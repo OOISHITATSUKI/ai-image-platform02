@@ -1,0 +1,138 @@
+{
+    "nav": {
+        "home": "Inicio",
+        "library": "Biblioteca",
+        "pricing": "Precios",
+        "settings": "Ajustes",
+        "inspiration": "Inspiración",
+        "models": "Modelos"
+    },
+    "create": {
+        "imageGen": "Generación de imagen",
+        "videoGen": "Generación de video",
+        "txt2img": "Texto a imagen",
+        "img2img": "Imagen a imagen",
+        "imgEdit": "Edición de imagen",
+        "txt2vid": "Texto a video",
+        "img2vid": "Imagen a video",
+        "ref2vid": "Referencia a video",
+        "vid2vid": "Video a video"
+    },
+    "editor": {
+        "settings": "Configuración",
+        "model": "Modelo",
+        "aspectRatio": "Proporción",
+        "resolution": "Resolución",
+        "duration": "Duración",
+        "count": "Cantidad",
+        "cameraFixed": "Cámara fija",
+        "uploadRef": "Subir referencia",
+        "uploadHint": "Arrastra o haz clic",
+        "generate": "Generar",
+        "generating": "Creando tu obra...",
+        "creditCost": "Créditos: {cost}",
+        "hide": "Ocultar ajustes",
+        "showSettings": "Ajustes",
+        "firstFrame": "Primer fotograma",
+        "lastFrame": "Último fotograma",
+        "lastFrameOptional": "Opcional",
+        "swapFrames": "Intercambiar",
+        "motionPrompt": "Describe el movimiento deseado...",
+        "optimize": "Optimizar",
+        "fromLibrary": "De la biblioteca",
+        "upload": "Subir"
+    },
+    "chat": {
+        "newChat": "Nuevo chat",
+        "history": "Historial",
+        "empty": "Comienza a crear",
+        "emptyDesc": "Escribe un prompt o sube una imagen para comenzar.",
+        "placeholder": "Describe lo que quieres crear...",
+        "attachFile": "Adjuntar",
+        "faceSwap": "Cambiar cara",
+        "faceSwapHint": "Modo cambio de cara: la cara de imagen 1 se fusiona con imagen 2",
+        "imageRefHint": "Escribe instrucciones usando las imágenes cargadas...",
+        "filterAll": "Todo",
+        "filterImages": "Imágenes",
+        "filterVideos": "Videos",
+        "filterFavorites": "Favoritos"
+    },
+    "actions": {
+        "generateVideo": "Generar video",
+        "generateImage": "Generar imagen",
+        "edit": "Editar",
+        "regenerate": "Regenerar",
+        "favorite": "Favorito",
+        "download": "Descargar",
+        "delete": "Eliminar",
+        "rename": "Renombrar"
+    },
+    "home": {
+        "title": "Crea contenido increíble con IA",
+        "subtitle": "Generación de imagen y video NSFW de próxima generación.",
+        "recentCreations": "Creaciones recientes",
+        "viewAll": "Ver todo"
+    },
+    "pricing": {
+        "title": "Elige tu plan",
+        "subtitle": "Desbloquea el poder de la IA",
+        "free": "Gratis",
+        "basic": "Básico",
+        "pro": "Pro",
+        "ultimate": "Ultimate",
+        "perMonth": "/mes",
+        "currentPlan": "Plan actual",
+        "upgrade": "Mejorar",
+        "features": {
+            "imagesPerDay": "{count} imágenes/día",
+            "imagesUnlimited": "Imágenes ilimitadas",
+            "videosPerDay": "{count} videos/día",
+            "noVideos": "Sin generación de video",
+            "maxRes": "Máx {res}",
+            "maxDuration": "Máx {sec}s video",
+            "faceSwap": "{count} cambios de cara/día",
+            "faceSwapUnlimited": "Cambios ilimitados",
+            "noFaceSwap": "Sin cambio de cara",
+            "chatHistory": "{days} días de historial",
+            "chatHistoryUnlimited": "Historial ilimitado",
+            "noAds": "Sin anuncios",
+            "hasAds": "Con anuncios"
+        }
+    },
+    "settings": {
+        "title": "Ajustes",
+        "profile": "Perfil",
+        "username": "Nombre",
+        "email": "Correo",
+        "avatar": "Avatar",
+        "appearance": "Apariencia",
+        "theme": "Tema",
+        "dark": "Oscuro",
+        "light": "Claro",
+        "language": "Idioma",
+        "subscription": "Suscripción",
+        "currentPlan": "Plan actual",
+        "managePlan": "Gestionar plan"
+    },
+    "auth": {
+        "login": "Iniciar sesión",
+        "logout": "Cerrar sesión",
+        "email": "Correo electrónico",
+        "sendCode": "Enviar código",
+        "enterCode": "Ingresa el código",
+        "verify": "Verificar",
+        "guest": "Invitado"
+    },
+    "ageGate": {
+        "title": "Verificación de edad",
+        "message": "Este sitio contiene contenido para adultos. Debes tener 18 años o más.",
+        "enter": "Tengo 18 o más",
+        "leave": "Salir"
+    },
+    "credits": {
+        "label": "Créditos",
+        "remaining": "{count} restantes",
+        "topUp": "Recargar",
+        "upgrade": "Mejorar plan"
+    }
+}

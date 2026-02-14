@@ -1,0 +1,138 @@
+{
+  "nav": {
+    "home": "Home",
+    "library": "Library",
+    "pricing": "Pricing",
+    "settings": "Settings",
+    "inspiration": "Inspiration",
+    "models": "Models"
+  },
+  "create": {
+    "imageGen": "Image Generation",
+    "videoGen": "Video Generation",
+    "txt2img": "Text to Image",
+    "img2img": "Image to Image",
+    "imgEdit": "Image Editing",
+    "txt2vid": "Text to Video",
+    "img2vid": "Image to Video",
+    "ref2vid": "Reference to Video",
+    "vid2vid": "Video to Video"
+  },
+  "editor": {
+    "settings": "Generation Settings",
+    "model": "Model",
+    "aspectRatio": "Aspect Ratio",
+    "resolution": "Resolution",
+    "duration": "Duration",
+    "count": "Count",
+    "cameraFixed": "Camera Fixed",
+    "uploadRef": "Upload Reference",
+    "uploadHint": "Drag & drop or click to upload",
+    "generate": "Generate",
+    "generating": "Creating your masterpiece...",
+    "creditCost": "Credits: {cost}",
+    "hide": "Hide Settings",
+    "showSettings": "Settings",
+    "firstFrame": "First Frame",
+    "lastFrame": "Last Frame",
+    "lastFrameOptional": "Optional",
+    "swapFrames": "Swap Frames",
+    "motionPrompt": "Describe the motion or transformation you want...",
+    "optimize": "Optimize",
+    "fromLibrary": "From Library",
+    "upload": "Upload"
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "history": "Chat History",
+    "empty": "Start creating",
+    "emptyDesc": "Type a prompt or upload an image to begin generating content.",
+    "placeholder": "Describe what you want to create...",
+    "attachFile": "Attach",
+    "faceSwap": "Face Swap",
+    "faceSwapHint": "Face Swap mode: image 1's face will be merged onto image 2",
+    "imageRefHint": "Enter instructions referencing the uploaded images...",
+    "filterAll": "All",
+    "filterImages": "Images",
+    "filterVideos": "Videos",
+    "filterFavorites": "Favorites"
+  },
+  "actions": {
+    "generateVideo": "Generate Video",
+    "generateImage": "Generate Image",
+    "edit": "Edit",
+    "regenerate": "Regenerate",
+    "favorite": "Favorite",
+    "download": "Download",
+    "delete": "Delete",
+    "rename": "Rename"
+  },
+  "home": {
+    "title": "Create stunning AI content",
+    "subtitle": "Next-generation NSFW image and video generation with unprecedented control.",
+    "recentCreations": "Recent Creations",
+    "viewAll": "View All"
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock the full power of AI generation",
+    "free": "Free",
+    "basic": "Basic",
+    "pro": "Pro",
+    "ultimate": "Ultimate",
+    "perMonth": "/month",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade",
+    "features": {
+      "imagesPerDay": "{count} images/day",
+      "imagesUnlimited": "Unlimited images",
+      "videosPerDay": "{count} videos/day",
+      "noVideos": "No video generation",
+      "maxRes": "Max {res} resolution",
+      "maxDuration": "Max {sec}s video",
+      "faceSwap": "{count} face swaps/day",
+      "faceSwapUnlimited": "Unlimited face swaps",
+      "noFaceSwap": "No face swap",
+      "chatHistory": "{days}-day history",
+      "chatHistoryUnlimited": "Unlimited history",
+      "noAds": "No ads",
+      "hasAds": "Contains ads"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "username": "Username",
+    "email": "Email",
+    "avatar": "Avatar",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "language": "Language",
+    "subscription": "Subscription",
+    "currentPlan": "Current Plan",
+    "managePlan": "Manage Plan"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email address",
+    "sendCode": "Send Code",
+    "enterCode": "Enter verification code",
+    "verify": "Verify",
+    "guest": "Guest"
+  },
+  "ageGate": {
+    "title": "Age Verification Required",
+    "message": "This website contains adult content. You must be 18 years or older to access this site.",
+    "enter": "I am 18 or older",
+    "leave": "Leave"
+  },
+  "credits": {
+    "label": "Credits",
+    "remaining": "{count} remaining",
+    "topUp": "Top Up",
+    "upgrade": "Upgrade Plan"
+  }
+}

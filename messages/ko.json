@@ -1,0 +1,138 @@
+{
+    "nav": {
+        "home": "홈",
+        "library": "라이브러리",
+        "pricing": "요금제",
+        "settings": "설정",
+        "inspiration": "영감",
+        "models": "모델"
+    },
+    "create": {
+        "imageGen": "이미지 생성",
+        "videoGen": "동영상 생성",
+        "txt2img": "텍스트→이미지",
+        "img2img": "이미지→이미지",
+        "imgEdit": "이미지 편집",
+        "txt2vid": "텍스트→동영상",
+        "img2vid": "이미지→동영상",
+        "ref2vid": "참조→동영상",
+        "vid2vid": "동영상→동영상"
+    },
+    "editor": {
+        "settings": "생성 설정",
+        "model": "모델",
+        "aspectRatio": "비율",
+        "resolution": "해상도",
+        "duration": "길이",
+        "count": "개수",
+        "cameraFixed": "카메라 고정",
+        "uploadRef": "참조 이미지 업로드",
+        "uploadHint": "드래그하거나 클릭",
+        "generate": "생성",
+        "generating": "생성 중...",
+        "creditCost": "크레딧: {cost}",
+        "hide": "설정 숨기기",
+        "showSettings": "설정",
+        "firstFrame": "시작 프레임",
+        "lastFrame": "끝 프레임",
+        "lastFrameOptional": "선택사항",
+        "swapFrames": "프레임 교환",
+        "motionPrompt": "원하는 동작이나 변화를 설명하세요...",
+        "optimize": "최적화",
+        "fromLibrary": "라이브러리에서",
+        "upload": "업로드"
+    },
+    "chat": {
+        "newChat": "새 채팅",
+        "history": "채팅 기록",
+        "empty": "시작하기",
+        "emptyDesc": "프롬프트를 입력하거나 이미지를 업로드해 콘텐츠를 생성하세요.",
+        "placeholder": "만들고 싶은 것을 설명하세요...",
+        "attachFile": "첨부",
+        "faceSwap": "얼굴 교환",
+        "faceSwapHint": "얼굴 교환 모드: 이미지 1의 얼굴을 이미지 2에 합성합니다",
+        "imageRefHint": "업로드한 이미지를 참조하여 지시를 입력...",
+        "filterAll": "전체",
+        "filterImages": "이미지",
+        "filterVideos": "동영상",
+        "filterFavorites": "즐겨찾기"
+    },
+    "actions": {
+        "generateVideo": "동영상 생성",
+        "generateImage": "이미지 생성",
+        "edit": "편집",
+        "regenerate": "재생성",
+        "favorite": "즐겨찾기",
+        "download": "다운로드",
+        "delete": "삭제",
+        "rename": "이름 변경"
+    },
+    "home": {
+        "title": "AI로 놀라운 콘텐츠 제작",
+        "subtitle": "차세대 NSFW 이미지 및 동영상 생성.",
+        "recentCreations": "최근 작품",
+        "viewAll": "전체 보기"
+    },
+    "pricing": {
+        "title": "플랜 선택",
+        "subtitle": "AI 생성의 모든 기능 활용",
+        "free": "무료",
+        "basic": "베이직",
+        "pro": "프로",
+        "ultimate": "얼티밋",
+        "perMonth": "/월",
+        "currentPlan": "현재 플랜",
+        "upgrade": "업그레이드",
+        "features": {
+            "imagesPerDay": "{count}장/일",
+            "imagesUnlimited": "무제한 이미지",
+            "videosPerDay": "{count}개/일",
+            "noVideos": "동영상 없음",
+            "maxRes": "최대 {res}",
+            "maxDuration": "최대 {sec}초",
+            "faceSwap": "{count}회/일",
+            "faceSwapUnlimited": "무제한",
+            "noFaceSwap": "얼굴 교환 없음",
+            "chatHistory": "{days}일 보관",
+            "chatHistoryUnlimited": "무제한 보관",
+            "noAds": "광고 없음",
+            "hasAds": "광고 포함"
+        }
+    },
+    "settings": {
+        "title": "설정",
+        "profile": "프로필",
+        "username": "사용자 이름",
+        "email": "이메일",
+        "avatar": "아바타",
+        "appearance": "외관",
+        "theme": "테마",
+        "dark": "다크",
+        "light": "라이트",
+        "language": "언어",
+        "subscription": "구독",
+        "currentPlan": "현재 플랜",
+        "managePlan": "플랜 관리"
+    },
+    "auth": {
+        "login": "로그인",
+        "logout": "로그아웃",
+        "email": "이메일 주소",
+        "sendCode": "코드 전송",
+        "enterCode": "인증 코드 입력",
+        "verify": "인증",
+        "guest": "게스트"
+    },
+    "ageGate": {
+        "title": "연령 확인 필요",
+        "message": "이 웹사이트는 성인 콘텐츠를 포함하고 있습니다. 18세 이상이어야 접근할 수 있습니다.",
+        "enter": "18세 이상입니다",
+        "leave": "나가기"
+    },
+    "credits": {
+        "label": "크레딧",
+        "remaining": "{count} 남음",
+        "topUp": "충전",
+        "upgrade": "플랜 업그레이드"
+    }
+}

@@ -1,0 +1,138 @@
+{
+    "nav": {
+        "home": "ホーム",
+        "library": "ライブラリ",
+        "pricing": "料金",
+        "settings": "設定",
+        "inspiration": "インスピレーション",
+        "models": "モデル"
+    },
+    "create": {
+        "imageGen": "画像生成",
+        "videoGen": "動画生成",
+        "txt2img": "テキスト→画像",
+        "img2img": "画像→画像",
+        "imgEdit": "画像編集",
+        "txt2vid": "テキスト→動画",
+        "img2vid": "画像→動画",
+        "ref2vid": "参照→動画",
+        "vid2vid": "動画→動画"
+    },
+    "editor": {
+        "settings": "生成設定",
+        "model": "モデル",
+        "aspectRatio": "アスペクト比",
+        "resolution": "解像度",
+        "duration": "再生時間",
+        "count": "生成数",
+        "cameraFixed": "カメラ固定",
+        "uploadRef": "参照画像をアップロード",
+        "uploadHint": "ドラッグ＆ドロップまたはクリック",
+        "generate": "生成する",
+        "generating": "生成中...",
+        "creditCost": "クレジット: {cost}",
+        "hide": "設定を非表示",
+        "showSettings": "設定",
+        "firstFrame": "最初のフレーム",
+        "lastFrame": "最後のフレーム",
+        "lastFrameOptional": "任意",
+        "swapFrames": "フレームを入れ替え",
+        "motionPrompt": "望むモーションや変化を入力してください...",
+        "optimize": "最適化",
+        "fromLibrary": "ライブラリから選択",
+        "upload": "アップロード"
+    },
+    "chat": {
+        "newChat": "新しいチャット",
+        "history": "チャット履歴",
+        "empty": "作成を開始",
+        "emptyDesc": "プロンプトを入力するか画像をアップロードして、コンテンツの生成を開始しましょう。",
+        "placeholder": "作りたいものを説明してください...",
+        "attachFile": "添付",
+        "faceSwap": "顔入れ替え",
+        "faceSwapHint": "顔入れ替えモード: 画像1の顔を画像2に合成します",
+        "imageRefHint": "画像を参照して生成する指示を入力...",
+        "filterAll": "すべて",
+        "filterImages": "画像",
+        "filterVideos": "動画",
+        "filterFavorites": "お気に入り"
+    },
+    "actions": {
+        "generateVideo": "動画生成",
+        "generateImage": "画像生成",
+        "edit": "編集",
+        "regenerate": "再生成",
+        "favorite": "お気に入り",
+        "download": "ダウンロード",
+        "delete": "削除",
+        "rename": "名前変更"
+    },
+    "home": {
+        "title": "AIで素晴らしいコンテンツを作成",
+        "subtitle": "次世代のNSFW画像・動画生成を、かつてないコントロールで。",
+        "recentCreations": "最近の作品",
+        "viewAll": "すべて表示"
+    },
+    "pricing": {
+        "title": "プランを選択",
+        "subtitle": "AI生成のフルパワーを解放",
+        "free": "フリー",
+        "basic": "ベーシック",
+        "pro": "プロ",
+        "ultimate": "アルティメット",
+        "perMonth": "/月",
+        "currentPlan": "現在のプラン",
+        "upgrade": "アップグレード",
+        "features": {
+            "imagesPerDay": "{count}枚/日",
+            "imagesUnlimited": "無制限画像",
+            "videosPerDay": "{count}本/日",
+            "noVideos": "動画生成なし",
+            "maxRes": "最大{res}解像度",
+            "maxDuration": "最大{sec}秒動画",
+            "faceSwap": "{count}回/日 顔交換",
+            "faceSwapUnlimited": "無制限顔交換",
+            "noFaceSwap": "顔交換なし",
+            "chatHistory": "{days}日間保存",
+            "chatHistoryUnlimited": "無制限保存",
+            "noAds": "広告なし",
+            "hasAds": "広告あり"
+        }
+    },
+    "settings": {
+        "title": "設定",
+        "profile": "プロフィール",
+        "username": "ユーザー名",
+        "email": "メールアドレス",
+        "avatar": "アバター",
+        "appearance": "外観",
+        "theme": "テーマ",
+        "dark": "ダーク",
+        "light": "ライト",
+        "language": "言語",
+        "subscription": "サブスクリプション",
+        "currentPlan": "現在のプラン",
+        "managePlan": "プラン管理"
+    },
+    "auth": {
+        "login": "ログイン",
+        "logout": "ログアウト",
+        "email": "メールアドレス",
+        "sendCode": "コード送信",
+        "enterCode": "認証コードを入力",
+        "verify": "認証",
+        "guest": "ゲスト"
+    },
+    "ageGate": {
+        "title": "年齢確認が必要です",
+        "message": "このウェブサイトにはアダルトコンテンツが含まれています。18歳以上であることを確認してください。",
+        "enter": "18歳以上です",
+        "leave": "離れる"
+    },
+    "credits": {
+        "label": "クレジット",
+        "remaining": "残り{count}",
+        "topUp": "チャージ",
+        "upgrade": "プランをアップグレード"
+    }
+}
