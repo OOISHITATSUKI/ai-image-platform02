@@ -297,25 +297,18 @@ export default function ChatArea() {
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Download an image from a URL as PNG
-    const handleDownload = async (url: string) => {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            // Create a file from blob to specify the correct type if needed
-            const pngBlob = new Blob([blob], { type: 'image/png' });
-            const blobUrl = URL.createObjectURL(pngBlob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `generated_${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
-        } catch {
-            // Fallback: open in new tab
-            window.open(url, '_blank');
-        }
+    // Download an image from a URL as PNG via server-side proxy
+    const handleDownload = (url: string) => {
+        // Use the server-side download API to bypass CORS and ensure true PNG conversion
+        const downloadUrl = `/api/download?url=${encodeURIComponent(url)}`;
+        
+        // Use an invisible link to trigger the download
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `generated_${Date.now()}.png`; // Hint for filename
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     };
 
     return (
