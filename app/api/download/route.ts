@@ -13,29 +13,36 @@ export async function GET(request: NextRequest) {
         let buffer: Buffer;
 
         if (imageUrl.startsWith('data:')) {
-            // Handle base64 data URI
             const base64Data = imageUrl.split(',')[1];
             buffer = Buffer.from(base64Data, 'base64');
         } else {
-            // Handle remote URL
-            const response = await fetch(imageUrl);
+            // Fetch with a timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const response = await fetch(imageUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
             const arrayBuffer = await response.arrayBuffer();
             buffer = Buffer.from(arrayBuffer);
         }
 
-        // Convert to PNG using sharp for maximum quality and compatibility
+        // Convert to PNG using sharp
         const pngBuffer = await sharp(buffer)
-            .png({ compressionLevel: 9, quality: 100 })
+            .png()
             .toBuffer();
 
-        const filename = `generated_${Date.now()}.png`;
+        const filename = `ai_image_${Date.now()}.png`;
 
-        return new NextResponse(pngBuffer, {
+        // We use application/octet-stream to force the browser to treat it as a file download
+        // and ensure the filename is set correctly in the headers
+        return new NextResponse(pngBuffer as any, {
             headers: {
                 'Content-Type': 'image/png',
-                'Content-Disposition': `attachment; filename="${filename}"`,
-                'Cache-Control': 'no-cache',
+                'Content-Disposition': `attachment; filename="${filename}"; filename*='UTF-8''${filename}`,
+                'Content-Length': pngBuffer.length.toString(),
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
             },
         });
     } catch (error) {

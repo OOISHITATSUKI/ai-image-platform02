@@ -491,7 +491,9 @@ export async function POST(request: NextRequest) {
             ...(model?.nsfw ? {
                 prompt: `(nsfw:1.2), explicit, naked, ${enhancedPrompt}`,
             } : {}),
-            loras: [
+            // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
+            // If the model ID contains 'xl' or is a known XL model, we skip SD1.5 LoRAs
+            loras: novitaModelName.toLowerCase().includes('xl') ? [] : [
                 {
                     model_name: 'add_detail_44319',
                     strength: 0.7,

@@ -298,17 +298,31 @@ export default function ChatArea() {
     };
 
     // Download an image from a URL as PNG via server-side proxy
-    const handleDownload = (url: string) => {
-        // Use the server-side download API to bypass CORS and ensure true PNG conversion
-        const downloadUrl = `/api/download?url=${encodeURIComponent(url)}`;
-        
-        // Use an invisible link to trigger the download
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `generated_${Date.now()}.png`; // Hint for filename
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    const handleDownload = async (url: string) => {
+        try {
+            // First, get the true file data from our proxy
+            const proxyUrl = `/api/download?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Trigger the actual save dialog with the blob
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `generated_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Clean up
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+        } catch (err) {
+            console.error('Download error:', err);
+            // Last resort fallback
+            window.open(`/api/download?url=${encodeURIComponent(url)}`, '_blank');
+        }
     };
 
     return (
