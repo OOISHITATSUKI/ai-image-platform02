@@ -297,15 +297,17 @@ export default function ChatArea() {
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Download an image from a URL
+    // Download an image from a URL as PNG
     const handleDownload = async (url: string) => {
         try {
             const response = await fetch(url);
             const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
+            // Create a file from blob to specify the correct type if needed
+            const pngBlob = new Blob([blob], { type: 'image/png' });
+            const blobUrl = URL.createObjectURL(pngBlob);
             const a = document.createElement('a');
             a.href = blobUrl;
-            a.download = `generated_${Date.now()}.jpg`;
+            a.download = `generated_${Date.now()}.png`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
