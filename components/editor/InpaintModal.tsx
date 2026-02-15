@@ -23,11 +23,10 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     // Initialize canvas size based on image
     useEffect(() => {
         const img = imgRef.current;
-        if (!img) return;
+        const canvas = canvasRef.current;
+        if (!img || !canvas) return;
 
         const handleLoad = () => {
-            const canvas = canvasRef.current;
-            if (!canvas) return;
             // Use natural resolution for the internal buffer
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
@@ -39,6 +38,15 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                 // Save initial state
                 setHistory([ctx.getImageData(0, 0, canvas.width, canvas.height)]);
             }
+
+            // Sync CSS display size
+            syncCanvasSize();
+        };
+
+        const syncCanvasSize = () => {
+            const rect = img.getBoundingClientRect();
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
         };
 
         if (img.complete) {
@@ -46,18 +54,25 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         } else {
             img.addEventListener('load', handleLoad);
         }
-        return () => img.removeEventListener('load', handleLoad);
+
+        // Keep canvas size in sync with image display size
+        const observer = new ResizeObserver(() => syncCanvasSize());
+        observer.observe(img);
+
+        return () => {
+            img.removeEventListener('load', handleLoad);
+            observer.disconnect();
+        };
     }, [imageUrl]);
 
     const lastPos = useRef<{ x: number, y: number } | null>(null);
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
         setIsDrawing(true);
-        const img = imgRef.current;
         const canvas = canvasRef.current;
-        if (!img || !canvas) return;
+        if (!canvas) return;
 
-        const rect = img.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
@@ -81,14 +96,13 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        const img = imgRef.current;
         const canvas = canvasRef.current;
-        if (!img || !canvas || !isDrawing) return;
+        if (!canvas || !isDrawing) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const rect = img.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
@@ -230,6 +244,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                         src={imageUrl}
                         alt="Base"
                         className="inpaint-base-img"
+                        style={{ display: 'block', maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
                         onDragStart={(e) => e.preventDefault()}
                     />
                     <canvas
