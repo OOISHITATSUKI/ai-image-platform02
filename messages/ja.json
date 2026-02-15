@@ -134,5 +134,18 @@
         "remaining": "残り {count} クレジット",
         "topUp": "チャージ",
         "upgrade": "プランをアップグレード"
+    },
+    "account": {
+        "title": "アカウント",
+        "currentPlan": "現在のプラン",
+        "changePlan": "プラン変更",
+        "payment": "支払い情報",
+        "theme": "テーマ",
+        "language": "言語",
+        "terms": "利用規約",
+        "privacy": "プライバシーポリシー",
+        "help": "ヘルプ・FAQ",
+        "contact": "お問い合わせ",
+        "logout": "ログアウト"
     }
 }

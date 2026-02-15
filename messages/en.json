@@ -134,5 +134,18 @@
     "remaining": "{count} credits left",
     "topUp": "Top Up",
     "upgrade": "Upgrade Plan"
+  },
+  "account": {
+    "title": "Account",
+    "currentPlan": "Current Plan",
+    "changePlan": "Change Plan",
+    "payment": "Payment info",
+    "theme": "Theme",
+    "language": "Language",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "help": "Help & FAQ",
+    "contact": "Contact Us",
+    "logout": "Log Out"
   }
 }

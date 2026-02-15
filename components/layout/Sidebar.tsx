@@ -103,6 +103,22 @@ export default function Sidebar() {
         { value: 'pt', label: 'Português' },
     ];
 
+    const [showAccountMenu, setShowAccountMenu] = useState(false);
+    const accountMenuRef = useRef<HTMLDivElement>(null);
+
+    // Close menu when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+                setShowAccountMenu(false);
+            }
+        };
+        if (showAccountMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showAccountMenu]);
+
     return (
         <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
             {/* Logo */}
@@ -290,52 +306,115 @@ export default function Sidebar() {
 
             {/* Footer */}
             <div className="sidebar-footer">
-                {/* Theme Toggle */}
-                <button
-                    className="theme-toggle-sidebar"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                    <span className="theme-toggle-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
-                    {!sidebarCollapsed && (
-                        <span className="theme-toggle-label">
-                            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                        </span>
-                    )}
-                </button>
+                {/* Account Menu Popup */}
+                {showAccountMenu && (
+                    <div className="account-menu-overlay" ref={accountMenuRef}>
+                        <div className="account-menu-header">
+                            <div className="account-menu-user">
+                                <div className="user-avatar" style={{ width: 40, height: 40, fontSize: '1.2rem' }}>
+                                    {user?.username?.[0]?.toUpperCase() ?? 'G'}
+                                </div>
+                                <div className="account-menu-user-info">
+                                    <div className="account-menu-username">{user?.username ?? t('auth.guest')}</div>
+                                    <div className="account-menu-email">{user?.email ?? 'guest@example.com'}</div>
+                                </div>
+                            </div>
+                            <div className="account-menu-status">
+                                <div className="status-item">
+                                    <span>💎 {t('account.currentPlan')}</span>
+                                    <span className="status-value">{user?.plan ?? 'Free'}</span>
+                                </div>
+                                <div className="status-item">
+                                    <span>✨ {t('credits.label')}</span>
+                                    <span className="status-value">{user?.credits ?? 0}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                {/* Language Selector */}
-                {!sidebarCollapsed && (
-                    <div className="language-selector-sidebar">
-                        <span className="lang-icon">🌐</span>
-                        <select
-                            value={locale}
-                            onChange={(e) => setLocale(e.target.value as Locale)}
-                        >
-                            {languages.map((lang) => (
-                                <option key={lang.value} value={lang.value}>
-                                    {lang.label}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="account-menu-section">
+                            <Link href="/pricing" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">🔄</span>
+                                <span className="account-menu-item-label">{t('account.changePlan')}</span>
+                            </Link>
+                            <button className="account-menu-item" onClick={() => alert('Coming soon!')}>
+                                <span className="account-menu-item-icon">💳</span>
+                                <span className="account-menu-item-label">{t('account.payment')}</span>
+                            </button>
+                            <div className="account-menu-item">
+                                <span className="account-menu-item-icon">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                                <span className="account-menu-item-label">{t('account.theme')}</span>
+                                <div
+                                    className={`toggle-switch-compact ${theme === 'dark' ? 'active' : ''}`}
+                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                >
+                                    <div className="toggle-dot-compact" />
+                                </div>
+                            </div>
+                            <div className="account-menu-item">
+                                <span className="account-menu-item-icon">🌍</span>
+                                <span className="account-menu-item-label">{t('account.language')}</span>
+                                <select
+                                    className="lang-select-small"
+                                    value={locale}
+                                    onChange={(e) => setLocale(e.target.value as Locale)}
+                                >
+                                    {languages.map(l => (
+                                        <option key={l.value} value={l.value}>{l.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="account-menu-section">
+                            <Link href="/terms" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">📄</span>
+                                <span className="account-menu-item-label">{t('account.terms')}</span>
+                            </Link>
+                            <Link href="/privacy" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">🔒</span>
+                                <span className="account-menu-item-label">{t('account.privacy')}</span>
+                            </Link>
+                            <Link href="/help" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">❓</span>
+                                <span className="account-menu-item-label">{t('account.help')}</span>
+                            </Link>
+                            <button className="account-menu-item" onClick={() => alert('Contact: support@example.com')}>
+                                <span className="account-menu-item-icon">📧</span>
+                                <span className="account-menu-item-label">{t('account.contact')}</span>
+                            </button>
+                        </div>
+
+                        <div className="account-menu-footer">
+                            <button className="account-menu-item logout-item" onClick={() => window.location.reload()}>
+                                <span className="account-menu-item-icon">🚪</span>
+                                <span className="account-menu-item-label">{t('account.logout')}</span>
+                            </button>
+                        </div>
                     </div>
                 )}
 
-                {/* Credits */}
-                <div className="credits-panel">
-                    <div className="credits-label">{t('credits.label')}</div>
-                    <div className="credits-value">{user?.credits ?? 10}</div>
-                    <div className="credits-bar">
-                        <div
-                            className="credits-bar-fill"
-                            style={{ width: `${Math.min(((user?.credits ?? 10) / 100) * 100, 100)}%` }}
-                        />
+                {/* Credits - Hidden when collapsed */}
+                {!sidebarCollapsed && (
+                    <div className="credits-panel" style={{ marginBottom: 12 }}>
+                        <div className="credits-label">{t('credits.label')}</div>
+                        <div className="credits-value">{user?.credits ?? 0}</div>
+                        <div className="credits-bar">
+                            <div
+                                className="credits-bar-fill"
+                                style={{ width: `${Math.min(((user?.credits ?? 0) / 100) * 100, 100)}%` }}
+                            />
+                        </div>
+                        <Link href="/pricing" className="upgrade-btn" style={{ textAlign: 'center', display: 'block' }}>
+                            {t('credits.upgrade')}
+                        </Link>
                     </div>
-                    <button className="upgrade-btn">{t('credits.upgrade')}</button>
-                </div>
+                )}
 
-                {/* User */}
-                <div className="user-profile-bar">
+                {/* User Profile Bar */}
+                <div
+                    className={`user-profile-bar ${showAccountMenu ? 'active' : ''}`}
+                    onClick={() => setShowAccountMenu(!showAccountMenu)}
+                >
                     <div className="user-avatar">
                         {user?.username?.[0]?.toUpperCase() ?? 'G'}
                     </div>
