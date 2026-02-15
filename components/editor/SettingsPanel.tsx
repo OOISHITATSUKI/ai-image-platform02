@@ -59,24 +59,6 @@ export default function SettingsPanel() {
                         value={settings.model}
                         onChange={(e) => updateSettings({ model: e.target.value })}
                     >
-                        {/* SFW Models */}
-                        <optgroup label="SFW Models">
-                            {filteredModels.filter((m) => !m.nsfw && m.apiType !== 'seedream').map((model) => (
-                                <option key={model.id} value={model.id}>
-                                    {model.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                        {/* Seedream Models */}
-                        {filteredModels.some((m) => m.apiType === 'seedream') && (
-                            <optgroup label="✨ Seedream">
-                                {filteredModels.filter((m) => m.apiType === 'seedream').map((model) => (
-                                    <option key={model.id} value={model.id}>
-                                        ✨ {model.name}
-                                    </option>
-                                ))}
-                            </optgroup>
-                        )}
                         {/* NSFW Realistic Models */}
                         {filteredModels.some((m) => m.category === 'nsfw-realistic') && (
                             <optgroup label="🔞 NSFW — Realistic">
@@ -91,6 +73,16 @@ export default function SettingsPanel() {
                         {filteredModels.some((m) => m.category === 'nsfw-anime') && (
                             <optgroup label="🔞 NSFW — Anime">
                                 {filteredModels.filter((m) => m.category === 'nsfw-anime').map((model) => (
+                                    <option key={model.id} value={model.id}>
+                                        {model.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        )}
+                        {/* Video Models */}
+                        {filteredModels.filter((m) => m.type === 'video').length > 0 && (
+                            <optgroup label="🎬 Video Models">
+                                {filteredModels.filter((m) => m.type === 'video').map((model) => (
                                     <option key={model.id} value={model.id}>
                                         {model.name}
                                     </option>

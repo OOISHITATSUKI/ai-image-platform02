@@ -147,16 +147,6 @@ export interface AIModel {
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // ── SFW Image Models (Novita.ai) ──
-  { id: 'novita-sd-xl', name: 'Stable Diffusion XL', type: 'image', provider: 'novita', description: 'High quality base model', novitaModelName: 'sd_xl_base_1.0.safetensors', apiType: 'sd', category: 'sfw' },
-  { id: 'novita-realistic', name: 'EpicRealism XL', type: 'image', provider: 'novita', description: 'Photorealistic images', novitaModelName: 'epicrealismXL_v10_247189.safetensors', apiType: 'sd', category: 'sfw' },
-  { id: 'novita-anime', name: 'Animagine XL v3.1', type: 'image', provider: 'novita', description: 'Anime style generation', novitaModelName: 'animagineXLV31_v31_325600.safetensors', apiType: 'sd', category: 'sfw' },
-  { id: 'novita-juggernaut', name: 'Juggernaut XL Lightning', type: 'image', provider: 'novita', description: 'Fast realistic generation', novitaModelName: 'juggernautXL_v9Rdphoto2Lightning_285361.safetensors', apiType: 'sd', category: 'sfw' },
-
-  // ── Seedream Models (Novita.ai proprietary) ──
-  { id: 'seedream-3', name: 'Seedream 3.0', type: 'image', provider: 'novita', description: 'Fast high-quality generation', apiType: 'seedream', seedreamEndpoint: 'seedream-3-0-txt2img', novitaModelName: 'seedream-3-0-t2i-250415', category: 'sfw' },
-  { id: 'seedream-4', name: 'Seedream 4.0', type: 'image', provider: 'novita', description: '2K–4K with multi-image support', apiType: 'seedream', seedreamEndpoint: 'seedream-4.0', category: 'sfw' },
-
   // ── NSFW Realistic Models ──
   { id: 'novita-realistic-vision-6', name: '🔞 Realistic Vision V6.0', type: 'image', provider: 'novita', description: 'Best photorealistic NSFW', novitaModelName: 'realisticVisionV60B1_v60B1VAE_190174.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-epicrealism', name: '🔞 epiCRealism', type: 'image', provider: 'novita', description: 'Natural skin excellence', novitaModelName: 'epicrealism_naturalSinRC1VAE_106430.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
@@ -172,7 +162,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-counterfeit', name: '🔞 Counterfeit V3.0', type: 'image', provider: 'novita', description: 'Anime line art', novitaModelName: 'CounterfeitV30_v30.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
   { id: 'novita-revanimated', name: '🔞 Rev Animated', type: 'image', provider: 'novita', description: '2.5D anime style', novitaModelName: 'revAnimated_v122.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
 
-  // ── Video Models (hidden for now but kept in code) ──
+  // ── Video Models ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },
   { id: 'wan-2.6', name: 'WAN 2.6 Pro', type: 'video', provider: 'wan', description: 'High quality video' },
   { id: 'venice-ltx', name: 'LTX Video', type: 'video', provider: 'venice', description: 'Cinematic video generation' },

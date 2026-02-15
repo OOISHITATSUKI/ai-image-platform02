@@ -106,18 +106,7 @@ function getResolutionFromAspectRatio(
     return map[aspectRatio] || { width: 512, height: 512 };
 }
 
-// Map aspect ratio to Seedream size string
-function getSeedreamSize(aspectRatio: AspectRatio): string {
-    const sizeMap: Record<AspectRatio, string> = {
-        '1:1': '1024x1024',
-        '4:3': '1152x864',
-        '3:4': '864x1152',
-        '16:9': '1280x720',
-        '9:16': '720x1280',
-        '21:9': '1512x648',
-    };
-    return sizeMap[aspectRatio] || '1024x1024';
-}
+
 
 // Poll task result until complete
 async function pollTaskResult(taskId: string): Promise<{
@@ -168,84 +157,7 @@ async function pollTaskResult(taskId: string): Promise<{
     return { success: false, error: 'Generation timed out (120s)' };
 }
 
-// ── Seedream generation handler ──
-async function handleSeedreamGeneration(
-    model: typeof AVAILABLE_MODELS[number],
-    prompt: string,
-    aspectRatio: AspectRatio,
-    resolution: string,
-) {
-    const endpointPath = model.seedreamEndpoint!;
-    const isSeedream4 = endpointPath.includes('4-0');
 
-    const url = `${NOVITA_BASE_SYNC}/${endpointPath}`;
-
-    // Build Seedream request body
-    const seedreamBody: Record<string, unknown> = {
-        prompt,
-        watermark: false,
-    };
-
-    if (isSeedream4) {
-        // Seedream 4.0: use resolution string (1K/2K/4K) or WxH
-        const resMap: Record<string, string> = { '512': '1K', '1024': '1K', '2K': '2K', '4K': '4K' };
-        seedreamBody.size = resMap[resolution] || '1K';
-    } else {
-        // Seedream 3.0: model name + WxH size string
-        seedreamBody.model = model.novitaModelName || 'seedream-3-0-t2i-250415';
-        seedreamBody.size = getSeedreamSize(aspectRatio);
-        seedreamBody.guidance_scale = 2.5;
-        seedreamBody.seed = -1;
-        seedreamBody.response_format = 'url';
-    }
-
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${NOVITA_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(seedreamBody),
-    });
-
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error('Seedream API error:', res.status, errText);
-        throw new Error(`Seedream API error: ${res.status} — ${errText.slice(0, 200)}`);
-    }
-
-    const data = await res.json();
-
-    // Parse image URLs from response
-    const imageUrls: string[] = [];
-
-    if (data.image_file) {
-        const imageType = data.image_type || 'png';
-        const dataUri = `data:image/${imageType};base64,${data.image_file}`;
-        imageUrls.push(dataUri);
-    }
-
-    if (data.image?.url) {
-        imageUrls.push(data.image.url);
-    }
-
-    if (data.images) {
-        for (const img of data.images) {
-            if (img.url) imageUrls.push(img.url);
-            else if (img.image_url) imageUrls.push(img.image_url);
-        }
-    }
-
-    if (data.image_url) {
-        imageUrls.push(data.image_url);
-    }
-
-    if (imageUrls.length === 0) {
-        throw new Error('No images returned from Seedream API');
-    }
-
-    return imageUrls.map((url) => ({ url, type: 'jpeg' }));
-}
 
 // ── Resize a base64 image so neither dimension exceeds maxDim ──
 const MAX_FACE_SWAP_DIM = 2048;
@@ -432,21 +344,7 @@ export async function POST(request: NextRequest) {
         // Look up model
         const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
 
-        // ── Seedream branch ──
-        if (model?.apiType === 'seedream') {
-            try {
-                const images = await handleSeedreamGeneration(
-                    model,
-                    translatedPrompt || 'a beautiful image',
-                    aspectRatio as AspectRatio,
-                    resolution,
-                );
-                return NextResponse.json({ images });
-            } catch (err) {
-                const errorMsg = err instanceof Error ? err.message : 'Seedream generation failed';
-                return NextResponse.json({ error: errorMsg }, { status: 502 });
-            }
-        }
+
 
         // ── Face Swap branch (explicit faceSwapMode toggle) ──
         if (faceSwapMode && imageBase64 && additionalImages?.length > 0) {

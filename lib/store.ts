@@ -80,7 +80,7 @@ interface AppState {
 
 const DEFAULT_SETTINGS: GenerationSettings = {
     generationType: 'txt2img',
-    model: 'novita-realistic',
+    model: 'novita-realistic-vision-6',
     aspectRatio: '1:1',
     resolution: '1024',
     count: 1,
