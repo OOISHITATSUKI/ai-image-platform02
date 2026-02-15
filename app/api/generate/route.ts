@@ -46,41 +46,41 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
     hiresFixUpscaler: string;
 }> = {
     quick: {
-        steps: 20,
-        sampler: 'DPM++ 2M Karras',
+        steps: 40,
+        sampler: 'DPM++ 2M SDE Karras',
         guidance: 7,
         negativePrompt: DEFAULT_NEGATIVE_PROMPT,
-        qualityPrefix: 'best quality, ',
-        hiresFixEnabled: false,
-        hiresFixStrength: 0,
-        hiresFixUpscaler: '',
+        qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
+        hiresFixEnabled: true,
+        hiresFixStrength: 0.5,
+        hiresFixUpscaler: 'Latent',
     },
     standard: {
-        steps: 30,
-        sampler: 'DPM++ 2M Karras',
+        steps: 40,
+        sampler: 'DPM++ 2M SDE Karras',
         guidance: 7,
         negativePrompt: DEFAULT_NEGATIVE_PROMPT,
-        qualityPrefix: 'best quality, highly detailed, ',
-        hiresFixEnabled: false,
-        hiresFixStrength: 0,
-        hiresFixUpscaler: '',
+        qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
+        hiresFixEnabled: true,
+        hiresFixStrength: 0.5,
+        hiresFixUpscaler: 'Latent',
     },
     hd: {
-        steps: 30,
-        sampler: 'DPM++ 2M Karras',
+        steps: 40,
+        sampler: 'DPM++ 2M SDE Karras',
         guidance: 7,
         negativePrompt: DEFAULT_NEGATIVE_PROMPT,
-        qualityPrefix: 'masterpiece, best quality, highly detailed, sharp focus, professional, ',
+        qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.5,
         hiresFixUpscaler: 'Latent',
     },
     ultra: {
-        steps: 35,
+        steps: 40,
         sampler: 'DPM++ 2M SDE Karras',
         guidance: 7,
         negativePrompt: DEFAULT_NEGATIVE_PROMPT,
-        qualityPrefix: 'masterpiece, best quality, ultra detailed, sharp focus, professional photography, cinematic lighting, 8k, ',
+        qualityPrefix: 'masterpiece, best quality, ultra detailed, sharp focus, professional photography, cinematic lighting, 8k, highly detailed textures, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.5,
         hiresFixUpscaler: 'Latent',
@@ -461,8 +461,8 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Standard SD branch ──
-        // Get quality config
-        const quality = QUALITY_CONFIGS[qualityPreset as QualityPreset] || QUALITY_CONFIGS.hd;
+        // Force Ultra quality for all requests to ensure maximum output
+        const quality = QUALITY_CONFIGS.ultra;
 
         const novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
 

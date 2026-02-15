@@ -103,18 +103,16 @@ export default function SettingsPanel() {
                 {/* Quality Preset */}
                 {isImageMode && (
                     <div className="control-group">
-                        <label>Quality</label>
-                        <div className="quality-preset-grid">
+                        <label>Quality (Ultra Fixed)</label>
+                        <div className="quality-preset-grid" style={{ gridTemplateColumns: '1fr' }}>
                             {([
-                                { key: 'quick', icon: '⚡', label: 'Quick', desc: '~10s' },
-                                { key: 'standard', icon: '✨', label: 'Standard', desc: '~20s' },
-                                { key: 'hd', icon: '🔥', label: 'HD', desc: '~40s' },
-                                { key: 'ultra', icon: '💎', label: 'Ultra', desc: '~60s' },
+                                { key: 'ultra', icon: '💎', label: 'Ultra High Quality', desc: 'Max detail & sharp focus' },
                             ] as const).map((preset) => (
                                 <button
                                     key={preset.key}
-                                    className={`quality-preset-btn ${settings.qualityPreset === preset.key ? 'active' : ''}`}
-                                    onClick={() => updateSettings({ qualityPreset: preset.key })}
+                                    className="quality-preset-btn active"
+                                    onClick={() => updateSettings({ qualityPreset: 'ultra' })}
+                                    style={{ cursor: 'default' }}
                                 >
                                     <span className="preset-icon">{preset.icon}</span>
                                     <span className="preset-label">{preset.label}</span>

@@ -86,7 +86,7 @@ const DEFAULT_SETTINGS: GenerationSettings = {
     count: 1,
     duration: 5,
     cameraFixed: false,
-    qualityPreset: 'hd',
+    qualityPreset: 'ultra',
 };
 
 export const useAppStore = create<AppState>()(
