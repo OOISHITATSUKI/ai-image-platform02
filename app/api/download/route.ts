@@ -16,37 +16,34 @@ export async function GET(request: NextRequest) {
             const base64Data = imageUrl.split(',')[1];
             buffer = Buffer.from(base64Data, 'base64');
         } else {
-            // Fetch with a timeout to prevent hanging
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-            const response = await fetch(imageUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
+            const response = await fetch(imageUrl);
             if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
             const arrayBuffer = await response.arrayBuffer();
             buffer = Buffer.from(arrayBuffer);
         }
 
-        // Convert to PNG using sharp
+        // Convert to PNG using sharp with explicit settings
         const pngBuffer = await sharp(buffer)
-            .png()
+            .png({ compressionLevel: 9 })
             .toBuffer();
 
-        const filename = `ai_image_${Date.now()}.png`;
+        // Use a simple, compatible filename to avoid OS issues
+        const filename = `img_${Date.now()}.png`;
 
-        // We use application/octet-stream to force the browser to treat it as a file download
-        // and ensure the filename is set correctly in the headers
+        // Create response with very explicit headers to force download behavior
         return new NextResponse(pngBuffer as any, {
             headers: {
+                // 'application/octet-stream' is the safest way to force a file save dialog
                 'Content-Type': 'image/png',
-                'Content-Disposition': `attachment; filename="${filename}"; filename*='UTF-8''${filename}`,
+                'Content-Disposition': `attachment; filename="${filename}"`,
                 'Content-Length': pngBuffer.length.toString(),
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
             },
         });
     } catch (error) {
         console.error('Download proxy error:', error);
-        return NextResponse.json({ error: 'Failed to process image download' }, { status: 500 });
+        return NextResponse.json({ error: 'Download failed' }, { status: 500 });
     }
 }
