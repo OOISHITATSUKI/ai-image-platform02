@@ -424,23 +424,19 @@ export async function POST(request: NextRequest) {
             if (inpaintMode && maskBase64) {
                 const rawMask = maskBase64.replace(/^data:image\/\w+;base64,/, '');
 
-                // Using ControlNet Inpaint as suggested for better reliability on Novita v3 API
+                // Using ControlNet Inpaint for V3 API as mask_base64 is not supported in this endpoint
                 novitaRequest.controlnet = {
                     units: [
                         {
                             model_name: 'control_v11p_sd15_inpaint',
                             image_base64: rawMask,
                             strength: 1.0,
-                            // inpaint_global_harmonious or inpaint_only are common preprocessors
-                            preprocessor: 'inpaint_global_harmonious',
+                            // Set preprocessor to 'none' for pre-made masks to avoid validation errors
+                            preprocessor: 'none',
                         }
                     ]
                 };
-
-                // Maintain standard inpaint params just in case the model supports them alongside CN
-                novitaRequest.mask_base64 = rawMask;
-                novitaRequest.inpainting_fill = 1;
-                novitaRequest.inpaint_full_res = true;
+                // Note: Legacy params like mask_base64 are omitted here to avoid V3 validator errors
             }
         }
 
