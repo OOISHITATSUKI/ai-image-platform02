@@ -333,7 +333,7 @@ async function restoreFaceViaImg2Img(base64Image: string): Promise<string> {
     }
 
     console.error('Face restoration failed, returning original');
-    return `data:image/jpeg;base64,${base64Image}`;
+    return base64Image;
 }
 
 // ── Face Swap (Merge Face) handler ──
@@ -382,19 +382,17 @@ async function handleMergeFace(
 
     // ── Post-process: restore face quality via img2img ──
     try {
-        const restoredUrl = await restoreFaceViaImg2Img(data.image_file);
-        // If restoredUrl is a full URL (from task result), return it directly
-        if (restoredUrl.startsWith('http')) {
-            return [{ url: restoredUrl, type: 'jpeg' }];
+        const restoredData = await restoreFaceViaImg2Img(data.image_file);
+        // If restoredData is a full URL (from task result), return it
+        if (restoredData.startsWith('http')) {
+            return [{ url: restoredData, type: 'png' }];
         }
-        // Otherwise it's a base64 data URI
-        return [{ url: restoredUrl, type: 'jpeg' }];
+        // Otherwise it's the processed/fallback base64 string
+        return [{ url: `data:image/png;base64,${restoredData}`, type: 'png' }];
     } catch (restoreErr) {
         console.error('Face restoration error, using raw face swap result:', restoreErr);
         // Fallback: return raw face swap result
-        const imageType = data.image_type || 'jpeg';
-        const dataUri = `data:image/${imageType};base64,${data.image_file}`;
-        return [{ url: dataUri, type: imageType }];
+        return [{ url: `data:image/jpeg;base64,${data.image_file}`, type: 'jpeg' }];
     }
 }
 
