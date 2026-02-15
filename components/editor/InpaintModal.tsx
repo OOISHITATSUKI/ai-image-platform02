@@ -81,7 +81,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
         if (tool === 'brush') {
             ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)'; // Semi-transparent red for mask
+            ctx.strokeStyle = 'rgba(124, 92, 252, 0.7)'; // Vibrant purple for mask
         } else {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.strokeStyle = 'rgba(0,0,0,1)';

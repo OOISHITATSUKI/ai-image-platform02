@@ -417,16 +417,22 @@ export async function POST(request: NextRequest) {
 
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
-            novitaRequest.strength = inpaintMode ? 0.6 : 0.7; // Lower strength for inpainting to keep context
+            // Lower strength for inpainting to keep context and subject consistency
+            // 0.45-0.5 is usually ideal for keeping the person but allowing enough change
+            novitaRequest.strength = inpaintMode ? 0.45 : 0.7;
 
             if (inpaintMode && maskBase64) {
                 // maskBase64 is a data URL, Novita expects raw base64
                 novitaRequest.mask_base64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
-                // Standard inpaint settings
-                novitaRequest.inpainting_fill = 1; // 1 = original
-                novitaRequest.inpaint_full_res = true;
+
+                // Optimized Inpaint settings for Novita/SD
+                novitaRequest.inpainting_fill = 1;         // 1 = original (best for keeping background)
+                novitaRequest.inpaint_full_res = true;     // Focus resolution on the masked area
                 novitaRequest.inpaint_full_res_padding = 32;
-                novitaRequest.inpainting_mask_invert = 0; // 0 = inpaint masked
+                novitaRequest.inpainting_mask_invert = 0;  // 0 = inpaint masked area
+
+                // Some APIs benefit from explicit mode setting
+                novitaRequest.mask_blur = 4;               // Soften mask edges for better blending
             }
         }
 

@@ -621,12 +621,14 @@ export default function ChatArea() {
                             <button
                                 className={`input-tool-btn inpaint-btn ${inpaintMode ? 'active' : ''}`}
                                 onClick={() => {
-                                    if (uploads.length === 0) return;
+                                    if (uploads.length === 0) {
+                                        setGenerationError(t('chat.uploadRequiredForInpaint') || 'Please upload or drag & drop an image first to use Inpaint.');
+                                        return;
+                                    }
                                     setInpaintMode(true);
                                     setFaceSwapMode(false);
                                     setShowInpaintModal(true);
                                 }}
-                                disabled={uploads.length === 0}
                                 title={t('chat.inpaint')}
                             >
                                 🖌 {t('chat.inpaint')}
@@ -698,6 +700,25 @@ export default function ChatArea() {
                     </div>
                 </div>
             )}
+
+            {/* Inpaint Modal */}
+            {showInpaintModal && uploads.length > 0 && (
+                <InpaintModal
+                    imageUrl={uploads[0].previewUrl}
+                    onClose={() => {
+                        setShowInpaintModal(false);
+                        if (!uploads[0].maskBase64) setInpaintMode(false);
+                    }}
+                    onSave={(maskBase64) => {
+                        const newUploads = [...uploads];
+                        newUploads[0] = { ...newUploads[0], maskBase64 };
+                        setUploads(newUploads);
+                        setShowInpaintModal(false);
+                        setInpaintMode(true);
+                    }}
+                />
+            )}
         </section>
     );
 }
+
