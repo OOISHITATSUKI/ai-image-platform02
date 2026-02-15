@@ -53,7 +53,7 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
         qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.4,
-        hiresFixUpscaler: 'R-ESRGAN 4x+',
+        hiresFixUpscaler: 'Latent',
     },
     standard: {
         steps: 30,
@@ -63,7 +63,7 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
         qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.4,
-        hiresFixUpscaler: 'R-ESRGAN 4x+',
+        hiresFixUpscaler: 'Latent',
     },
     hd: {
         steps: 30,
@@ -73,7 +73,7 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
         qualityPrefix: 'masterpiece, best quality, ultra detailed, 8k, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.4,
-        hiresFixUpscaler: 'R-ESRGAN 4x+',
+        hiresFixUpscaler: 'Latent',
     },
     ultra: {
         steps: 30,
@@ -83,7 +83,7 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
         qualityPrefix: 'masterpiece, best quality, ultra detailed, sharp focus, professional photography, cinematic lighting, 8k, ',
         hiresFixEnabled: true,
         hiresFixStrength: 0.4,
-        hiresFixUpscaler: 'R-ESRGAN 4x+',
+        hiresFixUpscaler: 'Latent',
     },
 };
 
