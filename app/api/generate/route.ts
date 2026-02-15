@@ -372,7 +372,8 @@ export async function POST(request: NextRequest) {
         );
 
         // Decide endpoint
-        const isImg2Img = generationType === 'img2img' && imageBase64;
+        // Inpainting is a specialized img2img request
+        const isImg2Img = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
         const endpoint = isImg2Img ? `${NOVITA_BASE}/img2img` : `${NOVITA_BASE}/txt2img`;
 
         // Auto-enhance prompt with quality prefix
@@ -417,9 +418,8 @@ export async function POST(request: NextRequest) {
 
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
-            // Lower strength for inpainting to keep context and subject consistency
-            // 0.45-0.5 is usually ideal for keeping the person but allowing enough change
-            novitaRequest.strength = inpaintMode ? 0.45 : 0.7;
+            // Strength of 0.7 is better for significant changes while keeping overall identity
+            novitaRequest.strength = inpaintMode ? 0.7 : 0.7;
 
             if (inpaintMode && maskBase64) {
                 // maskBase64 is a data URL, Novita expects raw base64

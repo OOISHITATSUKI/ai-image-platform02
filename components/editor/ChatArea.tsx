@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
-import type { MediaFilter } from '@/lib/types';
+import type { MediaFilter, AspectRatio } from '@/lib/types';
 import InpaintModal from './InpaintModal';
 
 // ── Uploaded image slot ──
@@ -32,6 +32,7 @@ export default function ChatArea() {
         toggleSettingsPanel,
         user,
         deductCredits,
+        updateSettings,
     } = useAppStore();
 
     const { t } = useTranslation();
@@ -120,6 +121,26 @@ export default function ChatArea() {
             previewUrl: URL.createObjectURL(file),
             label: `画像${uploads.length + i + 1}`,
         }));
+
+        // Auto-detect and set aspect ratio based on the first image
+        if (uploads.length === 0 && toAdd.length > 0) {
+            const firstFile = toAdd[0];
+            const img = new Image();
+            img.onload = () => {
+                const ratio = img.width / img.height;
+                let detected: AspectRatio = '1:1';
+                if (ratio > 2.0) detected = '21:9';
+                else if (ratio > 1.5) detected = '16:9';
+                else if (ratio > 1.1) detected = '4:3';
+                else if (ratio < 0.5) detected = '9:16';
+                else if (ratio < 0.9) detected = '3:4';
+
+                updateSettings({ aspectRatio: detected });
+                URL.revokeObjectURL(img.src);
+            };
+            img.src = URL.createObjectURL(firstFile);
+        }
+
         setUploads((prev) => [...prev, ...newSlots]);
     };
 

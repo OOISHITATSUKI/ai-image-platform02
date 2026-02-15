@@ -28,8 +28,9 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const handleLoad = () => {
             const canvas = canvasRef.current;
             if (!canvas) return;
-            canvas.width = img.clientWidth;
-            canvas.height = img.clientHeight;
+            // Use natural resolution for the internal buffer
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
 
             const ctx = canvas.getContext('2d');
             if (ctx) {
@@ -52,16 +53,21 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
         setIsDrawing(true);
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
+        const img = imgRef.current;
+        const canvas = canvasRef.current;
+        if (!img || !canvas) return;
+
+        const rect = img.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
         let x, y;
         if ('touches' in e) {
-            x = e.touches[0].clientX - rect.left;
-            y = e.touches[0].clientY - rect.top;
+            x = (e.touches[0].clientX - rect.left) * scaleX;
+            y = (e.touches[0].clientY - rect.top) * scaleY;
         } else {
-            x = (e as React.MouseEvent).clientX - rect.left;
-            y = (e as React.MouseEvent).clientY - rect.top;
+            x = ((e as React.MouseEvent).clientX - rect.left) * scaleX;
+            y = ((e as React.MouseEvent).clientY - rect.top) * scaleY;
         }
         lastPos.current = { x, y };
         draw(e);
@@ -75,24 +81,29 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
+        const img = imgRef.current;
         const canvas = canvasRef.current;
-        if (!canvas || !isDrawing) return;
+        if (!img || !canvas || !isDrawing) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const rect = canvas.getBoundingClientRect();
-        let x, y;
+        const rect = img.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
+        let x, y;
         if ('touches' in e) {
-            x = e.touches[0].clientX - rect.left;
-            y = e.touches[0].clientY - rect.top;
+            x = (e.touches[0].clientX - rect.left) * scaleX;
+            y = (e.touches[0].clientY - rect.top) * scaleY;
         } else {
-            x = (e as React.MouseEvent).clientX - rect.left;
-            y = (e as React.MouseEvent).clientY - rect.top;
+            x = ((e as React.MouseEvent).clientX - rect.left) * scaleX;
+            y = ((e as React.MouseEvent).clientY - rect.top) * scaleY;
         }
 
-        ctx.lineWidth = brushSize;
+        // Scale brush size to natural resolution
+        const effectiveBrushSize = brushSize * scaleX;
+        ctx.lineWidth = effectiveBrushSize;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
