@@ -158,19 +158,19 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'seedream-4', name: 'Seedream 4.0', type: 'image', provider: 'novita', description: '2K–4K with multi-image support', apiType: 'seedream', seedreamEndpoint: 'seedream-4-0', category: 'sfw' },
 
   // ── NSFW Realistic Models ──
-  { id: 'novita-realistic-vision-6', name: '🔞 Realistic Vision V6.0', type: 'image', provider: 'novita', description: 'Best photorealistic NSFW', novitaModelName: 'realistic-vision-v60-b1_245598.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-epicrealism', name: '🔞 epiCRealism', type: 'image', provider: 'novita', description: 'Natural skin excellence', novitaModelName: 'epicrealism_natural-sin-rc1-vae_143906.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-bra', name: '🔞 Beautiful Realistic Asians', type: 'image', provider: 'novita', description: 'Specialized for Asian beauty', novitaModelName: 'beautiful-realistic-asians-v50_60100.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-majicmix', name: '🔞 majicMIX Realistic', type: 'image', provider: 'novita', description: 'Classic realistic model', novitaModelName: 'majicmix-realistic-v7_134792.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-cyberrealistic', name: '🔞 CyberRealistic', type: 'image', provider: 'novita', description: 'Modern photorealism', novitaModelName: 'cyberrealistic_v42_144984.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-realistic-vision-6', name: '🔞 Realistic Vision V6.0', type: 'image', provider: 'novita', description: 'Best photorealistic NSFW', novitaModelName: 'realisticVisionV60B1_v60B1VAE_190174.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-epicrealism', name: '🔞 epiCRealism', type: 'image', provider: 'novita', description: 'Natural skin excellence', novitaModelName: 'epicrealism_naturalSinRC1VAE_106430.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-bra', name: '🔞 Beautiful Realistic Asians', type: 'image', provider: 'novita', description: 'Specialized for Asian beauty', novitaModelName: 'beautifulRealistic_brav3_31664.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-majicmix', name: '🔞 majicMIX Realistic', type: 'image', provider: 'novita', description: 'Classic realistic model', novitaModelName: 'majicmixRealistic_v7_134792.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-cyberrealistic', name: '🔞 CyberRealistic', type: 'image', provider: 'novita', description: 'Modern photorealism', novitaModelName: 'cyberrealistic_v40_151857.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-dreamshaper', name: '🔞 DreamShaper', type: 'image', provider: 'novita', description: 'Fantasy versatile', novitaModelName: 'dreamshaper_8_93211.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
 
   // ── NSFW Anime Models ──
-  { id: 'novita-anything-v5', name: '🔞 Anything V5', type: 'image', provider: 'novita', description: 'Top anime quality', novitaModelName: 'anything-v5-pope_1_30163.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-meinahentai', name: '🔞 MeinaHentai V12', type: 'image', provider: 'novita', description: 'Dedicated NSFW anime', novitaModelName: 'meinahentai-v12_44907.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-anything-v5', name: '🔞 Anything V5', type: 'image', provider: 'novita', description: 'Top anime quality', novitaModelName: 'AnythingV5_v5PrtRE.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-meinahentai', name: '🔞 MeinaHentai V4', type: 'image', provider: 'novita', description: 'Dedicated NSFW anime', novitaModelName: 'meinahentai_v4_70340.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
   { id: 'novita-abyssorangemix3', name: '🔞 AbyssOrangeMix3', type: 'image', provider: 'novita', description: 'Dark anime style', novitaModelName: 'abyssorangemix-3-aom3_26306.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-counterfeit', name: '🔞 Counterfeit V3.0', type: 'image', provider: 'novita', description: 'Anime line art', novitaModelName: 'counterfeit-v30-v30_45397.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-revanimated', name: '🔞 Rev Animated', type: 'image', provider: 'novita', description: '2.5D anime style', novitaModelName: 'revanimated_v2-rebirth_161534.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-counterfeit', name: '🔞 Counterfeit V3.0', type: 'image', provider: 'novita', description: 'Anime line art', novitaModelName: 'CounterfeitV30_v30.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-revanimated', name: '🔞 Rev Animated', type: 'image', provider: 'novita', description: '2.5D anime style', novitaModelName: 'revAnimated_v122.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
 
   // ── Video Models (hidden for now but kept in code) ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },
