@@ -364,7 +364,20 @@ export async function POST(request: NextRequest) {
         // Force Ultra quality for all requests to ensure maximum output
         const quality = QUALITY_CONFIGS.ultra;
 
-        const novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
+        let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
+
+        // ── Inpaint Model Mapping ──
+        // Dedicated Inpainting API (/v3/async/inpainting) requires specialized models.
+        // If we are in inpaintMode, we switch to a proven inpainting model.
+        if (inpaintMode && (generationType === 'img2img' || inpaintMode)) {
+            if (model?.category === 'nsfw-anime') {
+                novitaModelName = 'sd-v1-5-inpainting_15408.safetensors';
+            } else {
+                // Highly compatible photorealistic inpaint model
+                novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
+            }
+            console.log(`Inpaint detected. Swapping model to: ${novitaModelName}`);
+        }
 
         const { width, height } = getResolutionFromAspectRatio(
             aspectRatio as AspectRatio,
