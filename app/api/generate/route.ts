@@ -287,7 +287,7 @@ async function restoreFaceViaImg2Img(base64Image: string): Promise<string> {
             nsfw_detection_level: 0,
         },
         request: {
-            model_name: 'realistic-vision-v60-b1_245598.safetensors',
+            model_name: 'realisticVisionV60B1_v60B1VAE_190174.safetensors',
             prompt: 'best quality, highly detailed, sharp focus, clear face, detailed eyes, detailed skin',
             negative_prompt: DEFAULT_NEGATIVE_PROMPT,
             image_base64: base64Image,
@@ -358,14 +358,20 @@ async function handleMergeFace(
         body: JSON.stringify({
             face_image_file: faceResized,
             image_file: targetResized,
-            response_image_type: 'png',
+            response_image_type: 'jpeg',
         }),
     });
 
     if (!res.ok) {
         const errText = await res.text();
         console.error('Merge Face API error:', res.status, errText);
-        throw new Error(`Face Swap API error: ${res.status} — ${errText.slice(0, 200)}`);
+        let msg = `Face Swap API error: ${res.status}`;
+        if (errText.includes('"code":2') || res.status === 500) {
+            msg += " — 顔が検出されなかったか、画像が不適切です。別の画像（正面を向いたはっきりした顔）で試してください。";
+        } else {
+            msg += ` — ${errText.slice(0, 200)}`;
+        }
+        throw new Error(msg);
     }
 
     const data = await res.json();
