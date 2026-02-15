@@ -73,6 +73,9 @@ interface AppState {
     // ----- Generating -----
     isGenerating: boolean;
     setIsGenerating: (generating: boolean) => void;
+
+    // ----- Credits -----
+    deductCredits: (amount: number) => void;
 }
 
 const DEFAULT_SETTINGS: GenerationSettings = {
@@ -99,8 +102,16 @@ export const useAppStore = create<AppState>()(
             setLocale: (locale) => set({ locale }),
 
             // ----- User -----
-            user: null,
-            isAuthenticated: false,
+            user: {
+                id: 'local-user',
+                email: 'user@example.com',
+                username: 'Designer',
+                plan: 'free',
+                credits: 50,
+                locale: 'ja',
+                theme: 'dark',
+            },
+            isAuthenticated: true,
             setUser: (user) => set({ user, isAuthenticated: !!user }),
 
             // ----- Chats -----
@@ -202,6 +213,12 @@ export const useAppStore = create<AppState>()(
             // ----- Generating -----
             isGenerating: false,
             setIsGenerating: (generating) => set({ isGenerating: generating }),
+
+            // ----- Credits -----
+            deductCredits: (amount) =>
+                set((s) => ({
+                    user: s.user ? { ...s.user, credits: Math.max(0, s.user.credits - amount) } : null,
+                })),
         }),
         {
             name: 'videogen-storage',

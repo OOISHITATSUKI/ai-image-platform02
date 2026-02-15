@@ -131,7 +131,7 @@
   },
   "credits": {
     "label": "Credits",
-    "remaining": "{count} remaining",
+    "remaining": "{count} credits left",
     "topUp": "Top Up",
     "upgrade": "Upgrade Plan"
   }

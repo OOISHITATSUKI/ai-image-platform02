@@ -1210,6 +1210,39 @@ video {
   flex-shrink: 0;
 }
 
+.credit-display {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.credit-low {
+  color: var(--error);
+  font-weight: 700;
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 .chat-input-wrapper {
   max-width: 720px;
   margin: 0 auto;
@@ -1307,6 +1340,21 @@ video {
 .send-btn:disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+
+.send-btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Home View ── */

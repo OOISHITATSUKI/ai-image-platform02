@@ -28,6 +28,8 @@ export default function ChatArea() {
         settings,
         settingsPanelVisible,
         toggleSettingsPanel,
+        user,
+        deductCredits,
     } = useAppStore();
 
     const { t } = useTranslation();
@@ -176,6 +178,15 @@ export default function ChatArea() {
         e.preventDefault();
         if (!inputText.trim() && uploads.length === 0) return;
 
+        const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+        const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
+        const creditCost = isVideoGeneration ? settings.count * 5 : settings.count * 1;
+
+        if (user && user.credits < creditCost) {
+            setGenerationError(`❌ クレジットが不足しています。（必要: ${creditCost}, 保有: ${user.credits}）`);
+            return;
+        }
+
         setGenerationError(null);
 
         // Ensure we have a chat
@@ -198,11 +209,8 @@ export default function ChatArea() {
         setUploads([]);
         if (fileInputRef.current) fileInputRef.current.value = '';
 
-        // Check generation type
-        const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
-        const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
-
         setIsGenerating(true);
+        deductCredits(creditCost);
 
         if (isImageGeneration) {
             try {
@@ -472,6 +480,12 @@ export default function ChatArea() {
 
             {/* Input */}
             <div className="chat-input-container">
+                {/* Credit Display */}
+                {user && (
+                    <div className={`credit-display ${user.credits <= 10 ? 'credit-low' : ''}`}>
+                        ✨ {t('credits.remaining').replace('{count}', user.credits.toString())}
+                    </div>
+                )}
                 <div className="chat-input-wrapper">
                     {/* BUG-02: Multi-image upload thumbnails */}
                     {uploads.length > 0 && (
@@ -537,10 +551,14 @@ export default function ChatArea() {
                         />
                         <button
                             type="submit"
-                            className="send-btn"
+                            className={`send-btn ${isGenerating ? 'generating' : ''}`}
                             disabled={isGenerating || (!inputText.trim() && uploads.length === 0)}
                         >
-                            ▶
+                            {isGenerating ? (
+                                <span className="send-btn-spinner" />
+                            ) : (
+                                '▶'
+                            )}
                         </button>
                     </form>
                 </div>

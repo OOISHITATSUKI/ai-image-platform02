@@ -210,25 +210,9 @@ export default function SettingsPanel() {
                     </div>
                 )}
 
-                {/* Generate Button */}
-                <button
-                    className={`generate-button ${isGenerating ? 'generating' : ''}`}
-                    disabled={isGenerating}
-                >
-                    {isGenerating ? (
-                        <>
-                            <span className="generating-dots">
-                                <span /><span /><span />
-                            </span>
-                            {t('editor.generating')}
-                        </>
-                    ) : (
-                        <>
-                            ✨ {t('editor.generate')}
-                        </>
-                    )}
-                    <div className="credit-cost">({creditCost} {t('credits.label')})</div>
-                </button>
+                <div className="settings-panel-footer-info" style={{ marginTop: 'auto', paddingTop: '20px', fontSize: '0.8rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                    {isVideoMode ? t('editor.vidNotice') : t('editor.imgNotice')}
+                </div>
             </div>
         </aside>
     );

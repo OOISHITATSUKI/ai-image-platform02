@@ -131,7 +131,7 @@
     },
     "credits": {
         "label": "クレジット",
-        "remaining": "残り{count}",
+        "remaining": "残り {count} クレジット",
         "topUp": "チャージ",
         "upgrade": "プランをアップグレード"
     }
