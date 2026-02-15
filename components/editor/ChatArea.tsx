@@ -4,12 +4,14 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { MediaFilter } from '@/lib/types';
+import InpaintModal from './InpaintModal';
 
 // ── Uploaded image slot ──
 interface UploadSlot {
     file: File;
     previewUrl: string;
     label: string;
+    maskBase64?: string;
 }
 
 const MAX_UPLOADS = 4;
@@ -37,6 +39,8 @@ export default function ChatArea() {
     // BUG-02: multi-image support
     const [uploads, setUploads] = useState<UploadSlot[]>([]);
     const [faceSwapMode, setFaceSwapMode] = useState(false);
+    const [inpaintMode, setInpaintMode] = useState(false);
+    const [showInpaintModal, setShowInpaintModal] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -281,7 +285,7 @@ export default function ChatArea() {
                 // Convert files to base64 for img2img / img_edit
                 let imageBase64: string | undefined;
                 let additionalImages: string[] | undefined;
-                if (currentUploads.length > 0 && settings.generationType !== 'txt2img') {
+                if (currentUploads.length > 0 && (settings.generationType !== 'txt2img' || inpaintMode)) {
                     imageBase64 = await fileToBase64(currentUploads[0].file);
                     if (currentUploads.length > 1) {
                         additionalImages = await Promise.all(
@@ -304,6 +308,8 @@ export default function ChatArea() {
                         imageBase64,
                         additionalImages,
                         faceSwapMode,
+                        inpaintMode,
+                        maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                     }),
                 });
 
@@ -312,6 +318,9 @@ export default function ChatArea() {
                 if (!res.ok || data.error) {
                     throw new Error(data.error || `API error: ${res.status}`);
                 }
+
+                setInpaintMode(false);
+                setFaceSwapMode(false);
 
                 // Add AI response for each generated image
                 const images = data.images || [];
@@ -570,7 +579,12 @@ export default function ChatArea() {
                         <div className="upload-thumbnails">
                             {uploads.map((slot, i) => (
                                 <div key={i} className="upload-thumb" onClick={() => handleThumbClick(slot.label)}>
-                                    <img src={slot.previewUrl} alt={slot.label} />
+                                    <div className="thumb-img-container">
+                                        <img src={slot.previewUrl} alt={slot.label} />
+                                        {slot.maskBase64 && (
+                                            <img src={slot.maskBase64} alt="Mask" className="thumb-mask-overlay" />
+                                        )}
+                                    </div>
                                     <span className="upload-thumb-label">{slot.label}</span>
                                     <button
                                         className="upload-thumb-remove"
@@ -595,10 +609,27 @@ export default function ChatArea() {
                             </button>
                             <button
                                 className={`input-tool-btn face-swap-btn ${faceSwapMode ? 'active' : ''}`}
-                                onClick={() => setFaceSwapMode((v) => !v)}
+                                onClick={() => {
+                                    setFaceSwapMode((v) => !v);
+                                    if (!faceSwapMode) setInpaintMode(false);
+                                }}
+                                disabled={uploads.length === 0}
                                 title={t('chat.faceSwap')}
                             >
                                 🔄 {t('chat.faceSwap')}
+                            </button>
+                            <button
+                                className={`input-tool-btn inpaint-btn ${inpaintMode ? 'active' : ''}`}
+                                onClick={() => {
+                                    if (uploads.length === 0) return;
+                                    setInpaintMode(true);
+                                    setFaceSwapMode(false);
+                                    setShowInpaintModal(true);
+                                }}
+                                disabled={uploads.length === 0}
+                                title={t('chat.inpaint')}
+                            >
+                                🖌 {t('chat.inpaint')}
                             </button>
                             <input
                                 ref={fileInputRef}
@@ -618,11 +649,14 @@ export default function ChatArea() {
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder={faceSwapMode && uploads.length > 0
-                                ? t('chat.faceSwapHint')
-                                : uploads.length > 0
-                                    ? t('chat.imageRefHint')
-                                    : t('chat.placeholder')
+                            placeholder={
+                                inpaintMode
+                                    ? t('chat.inpaintHint') || 'Describe what to change in the masked area...'
+                                    : faceSwapMode && uploads.length > 0
+                                        ? t('chat.faceSwapHint')
+                                        : uploads.length > 0
+                                            ? t('chat.imageRefHint')
+                                            : t('chat.placeholder')
                             }
                             rows={1}
                             disabled={isGenerating}

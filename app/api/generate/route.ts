@@ -327,6 +327,8 @@ export async function POST(request: NextRequest) {
             imageBase64,
             additionalImages,
             faceSwapMode = false,
+            inpaintMode = false,
+            maskBase64,
             count = 1,
             qualityPreset = 'hd',
         } = body;
@@ -415,7 +417,17 @@ export async function POST(request: NextRequest) {
 
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
-            novitaRequest.strength = 0.7;
+            novitaRequest.strength = inpaintMode ? 0.6 : 0.7; // Lower strength for inpainting to keep context
+
+            if (inpaintMode && maskBase64) {
+                // maskBase64 is a data URL, Novita expects raw base64
+                novitaRequest.mask_base64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
+                // Standard inpaint settings
+                novitaRequest.inpainting_fill = 1; // 1 = original
+                novitaRequest.inpaint_full_res = true;
+                novitaRequest.inpaint_full_res_padding = 32;
+                novitaRequest.inpainting_mask_invert = 0; // 0 = inpaint masked
+            }
         }
 
         const novitaBody = {

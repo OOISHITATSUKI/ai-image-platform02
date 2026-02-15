@@ -56,7 +56,17 @@
     "filterImages": "Images",
     "filterVideos": "Videos",
     "filterFavorites": "Favorites",
-    "dropFiles": "Drop files here to upload"
+    "dropFiles": "Drop files here to upload",
+    "inpaint": "Inpaint",
+    "inpaintModalTitle": "Inpaint Mode",
+    "inpaintBrush": "Brush",
+    "inpaintEraser": "Eraser",
+    "inpaintUndo": "Undo",
+    "inpaintClear": "Clear All",
+    "inpaintSize": "Brush Size",
+    "inpaintDone": "Done",
+    "inpaintClose": "Close",
+    "inpaintHint": "Describe what to change in the masked area..."
   },
   "actions": {
     "generateVideo": "Generate Video",

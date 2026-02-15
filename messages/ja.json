@@ -56,7 +56,17 @@
         "filterImages": "画像",
         "filterVideos": "動画",
         "filterFavorites": "お気に入り",
-        "dropFiles": "ここにファイルをドロップしてアップロード"
+        "dropFiles": "ここにファイルをドロップしてアップロード",
+        "inpaint": "部分修正",
+        "inpaintModalTitle": "部分修正モード",
+        "inpaintBrush": "ブラシ",
+        "inpaintEraser": "消しゴム",
+        "inpaintUndo": "戻す",
+        "inpaintClear": "全消去",
+        "inpaintSize": "ブラシサイズ",
+        "inpaintDone": "マスク完了",
+        "inpaintClose": "閉じる",
+        "inpaintHint": "マスクした部分をどう変更したいか入力してください..."
     },
     "actions": {
         "generateVideo": "動画生成",
