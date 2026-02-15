@@ -168,7 +168,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   // ── NSFW Anime Models ──
   { id: 'novita-anything-v5', name: '🔞 Anything V5', type: 'image', provider: 'novita', description: 'Top anime quality', novitaModelName: 'AnythingV5_v5PrtRE.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
   { id: 'novita-meinahentai', name: '🔞 MeinaHentai V4', type: 'image', provider: 'novita', description: 'Dedicated NSFW anime', novitaModelName: 'meinahentai_v4_70340.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-abyssorangemix3', name: '🔞 AbyssOrangeMix3', type: 'image', provider: 'novita', description: 'Dark anime style', novitaModelName: 'abyssorangemix-3-aom3_26306.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-abyssorangemix3', name: '🔞 AbyssOrangeMix3', type: 'image', provider: 'novita', description: 'Dark anime style', novitaModelName: 'abyssorangemix3AOM3_aom3a1b.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
   { id: 'novita-counterfeit', name: '🔞 Counterfeit V3.0', type: 'image', provider: 'novita', description: 'Anime line art', novitaModelName: 'CounterfeitV30_v30.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
   { id: 'novita-revanimated', name: '🔞 Rev Animated', type: 'image', provider: 'novita', description: '2.5D anime style', novitaModelName: 'revAnimated_v122.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
 
