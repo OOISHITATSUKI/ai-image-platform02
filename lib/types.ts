@@ -154,8 +154,8 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-juggernaut', name: 'Juggernaut XL Lightning', type: 'image', provider: 'novita', description: 'Fast realistic generation', novitaModelName: 'juggernautXL_v9Rdphoto2Lightning_285361.safetensors', apiType: 'sd', category: 'sfw' },
 
   // ── Seedream Models (Novita.ai proprietary) ──
-  { id: 'seedream-3', name: 'Seedream 3.0', type: 'image', provider: 'novita', description: 'Fast high-quality generation', apiType: 'seedream', seedreamEndpoint: 'seedream-3-0-t2i', novitaModelName: 'seedream-3-0-t2i-250415', category: 'sfw' },
-  { id: 'seedream-4', name: 'Seedream 4.0', type: 'image', provider: 'novita', description: '2K–4K with multi-image support', apiType: 'seedream', seedreamEndpoint: 'seedream-4-0', category: 'sfw' },
+  { id: 'seedream-3', name: 'Seedream 3.0', type: 'image', provider: 'novita', description: 'Fast high-quality generation', apiType: 'seedream', seedreamEndpoint: 'seedream-3-0-txt2img', novitaModelName: 'seedream-3-0-t2i-250415', category: 'sfw' },
+  { id: 'seedream-4', name: 'Seedream 4.0', type: 'image', provider: 'novita', description: '2K–4K with multi-image support', apiType: 'seedream', seedreamEndpoint: 'seedream-4.0', category: 'sfw' },
 
   // ── NSFW Realistic Models ──
   { id: 'novita-realistic-vision-6', name: '🔞 Realistic Vision V6.0', type: 'image', provider: 'novita', description: 'Best photorealistic NSFW', novitaModelName: 'realisticVisionV60B1_v60B1VAE_190174.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
