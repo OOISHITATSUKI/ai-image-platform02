@@ -48,14 +48,29 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         return () => img.removeEventListener('load', handleLoad);
     }, [imageUrl]);
 
+    const lastPos = useRef<{ x: number, y: number } | null>(null);
+
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
         setIsDrawing(true);
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        let x, y;
+        if ('touches' in e) {
+            x = e.touches[0].clientX - rect.left;
+            y = e.touches[0].clientY - rect.top;
+        } else {
+            x = (e as React.MouseEvent).clientX - rect.left;
+            y = (e as React.MouseEvent).clientY - rect.top;
+        }
+        lastPos.current = { x, y };
         draw(e);
     };
 
     const stopDrawing = () => {
         if (!isDrawing) return;
         setIsDrawing(false);
+        lastPos.current = null;
         saveToHistory();
     };
 
@@ -78,22 +93,31 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         }
 
         ctx.lineWidth = brushSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
         if (tool === 'brush') {
             ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = 'rgba(124, 92, 252, 0.7)'; // Vibrant purple for mask
+            const purple = 'rgba(124, 92, 252, 0.7)';
+            ctx.strokeStyle = purple;
+            ctx.fillStyle = purple;
         } else {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.strokeStyle = 'rgba(0,0,0,1)';
+            ctx.fillStyle = 'rgba(0,0,0,1)';
         }
 
-        // Draw point
         ctx.beginPath();
-        ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-        ctx.fill();
+        if (lastPos.current) {
+            ctx.moveTo(lastPos.current.x, lastPos.current.y);
+            ctx.lineTo(x, y);
+        } else {
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
 
-        // Connect lines for smoother feel
-        // (Simplified for this task, just drawing circles works well for masking)
+        lastPos.current = { x, y };
     };
 
     const saveToHistory = () => {
