@@ -297,20 +297,31 @@ export default function ChatArea() {
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Download an image from a URL as PNG via server-side proxy
+    // Download an image from a URL as PNG
     const handleDownload = (url: string) => {
-        // Direct download via a hidden anchor tag.
-        // This is the most reliable way to preserve the filename and extension
-        // provided by the server headers (Content-Disposition).
-        const downloadUrl = `/api/download?url=${encodeURIComponent(url)}`;
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        // The 'download' attribute here is a fallback, 
-        // the server header 'Content-Disposition' will take precedence.
-        a.setAttribute('download', '');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const isDataUri = url.startsWith('data:');
+
+        if (isDataUri) {
+            // Case 1: Data URI (e.g. Face Swap results)
+            // These are huge, so we MUST handle them locally to avoid URL length limits.
+            const a = document.createElement('a');
+            a.href = url;
+            // Force PNG extension even if source is JPEG
+            a.download = `ai_image_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } else {
+            // Case 2: Remote URL (e.g. standard generation)
+            // We use the proxy to bypass CORS and ensure a clean PNG conversion.
+            const proxyUrl = `/api/download?url=${encodeURIComponent(url)}`;
+            const a = document.createElement('a');
+            a.href = proxyUrl;
+            a.download = `ai_image_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
     };
 
     return (
