@@ -2668,3 +2668,222 @@ video {
     transform: translateY(0);
   }
 }
+
+/* ── Mobile & Responsive Updates ── */
+.mobile-header {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px;
+    --settings-panel-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 60px;
+  }
+
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    flex-direction: column;
+    height: 100vh;
+    padding-top: var(--header-height);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform var(--transition-slow);
+    z-index: 3000;
+    box-shadow: var(--shadow-lg);
+    border-right: 1px solid var(--border);
+  }
+
+  /* Since the state is sidebarCollapsed, when it is FALSE, it should show on mobile */
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2999;
+  }
+
+  .sidebar:not(.collapsed)+.sidebar-overlay {
+    display: block !important;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height));
+    overflow: hidden;
+  }
+
+  .mobile-header {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    padding: 0 16px;
+    z-index: 2500;
+  }
+
+  .mobile-menu-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    margin-right: 12px;
+  }
+
+  .mobile-settings-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .editor-layout {
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .settings-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    background: var(--bg-panel);
+    border-bottom: 2px solid var(--primary);
+    z-index: 2000;
+    transition: transform var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+  }
+
+  .settings-panel.hidden {
+    transform: translateY(-100%);
+    display: block !important;
+    /* Keep it in DOM for transition */
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* When settings are shown, ensure they slide down */
+  .settings-panel:not(.hidden) {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    z-index: 5;
+  }
+
+  .chat-messages {
+    padding: 10px 8px;
+    gap: 12px;
+  }
+
+  .chat-input-container {
+    padding: 10px;
+    background: var(--bg-base);
+    border-top: 1px solid var(--border);
+  }
+
+  .message-wrapper {
+    margin-bottom: 8px;
+  }
+
+  .message-bubble {
+    max-width: 100%;
+    /* Use full width on mobile for messages */
+    font-size: 0.88rem;
+    padding: 10px 12px;
+    border-radius: var(--radius-lg);
+  }
+
+  .message-image-wrapper {
+    margin-top: 8px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .message-image-wrapper img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .message-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .msg-action-btn {
+    justify-content: center;
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+
+  .nav-item,
+  .chat-history-item {
+    padding: 12px 14px;
+    /* Larger touch targets */
+    font-size: 0.95rem;
+  }
+
+  .sidebar-new-chat {
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .chat-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}

@@ -216,6 +216,30 @@ export default function ChatArea() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    // ── Re-upload helper: used by Regenerate/Edit actions ──
+    const reUploadImage = async (url: string) => {
+        try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const file = new File([blob], `ai_ref_${Date.now()}.png`, { type: 'image/png' });
+
+            // Cleanup existing
+            uploads.forEach((s) => URL.revokeObjectURL(s.previewUrl));
+
+            const newSlot: UploadSlot = {
+                file,
+                previewUrl: URL.createObjectURL(file),
+                label: '画像1',
+            };
+            setUploads([newSlot]);
+            return true;
+        } catch (err) {
+            console.error('Failed to re-upload image:', err);
+            setGenerationError('画像の読み込みに失敗しました。');
+            return false;
+        }
+    };
+
     // BUG-03: Convert image to PNG via Canvas (handles WebP, AVIF, BMP, etc.)
     const convertImageToPng = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -387,6 +411,23 @@ export default function ChatArea() {
         setIsGenerating(false);
     };
 
+    const handleActionRegenerate = async (imgUrl: string, originalPrompt: string) => {
+        const success = await reUploadImage(imgUrl);
+        if (success) {
+            // Just set the prompt, but don't auto-generate
+            setInputText(originalPrompt);
+        }
+    };
+
+    const handleActionEdit = async (imgUrl: string) => {
+        const success = await reUploadImage(imgUrl);
+        if (success) {
+            setInpaintMode(true);
+            setFaceSwapMode(false);
+            setShowInpaintModal(true);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -532,14 +573,20 @@ export default function ChatArea() {
                                     >
                                         {msg.isFavorite ? '❤️' : '🤍'} {t('actions.favorite')}
                                     </button>
+                                    <button
+                                        className="msg-action-btn"
+                                        onClick={() => msg.imageUrl && handleActionRegenerate(msg.imageUrl, msg.content.replace(/^Generated from: "(.*)"$/, '$1'))}
+                                    >
+                                        🔄 {t('actions.regenerate')}
+                                    </button>
                                     {msg.imageUrl && (
-                                        <button className="msg-action-btn">🎬 {t('actions.generateVideo')}</button>
+                                        <button
+                                            className="msg-action-btn"
+                                            onClick={() => handleActionEdit(msg.imageUrl!)}
+                                        >
+                                            ✏️ {t('actions.edit')}
+                                        </button>
                                     )}
-                                    {msg.videoUrl && (
-                                        <button className="msg-action-btn">🖼️ {t('actions.generateImage')}</button>
-                                    )}
-                                    <button className="msg-action-btn">🔄 {t('actions.regenerate')}</button>
-                                    <button className="msg-action-btn">✏️ {t('actions.edit')}</button>
                                 </div>
                             )}
                         </div>
