@@ -9,7 +9,7 @@ const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 
 // ── Default Negative Prompt (auto-appended to all generations) ──
 const DEFAULT_NEGATIVE_PROMPT =
-    '(worst quality:1.4), (low quality:1.4), (normal quality:1.4), lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, deformed, distorted, disfigured, poorly drawn face, mutation, mutated, ugly';
+    '(worst quality:1.4), (low quality:1.4), (normal quality:1.4), lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, deformed, distorted, disfigured, poorly drawn face, mutation, mutated, ugly, (deformed genitalia:1.5), (bad genitalia:1.5), (extra genitalia:1.3), (deformed vagina:1.5), (deformed penis:1.5), (fused body parts:1.3), (extra limbs:1.3), (missing limbs:1.3), (extra arms:1.3), (extra legs:1.3), (bad proportions:1.3), (gross proportions:1.3), (child:1.5), (childlike:1.5), (loli:1.5), (underage:1.5), (baby face:1.3), (doll face:1.3), (doll-like:1.3), (unnatural eyes:1.3), (huge eyes:1.3), (3d render:1.2), (plastic skin:1.3), (uncanny valley:1.3), (long neck:1.3), (cloned face:1.3), (malformed hands:1.4), (poorly drawn feet:1.4), (extra fingers:1.3)';
 
 // ── Simple Translation Mock/Helper ──
 // Stable Diffusion models only understand English well.
