@@ -374,7 +374,13 @@ export async function POST(request: NextRequest) {
         // Decide endpoint
         // Inpainting is a specialized img2img request
         const isImg2Img = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
-        const endpoint = isImg2Img ? `${NOVITA_BASE}/img2img` : `${NOVITA_BASE}/txt2img`;
+
+        // Use dedicated inpainting endpoint if mask is provided
+        const endpoint = (inpaintMode && maskBase64)
+            ? `${NOVITA_BASE}/inpainting`
+            : isImg2Img
+                ? `${NOVITA_BASE}/img2img`
+                : `${NOVITA_BASE}/txt2img`;
 
         // Auto-enhance prompt with quality prefix
         const enhancedPrompt = quality.qualityPrefix + (translatedPrompt || 'a beautiful image');
@@ -422,21 +428,12 @@ export async function POST(request: NextRequest) {
             novitaRequest.strength = inpaintMode ? 0.8 : 0.7;
 
             if (inpaintMode && maskBase64) {
-                const rawMask = maskBase64.replace(/^data:image\/\w+;base64,/, '');
+                // For the dedicated /inpainting endpoint, Novita expects 'mask_image_base64'
+                novitaRequest.mask_image_base64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
 
-                // Using ControlNet Inpaint for V3 API as mask_base64 is not supported in this endpoint
-                novitaRequest.controlnet = {
-                    units: [
-                        {
-                            model_name: 'control_v11p_sd15_inpaint',
-                            image_base64: rawMask,
-                            strength: 1.0,
-                            // Set preprocessor to 'none' for pre-made masks to avoid validation errors
-                            preprocessor: 'none',
-                        }
-                    ]
-                };
-                // Note: Legacy params like mask_base64 are omitted here to avoid V3 validator errors
+                // Dedicated endpoint specific params
+                novitaRequest.guidance_scale = quality.guidance;
+                novitaRequest.steps = quality.steps;
             }
         }
 
