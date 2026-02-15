@@ -55,7 +55,8 @@
     "filterAll": "All",
     "filterImages": "Images",
     "filterVideos": "Videos",
-    "filterFavorites": "Favorites"
+    "filterFavorites": "Favorites",
+    "dropFiles": "Drop files here to upload"
   },
   "actions": {
     "generateVideo": "Generate Video",

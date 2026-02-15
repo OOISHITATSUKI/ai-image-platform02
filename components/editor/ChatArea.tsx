@@ -39,6 +39,8 @@ export default function ChatArea() {
     const [faceSwapMode, setFaceSwapMode] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragCounter = useRef(0);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,15 +104,77 @@ export default function ChatArea() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
+        addFiles(Array.from(files));
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const addFiles = (files: File[]) => {
         const remaining = MAX_UPLOADS - uploads.length;
-        const toAdd = Array.from(files).slice(0, remaining);
+        const toAdd = files.slice(0, remaining);
         const newSlots: UploadSlot[] = toAdd.map((file, i) => ({
             file,
             previewUrl: URL.createObjectURL(file),
             label: `画像${uploads.length + i + 1}`,
         }));
         setUploads((prev) => [...prev, ...newSlots]);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleDragEnter = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current++;
+        if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+            setIsDragging(true);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current--;
+        if (dragCounter.current === 0) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        dragCounter.current = 0;
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            addFiles(Array.from(e.dataTransfer.files));
+            e.dataTransfer.clearData();
+        }
+    };
+
+    const handleThumbClick = (label: string) => {
+        if (!textareaRef.current) return;
+        const start = textareaRef.current.selectionStart;
+        const end = textareaRef.current.selectionEnd;
+        const text = inputText;
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+
+        // Add space around the label if needed
+        const labelWithSpacing = `${before.endsWith(' ') || before === '' ? '' : ' '}${label}${after.startsWith(' ') ? '' : ' '}`;
+
+        const newText = before + labelWithSpacing + after;
+        setInputText(newText);
+
+        // Return focus and move cursor
+        setTimeout(() => {
+            if (textareaRef.current) {
+                textareaRef.current.focus();
+                const newPos = start + labelWithSpacing.length;
+                textareaRef.current.setSelectionRange(newPos, newPos);
+            }
+        }, 0);
     };
 
     const handleRemoveUpload = (index: number) => {
@@ -486,17 +550,31 @@ export default function ChatArea() {
                         ✨ {t('credits.remaining').replace('{count}', user.credits.toString())}
                     </div>
                 )}
-                <div className="chat-input-wrapper">
+                <div
+                    className={`chat-input-wrapper ${isDragging ? 'dragging' : ''}`}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    {isDragging && (
+                        <div className="drag-overlay">
+                            <div className="drag-overlay-content">
+                                <div className="drag-icon">📥</div>
+                                <div className="drag-text">{t('chat.dropFiles')}</div>
+                            </div>
+                        </div>
+                    )}
                     {/* BUG-02: Multi-image upload thumbnails */}
                     {uploads.length > 0 && (
                         <div className="upload-thumbnails">
                             {uploads.map((slot, i) => (
-                                <div key={i} className="upload-thumb">
+                                <div key={i} className="upload-thumb" onClick={() => handleThumbClick(slot.label)}>
                                     <img src={slot.previewUrl} alt={slot.label} />
                                     <span className="upload-thumb-label">{slot.label}</span>
                                     <button
                                         className="upload-thumb-remove"
-                                        onClick={() => handleRemoveUpload(i)}
+                                        onClick={(e) => { e.stopPropagation(); handleRemoveUpload(i); }}
                                     >
                                         ✕
                                     </button>
@@ -552,7 +630,7 @@ export default function ChatArea() {
                         <button
                             type="submit"
                             className={`send-btn ${isGenerating ? 'generating' : ''}`}
-                            disabled={isGenerating || (!inputText.trim() && uploads.length === 0)}
+                            disabled={isGenerating || (showAttach && uploads.length === 0) || (!inputText.trim() && uploads.length === 0)}
                         >
                             {isGenerating ? (
                                 <span className="send-btn-spinner" />

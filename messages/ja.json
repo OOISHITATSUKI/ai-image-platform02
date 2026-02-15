@@ -55,7 +55,8 @@
         "filterAll": "すべて",
         "filterImages": "画像",
         "filterVideos": "動画",
-        "filterFavorites": "お気に入り"
+        "filterFavorites": "お気に入り",
+        "dropFiles": "ここにファイルをドロップしてアップロード"
     },
     "actions": {
         "generateVideo": "動画生成",
