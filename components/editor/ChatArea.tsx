@@ -431,28 +431,13 @@ export default function ChatArea() {
 
             {/* Error Banner */}
             {generationError && (
-                <div style={{
-                    padding: '10px 16px',
-                    background: 'rgba(255,60,60,0.15)',
-                    borderBottom: '1px solid rgba(255,60,60,0.3)',
-                    color: '#ff6b6b',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    whiteSpace: 'pre-line',
-                }}>
-                    <span>{generationError}</span>
+                <div className="chat-error-banner">
+                    <div className="chat-error-content">
+                        {generationError}
+                    </div>
                     <button
+                        className="chat-error-close"
                         onClick={() => setGenerationError(null)}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#ff6b6b',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            flexShrink: 0,
-                        }}
                     >
                         ✕
                     </button>

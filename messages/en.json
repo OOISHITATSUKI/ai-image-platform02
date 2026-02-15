@@ -66,8 +66,8 @@
     "inpaintSize": "Brush Size",
     "inpaintDone": "Done",
     "inpaintClose": "Close",
-    "inpaintHint": "Describe what to change in the masked area... (Tip: Match the Aspect Ratio settings to your image for better results)",
-    "uploadRequiredForInpaint": "Please upload or drag & drop an image first to use Inpaint. (Tip: Use the same Aspect Ratio as your photo in Settings)"
+    "inpaintHint": "🎨 Describe what to change in the masked area... (💡 Hint: Match the Aspect Ratio to your image for best results!)",
+    "uploadRequiredForInpaint": "🎨 Please upload an image first to use Inpaint! \n\n💡 Hint: Choosing the same Aspect Ratio in Settings makes the result much better ✨"
   },
   "actions": {
     "generateVideo": "Generate Video",
