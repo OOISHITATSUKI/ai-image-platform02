@@ -418,21 +418,29 @@ export async function POST(request: NextRequest) {
 
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
-            // Strength of 0.7 is better for significant changes while keeping overall identity
-            novitaRequest.strength = inpaintMode ? 0.7 : 0.7;
+            // High strength allows the AI to actually change the content in the masked area
+            novitaRequest.strength = inpaintMode ? 0.8 : 0.7;
 
             if (inpaintMode && maskBase64) {
-                // maskBase64 is a data URL, Novita expects raw base64
-                novitaRequest.mask_base64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
+                const rawMask = maskBase64.replace(/^data:image\/\w+;base64,/, '');
 
-                // Optimized Inpaint settings for Novita/SD
-                novitaRequest.inpainting_fill = 1;         // 1 = original (best for keeping background)
-                novitaRequest.inpaint_full_res = true;     // Focus resolution on the masked area
-                novitaRequest.inpaint_full_res_padding = 32;
-                novitaRequest.inpainting_mask_invert = 0;  // 0 = inpaint masked area
+                // Using ControlNet Inpaint as suggested for better reliability on Novita v3 API
+                novitaRequest.controlnet = {
+                    units: [
+                        {
+                            model_name: 'control_v11p_sd15_inpaint',
+                            image_base64: rawMask,
+                            strength: 1.0,
+                            // inpaint_global_harmonious or inpaint_only are common preprocessors
+                            preprocessor: 'inpaint_global_harmonious',
+                        }
+                    ]
+                };
 
-                // Some APIs benefit from explicit mode setting
-                novitaRequest.mask_blur = 4;               // Soften mask edges for better blending
+                // Maintain standard inpaint params just in case the model supports them alongside CN
+                novitaRequest.mask_base64 = rawMask;
+                novitaRequest.inpainting_fill = 1;
+                novitaRequest.inpaint_full_res = true;
             }
         }
 
