@@ -12,38 +12,40 @@ export async function GET(request: NextRequest) {
     try {
         let buffer: Buffer;
 
+        // 1. Fetch source image
         if (imageUrl.startsWith('data:')) {
             const base64Data = imageUrl.split(',')[1];
             buffer = Buffer.from(base64Data, 'base64');
         } else {
             const response = await fetch(imageUrl);
-            if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+            if (!response.ok) throw new Error(`Source image fetch failed: ${response.status}`);
             const arrayBuffer = await response.arrayBuffer();
             buffer = Buffer.from(arrayBuffer);
         }
 
-        // Convert to PNG using sharp with explicit settings
+        // 2. Convert to PNG using sharp (ensures a valid PNG binary)
         const pngBuffer = await sharp(buffer)
-            .png({ compressionLevel: 9 })
+            .png()
             .toBuffer();
 
-        // Use a simple, compatible filename to avoid OS issues
-        const filename = `img_${Date.now()}.png`;
+        // 3. Set filename as requested (ai_image_...)
+        const filename = `ai_image_${Date.now()}.png`;
 
-        // Create response with very explicit headers to force download behavior
+        // 4. Return as attachment with explicit filename headers
         return new NextResponse(pngBuffer as any, {
             headers: {
-                // 'application/octet-stream' is the safest way to force a file save dialog
                 'Content-Type': 'image/png',
-                'Content-Disposition': `attachment; filename="${filename}"`,
+                // Important: Using double quotes and UTF-8 encoding for broad browser support
+                'Content-Disposition': `attachment; filename="${filename}"; filename*='UTF-8''${filename}`,
                 'Content-Length': pngBuffer.length.toString(),
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0',
+                'X-Content-Type-Options': 'nosniff',
+                'Cache-Control': 'no-cache',
             },
         });
     } catch (error) {
-        console.error('Download proxy error:', error);
-        return NextResponse.json({ error: 'Download failed' }, { status: 500 });
+        console.error('Download Proxy Error:', error);
+        return NextResponse.json({
+            error: error instanceof Error ? error.message : 'Unknown processing error'
+        }, { status: 500 });
     }
 }

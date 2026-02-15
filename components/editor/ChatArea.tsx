@@ -298,12 +298,40 @@ export default function ChatArea() {
     };
 
     // Download an image from a URL as PNG via server-side proxy
-    const handleDownload = (url: string) => {
-        // We use window.location.assign for maximum reliability.
-        // The server-side API (NextResponse) specifies 'Content-Disposition: attachment',
-        // which tells the browser to stay on the same page but start a file download.
-        // This avoids all Blob/CORS/extension issues in the browser.
-        window.location.assign(`/api/download?url=${encodeURIComponent(url)}`);
+    const handleDownload = async (url: string) => {
+        try {
+            console.log('Initiating download for:', url);
+            const proxyUrl = `/api/download?url=${encodeURIComponent(url)}`;
+
+            // 1. Fetch from proxy to catch headers and potential errors
+            const response = await fetch(proxyUrl);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server returned ${response.status}`);
+            }
+
+            // 2. Convert response to a blob and trigger native save dialog
+            // This ensures we can set the filename explicitly in JS as well
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            // Use same filename format as server
+            a.download = `ai_image_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Cleanup
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
+            console.log('Download triggered successfully');
+        } catch (err) {
+            console.error('Download click failed:', err);
+            alert(`ダウンロードに失敗しました: ${err instanceof Error ? err.message : String(err)}`);
+        }
     };
 
     return (
