@@ -4,6 +4,7 @@ import type { AspectRatio, QualityPreset } from '@/lib/types';
 import sharp from 'sharp';
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const NOVITA_BASE = 'https://api.novita.ai/v3/async';
 const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 
@@ -11,25 +12,56 @@ const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 const DEFAULT_NEGATIVE_PROMPT =
     '(worst quality:1.4), (low quality:1.4), (normal quality:1.4), lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, deformed, distorted, disfigured, poorly drawn face, mutation, mutated, ugly, (deformed genitalia:1.5), (bad genitalia:1.5), (extra genitalia:1.3), (deformed vagina:1.5), (deformed penis:1.5), (fused body parts:1.3), (extra limbs:1.3), (missing limbs:1.3), (extra arms:1.3), (extra legs:1.3), (bad proportions:1.3), (gross proportions:1.3), (child:1.5), (childlike:1.5), (loli:1.5), (underage:1.5), (baby face:1.3), (doll face:1.3), (doll-like:1.3), (unnatural eyes:1.3), (huge eyes:1.3), (3d render:1.2), (plastic skin:1.3), (uncanny valley:1.3), (long neck:1.3), (cloned face:1.3), (malformed hands:1.4), (poorly drawn feet:1.4), (extra fingers:1.3)';
 
-// ── Simple Translation Mock/Helper ──
-// Stable Diffusion models only understand English well.
-// We will detect Japanese characters and wrap the logic.
-async function translatePromptIfNeeded(prompt: string): Promise<string> {
-    const hasJapanese = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(prompt);
-    if (!hasJapanese) return prompt;
+// ── Claude Prompt Optimization ──
+// Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
+async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean): Promise<string> {
+    if (!ANTHROPIC_API_KEY) {
+        console.warn('ANTHROPIC_API_KEY not found, using raw prompt');
+        return prompt;
+    }
 
-    console.log(`Translating prompt: ${prompt}`);
-    // In a production app, we would use a real translation API.
-    // Since we want to be proactive without adding extra paid keys now,
-    // we use a simple free-tier translation fetch.
+    console.log(`Optimizing prompt with Claude: ${prompt}`);
+
+    const systemPrompt = `You are a prompt engineering expert for Stable Diffusion.
+Convert the user's input into a highly effective comma-separated list of English tags for image generation.
+Focus on:
+1. Translating to English if needed.
+2. Expanding descriptions for high quality (masterpiece, detailed skin, etc.).
+3. If the user wants to see specific content (e.g. nudity, clothes removal), use direct descriptive tags like "nude", "naked", "cleavage", "bare breasts".
+4. For Inpainting, focus on what should appear in the specific area.
+
+Output ONLY the comma-separated tags, nothing else.`;
+
     try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(prompt)}`);
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20240620',
+                max_tokens: 200,
+                system: systemPrompt,
+                messages: [
+                    { role: 'user', content: `Generation Type: ${generationType}, NSFW Mode: ${isNsfw}\nUser Input: ${prompt}` }
+                ],
+            }),
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            console.error('Claude API Error:', res.status, err);
+            return prompt;
+        }
+
         const data = await res.json();
-        const translated = data?.[0]?.[0]?.[0] || prompt;
-        console.log(`Translated to: ${translated}`);
-        return translated;
+        const optimized = data.content[0].text.trim();
+        console.log(`Optimized prompt: ${optimized}`);
+        return optimized;
     } catch (err) {
-        console.error('Translation failed, using original prompt:', err);
+        console.error('Claude optimization failed:', err);
         return prompt;
     }
 }
@@ -340,11 +372,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ── Translation Step ──
-        const translatedPrompt = await translatePromptIfNeeded(prompt || '');
-
         // Look up model
         const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+
+        // ── Claude Optimization Step ──
+        const optimizedPrompt = await optimizePromptWithClaude(
+            prompt || (inpaintMode ? 'naked, detailed skin' : 'a beautiful image'),
+            generationType,
+            model?.nsfw ?? true
+        );
 
 
 
@@ -395,8 +431,10 @@ export async function POST(request: NextRequest) {
                 ? `${NOVITA_BASE}/img2img`
                 : `${NOVITA_BASE}/txt2img`;
 
-        // Auto-enhance prompt with quality prefix
-        const enhancedPrompt = quality.qualityPrefix + (translatedPrompt || 'a beautiful image');
+        // ── Prompt Assembly ──
+        // For Inpainting, we don't want too many generic quality prefixes that might dilute the specific instruction
+        const promptPrefix = inpaintMode ? '' : quality.qualityPrefix;
+        const enhancedPrompt = promptPrefix + optimizedPrompt;
 
         // Build request body
         const novitaRequest: Record<string, unknown> = {
@@ -413,7 +451,7 @@ export async function POST(request: NextRequest) {
             guidance_scale: quality.guidance,
             // Automatically add NSFW trigger tags if model is NSFW
             ...(model?.nsfw ? {
-                prompt: `(nsfw:1.2), explicit, naked, ${enhancedPrompt}`,
+                prompt: `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`,
             } : {}),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
             // If the model ID contains 'xl' or is a known XL model, we skip SD1.5 LoRAs
@@ -438,7 +476,9 @@ export async function POST(request: NextRequest) {
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
             // High strength allows the AI to actually change the content in the masked area
-            novitaRequest.strength = inpaintMode ? 0.8 : 0.7;
+            // Increased to 0.85-0.9 for Inpaint to allow more radical changes (like removing clothes)
+            const isRadicalChange = optimizedPrompt.toLowerCase().includes('naked') || optimizedPrompt.toLowerCase().includes('nude') || optimizedPrompt.toLowerCase().includes('skin');
+            novitaRequest.strength = inpaintMode ? (isRadicalChange ? 0.9 : 0.85) : 0.7;
 
             if (inpaintMode && maskBase64) {
                 // For the dedicated /inpainting endpoint, Novita expects 'mask_image_base64'
