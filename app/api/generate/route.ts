@@ -41,7 +41,7 @@ Output ONLY the comma-separated tags, nothing else.`;
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20240620',
+                model: 'claude-3-5-sonnet-latest',
                 max_tokens: 200,
                 system: systemPrompt,
                 messages: [
@@ -472,7 +472,6 @@ export async function POST(request: NextRequest) {
                 upscaler: quality.hiresFixUpscaler,
             };
         }
-
         if (isImg2Img) {
             novitaRequest.image_base64 = imageBase64;
             // High strength allows the AI to actually change the content in the masked area
