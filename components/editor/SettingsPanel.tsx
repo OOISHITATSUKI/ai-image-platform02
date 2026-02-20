@@ -92,28 +92,6 @@ export default function SettingsPanel() {
                     </select>
                 </div>
 
-                {/* Quality Preset */}
-                {isImageMode && (
-                    <div className="control-group">
-                        <label>Quality (Ultra Fixed)</label>
-                        <div className="quality-preset-grid" style={{ gridTemplateColumns: '1fr' }}>
-                            {([
-                                { key: 'ultra', icon: '💎', label: 'Ultra High Quality', desc: 'Max detail & sharp focus' },
-                            ] as const).map((preset) => (
-                                <button
-                                    key={preset.key}
-                                    className="quality-preset-btn active"
-                                    onClick={() => updateSettings({ qualityPreset: 'ultra' })}
-                                    style={{ cursor: 'default' }}
-                                >
-                                    <span className="preset-icon">{preset.icon}</span>
-                                    <span className="preset-label">{preset.label}</span>
-                                    <span className="preset-desc">{preset.desc}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
                 {/* Aspect Ratio */}
                 <div className="control-group">
