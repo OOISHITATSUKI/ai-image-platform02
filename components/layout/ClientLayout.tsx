@@ -20,6 +20,38 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     // Prevent hydration mismatch and handle mobile initial state
     useEffect(() => {
         setMounted(true);
+
+        // ── Restore session: invoke /api/auth/me if auth_token exists ──
+        const restoreSession = async () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    useAppStore.setState({
+                        user: data.user,
+                        isAuthenticated: true,
+                        ageVerified: true,
+                    });
+                } else {
+                    // Invalid token -> clean up
+                    localStorage.removeItem('auth_token');
+                    useAppStore.setState({
+                        user: null,
+                        isAuthenticated: false,
+                    });
+                }
+            } catch (err) {
+                console.error('Session restore failed:', err);
+            }
+        };
+
+        restoreSession();
+
         if (window.innerWidth <= 768) {
             // Force sidebar and settings collapsed on mobile mount
             useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });

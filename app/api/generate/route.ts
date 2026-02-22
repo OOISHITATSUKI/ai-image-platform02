@@ -197,10 +197,36 @@ async function pollTaskResult(taskId: string): Promise<{
         const status = data?.task?.status;
 
         if (status === 'TASK_STATUS_SUCCEED') {
-            const images = (data.images || []).map((img: { image_url: string; image_type: string }) => ({
-                url: img.image_url,
-                type: img.image_type,
-            }));
+            const fs = require('fs');
+            const path = require('path');
+            const imagesDir = path.join(process.cwd(), 'data', 'images');
+            if (!fs.existsSync(imagesDir)) {
+                fs.mkdirSync(imagesDir, { recursive: true });
+            }
+
+            const images = [];
+            for (let j = 0; j < (data.images || []).length; j++) {
+                const imgInfo = data.images[j];
+                const imgUrl = imgInfo.image_url;
+                try {
+                    const imgRes = await fetch(imgUrl);
+                    const buf = await imgRes.arrayBuffer();
+                    const filename = `${taskId}_${j}.png`;
+                    fs.writeFileSync(path.join(imagesDir, filename), Buffer.from(buf));
+                    images.push({
+                        url: `/api/images/${filename}`,
+                        type: imgInfo.image_type
+                    });
+                } catch (e) {
+                    console.error('Failed to download image from Novita:', e);
+                    // Fallback to original url
+                    images.push({
+                        url: imgUrl,
+                        type: imgInfo.image_type
+                    });
+                }
+            }
+
             return { success: true, images };
         }
 

@@ -62,9 +62,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { firstGenerationConfirmed } = await req.json();
+        const { firstGenerationConfirmed, username } = await req.json();
+
+        let updated = false;
+
         if (firstGenerationConfirmed !== undefined) {
             user.firstGenerationConfirmed = firstGenerationConfirmed;
+            updated = true;
+        }
+
+        if (username !== undefined && typeof username === 'string' && username.trim().length > 0) {
+            user.username = username.trim();
+            updated = true;
+        }
+
+        if (updated) {
             saveUser(user);
         }
 
