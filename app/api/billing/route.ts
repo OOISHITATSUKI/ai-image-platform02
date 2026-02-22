@@ -46,13 +46,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Rate Limit: 5 actions per user per hour
-    const rl = rateLimit(`${decoded.userId}:billing`, 5, 60 * 60 * 1000);
-    if (!rl.allowed) {
-        return NextResponse.json(
-            { error: 'Too many billing requests. Please wait before trying again.' },
-            { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': rl.resetAt.toString() } }
-        );
+    // ── Bypass for Test Account ──
+    const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
+
+    // Rate Limit: 5 actions per user per hour (skip for test account)
+    if (!isTestAccount) {
+        const rl = rateLimit(`${decoded.userId}:billing`, 5, 60 * 60 * 1000);
+        if (!rl.allowed) {
+            return NextResponse.json(
+                { error: 'Too many billing requests. Please wait before trying again.' },
+                { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': rl.resetAt.toString() } }
+            );
+        }
     }
 
     const body = await req.json();
@@ -64,6 +69,12 @@ export async function POST(req: NextRequest) {
         if (!amount || amount <= 0) {
             return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
         }
+
+        // テストアカウントはクレジット差し引きをスキップ
+        if (isTestAccount) {
+            return NextResponse.json({ balance: user.credits, log: null });
+        }
+
         if (user.credits < amount) {
             return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
         }

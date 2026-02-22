@@ -119,7 +119,7 @@
     "status": "active",
     "emailVerified": true,
     "plan": "free",
-    "credits": 50,
+    "credits": 999999,
     "locale": "en",
     "theme": "dark",
     "otpAttempts": 0,

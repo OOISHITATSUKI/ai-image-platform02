@@ -308,7 +308,9 @@ export default function ChatArea() {
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
         const creditCost = isVideoGeneration ? settings.count * 5 : settings.count * 1;
 
-        if (user && user.credits < creditCost) {
+        const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
+
+        if (!isTestAccount && user && user.credits < creditCost) {
             setGenerationError(`❌ クレジットが不足しています。（必要: ${creditCost}, 保有: ${user.credits}）`);
             return;
         }
@@ -337,7 +339,9 @@ export default function ChatArea() {
         if (fileInputRef.current) fileInputRef.current.value = '';
 
         setIsGenerating(true);
-        deductCredits(creditCost);
+        if (!isTestAccount) {
+            deductCredits(creditCost);
+        }
 
         if (isImageGeneration) {
             try {
