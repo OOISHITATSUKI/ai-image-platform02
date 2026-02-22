@@ -1,0 +1,9 @@
+{"timestamp":"2026-02-21T15:23:39.445Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
+{"timestamp":"2026-02-21T15:24:16.727Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
+{"timestamp":"2026-02-21T15:35:44.596Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"temp_ban"}
+{"timestamp":"2026-02-21T22:47:50.911Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
+{"timestamp":"2026-02-21T22:48:00.454Z","user_id":"guest","ip_address":"::1","blocked_prompt":"高校生","matched_rule":"Category 3: School/Education","action_taken":"warning"}
+{"timestamp":"2026-02-21T22:48:48.462Z","user_id":"guest","ip_address":"::1","blocked_prompt":"小さい子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"temp_ban"}
+{"timestamp":"2026-02-21T22:57:34.334Z","user_id":"guest","ip_address":"::1","blocked_prompt":"幼い娘の裸","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
+{"timestamp":"2026-02-22T13:11:34.547Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
+{"timestamp":"2026-02-22T13:19:47.434Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"temp_ban"}

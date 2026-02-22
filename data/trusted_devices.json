@@ -1,0 +1,24 @@
+{
+  "a634eb62-293d-493a-a2eb-39a988d0fd71": {
+    "id": "a634eb62-293d-493a-a2eb-39a988d0fd71",
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "deviceToken": "09df1b5f-aa7d-4f00-8abc-43c2f766c772",
+    "deviceName": "Chrome / Mac",
+    "ipAddress": "::1",
+    "countryCode": "XX",
+    "expiresAt": 1779541274873,
+    "lastUsedAt": 1771796844142,
+    "createdAt": 1771765274877
+  },
+  "0097511a-ff68-4870-8644-8b74e37fbcbb": {
+    "id": "0097511a-ff68-4870-8644-8b74e37fbcbb",
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "deviceToken": "2f83fc1b-96ce-4ed4-84f4-53d09479fe17",
+    "deviceName": "Safari / Mac",
+    "ipAddress": "::1",
+    "countryCode": "XX",
+    "expiresAt": 1779570947116,
+    "lastUsedAt": 1771796412852,
+    "createdAt": 1771794947119
+  }
+}

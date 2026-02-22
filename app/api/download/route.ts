@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         const filename = `ai_image_${Date.now()}.png`;
 
         // Standard Response with simple headers for maximum compatibility
-        return new Response(pngBuffer, {
+        return new Response(new Uint8Array(pngBuffer), {
             headers: {
                 'Content-Type': 'image/png',
                 'Content-Disposition': `attachment; filename="${filename}"`,

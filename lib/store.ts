@@ -14,6 +14,8 @@ import type {
     MediaFilter,
     AspectRatio,
     Resolution,
+    TagSettings,
+    FetishTag,
 } from './types';
 
 // ============================================================
@@ -34,6 +36,7 @@ interface AppState {
     user: User | null;
     isAuthenticated: boolean;
     setUser: (user: User | null) => void;
+    logout: () => void;
 
     // ----- Chats -----
     chats: Chat[];
@@ -74,14 +77,26 @@ interface AppState {
     isGenerating: boolean;
     setIsGenerating: (generating: boolean) => void;
 
+    // ----- Tag Settings -----
+    tagSettings: TagSettings;
+    updateTagSettings: (partial: Partial<TagSettings>) => void;
+    toggleFetishTag: (tag: FetishTag) => void;
+    resetTagSettings: () => void;
+
     // ----- Credits -----
     deductCredits: (amount: number) => void;
 }
 
+const DEFAULT_TAG_SETTINGS: TagSettings = {
+    breastSize: 50,
+    photorealism: 'photorealistic',
+    fetish: [],
+};
+
 const DEFAULT_SETTINGS: GenerationSettings = {
     generationType: 'txt2img',
     model: 'novita-realistic-vision-6',
-    aspectRatio: '1:1',
+    aspectRatio: '9:16',
     resolution: '1024',
     count: 1,
     duration: 5,
@@ -102,17 +117,13 @@ export const useAppStore = create<AppState>()(
             setLocale: (locale) => set({ locale }),
 
             // ----- User -----
-            user: {
-                id: 'local-user',
-                email: 'user@example.com',
-                username: 'Designer',
-                plan: 'free',
-                credits: 50,
-                locale: 'ja',
-                theme: 'dark',
-            },
-            isAuthenticated: true,
+            user: null,
+            isAuthenticated: false,
             setUser: (user) => set({ user, isAuthenticated: !!user }),
+            logout: () => {
+                localStorage.removeItem('auth_token');
+                set({ user: null, isAuthenticated: false, ageVerified: false });
+            },
 
             // ----- Chats -----
             chats: [],
@@ -214,6 +225,21 @@ export const useAppStore = create<AppState>()(
             isGenerating: false,
             setIsGenerating: (generating) => set({ isGenerating: generating }),
 
+            // ----- Tag Settings -----
+            tagSettings: DEFAULT_TAG_SETTINGS,
+            updateTagSettings: (partial) =>
+                set((s) => ({ tagSettings: { ...s.tagSettings, ...partial } })),
+            toggleFetishTag: (tag) =>
+                set((s) => ({
+                    tagSettings: {
+                        ...s.tagSettings,
+                        fetish: s.tagSettings.fetish.includes(tag)
+                            ? s.tagSettings.fetish.filter((t) => t !== tag)
+                            : [...s.tagSettings.fetish, tag],
+                    },
+                })),
+            resetTagSettings: () => set({ tagSettings: DEFAULT_TAG_SETTINGS }),
+
             // ----- Credits -----
             deductCredits: (amount) =>
                 set((s) => ({
@@ -221,7 +247,7 @@ export const useAppStore = create<AppState>()(
                 })),
         }),
         {
-            name: 'videogen-storage',
+            name: 'videogen-storage-v3', // Bumped version for auth system
             partialize: (state) => {
                 // Strip large base64 data URIs and blob URLs from chat messages
                 // before persisting to localStorage (they can be several MB each
@@ -247,6 +273,7 @@ export const useAppStore = create<AppState>()(
                     user: state.user,
                     isAuthenticated: state.isAuthenticated,
                     settings: state.settings,
+                    tagSettings: state.tagSettings,
                     ageVerified: state.ageVerified,
                     sidebarCollapsed: state.sidebarCollapsed,
                     settingsPanelVisible: state.settingsPanelVisible,

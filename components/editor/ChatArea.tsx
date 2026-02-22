@@ -33,6 +33,7 @@ export default function ChatArea() {
         user,
         deductCredits,
         updateSettings,
+        tagSettings,
     } = useAppStore();
 
     const { t } = useTranslation();
@@ -44,7 +45,13 @@ export default function ChatArea() {
     const [showInpaintModal, setShowInpaintModal] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+    // Security: Img2Img Consent
+    const [img2imgConsent, setImg2imgConsent] = useState<boolean[]>([false, false, false, false, false]);
+    const allConsentChecked = img2imgConsent.every(Boolean);
+
     const [isDragging, setIsDragging] = useState(false);
+    const [draggedThumbIndex, setDraggedThumbIndex] = useState<number | null>(null);
     const dragCounter = useRef(0);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -284,6 +291,12 @@ export default function ChatArea() {
         if (raw.includes('INVALID_IMAGE_FORMAT')) {
             return '❌ この画像形式には対応していません。\n対応形式：JPG、PNG\n対処法：画像をJPGまたはPNGに変換してから再度アップロードしてください。';
         }
+        if (raw.includes('Account temporarily suspended for repeated violations (24h).')) {
+            return t('chat.error_temp_ban');
+        }
+        if (raw.includes('Account permanently banned')) {
+            return t('chat.error_permanent_ban');
+        }
         return raw;
     };
 
@@ -320,6 +333,7 @@ export default function ChatArea() {
         const currentUploads = [...uploads];
         setInputText('');
         setUploads([]);
+        setImg2imgConsent([false, false, false, false, false]); // Reset consent on submit
         if (fileInputRef.current) fileInputRef.current.value = '';
 
         setIsGenerating(true);
@@ -338,10 +352,15 @@ export default function ChatArea() {
                         );
                     }
                 }
+                const token = window.localStorage.getItem('auth_token');
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
 
                 const res = await fetch('/api/generate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({
                         prompt: userPrompt,
                         modelId: settings.model,
@@ -355,6 +374,7 @@ export default function ChatArea() {
                         faceSwapMode,
                         inpaintMode,
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
+                        tagSettings,
                     }),
                 });
 
@@ -386,11 +406,30 @@ export default function ChatArea() {
                 }
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-                const friendly = friendlyError(errorMsg);
+                const i18nKeys = [
+                    'error_safety_violation',
+                    'error_temp_ban',
+                    'error_permanent_ban',
+                    'error_access_denied',
+                    'error_rate_limit',
+                    'error_free_credits_expired',
+                    'error_free_credits_feature'
+                ];
+                const isSafetyErrorCode = i18nKeys.some(k => errorMsg.includes(k));
+
+                let friendly = friendlyError(errorMsg);
+                if (errorMsg.startsWith('error_access_denied')) {
+                    const reason = errorMsg.replace('error_access_denied', '').trim();
+                    friendly = t('errors.error_access_denied') + reason;
+                } else if (i18nKeys.includes(errorMsg)) {
+                    // Map to the translation key
+                    friendly = t(`errors.${errorMsg}`);
+                }
+
                 setGenerationError(friendly);
                 addMessage(chatId, {
                     role: 'assistant',
-                    content: `❌ Generation failed: ${friendly}`,
+                    content: `❌ ${isSafetyErrorCode || errorMsg.includes('INVALID_IMAGE_FORMAT') ? '' : 'Generation failed: '}${friendly}`,
                     isFavorite: false,
                 });
             }
@@ -426,6 +465,66 @@ export default function ChatArea() {
             setFaceSwapMode(false);
             setShowInpaintModal(true);
         }
+    };
+
+    // Action: start Inpaint from a generated image
+    const handleActionInpaint = async (imgUrl: string) => {
+        // Switch to img2img mode to enable attach/inpaint tools
+        updateSettings({ generationType: 'img2img' });
+        const success = await reUploadImage(imgUrl);
+        if (success) {
+            setInpaintMode(true);
+            setFaceSwapMode(false);
+            setShowInpaintModal(true);
+        }
+    };
+
+    // Action: start Face Swap from a generated image
+    const handleActionFaceSwap = async (imgUrl: string) => {
+        updateSettings({ generationType: 'img2img' });
+        const success = await reUploadImage(imgUrl);
+        if (success) {
+            setFaceSwapMode(true);
+            setInpaintMode(false);
+        }
+    };
+
+    // Swap uploaded images (for Face to Face ordering)
+    const handleSwapUploads = () => {
+        if (uploads.length < 2) return;
+        setUploads((prev) => {
+            const swapped = [prev[1], prev[0], ...prev.slice(2)];
+            return swapped.map((slot, i) => ({ ...slot, label: `画像${i + 1}` }));
+        });
+    };
+
+    // Drag & Drop for thumbnail reordering (Face Swap)
+    const handleThumbDragStart = (index: number) => {
+        setDraggedThumbIndex(index);
+    };
+
+    const handleThumbDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleThumbDrop = (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        if (draggedThumbIndex === null || draggedThumbIndex === dropIndex) {
+            setDraggedThumbIndex(null);
+            return;
+        }
+        setUploads((prev) => {
+            const newUploads = [...prev];
+            const [dragged] = newUploads.splice(draggedThumbIndex, 1);
+            newUploads.splice(dropIndex, 0, dragged);
+            return newUploads.map((slot, i) => ({ ...slot, label: `画像${i + 1}` }));
+        });
+        setDraggedThumbIndex(null);
+    };
+
+    const handleThumbDragEnd = () => {
+        setDraggedThumbIndex(null);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -537,7 +636,11 @@ export default function ChatArea() {
                                         <img
                                             src={msg.imageUrl}
                                             alt="Generated content"
-                                            style={{ maxWidth: msg.role === 'user' ? 200 : 400, cursor: 'pointer' }}
+                                            style={{
+                                                maxWidth: msg.role === 'user' ? 200 : '100%',
+                                                maxHeight: msg.role === 'user' ? 200 : 600,
+                                                cursor: 'pointer',
+                                            }}
                                             onClick={() => setLightboxUrl(msg.imageUrl!)}
                                         />
                                         <button
@@ -562,7 +665,6 @@ export default function ChatArea() {
                             </div>
                             <div className="message-meta">
                                 <span>{formatTime(msg.timestamp)}</span>
-                                {msg.model && <span>• {msg.model}</span>}
                                 {msg.generationType && <span>• {msg.generationType}</span>}
                             </div>
                             {msg.role === 'assistant' && (
@@ -580,12 +682,20 @@ export default function ChatArea() {
                                         🔄 {t('actions.regenerate')}
                                     </button>
                                     {msg.imageUrl && (
-                                        <button
-                                            className="msg-action-btn"
-                                            onClick={() => handleActionEdit(msg.imageUrl!)}
-                                        >
-                                            ✏️ {t('actions.edit')}
-                                        </button>
+                                        <>
+                                            <button
+                                                className="msg-action-btn"
+                                                onClick={() => handleActionInpaint(msg.imageUrl!)}
+                                            >
+                                                🖌 {t('chat.actionInpaint')}
+                                            </button>
+                                            <button
+                                                className="msg-action-btn"
+                                                onClick={() => handleActionFaceSwap(msg.imageUrl!)}
+                                            >
+                                                🔄 {t('chat.actionFaceSwap')}
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             )}
@@ -630,23 +740,57 @@ export default function ChatArea() {
                     {/* BUG-02: Multi-image upload thumbnails */}
                     {uploads.length > 0 && (
                         <div className="upload-thumbnails">
-                            {uploads.map((slot, i) => (
-                                <div key={i} className="upload-thumb" onClick={() => handleThumbClick(slot.label)}>
-                                    <div className="thumb-img-container">
-                                        <img src={slot.previewUrl} alt={slot.label} />
-                                        {slot.maskBase64 && (
-                                            <img src={slot.maskBase64} alt="Mask" className="thumb-mask-overlay" />
-                                        )}
-                                    </div>
-                                    <span className="upload-thumb-label">{slot.label}</span>
-                                    <button
-                                        className="upload-thumb-remove"
-                                        onClick={(e) => { e.stopPropagation(); handleRemoveUpload(i); }}
+                            {uploads.map((slot, i) => {
+                                const isFaceSwap = faceSwapMode;
+                                const roleLabel = isFaceSwap
+                                    ? (i === 0 ? `📷 ${t('chat.faceSwapBody')}` : i === 1 ? `🧑 ${t('chat.faceSwapFace')}` : slot.label)
+                                    : slot.label;
+                                const borderColor = isFaceSwap
+                                    ? (i === 0 ? '#3b82f6' : i === 1 ? '#22c55e' : 'var(--border)')
+                                    : 'var(--border)';
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`upload-thumb ${draggedThumbIndex === i ? 'dragging' : ''}`}
+                                        onClick={() => handleThumbClick(slot.label)}
+                                        draggable={isFaceSwap}
+                                        onDragStart={() => handleThumbDragStart(i)}
+                                        onDragOver={(e) => handleThumbDragOver(e, i)}
+                                        onDrop={(e) => handleThumbDrop(e, i)}
+                                        onDragEnd={handleThumbDragEnd}
+                                        style={{
+                                            borderColor,
+                                            borderWidth: isFaceSwap ? '2px' : '1px',
+                                            cursor: isFaceSwap ? 'grab' : 'pointer',
+                                            opacity: draggedThumbIndex === i ? 0.5 : 1,
+                                            transition: 'all 0.2s ease',
+                                        }}
                                     >
-                                        ✕
-                                    </button>
-                                </div>
-                            ))}
+                                        <div className="thumb-img-container">
+                                            <img src={slot.previewUrl} alt={roleLabel} />
+                                            {slot.maskBase64 && (
+                                                <img src={slot.maskBase64} alt="Mask" className="thumb-mask-overlay" />
+                                            )}
+                                        </div>
+                                        <span
+                                            className="upload-thumb-label"
+                                            style={{
+                                                background: isFaceSwap
+                                                    ? (i === 0 ? 'rgba(59, 130, 246, 0.85)' : i === 1 ? 'rgba(34, 197, 94, 0.85)' : 'rgba(0,0,0,0.7)')
+                                                    : 'rgba(0,0,0,0.7)',
+                                            }}
+                                        >
+                                            {roleLabel}
+                                        </span>
+                                        <button
+                                            className="upload-thumb-remove"
+                                            onClick={(e) => { e.stopPropagation(); handleRemoveUpload(i); }}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -686,6 +830,15 @@ export default function ChatArea() {
                             >
                                 🖌 {t('chat.inpaint')}
                             </button>
+                            {faceSwapMode && uploads.length >= 2 && (
+                                <button
+                                    className="input-tool-btn"
+                                    onClick={handleSwapUploads}
+                                    title={t('chat.swapImages')}
+                                >
+                                    ↔ {t('chat.swapImages')}
+                                </button>
+                            )}
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -696,6 +849,103 @@ export default function ChatArea() {
                             />
                         </div>
                     )}
+
+                    {/* Face to Face guide */}
+                    {faceSwapMode && (
+                        <div className="face-swap-guide">
+                            {uploads.length < 2
+                                ? t('chat.faceSwapNoImage')
+                                : t('chat.faceSwapGuide')
+                            }
+                        </div>
+                    )}
+
+                    {/* Security: Mandatory Img2Img Consent Checkboxes */}
+                    {(() => {
+                        let shouldShowConsent = false;
+                        if (uploads.length > 0) {
+                            if (faceSwapMode) {
+                                shouldShowConsent = uploads.length >= 2;
+                            } else if (inpaintMode) {
+                                shouldShowConsent = !!uploads[0]?.maskBase64;
+                            } else {
+                                shouldShowConsent = true; // Standard img2img
+                            }
+                        }
+
+                        return shouldShowConsent ? (
+                            <div className="img2img-consent-block" style={{
+                                padding: '16px',
+                                background: 'rgba(255, 170, 0, 0.05)',
+                                border: '1px solid rgba(255, 170, 0, 0.2)',
+                                borderRadius: '12px',
+                                marginBottom: '16px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '12px'
+                            }}>
+                                <div style={{
+                                    fontSize: '0.95rem',
+                                    color: 'var(--accent-primary)',
+                                    fontWeight: 600,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    borderBottom: '1px solid rgba(255,170,0,0.1)',
+                                    paddingBottom: '8px'
+                                }}>
+                                    {t('img2imgConsent.title')}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                                    {[
+                                        t('img2imgConsent.term0'),
+                                        t('img2imgConsent.term1'),
+                                        t('img2imgConsent.term2'),
+                                        t('img2imgConsent.term3'),
+                                        t('img2imgConsent.term4')
+                                    ].map((text, idx) => (
+                                        <label key={idx} style={{
+                                            display: 'flex',
+                                            alignItems: 'flex-start',
+                                            gap: '12px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            lineHeight: '1.4',
+                                            padding: '4px 8px',
+                                            borderRadius: '6px',
+                                            transition: 'background 0.2s ease',
+                                        }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={img2imgConsent[idx]}
+                                                onChange={(e) => {
+                                                    const newConsent = [...img2imgConsent];
+                                                    newConsent[idx] = e.target.checked;
+                                                    setImg2imgConsent(newConsent);
+                                                }}
+                                                style={{
+                                                    marginTop: '2px',
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    accentColor: 'var(--accent-primary)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            />
+                                            <span style={{
+                                                color: img2imgConsent[idx] ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                                transition: 'color 0.2s ease'
+                                            }}>
+                                                {text}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null;
+                    })()}
 
                     <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
                         <textarea
@@ -719,7 +969,7 @@ export default function ChatArea() {
                         <button
                             type="submit"
                             className={`send-btn ${isGenerating ? 'generating' : ''}`}
-                            disabled={isGenerating || (showAttach && uploads.length === 0) || (!inputText.trim() && uploads.length === 0)}
+                            disabled={isGenerating || (showAttach && uploads.length === 0) || (!inputText.trim() && uploads.length === 0) || (uploads.length > 0 && !allConsentChecked)}
                         >
                             {isGenerating ? (
                                 <span className="send-btn-spinner" />
@@ -732,46 +982,50 @@ export default function ChatArea() {
             </div>
 
             {/* Lightbox Overlay */}
-            {lightboxUrl && (
-                <div className="lightbox-overlay" onClick={() => setLightboxUrl(null)}>
-                    <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-                        <img src={lightboxUrl} alt="Full size" />
-                        <div className="lightbox-actions">
-                            <button
-                                className="lightbox-btn lightbox-download"
-                                onClick={() => handleDownload(lightboxUrl)}
-                            >
-                                ⬇ Download
-                            </button>
-                            <button
-                                className="lightbox-btn lightbox-close"
-                                onClick={() => setLightboxUrl(null)}
-                            >
-                                ✕ Close
-                            </button>
+            {
+                lightboxUrl && (
+                    <div className="lightbox-overlay" onClick={() => setLightboxUrl(null)}>
+                        <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+                            <img src={lightboxUrl} alt="Full size" />
+                            <div className="lightbox-actions">
+                                <button
+                                    className="lightbox-btn lightbox-download"
+                                    onClick={() => handleDownload(lightboxUrl)}
+                                >
+                                    ⬇ Download
+                                </button>
+                                <button
+                                    className="lightbox-btn lightbox-close"
+                                    onClick={() => setLightboxUrl(null)}
+                                >
+                                    ✕ Close
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Inpaint Modal */}
-            {showInpaintModal && uploads.length > 0 && (
-                <InpaintModal
-                    imageUrl={uploads[0].previewUrl}
-                    onClose={() => {
-                        setShowInpaintModal(false);
-                        if (!uploads[0].maskBase64) setInpaintMode(false);
-                    }}
-                    onSave={(maskBase64) => {
-                        const newUploads = [...uploads];
-                        newUploads[0] = { ...newUploads[0], maskBase64 };
-                        setUploads(newUploads);
-                        setShowInpaintModal(false);
-                        setInpaintMode(true);
-                    }}
-                />
-            )}
-        </section>
+            {
+                showInpaintModal && uploads.length > 0 && (
+                    <InpaintModal
+                        imageUrl={uploads[0].previewUrl}
+                        onClose={() => {
+                            setShowInpaintModal(false);
+                            if (!uploads[0].maskBase64) setInpaintMode(false);
+                        }}
+                        onSave={(maskBase64) => {
+                            const newUploads = [...uploads];
+                            newUploads[0] = { ...newUploads[0], maskBase64 };
+                            setUploads(newUploads);
+                            setShowInpaintModal(false);
+                            setInpaintMode(true);
+                        }}
+                    />
+                )
+            }
+        </section >
     );
 }
 

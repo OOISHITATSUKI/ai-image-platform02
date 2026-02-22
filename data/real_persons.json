@@ -1,0 +1,754 @@
+{
+  "blocked_persons": [
+    {
+      "id": 125,
+      "name_en": "Matsumoto Karen",
+      "name_ja": "松本かれん",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 124,
+      "name_en": "Sakurai Yui",
+      "name_ja": "櫻井優衣",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 101,
+      "name_en": "Elon Musk",
+      "name_ja": "イーロン・マスク",
+      "category": "public_figure"
+    },
+    {
+      "id": 102,
+      "name_en": "Taylor Swift",
+      "name_ja": "テイラー・スウィフト",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 103,
+      "name_en": "Joe Biden",
+      "name_ja": "ジョー・バイデン",
+      "category": "politician"
+    },
+    {
+      "id": 104,
+      "name_en": "Donald Trump",
+      "name_ja": "ドナルド・トランプ",
+      "category": "politician"
+    },
+    {
+      "id": 105,
+      "name_en": "Barack Obama",
+      "name_ja": "バラク・オバマ",
+      "category": "politician"
+    },
+    {
+      "id": 106,
+      "name_en": "Emma Watson",
+      "name_ja": "エマ・ワトソン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 107,
+      "name_en": "Billie Eilish",
+      "name_ja": "ビリー・アイリッシュ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 108,
+      "name_en": "Ariana Grande",
+      "name_ja": "アリアナ・グランデ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 109,
+      "name_en": "Gigi Hadid",
+      "name_ja": "ジジ・ハディッド",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 110,
+      "name_en": "Kendall Jenner",
+      "name_ja": "ケンダル・ジェンナー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 111,
+      "name_en": "Kylie Jenner",
+      "name_ja": "カイリー・ジェンナー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 112,
+      "name_en": "Selena Gomez",
+      "name_ja": "セレーナ・ゴメス",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 113,
+      "name_en": "Tom Cruise",
+      "name_ja": "トム・クルーズ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 114,
+      "name_en": "Brad Pitt",
+      "name_ja": "ブラッド・ピット",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 115,
+      "name_en": "Leonardo DiCaprio",
+      "name_ja": "レオナルド・ディカプリオ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 116,
+      "name_en": "MrBeast",
+      "name_ja": "ミスタービースト",
+      "category": "internet_personality"
+    },
+    {
+      "id": 117,
+      "name_en": "PewDiePie",
+      "name_ja": "ピューディパイ",
+      "category": "internet_personality"
+    },
+    {
+      "id": 118,
+      "name_en": "Ishihara Satomi",
+      "name_ja": "石原さとみ",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 119,
+      "name_en": "Aragaki Yui",
+      "name_ja": "新垣結衣",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 120,
+      "name_en": "Hashimoto Kanna",
+      "name_ja": "橋本環奈",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 121,
+      "name_en": "Hirose Suzu",
+      "name_ja": "広瀬すず",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 122,
+      "name_en": "Nagasawa Masami",
+      "name_ja": "長澤まさみ",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 123,
+      "name_en": "Honda Tsubasa",
+      "name_ja": "本田翼",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 1,
+      "name_en": "Taylor Swift",
+      "name_ja": "テイラー・スウィフト",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 2,
+      "name_en": "Ariana Grande",
+      "name_ja": "アリアナ・グランデ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 3,
+      "name_en": "Billie Eilish",
+      "name_ja": "ビリー・アイリッシュ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 4,
+      "name_en": "Selena Gomez",
+      "name_ja": "セレーナ・ゴメス",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 5,
+      "name_en": "Dua Lipa",
+      "name_ja": "デュア・リパ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 6,
+      "name_en": "Beyonce",
+      "name_ja": "ビヨンセ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 7,
+      "name_en": "Rihanna",
+      "name_ja": "リアーナ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 8,
+      "name_en": "Lady Gaga",
+      "name_ja": "レディー・ガガ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 9,
+      "name_en": "Zendaya",
+      "name_ja": "ゼンデイヤ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 10,
+      "name_en": "Scarlett Johansson",
+      "name_ja": "スカーレット・ヨハンソン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 11,
+      "name_en": "Emma Watson",
+      "name_ja": "エマ・ワトソン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 12,
+      "name_en": "Margot Robbie",
+      "name_ja": "マーゴット・ロビー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 13,
+      "name_en": "Jennifer Lawrence",
+      "name_ja": "ジェニファー・ローレンス",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 14,
+      "name_en": "Gal Gadot",
+      "name_ja": "ガル・ガドット",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 15,
+      "name_en": "Sydney Sweeney",
+      "name_ja": "シドニー・スウィーニー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 16,
+      "name_en": "Ana de Armas",
+      "name_ja": "アナ・デ・アルマス",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 17,
+      "name_en": "Florence Pugh",
+      "name_ja": "フローレンス・ピュー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 18,
+      "name_en": "Jenna Ortega",
+      "name_ja": "ジェナ・オルテガ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 19,
+      "name_en": "Elizabeth Olsen",
+      "name_ja": "エリザベス・オルセン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 20,
+      "name_en": "Alexandra Daddario",
+      "name_ja": "アレクサンドラ・ダダリオ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 21,
+      "name_en": "Natalie Portman",
+      "name_ja": "ナタリー・ポートマン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 22,
+      "name_en": "Angelina Jolie",
+      "name_ja": "アンジェリーナ・ジョリー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 23,
+      "name_en": "Emma Stone",
+      "name_ja": "エマ・ストーン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 24,
+      "name_en": "Megan Fox",
+      "name_ja": "ミーガン・フォックス",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 25,
+      "name_en": "Kim Kardashian",
+      "name_ja": "キム・カーダシアン",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 26,
+      "name_en": "Kylie Jenner",
+      "name_ja": "カイリー・ジェンナー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 27,
+      "name_en": "Kendall Jenner",
+      "name_ja": "ケンダル・ジェンナー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 28,
+      "name_en": "Hailey Bieber",
+      "name_ja": "ヘイリー・ビーバー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 29,
+      "name_en": "Olivia Rodrigo",
+      "name_ja": "オリヴィア・ロドリゴ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 30,
+      "name_en": "Madison Beer",
+      "name_ja": "マディソン・ビアー",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 31,
+      "name_en": "Addison Rae",
+      "name_ja": "アディソン・レイ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 32,
+      "name_en": "Charli D'Amelio",
+      "name_ja": "チャーリー・ダミリオ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 33,
+      "name_en": "Pokimane",
+      "name_ja": "ポキマネ",
+      "category": "internet_personality"
+    },
+    {
+      "id": 34,
+      "name_en": "Valkyrae",
+      "name_ja": "ヴァルキレイ",
+      "category": "internet_personality"
+    },
+    {
+      "id": 35,
+      "name_en": "Nicki Minaj",
+      "name_ja": "ニッキー・ミナージュ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 36,
+      "name_en": "Cardi B",
+      "name_ja": "カーディ・B",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 37,
+      "name_en": "Doja Cat",
+      "name_ja": "ドージャ・キャット",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 38,
+      "name_en": "Sabrina Carpenter",
+      "name_ja": "サブリナ・カーペンター",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 39,
+      "name_en": "Camila Cabello",
+      "name_ja": "カミラ・カベロ",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 40,
+      "name_en": "Hailee Steinfeld",
+      "name_ja": "ヘイリー・スタインフェルド",
+      "category": "international_celebrity"
+    },
+    {
+      "id": 41,
+      "name_en": "BLACKPINK",
+      "name_ja": "ブラックピンク",
+      "category": "kpop"
+    },
+    {
+      "id": 42,
+      "name_en": "Jennie Kim",
+      "name_ja": "ジェニー",
+      "category": "kpop"
+    },
+    {
+      "id": 43,
+      "name_en": "Lisa Manoban",
+      "name_ja": "リサ",
+      "category": "kpop"
+    },
+    {
+      "id": 44,
+      "name_en": "Jisoo",
+      "name_ja": "ジス",
+      "category": "kpop"
+    },
+    {
+      "id": 45,
+      "name_en": "Rose",
+      "name_ja": "ロゼ",
+      "category": "kpop"
+    },
+    {
+      "id": 46,
+      "name_en": "IU",
+      "name_ja": "アイユー",
+      "category": "kpop"
+    },
+    {
+      "id": 47,
+      "name_en": "Twice",
+      "name_ja": "トゥワイス",
+      "category": "kpop"
+    },
+    {
+      "id": 48,
+      "name_en": "Jungkook",
+      "name_ja": "ジョングク",
+      "category": "kpop"
+    },
+    {
+      "id": 49,
+      "name_en": "V Taehyung",
+      "name_ja": "テテ",
+      "category": "kpop"
+    },
+    {
+      "id": 50,
+      "name_en": "BTS",
+      "name_ja": "防弾少年団",
+      "category": "kpop"
+    },
+    {
+      "id": 51,
+      "name_en": "Hashimoto Kanna",
+      "name_ja": "橋本環奈",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 52,
+      "name_en": "Saito Asuka",
+      "name_ja": "齋藤飛鳥",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 53,
+      "name_en": "Endo Sakura",
+      "name_ja": "遠藤さくら",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 54,
+      "name_en": "Kaki Haruka",
+      "name_ja": "賀喜遥香",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 55,
+      "name_en": "Ikuta Erika",
+      "name_ja": "生田絵梨花",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 56,
+      "name_en": "Shiraishi Mai",
+      "name_ja": "白石麻衣",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 57,
+      "name_en": "Nishino Nanase",
+      "name_ja": "西野七瀬",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 58,
+      "name_en": "Hirate Yurina",
+      "name_ja": "平手友梨奈",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 59,
+      "name_en": "Nagahama Neru",
+      "name_ja": "長濱ねる",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 60,
+      "name_en": "Imaizumi Yui",
+      "name_ja": "今泉佑唯",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 61,
+      "name_en": "Aragaki Yui",
+      "name_ja": "新垣結衣",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 62,
+      "name_en": "Ishihara Satomi",
+      "name_ja": "石原さとみ",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 63,
+      "name_en": "Kitagawa Keiko",
+      "name_ja": "北川景子",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 64,
+      "name_en": "Satoh Takeru",
+      "name_ja": "佐藤健",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 65,
+      "name_en": "Suda Masaki",
+      "name_ja": "菅田将暉",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 66,
+      "name_en": "Yokohama Ryusei",
+      "name_ja": "横浜流星",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 67,
+      "name_en": "Yoshioka Riho",
+      "name_ja": "吉岡里帆",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 68,
+      "name_en": "Fukada Kyoko",
+      "name_ja": "深田恭子",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 69,
+      "name_en": "Toda Erika",
+      "name_ja": "戸田恵梨香",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 70,
+      "name_en": "Honda Tsubasa",
+      "name_ja": "本田翼",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 71,
+      "name_en": "Hirose Suzu",
+      "name_ja": "広瀬すず",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 72,
+      "name_en": "Hirose Alice",
+      "name_ja": "広瀬アリス",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 73,
+      "name_en": "Arimura Kasumi",
+      "name_ja": "有村架純",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 74,
+      "name_en": "Suzu Yamanouchi",
+      "name_ja": "山之内すず",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 75,
+      "name_en": "Inoue Mao",
+      "name_ja": "井上真央",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 76,
+      "name_en": "Minami Hamabe",
+      "name_ja": "浜辺美波",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 77,
+      "name_en": "Nana Mori",
+      "name_ja": "森七菜",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 78,
+      "name_en": "Mone Kamishiraishi",
+      "name_ja": "上白石萌音",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 79,
+      "name_en": "Hana Kamishiraishi",
+      "name_ja": "上白石萌歌",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 80,
+      "name_en": "Nagano Mei",
+      "name_ja": "永野芽郁",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 81,
+      "name_en": "Imada Mio",
+      "name_ja": "今田美桜",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 82,
+      "name_en": "Kawaguchi Haruna",
+      "name_ja": "川口春奈",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 83,
+      "name_en": "Matsumura Sayuri",
+      "name_ja": "松村沙友理",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 84,
+      "name_en": "Yamamoto Sayaka",
+      "name_ja": "山本彩",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 85,
+      "name_en": "Kojima Haruna",
+      "name_ja": "小嶋陽菜",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 86,
+      "name_en": "Maeda Atsuko",
+      "name_ja": "前田敦子",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 87,
+      "name_en": "Oshima Yuko",
+      "name_ja": "大島優子",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 88,
+      "name_en": "Watanabe Mayu",
+      "name_ja": "渡辺麻友",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 89,
+      "name_en": "Sasaki Nozomi",
+      "name_ja": "佐々木希",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 90,
+      "name_en": "Sawajiri Erika",
+      "name_ja": "沢尻エリカ",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 91,
+      "name_en": "Naomi Osaka",
+      "name_ja": "大坂なおみ",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 92,
+      "name_en": "Ikee Rikako",
+      "name_ja": "池江璃花子",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 93,
+      "name_en": "Ohtani Shohei",
+      "name_ja": "大谷翔平",
+      "category": "japanese_celebrity"
+    },
+    {
+      "id": 94,
+      "name_en": "Elon Musk",
+      "name_ja": "イーロン・マスク",
+      "category": "public_figure"
+    },
+    {
+      "id": 95,
+      "name_en": "Donald Trump",
+      "name_ja": "ドナルド・トランプ",
+      "category": "politician"
+    },
+    {
+      "id": 96,
+      "name_en": "Barack Obama",
+      "name_ja": "バラク・オバマ",
+      "category": "politician"
+    },
+    {
+      "id": 97,
+      "name_en": "Joe Biden",
+      "name_ja": "ジョー・バイデン",
+      "category": "politician"
+    },
+    {
+      "id": 98,
+      "name_en": "Kishida Fumio",
+      "name_ja": "岸田文雄",
+      "category": "politician"
+    },
+    {
+      "id": 99,
+      "name_en": "Emperor Naruhito",
+      "name_ja": "天皇陛下",
+      "category": "royalty"
+    },
+    {
+      "id": 100,
+      "name_en": "Princess Aiko",
+      "name_ja": "愛子様",
+      "category": "royalty"
+    }
+  ]
+}

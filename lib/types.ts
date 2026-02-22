@@ -58,9 +58,33 @@ export interface GenerationSettings {
   referenceImageUrl?: string;
   faceSwapImageUrl?: string;
   promptTemplate?: string;
+  tagSettings?: TagSettings;
+}
+
+// ----- Tag-based Parameter Types -----
+
+export type AgeTag = '20s' | '30s';
+export type PeopleCountTag = '1' | '2' | 'multiple';
+export type EthnicityTag = 'asian' | 'european' | 'american' | 'southeast_asian' | 'latina' | 'african';
+export type PhotorealismTag = 'photorealistic' | 'realistic';
+export type CompositionTag = 'full_body' | 'waist_up' | 'bust' | 'face_closeup';
+export type BreastPositionTag = 'cleavage' | 'asymmetric' | 'natural' | 'pushed_together';
+export type FetishTag = 'fellatio' | 'cowgirl' | 'insertion' | 'kiss' | 'missionary' | 'doggy' | 'standing' | 'handjob' | 'paizuri';
+
+export interface TagSettings {
+  age?: AgeTag;
+  peopleCount?: PeopleCountTag;
+  ethnicity?: EthnicityTag;
+  breastSize: number; // 0-100 slider
+  breastPosition?: BreastPositionTag;
+  photorealism?: PhotorealismTag;
+  composition?: CompositionTag;
+  fetish: FetishTag[];
 }
 
 // ----- User -----
+
+export type UserStatus = 'pending_otp' | 'pending_password' | 'pending_agreements' | 'pending_profile' | 'active' | 'age_restricted' | 'banned';
 
 export interface User {
   id: string;
@@ -71,6 +95,10 @@ export interface User {
   credits: number;
   locale: Locale;
   theme: ThemeMode;
+  status?: UserStatus;
+  dateOfBirth?: string;
+  country?: string;
+  firstGenerationConfirmed?: boolean;
 }
 
 // ----- Plan Limits -----
@@ -127,7 +155,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
 // ----- Models -----
 
 export type ModelApiType = 'sd' | 'seedream';
-export type ModelCategory = 'sfw' | 'nsfw-realistic' | 'nsfw-anime';
+export type ModelCategory = 'sfw' | 'nsfw-realistic';
 
 export interface AIModel {
   id: string;
@@ -154,13 +182,6 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-majicmix', name: '🔞 majicMIX Realistic', type: 'image', provider: 'novita', description: 'Classic realistic model', novitaModelName: 'majicmixRealistic_v7_134792.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-cyberrealistic', name: '🔞 CyberRealistic', type: 'image', provider: 'novita', description: 'Modern photorealism', novitaModelName: 'cyberrealistic_v40_151857.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-dreamshaper', name: '🔞 DreamShaper', type: 'image', provider: 'novita', description: 'Fantasy versatile', novitaModelName: 'dreamshaper_8_93211.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-
-  // ── NSFW Anime Models ──
-  { id: 'novita-anything-v5', name: '🔞 Anything V5', type: 'image', provider: 'novita', description: 'Top anime quality', novitaModelName: 'AnythingV5_v5PrtRE.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-meinahentai', name: '🔞 MeinaHentai V4', type: 'image', provider: 'novita', description: 'Dedicated NSFW anime', novitaModelName: 'meinahentai_v4_70340.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-abyssorangemix3', name: '🔞 AbyssOrangeMix3', type: 'image', provider: 'novita', description: 'Dark anime style', novitaModelName: 'abyssorangemix3AOM3_aom3a1b.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-counterfeit', name: '🔞 Counterfeit V3.0', type: 'image', provider: 'novita', description: 'Anime line art', novitaModelName: 'CounterfeitV30_v30.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
-  { id: 'novita-revanimated', name: '🔞 Rev Animated', type: 'image', provider: 'novita', description: '2.5D anime style', novitaModelName: 'revAnimated_v122.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
 
   // ── Video Models ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },

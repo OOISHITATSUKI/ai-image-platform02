@@ -18,6 +18,8 @@ export default function Sidebar() {
         settings,
         setGenerationType,
         user,
+        isAuthenticated,
+        logout,
         sidebarCollapsed,
         locale,
         setLocale,
@@ -123,9 +125,15 @@ export default function Sidebar() {
         <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
             {/* Logo */}
             <div className="sidebar-header">
-                <Link href="/" className="sidebar-logo">
-                    <div className="logo-icon">⚡</div>
-                    {!sidebarCollapsed && <span>VideoGen</span>}
+                <Link href="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'flex-start', width: '100%', overflow: 'hidden' }}>
+                    {!sidebarCollapsed ? (
+                        <>
+                            <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" />
+                            <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" />
+                        </>
+                    ) : (
+                        <div className="logo-icon">⚡</div>
+                    )}
                 </Link>
             </div>
 
@@ -309,60 +317,32 @@ export default function Sidebar() {
                 {/* Account Menu Popup */}
                 {showAccountMenu && (
                     <div className="account-menu-overlay" ref={accountMenuRef}>
-                        <div className="account-menu-header">
-                            <div className="account-menu-user">
-                                <div className="user-avatar" style={{ width: 40, height: 40, fontSize: '1.2rem' }}>
-                                    {user?.username?.[0]?.toUpperCase() ?? 'G'}
-                                </div>
-                                <div className="account-menu-user-info">
-                                    <div className="account-menu-username">{user?.username ?? t('auth.guest')}</div>
-                                    <div className="account-menu-email">{user?.email ?? 'guest@example.com'}</div>
-                                </div>
-                            </div>
-                            <div className="account-menu-status">
-                                <div className="status-item">
-                                    <span>💎 {t('account.currentPlan')}</span>
-                                    <span className="status-value">{user?.plan ?? 'Free'}</span>
-                                </div>
-                                <div className="status-item">
-                                    <span>✨ {t('credits.label')}</span>
-                                    <span className="status-value">{user?.credits ?? 0}</span>
-                                </div>
-                            </div>
+                        <div className="account-menu-header" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '1.2rem' }}>👤</span>
+                            <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)' }}>{user?.username ?? t('auth.guest')}</span>
                         </div>
 
                         <div className="account-menu-section">
-                            <Link href="/pricing" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">🔄</span>
-                                <span className="account-menu-item-label">{t('account.changePlan')}</span>
+                            <Link href="/profile" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">👤</span>
+                                <span className="account-menu-item-label">{t('account.profileSettings')}</span>
                             </Link>
-                            <button className="account-menu-item" onClick={() => alert('Coming soon!')}>
+                            <Link href="/pricing" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">💰</span>
+                                <span className="account-menu-item-label">{t('account.creditsCharge')}</span>
+                            </Link>
+                            <Link href="/history/generation" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">🖼️</span>
+                                <span className="account-menu-item-label">{t('account.generationHistory')}</span>
+                            </Link>
+                            <Link href="/history/billing" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
                                 <span className="account-menu-item-icon">💳</span>
-                                <span className="account-menu-item-label">{t('account.payment')}</span>
-                            </button>
-                            <div className="account-menu-item">
-                                <span className="account-menu-item-icon">{theme === 'dark' ? '🌙' : '☀️'}</span>
-                                <span className="account-menu-item-label">{t('account.theme')}</span>
-                                <div
-                                    className={`toggle-switch-compact ${theme === 'dark' ? 'active' : ''}`}
-                                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                >
-                                    <div className="toggle-dot-compact" />
-                                </div>
-                            </div>
-                            <div className="account-menu-item">
-                                <span className="account-menu-item-icon">🌍</span>
-                                <span className="account-menu-item-label">{t('account.language')}</span>
-                                <select
-                                    className="lang-select-small"
-                                    value={locale}
-                                    onChange={(e) => setLocale(e.target.value as Locale)}
-                                >
-                                    {languages.map(l => (
-                                        <option key={l.value} value={l.value}>{l.label}</option>
-                                    ))}
-                                </select>
-                            </div>
+                                <span className="account-menu-item-label">{t('account.purchaseHistory')}</span>
+                            </Link>
+                            <Link href="/settings" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">⚙️</span>
+                                <span className="account-menu-item-label">{t('account.settings')}</span>
+                            </Link>
                         </div>
 
                         <div className="account-menu-section">
@@ -370,22 +350,28 @@ export default function Sidebar() {
                                 <span className="account-menu-item-icon">📄</span>
                                 <span className="account-menu-item-label">{t('account.terms')}</span>
                             </Link>
+                            <Link href="/content-policy" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">📄</span>
+                                <span className="account-menu-item-label">{t('account.contentPolicy')}</span>
+                            </Link>
                             <Link href="/privacy" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">🔒</span>
+                                <span className="account-menu-item-icon">📄</span>
                                 <span className="account-menu-item-label">{t('account.privacy')}</span>
                             </Link>
-                            <Link href="/help" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">❓</span>
-                                <span className="account-menu-item-label">{t('account.help')}</span>
+                            <Link href="/dmca" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                <span className="account-menu-item-icon">📄</span>
+                                <span className="account-menu-item-label">{t('account.dmcaPolicy')}</span>
                             </Link>
-                            <button className="account-menu-item" onClick={() => alert('Contact: support@example.com')}>
-                                <span className="account-menu-item-icon">📧</span>
-                                <span className="account-menu-item-label">{t('account.contact')}</span>
-                            </button>
+                            {user?.country === 'US' && (
+                                <Link href="/terms#2257" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
+                                    <span className="account-menu-item-icon">📄</span>
+                                    <span className="account-menu-item-label">{t('account.compliance2257')}</span>
+                                </Link>
+                            )}
                         </div>
 
                         <div className="account-menu-footer">
-                            <button className="account-menu-item logout-item" onClick={() => window.location.reload()}>
+                            <button className="account-menu-item logout-item" onClick={() => { logout(); router.push('/login'); }}>
                                 <span className="account-menu-item-icon">🚪</span>
                                 <span className="account-menu-item-label">{t('account.logout')}</span>
                             </button>
@@ -411,20 +397,31 @@ export default function Sidebar() {
                 )}
 
                 {/* User Profile Bar */}
-                <div
-                    className={`user-profile-bar ${showAccountMenu ? 'active' : ''}`}
-                    onClick={() => setShowAccountMenu(!showAccountMenu)}
-                >
-                    <div className="user-avatar">
-                        {user?.username?.[0]?.toUpperCase() ?? 'G'}
-                    </div>
-                    {!sidebarCollapsed && (
-                        <div className="user-info">
-                            <div className="user-name">{user?.username ?? t('auth.guest')}</div>
-                            <div className="user-plan-badge">{user?.plan ?? 'Free'}</div>
+                {isAuthenticated ? (
+                    <div
+                        className={`user-profile-bar ${showAccountMenu ? 'active' : ''}`}
+                        onClick={() => setShowAccountMenu(!showAccountMenu)}
+                    >
+                        <div className="user-avatar">
+                            {user?.username?.[0]?.toUpperCase() ?? 'G'}
                         </div>
-                    )}
-                </div>
+                        {!sidebarCollapsed && (
+                            <div className="user-info">
+                                <div className="user-name">{user?.username ?? t('auth.guest')}</div>
+                                <div className="user-plan-badge">{user?.plan ?? 'Free'}</div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="sidebar-auth-buttons">
+                        <Link href="/login" className="sidebar-login-btn">
+                            {t('auth.login')}
+                        </Link>
+                        <Link href="/register" className="sidebar-register-btn">
+                            Create Account
+                        </Link>
+                    </div>
+                )}
             </div>
         </nav>
     );

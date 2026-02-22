@@ -1,0 +1,175 @@
+{
+  "143251b7-ff67-4dce-8f5a-e400b9fcf9a5": {
+    "id": "143251b7-ff67-4dce-8f5a-e400b9fcf9a5",
+    "email": "test@example.com",
+    "passwordHash": "$2b$10$eJwqmdJUSCUwf74IIJnspOKiXChwlAbOJYn3a5eLaxHH.xafsOPOq",
+    "username": "testuser1",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 50,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1771751892904,
+    "firstGenerationConfirmed": true,
+    "createdAt": 1771751892904,
+    "updatedAt": 1771755903017,
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "contentPolicy": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "minorContentBan": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "noRefund": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "personalUseOnly": {
+        "agreedAt": 1771752154894,
+        "version": "1.0",
+        "ip": "::1"
+      }
+    },
+    "dateOfBirth": "2000-01-01",
+    "country": "US"
+  },
+  "e6a3cf3f-cac0-4e29-9836-730def02e082": {
+    "id": "e6a3cf3f-cac0-4e29-9836-730def02e082",
+    "email": "testuser_new@example.com",
+    "passwordHash": "$2b$10$DaYX05QweDtdJNWZCV7NnupoRvHjZBAYNNr40sOPg5iMOLwK8wg/S",
+    "username": "testuser_new",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 50,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1771756345697,
+    "firstGenerationConfirmed": true,
+    "createdAt": 1771756345697,
+    "updatedAt": 1771757542716,
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "contentPolicy": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "minorContentBan": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "noRefund": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "personalUseOnly": {
+        "agreedAt": 1771756846277,
+        "version": "1.0",
+        "ip": "::1"
+      }
+    },
+    "dateOfBirth": "1990-01-01",
+    "country": "US"
+  },
+  "d7d3fd6b-14e4-40ee-a42d-f462f052c053": {
+    "id": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "passwordHash": "$2b$10$6BEUF5z0SAGcF57BCnY9z..AxmaNqaq0ZjHEHZceTWBvGSMwXYOU2",
+    "username": "test",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 50,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1771759420211,
+    "firstGenerationConfirmed": true,
+    "createdAt": 1771757809717,
+    "updatedAt": 1771796844139,
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "contentPolicy": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "minorContentBan": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "noRefund": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      },
+      "personalUseOnly": {
+        "agreedAt": 1771759458006,
+        "version": "1.0",
+        "ip": "::1"
+      }
+    },
+    "dateOfBirth": "1990-05-05",
+    "country": "US",
+    "lastLoginAt": 1771796844105,
+    "loginFailCount": 0,
+    "deviceOtpAttempts": 0,
+    "lastKnownCountry": "XX",
+    "loginFailResetAt": 1771798531323
+  }
+}
