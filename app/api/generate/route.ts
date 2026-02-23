@@ -197,35 +197,30 @@ async function pollTaskResult(taskId: string): Promise<{
         const status = data?.task?.status;
 
         if (status === 'TASK_STATUS_SUCCEED') {
-            const fs = require('fs');
-            const path = require('path');
-            const imagesDir = path.join(process.cwd(), 'data', 'images');
-            if (!fs.existsSync(imagesDir)) {
-                fs.mkdirSync(imagesDir, { recursive: true });
-            }
+            const rawImages = data.images || [];
 
-            const images = [];
-            for (let j = 0; j < (data.images || []).length; j++) {
-                const imgInfo = data.images[j];
-                const imgUrl = imgInfo.image_url;
-                try {
-                    const imgRes = await fetch(imgUrl);
-                    const buf = await imgRes.arrayBuffer();
-                    const filename = `${taskId}_${j}.png`;
-                    fs.writeFileSync(path.join(imagesDir, filename), Buffer.from(buf));
-                    images.push({
-                        url: `/api/images/${filename}`,
-                        type: imgInfo.image_type
-                    });
-                } catch (e) {
-                    console.error('Failed to download image from Novita:', e);
-                    // Fallback to original url
-                    images.push({
-                        url: imgUrl,
-                        type: imgInfo.image_type
-                    });
-                }
-            }
+            // Fetch each image URL and convert to Base64 data URI
+            const images = await Promise.all(
+                rawImages.map(async (img: { image_url: string; image_type: string }) => {
+                    try {
+                        const imgRes = await fetch(img.image_url);
+                        if (!imgRes.ok) {
+                            console.error(`Failed to fetch image: ${imgRes.status}`);
+                            return { url: img.image_url, type: img.image_type }; // Fallback
+                        }
+                        const buffer = await imgRes.arrayBuffer();
+                        const base64 = Buffer.from(buffer).toString('base64');
+                        const mimeType = img.image_type === 'jpeg' ? 'image/jpeg' : 'image/png';
+                        return {
+                            url: `data:${mimeType};base64,${base64}`,
+                            type: img.image_type,
+                        };
+                    } catch (err) {
+                        console.error('Image fetch/convert error:', err);
+                        return { url: img.image_url, type: img.image_type }; // Fallback
+                    }
+                })
+            );
 
             return { success: true, images };
         }
