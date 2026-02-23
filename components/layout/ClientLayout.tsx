@@ -102,8 +102,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     ☰
                 </button>
                 <div className="mobile-logo">
-                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '28px' }} />
-                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '28px' }} />
+                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '36px' }} />
+                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '36px' }} />
                 </div>
                 <button
                     className="mobile-settings-btn"
