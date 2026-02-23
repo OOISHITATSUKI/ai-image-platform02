@@ -733,10 +733,10 @@ export async function POST(request: NextRequest) {
                 // Mask blur: softens mask edges for natural skin-to-background blending
                 novitaRequest.mask_blur = 4;
                 // Comprehensive clothing-removal negative prompt
-                novitaRequest.negative_prompt = enforceLimit(`${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}`);
+                novitaRequest.negative_prompt = enforceLimit(`${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}, (huge nipples:1.6), (giant areola:1.6), (oversized nipples:1.6), (exaggerated proportions:1.5)`);
                 // Transformation-first prompt: lead with undress directive, then skin descriptors
                 novitaRequest.prompt = enforceLimit(
-                    `remove clothes, undress, (no straps:1.5), (no strings:1.5), (no collar:1.5), (nsfw:1.5), (completely nude:1.5), (naked body:1.5), (bare skin:1.5), (exposed chest:1.5), (bare breasts:1.5), (bare torso:1.5), natural skin texture, realistic skin, skin pores, smooth skin, anatomically correct body, ${enhancedPrompt}`
+                    `remove clothes, undress, (no straps:1.5), (no strings:1.5), (no collar:1.5), (nsfw:1.5), (completely nude:1.5), (naked body:1.5), (bare skin:1.5), (exposed chest:1.5), (bare breasts:1.5), (bare torso:1.5), (natural size nipples:1.4), (small areola:1.4), (proportional anatomy:1.4), natural skin texture, realistic skin, skin pores, smooth skin, anatomically correct body, ${enhancedPrompt}`
                 );
             } else {
                 novitaRequest.strength = 0.7;
