@@ -3,9 +3,13 @@ import './globals.css';
 import ClientLayout from '@/components/layout/ClientLayout';
 
 export const metadata: Metadata = {
-  title: 'VideoGen - AI Image & Video Generation',
+  title: 'Image Nude - AI Image Generator',
   description: 'Next-generation AI-powered NSFW image and video generation platform. Create stunning content with text-to-video, image-to-video, and more.',
   keywords: ['AI', 'video generation', 'image generation', 'NSFW', 'text to video', 'image to video'],
+  icons: {
+    icon: '/favicon.png',
+    apple: '/logo-dark.png',
+  },
 };
 
 export default function RootLayout({

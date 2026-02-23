@@ -125,7 +125,7 @@ export default function Sidebar() {
         <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
             {/* Logo */}
             <div className="sidebar-header">
-                <Link href="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'flex-start', width: '100%', overflow: 'hidden' }}>
+                <Link href="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
                     {!sidebarCollapsed ? (
                         <>
                             <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" />
