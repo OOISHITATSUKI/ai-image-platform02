@@ -52,7 +52,6 @@ export async function POST(req: NextRequest) {
         const nowpaymentsPayload = {
             price_amount: pack.usd,
             price_currency: 'USD',
-            pay_currency: '', // Leave empty to let user choose on hosted page
             order_id: transaction.id,
             order_description: `${packType.toUpperCase()} Credit Pack - ${pack.credits} Credits`,
             ipn_callback_url: `${APP_URL}/api/webhooks/nowpayments`,
