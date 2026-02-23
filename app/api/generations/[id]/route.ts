@@ -5,7 +5,7 @@ import { getGenerationById, deleteGeneration } from '@/lib/db/generations';
 // DELETE /api/generations/[id] — delete a generation record
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const token = extractToken(req.headers.get('Authorization'));
     const decoded = token ? verifyToken(token) : null;
@@ -13,7 +13,8 @@ export async function DELETE(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     const gen = getGenerationById(id);
 
     if (!gen) {
@@ -32,7 +33,7 @@ export async function DELETE(
 // GET /api/generations/[id] — get a single generation record
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const token = extractToken(req.headers.get('Authorization'));
     const decoded = token ? verifyToken(token) : null;
@@ -40,7 +41,8 @@ export async function GET(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     const gen = getGenerationById(id);
 
     if (!gen) {
