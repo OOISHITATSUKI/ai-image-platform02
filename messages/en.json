@@ -147,7 +147,8 @@
         "sendCode": "Send Code",
         "enterCode": "Enter verification code",
         "verify": "Verify",
-        "guest": "Guest"
+        "guest": "Guest",
+        "forgotPassword": "Forgot Password?"
     },
     "errors": {
         "error_rate_limit": "Rate limit exceeded. Please wait a minute before generating again.",

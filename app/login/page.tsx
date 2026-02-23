@@ -4,12 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
+import { useTranslations } from 'next-intl';
 
 type Step = 'password' | 'mfa' | 'forgot-password' | 'reset-password';
 
 export default function LoginPage() {
     const router = useRouter();
     const { setUser } = useAppStore();
+    const t = useTranslations();
 
     // Step 1 state
     const [step, setStep] = useState<Step>('password');
@@ -282,7 +284,7 @@ export default function LoginPage() {
                                     onClick={() => { setError(''); setSuccessMsg(''); setStep('forgot-password'); }}
                                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
                                 >
-                                    パスワードをお忘れですか？
+                                    {t('auth.forgotPassword')}
                                 </button>
                             </div>
 
@@ -472,6 +474,6 @@ export default function LoginPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -147,7 +147,8 @@
         "sendCode": "コード送信",
         "enterCode": "認証コードを入力",
         "verify": "認証",
-        "guest": "ゲスト"
+        "guest": "ゲスト",
+        "forgotPassword": "パスワードをお忘れですか？"
     },
     "errors": {
         "error_rate_limit": "生成制限に達しました。1分待ってから再度お試しください。",
