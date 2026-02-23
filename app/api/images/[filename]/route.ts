@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET(req: NextRequest, { params }: { params: { filename: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
     try {
-        const filePath = path.join(process.cwd(), 'data', 'images', params.filename);
+        const resolvedParams = await params;
+        const filePath = path.join(process.cwd(), 'data', 'images', resolvedParams.filename);
 
         if (!fs.existsSync(filePath)) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -14,8 +15,8 @@ export async function GET(req: NextRequest, { params }: { params: { filename: st
 
         // Determine Content-Type
         let contentType = 'image/png';
-        if (params.filename.endsWith('.webp')) contentType = 'image/webp';
-        else if (params.filename.endsWith('.jpg') || params.filename.endsWith('.jpeg')) contentType = 'image/jpeg';
+        if (resolvedParams.filename.endsWith('.webp')) contentType = 'image/webp';
+        else if (resolvedParams.filename.endsWith('.jpg') || resolvedParams.filename.endsWith('.jpeg')) contentType = 'image/jpeg';
 
         return new NextResponse(buffer, {
             headers: {
