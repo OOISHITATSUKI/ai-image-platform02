@@ -446,10 +446,11 @@ export default function GenerationHistoryPage() {
 // ─── Styles (inline to match existing app pattern) ────────────
 const styles: Record<string, React.CSSProperties> = {
     page: {
-        minHeight: '100vh',
+        height: '100vh',
+        overflowY: 'auto',
         background: 'var(--bg-base)',
         color: 'var(--text-primary)',
-        padding: '24px 32px',
+        padding: '24px 32px 100px', // Extra padding bottom for mobile/nav space
         maxWidth: 1400,
         margin: '0 auto',
     },
