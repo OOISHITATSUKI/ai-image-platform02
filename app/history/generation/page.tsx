@@ -396,11 +396,11 @@ export default function GenerationHistoryPage() {
                                 <span style={styles.lightboxValue}>{formatModelName(lightbox.modelName)}</span>
                             </div>
 
-                            {lightbox.params?.width && (
+                            {Boolean(lightbox.params?.width) && Boolean(lightbox.params?.height) && (
                                 <div style={styles.lightboxDetailRow}>
                                     <span style={styles.lightboxLabel}>サイズ</span>
                                     <span style={styles.lightboxValue}>
-                                        {String(lightbox.params.width)} × {String(lightbox.params.height)}
+                                        {String(lightbox.params!.width)} × {String(lightbox.params!.height)}
                                     </span>
                                 </div>
                             )}
