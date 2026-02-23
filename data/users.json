@@ -126,7 +126,7 @@
     "otpLastSentAt": 1771759420211,
     "firstGenerationConfirmed": true,
     "createdAt": 1771757809717,
-    "updatedAt": 1771826890958,
+    "updatedAt": 1771827652162,
     "agreements": {
       "termsOfService": {
         "agreedAt": 1771759458006,
@@ -166,7 +166,7 @@
     },
     "dateOfBirth": "1990-05-05",
     "country": "US",
-    "lastLoginAt": 1771826890950,
+    "lastLoginAt": 1771827652136,
     "loginFailCount": 0,
     "deviceOtpAttempts": 0,
     "lastKnownCountry": "XX",

@@ -724,19 +724,41 @@ export async function POST(request: NextRequest) {
             }
 
             if (inpaintMode) {
-                // strength=1.0: completely ignores original pixels in masked region
-                // (critical for full-body clothing where AI otherwise sees clothing texture)
+                // ═══ Inpaint Optimization for Near-Perfect Clothing Removal ═══
+
+                // (1) strength=1.0: 完全にマスク領域のピクセルを無視
+                //     衣類のテクスチャが残らないようにする
                 novitaRequest.strength = 1.0;
-                // Extremely high guidance forces the prompt instead of input image
+
+                // (2) guidance_scale: 12に上げてプロンプトへの忠実度を最大化
+                //     10→12 で「nude」指示への従属度が上がる
                 novitaRequest.guidance_scale = 12;
+
+                // (3) steps: 50に増加
+                //     細部の描写が改善される（ストラップの除去精度向上）
                 novitaRequest.steps = 50;
-                // Mask blur: softens mask edges for natural skin-to-background blending
-                novitaRequest.mask_blur = 4;
-                // Comprehensive clothing-removal negative prompt
-                novitaRequest.negative_prompt = enforceLimit(`${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}, (huge nipples:1.6), (giant areola:1.6), (oversized nipples:1.6), (exaggerated proportions:1.5)`);
-                // Transformation-first prompt: lead with undress directive, then skin descriptors
+
+                // (4) mask_blur: 8に増加
+                //     マスク境界のブレンドが自然になる
+                //     細いストラップがマスクの端に引っかかるのを防ぐ
+                novitaRequest.mask_blur = 8;
+
+                // (5) ★ inpaint_full_res: マスク領域だけを拡大してインペイント
+                //     これにより細部の精度が大幅に向上する
+                novitaRequest.inpaint_full_res = 1;
+                novitaRequest.inpaint_full_res_padding = 48;
+
+                // (6) sampler: Euler a はインペイントで安定した結果を出す
+                novitaRequest.sampler_name = 'Euler a';
+
+                // (7) 強化されたネガティブプロンプト（ストラップ・紐を明示的に追加 + 巨乳化抑制）
+                novitaRequest.negative_prompt = enforceLimit(
+                    `${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}, (huge nipples:1.6), (giant areola:1.6), (oversized nipples:1.6), (exaggerated proportions:1.5), (straps:1.5), (shoulder straps:1.5), (bra straps:1.5), (string:1.4), (ribbon:1.4), (elastic band:1.4), (neckline:1.3), (collar:1.3), (seam:1.3), (stitching:1.3), (trim:1.3), (lace:1.4), (wire:1.3)`
+                );
+
+                // (8) 強化されたプロンプト
                 novitaRequest.prompt = enforceLimit(
-                    `remove clothes, undress, (no straps:1.5), (no strings:1.5), (no collar:1.5), (nsfw:1.5), (completely nude:1.5), (naked body:1.5), (bare skin:1.5), (exposed chest:1.5), (bare breasts:1.5), (bare torso:1.5), (natural size nipples:1.4), (small areola:1.4), (proportional anatomy:1.4), natural skin texture, realistic skin, skin pores, smooth skin, anatomically correct body, ${enhancedPrompt}`
+                    `(completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), (topless:1.5), (exposed breasts:1.5), (exposed nipples:1.4), (natural size nipples:1.4), (small areola:1.4), (proportional anatomy:1.4), natural skin tone, realistic skin texture, skin pores, smooth natural skin, detailed skin, soft shadows on skin, anatomically correct body, photorealistic skin, ${enhancedPrompt}`
                 );
             } else {
                 novitaRequest.strength = 0.7;

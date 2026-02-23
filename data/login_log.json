@@ -294,5 +294,14 @@
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
     "id": "e7de1beb-8c19-449e-bfc5-a20d35766e5c",
     "createdAt": 1771826890962
+  },
+  "0ff0b998-ed87-4600-b3ad-019033136dc6": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
+    "id": "0ff0b998-ed87-4600-b3ad-019033136dc6",
+    "createdAt": 1771827652167
   }
 }
