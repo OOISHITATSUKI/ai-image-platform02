@@ -4,14 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
-import { useTranslations } from 'next-intl';
+import { useTranslation } from '@/lib/useTranslation';
 
 type Step = 'password' | 'mfa' | 'forgot-password' | 'reset-password';
 
 export default function LoginPage() {
     const router = useRouter();
     const { setUser } = useAppStore();
-    const t = useTranslations();
+    const { t } = useTranslation();
 
     // Step 1 state
     const [step, setStep] = useState<Step>('password');
