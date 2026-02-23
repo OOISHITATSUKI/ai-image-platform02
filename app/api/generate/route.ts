@@ -654,7 +654,7 @@ export async function POST(request: NextRequest) {
             sampler_name: quality.sampler,
             guidance_scale: quality.guidance,
             ...(model?.nsfw ? {
-                prompt: `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`,
+                prompt: enforceLimit(`(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`),
             } : {}),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
             loras: novitaModelName.toLowerCase().includes('xl') ? [] : [
