@@ -267,5 +267,23 @@
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
     "id": "69ca8d79-b90e-4029-84ef-f4320f95e9af",
     "createdAt": 1771798234492
+  },
+  "6696ba03-6088-4e1c-8b5f-9e8f0e8450b4": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "invalid_password",
+    "ipAddress": "::1",
+    "id": "6696ba03-6088-4e1c-8b5f-9e8f0e8450b4",
+    "createdAt": 1771810975943
+  },
+  "fabf370d-5430-4dc1-ab8a-08599889ac6a": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "invalid_password",
+    "ipAddress": "::1",
+    "id": "fabf370d-5430-4dc1-ab8a-08599889ac6a",
+    "createdAt": 1771811083138
   }
 }

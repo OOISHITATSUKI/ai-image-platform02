@@ -407,6 +407,42 @@ export default function ChatArea() {
                         isFavorite: false,
                         settings: { ...settings },
                     });
+
+                    // ★ 生成履歴をサーバーに保存
+                    try {
+                        const saveToken = window.localStorage.getItem('auth_token');
+                        if (saveToken) {
+                            fetch('/api/generations', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${saveToken}`,
+                                },
+                                body: JSON.stringify({
+                                    prompt: userPrompt || 'uploaded reference',
+                                    modelName: settings.model,
+                                    fileUrl: img.url,
+                                    fileType: 'image',
+                                    generationType: inpaintMode
+                                        ? 'inpaint'
+                                        : faceSwapMode
+                                            ? 'faceswap'
+                                            : settings.generationType === 'img2img'
+                                                ? 'img2img'
+                                                : 'txt2img',
+                                    creditsUsed: creditCost,
+                                    status: 'success',
+                                    params: {
+                                        aspectRatio: settings.aspectRatio,
+                                        resolution: settings.resolution,
+                                        qualityPreset: settings.qualityPreset,
+                                    },
+                                }),
+                            }).catch(err => console.error('Failed to save generation:', err));
+                        }
+                    } catch (e) {
+                        console.error('Generation save error:', e);
+                    }
                 }
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : 'Unknown error';

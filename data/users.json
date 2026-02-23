@@ -115,7 +115,7 @@
     "id": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
     "email": "ooisidegesu@gmail.com",
     "passwordHash": "$2b$10$6BEUF5z0SAGcF57BCnY9z..AxmaNqaq0ZjHEHZceTWBvGSMwXYOU2",
-    "username": "test",
+    "username": "ooisidegesu@gmail.com",
     "status": "active",
     "emailVerified": true,
     "plan": "free",
@@ -126,7 +126,7 @@
     "otpLastSentAt": 1771759420211,
     "firstGenerationConfirmed": true,
     "createdAt": 1771757809717,
-    "updatedAt": 1771798234488,
+    "updatedAt": 1771811083136,
     "agreements": {
       "termsOfService": {
         "agreedAt": 1771759458006,
@@ -167,9 +167,9 @@
     "dateOfBirth": "1990-05-05",
     "country": "US",
     "lastLoginAt": 1771798234481,
-    "loginFailCount": 0,
+    "loginFailCount": 2,
     "deviceOtpAttempts": 0,
     "lastKnownCountry": "XX",
-    "loginFailResetAt": 1771798531323
+    "loginFailResetAt": 1771814575937
   }
 }
