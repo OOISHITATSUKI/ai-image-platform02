@@ -27,7 +27,7 @@ const DEFAULT_NEGATIVE_PROMPT =
 
 // Extra negative prompt specifically for inpaint clothing removal
 const INPAINT_CLOTHING_NEGATIVE =
-    '(clothing:1.8), (fabric:1.7), (cloth:1.7), (dressed:1.8), (shirt:1.7), (dress:1.8), (bra:1.8), (underwear:1.8), (panties:1.8), (lingerie:1.7), (bikini:1.8), (swimsuit:1.8), (tank top:1.7), (t-shirt:1.7), (skirt:1.7), (pants:1.7), (shorts:1.7), (leotard:1.7), (bodysuit:1.8), (tight dress:1.8), (knit dress:1.8), (sweater:1.7), (corset:1.7), (stockings:1.6), (socks:1.6), (gloves:1.6), (latex:1.7), (spandex:1.7), (textile:1.6), (fiber:1.6), (texture:1.5)';
+    '(clothing:1.8), (fabric:1.7), (cloth:1.7), (dressed:1.8), (shirt:1.7), (dress:1.8), (bra:1.8), (underwear:1.8), (panties:1.8), (lingerie:1.7), (bikini:1.8), (swimsuit:1.8), (tank top:1.7), (t-shirt:1.7), (skirt:1.7), (pants:1.7), (shorts:1.7), (leotard:1.7), (bodysuit:1.8), (tight dress:1.8), (knit dress:1.8), (sweater:1.7), (corset:1.7), (stockings:1.6), (socks:1.6), (gloves:1.6), (latex:1.7), (spandex:1.7), (textile:1.6), (fiber:1.6), (texture:1.5), (strap:1.8), (string:1.8), (necklace:1.8), (choker:1.8), (harness:1.8), (jewelry:1.6), (ribbon:1.6), (lace:1.6)';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -731,12 +731,12 @@ export async function POST(request: NextRequest) {
                 novitaRequest.guidance_scale = 12;
                 novitaRequest.steps = 50;
                 // Mask blur: softens mask edges for natural skin-to-background blending
-                novitaRequest.mask_blur = 8;
+                novitaRequest.mask_blur = 4;
                 // Comprehensive clothing-removal negative prompt
                 novitaRequest.negative_prompt = enforceLimit(`${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}`);
                 // Transformation-first prompt: lead with undress directive, then skin descriptors
                 novitaRequest.prompt = enforceLimit(
-                    `remove clothes, undress, (nsfw:1.5), (completely nude:1.5), (naked body:1.5), (bare skin:1.5), (exposed chest:1.5), (bare breasts:1.5), (bare torso:1.5), natural skin texture, realistic skin, skin pores, smooth skin, anatomically correct body, ${enhancedPrompt}`
+                    `remove clothes, undress, (no straps:1.5), (no strings:1.5), (no collar:1.5), (nsfw:1.5), (completely nude:1.5), (naked body:1.5), (bare skin:1.5), (exposed chest:1.5), (bare breasts:1.5), (bare torso:1.5), natural skin texture, realistic skin, skin pores, smooth skin, anatomically correct body, ${enhancedPrompt}`
                 );
             } else {
                 novitaRequest.strength = 0.7;
