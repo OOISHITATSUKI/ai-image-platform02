@@ -3793,7 +3793,7 @@ video {
 /* Theme-aware Logo */
 .app-logo {
   max-width: 100%;
-  max-height: 52px;
+  max-height: 60px;
   object-fit: contain;
 }
 
