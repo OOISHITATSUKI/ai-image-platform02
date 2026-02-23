@@ -5,63 +5,61 @@ import React, { useState } from 'react';
 export default function PricingPage() {
     const plans = [
         {
-            name: 'Free',
-            price: '$0',
-            period: '',
+            name: 'お試し',
+            packType: 'starter',
+            price: '$4.99',
+            credits: 500,
+            perCredit: '~$0.010',
             featured: false,
             features: [
-                { text: '5 images/day', available: true },
-                { text: 'No video generation', available: false },
-                { text: 'Max 512px resolution', available: true },
-                { text: 'No face swap', available: false },
-                { text: '24-hour history', available: true },
-                { text: 'Contains ads', available: false },
+                { text: '500 クレジット', available: true },
+                { text: 'Text → Image', available: true },
+                { text: '標準解像度', available: true },
+                { text: 'Face Swap / Inpaint', available: false },
             ],
         },
         {
-            name: 'Basic',
+            name: 'ライト',
+            packType: 'light',
             price: '$9.99',
-            period: '/month',
+            credits: 1200,
+            perCredit: '~$0.008',
             featured: false,
             features: [
-                { text: '100 images/day', available: true },
-                { text: '5 videos/day', available: true },
-                { text: 'Max 1024px resolution', available: true },
-                { text: 'Max 3s video', available: true },
-                { text: '10 face swaps/day', available: true },
-                { text: '30-day history', available: true },
-                { text: 'No ads', available: true },
+                { text: '1,200 クレジット', available: true },
+                { text: '全生成モード', available: true },
+                { text: 'HD解像度', available: true },
+                { text: 'Face Swap / Inpaint', available: true },
             ],
         },
         {
-            name: 'Pro',
+            name: 'スタンダード',
+            packType: 'standard',
             price: '$24.99',
-            period: '/month',
+            credits: 4000,
+            perCredit: '~$0.006',
             featured: true,
             features: [
-                { text: '500 images/day', available: true },
-                { text: '30 videos/day', available: true },
-                { text: 'Max 2K resolution', available: true },
-                { text: 'Max 8s video', available: true },
-                { text: '50 face swaps/day', available: true },
-                { text: 'Unlimited history', available: true },
-                { text: 'No ads', available: true },
+                { text: '4,000 クレジット', available: true },
+                { text: '全生成モード', available: true },
+                { text: 'Ultra HD解像度', available: true },
+                { text: 'Face Swap / Inpaint 無制限', available: true },
+                { text: '優先生成', available: true },
             ],
         },
         {
-            name: 'Ultimate',
+            name: 'プレミアム',
+            packType: 'premium',
             price: '$49.99',
-            period: '/month',
+            credits: 10000,
+            perCredit: '~$0.005',
             featured: false,
             features: [
-                { text: 'Unlimited images', available: true },
-                { text: '100 videos/day', available: true },
-                { text: 'Max 4K resolution', available: true },
-                { text: 'Max 20s video', available: true },
-                { text: 'Unlimited face swaps', available: true },
-                { text: 'Unlimited history', available: true },
-                { text: 'No ads', available: true },
-                { text: 'Priority support', available: true },
+                { text: '10,000 クレジット', available: true },
+                { text: '全生成モード', available: true },
+                { text: '最高品質', available: true },
+                { text: 'Face Swap / Inpaint 無制限', available: true },
+                { text: '優先生成 + 優先サポート', available: true },
             ],
         },
     ];
@@ -69,36 +67,34 @@ export default function PricingPage() {
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const handleCheckout = async (packName: string) => {
+    const handleCheckout = async (packType: string) => {
         setError(null);
-        let packType = '';
-        if (packName === 'Basic') packType = 'light';
-        else if (packName === 'Pro') packType = 'standard';
-        else if (packName === 'Ultimate') packType = 'premium';
-        else return;
-
-        setLoadingPack(packName);
+        setLoadingPack(packType);
         try {
             const token = localStorage.getItem('auth_token');
+            if (!token) {
+                setError('ログインが必要です');
+                setLoadingPack(null);
+                return;
+            }
             const res = await fetch('/api/billing/create-invoice', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ packType })
+                body: JSON.stringify({ packType }),
             });
             const data = await res.json();
 
             if (res.ok && data.invoice_url) {
-                // Redirect user to NowPayments hosted checkout page
                 window.location.href = data.invoice_url;
             } else {
-                setError(data.error || 'Failed to initialize payment');
+                setError(data.error || '決済の初期化に失敗しました');
                 setLoadingPack(null);
             }
         } catch (e) {
-            setError('Network error occurred');
+            setError('ネットワークエラーが発生しました');
             setLoadingPack(null);
         }
     };
@@ -123,7 +119,6 @@ export default function PricingPage() {
                         <div className="pricing-card-name">{plan.name}</div>
                         <div className="pricing-card-price">
                             {plan.price}
-                            {plan.period && <span>{plan.period}</span>}
                         </div>
                         <ul className="pricing-feature-list">
                             {plan.features.map((f, i) => (
@@ -137,10 +132,13 @@ export default function PricingPage() {
                         </ul>
                         <button
                             className="pricing-cta"
-                            disabled={plan.price === '$0' || loadingPack !== null}
-                            onClick={() => plan.price !== '$0' && handleCheckout(plan.name)}
+                            disabled={loadingPack !== null}
+                            onClick={() => handleCheckout(plan.packType)}
                         >
-                            {loadingPack === plan.name ? 'Processing...' : plan.price === '$0' ? 'Current Plan' : 'Purchase with Crypto'}
+                            {loadingPack === plan.packType
+                                ? '処理中...'
+                                : `仮想通貨で購入 (${plan.price})`
+                            }
                         </button>
                     </div>
                 ))}

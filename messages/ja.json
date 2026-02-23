@@ -169,7 +169,8 @@
         "label": "クレジット",
         "remaining": "残り {count} クレジット",
         "topUp": "チャージ",
-        "upgrade": "プランをアップグレード"
+        "upgrade": "プランをアップグレード",
+        "buyCredits": "クレジット購入"
     },
     "account": {
         "title": "アカウント",

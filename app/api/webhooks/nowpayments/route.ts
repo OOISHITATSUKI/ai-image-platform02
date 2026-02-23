@@ -53,10 +53,11 @@ export async function POST(req: NextRequest) {
 
             // Grant Credits
             const newBalance = user.credits + transaction.creditsGranted;
-            // Also reset their 'plan' flag to 'paid' if they were free
+            // Also reset their 'plan' flag to 'basic' if they were free
             if (user.plan === 'free') {
-                user.plan = 'paid';
+                user.plan = 'basic';
             }
+            delete user.freeCreditsExpireAt;
             user.credits = newBalance;
             saveUser(user);
 

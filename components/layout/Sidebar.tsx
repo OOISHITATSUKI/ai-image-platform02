@@ -391,7 +391,7 @@ export default function Sidebar() {
                             />
                         </div>
                         <Link href="/pricing" className="upgrade-btn" style={{ textAlign: 'center', display: 'block' }}>
-                            {t('credits.upgrade')}
+                            💎 {t('credits.buyCredits')}
                         </Link>
                     </div>
                 )}
