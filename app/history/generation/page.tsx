@@ -191,6 +191,10 @@ export default function GenerationHistoryPage() {
         };
         return map[gt] || gt;
     };
+    const formatModelName = (name: string) => {
+        if (!name) return 'Unknown';
+        return name.replace(/^novita-/i, '');
+    };
 
     // ─── Auth Gate ──────────────────────────────────────────
     if (!isAuthenticated && typeof window !== 'undefined' && !getToken()) {
@@ -389,7 +393,7 @@ export default function GenerationHistoryPage() {
 
                             <div style={styles.lightboxDetailRow}>
                                 <span style={styles.lightboxLabel}>モデル</span>
-                                <span style={styles.lightboxValue}>{lightbox.modelName}</span>
+                                <span style={styles.lightboxValue}>{formatModelName(lightbox.modelName)}</span>
                             </div>
 
                             {lightbox.params?.width && (
