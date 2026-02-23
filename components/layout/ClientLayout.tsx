@@ -32,18 +32,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    useAppStore.setState({
-                        user: data.user,
-                        isAuthenticated: true,
-                        ageVerified: true,
-                    });
+                    // use setUser to trigger the chat loading logic
+                    useAppStore.getState().setUser(data.user);
+                    useAppStore.setState({ ageVerified: true });
                 } else {
-                    // Invalid token -> clean up
-                    localStorage.removeItem('auth_token');
-                    useAppStore.setState({
-                        user: null,
-                        isAuthenticated: false,
-                    });
+                    // Invalid token -> clean up securely using the store logout
+                    useAppStore.getState().logout();
                 }
             } catch (err) {
                 console.error('Session restore failed:', err);

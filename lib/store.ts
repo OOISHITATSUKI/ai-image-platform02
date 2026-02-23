@@ -19,6 +19,41 @@ import type {
 } from './types';
 
 // ============================================================
+// Per-account chat storage helpers
+// ============================================================
+
+function saveChatsForUser(userId: string, chats: Chat[]): void {
+    try {
+        // Strip large base64/blob URLs before saving to save space
+        const cleaned = chats.map((chat) => ({
+            ...chat,
+            messages: chat.messages.map((msg) => ({
+                ...msg,
+                imageUrl: msg.imageUrl?.startsWith('data:') || msg.imageUrl?.startsWith('blob:')
+                    ? undefined
+                    : msg.imageUrl,
+                videoUrl: msg.videoUrl?.startsWith('data:') || msg.videoUrl?.startsWith('blob:')
+                    ? undefined
+                    : msg.videoUrl,
+            })),
+        }));
+        localStorage.setItem(`chats_${userId}`, JSON.stringify(cleaned));
+    } catch (e) {
+        console.error('Failed to save chats for user:', e);
+    }
+}
+
+function loadChatsForUser(userId: string): Chat[] {
+    try {
+        const raw = localStorage.getItem(`chats_${userId}`);
+        if (!raw) return [];
+        return JSON.parse(raw) as Chat[];
+    } catch {
+        return [];
+    }
+}
+
+// ============================================================
 // App Store (Zustand + localStorage persistence)
 // ============================================================
 
@@ -119,10 +154,32 @@ export const useAppStore = create<AppState>()(
             // ----- User -----
             user: null,
             isAuthenticated: false,
-            setUser: (user) => set({ user, isAuthenticated: !!user }),
+            setUser: (user) => {
+                if (user) {
+                    const savedChats = loadChatsForUser(user.id);
+                    set({
+                        user,
+                        isAuthenticated: true,
+                        chats: savedChats,
+                        activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
+                    });
+                } else {
+                    set({ user: null, isAuthenticated: false });
+                }
+            },
             logout: () => {
+                const state = get();
+                if (state.user?.id) {
+                    saveChatsForUser(state.user.id, state.chats);
+                }
                 localStorage.removeItem('auth_token');
-                set({ user: null, isAuthenticated: false, ageVerified: false });
+                set({
+                    user: null,
+                    isAuthenticated: false,
+                    ageVerified: false,
+                    chats: [],
+                    activeChatId: null,
+                });
             },
 
             // ----- Chats -----
