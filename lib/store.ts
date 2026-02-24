@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from './supabase';
 import type {
     Chat,
     ChatMessage,
@@ -22,33 +23,73 @@ import type {
 // Per-account chat storage helpers
 // ============================================================
 
-function saveChatsForUser(userId: string, chats: Chat[]): void {
+async function saveChatsToSupabase(userId: string, chats: Chat[]): Promise<void> {
     try {
-        // Strip large base64/blob URLs before saving to save space
-        const cleaned = chats.map((chat) => ({
-            ...chat,
-            messages: chat.messages.map((msg) => ({
-                ...msg,
-                imageUrl: msg.imageUrl?.startsWith('data:') || msg.imageUrl?.startsWith('blob:')
-                    ? undefined
-                    : msg.imageUrl,
-                videoUrl: msg.videoUrl?.startsWith('data:') || msg.videoUrl?.startsWith('blob:')
-                    ? undefined
-                    : msg.videoUrl,
-            })),
-        }));
-        localStorage.setItem(`chats_${userId}`, JSON.stringify(cleaned));
+        // This is a simplified version. In a real app, you'd handle individual message inserts.
+        // For now, mirroring the requirement: save to Supabase.
+        const { error } = await supabase
+            .from('chats')
+            .upsert(chats.map(chat => ({
+                id: chat.id,
+                user_id: userId,
+                name: chat.name,
+                updated_at: new Date(chat.updatedAt).toISOString()
+            })));
+
+        if (error) throw error;
+
+        for (const chat of chats) {
+            const { error: msgErr } = await supabase
+                .from('messages')
+                .upsert(chat.messages.map(msg => ({
+                    id: msg.id,
+                    chat_id: chat.id,
+                    role: msg.role,
+                    content: msg.content,
+                    image_url: msg.imageUrl,
+                    video_url: msg.videoUrl,
+                    thumbnail_url: msg.thumbnailUrl,
+                    is_favorite: msg.isFavorite,
+                    created_at: new Date(msg.timestamp).toISOString()
+                })));
+            if (msgErr) throw msgErr;
+        }
     } catch (e) {
-        console.error('Failed to save chats for user:', e);
+        console.error('Failed to save chats to Supabase:', e);
     }
 }
 
-function loadChatsForUser(userId: string): Chat[] {
+async function loadChatsFromSupabase(userId: string): Promise<Chat[]> {
     try {
-        const raw = localStorage.getItem(`chats_${userId}`);
-        if (!raw) return [];
-        return JSON.parse(raw) as Chat[];
-    } catch {
+        const { data: chats, error } = await supabase
+            .from('chats')
+            .select(`
+                *,
+                messages (*)
+            `)
+            .eq('user_id', userId)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (chats || []).map(chat => ({
+            id: chat.id,
+            name: chat.name,
+            messages: (chat.messages || []).map((msg: any) => ({
+                id: msg.id,
+                role: msg.role,
+                content: msg.content,
+                imageUrl: msg.image_url,
+                videoUrl: msg.video_url,
+                thumbnailUrl: msg.thumbnail_url,
+                isFavorite: msg.is_favorite,
+                timestamp: new Date(msg.created_at).getTime()
+            })),
+            createdAt: new Date(chat.created_at).getTime(),
+            updatedAt: new Date(chat.updated_at).getTime()
+        }));
+    } catch (e) {
+        console.error('Failed to load chats from Supabase:', e);
         return [];
     }
 }
@@ -65,7 +106,7 @@ interface AppState {
 
     // ----- Locale -----
     locale: Locale;
-    setLocale: (locale: Locale) => void;
+    setLocale: (locale: Locale) => Promise<void>;
 
     // ----- User -----
     user: User | null;
@@ -149,20 +190,47 @@ export const useAppStore = create<AppState>()(
 
             // ----- Locale -----
             locale: 'en',
-            setLocale: (locale) => set({ locale }),
+            setLocale: async (locale) => {
+                set({ locale });
+                const user = get().user;
+                if (user) {
+                    try {
+                        await supabase
+                            .from('users')
+                            .update({ preferred_language: locale })
+                            .eq('id', user.id);
+                    } catch (e) {
+                        console.error('Failed to sync locale to Supabase:', e);
+                    }
+                }
+            },
 
             // ----- User -----
             user: null,
             isAuthenticated: false,
-            setUser: (user) => {
+            setUser: async (user) => {
                 if (user) {
-                    const savedChats = loadChatsForUser(user.id);
-                    set({
-                        user,
-                        isAuthenticated: true,
-                        chats: savedChats,
-                        activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
-                    });
+                    set({ user, isAuthenticated: true });
+                    // Fetch language preference and chats asynchronously
+                    try {
+                        const { data: userData } = await supabase
+                            .from('users')
+                            .select('preferred_language')
+                            .eq('id', user.id)
+                            .single();
+
+                        if (userData?.preferred_language) {
+                            set({ locale: userData.preferred_language as Locale });
+                        }
+
+                        const savedChats = await loadChatsFromSupabase(user.id);
+                        set({
+                            chats: savedChats,
+                            activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
+                        });
+                    } catch (e) {
+                        console.error('Failed to fetch user data from Supabase:', e);
+                    }
                 } else {
                     set({ user: null, isAuthenticated: false });
                 }
@@ -170,7 +238,7 @@ export const useAppStore = create<AppState>()(
             logout: () => {
                 const state = get();
                 if (state.user?.id) {
-                    saveChatsForUser(state.user.id, state.chats);
+                    saveChatsToSupabase(state.user.id, state.chats);
                 }
                 localStorage.removeItem('auth_token');
                 set({
@@ -193,9 +261,10 @@ export const useAppStore = create<AppState>()(
             createChat: (name?: string) => {
                 const id = uuidv4();
                 const now = Date.now();
+                const defaultName = name || `Chat ${get().chats.length + 1}`;
                 const newChat: Chat = {
                     id,
-                    name: name || `Chat ${get().chats.length + 1}`,
+                    name: defaultName,
                     messages: [],
                     createdAt: now,
                     updatedAt: now,
@@ -204,55 +273,124 @@ export const useAppStore = create<AppState>()(
                     chats: [newChat, ...s.chats],
                     activeChatId: id,
                 }));
+
+                // Async sync
+                const user = get().user;
+                if (user) {
+                    supabase.from('chats').insert({
+                        id,
+                        user_id: user.id,
+                        name: defaultName,
+                        created_at: new Date(now).toISOString(),
+                        updated_at: new Date(now).toISOString()
+                    }).then(({ error }) => {
+                        if (error) console.error('Failed to sync new chat:', error);
+                    });
+                }
                 return id;
             },
 
-            renameChat: (id, name) =>
+            renameChat: (id, name) => {
                 set((s) => ({
                     chats: s.chats.map((c) => (c.id === id ? { ...c, name, updatedAt: Date.now() } : c)),
-                })),
+                }));
 
-            deleteChat: (id) =>
+                const user = get().user;
+                if (user) {
+                    supabase.from('chats').update({ name, updated_at: new Date().toISOString() }).eq('id', id).then(({ error }) => {
+                        if (error) console.error('Failed to sync rename:', error);
+                    });
+                }
+            },
+
+            deleteChat: (id) => {
                 set((s) => {
                     const remaining = s.chats.filter((c) => c.id !== id);
                     return {
                         chats: remaining,
                         activeChatId: s.activeChatId === id ? (remaining[0]?.id || null) : s.activeChatId,
                     };
-                }),
+                });
+
+                const user = get().user;
+                if (user) {
+                    supabase.from('chats').delete().eq('id', id).then(({ error }) => {
+                        if (error) console.error('Failed to sync delete:', error);
+                    });
+                }
+            },
 
             setActiveChat: (id) => set({ activeChatId: id }),
 
             // ----- Messages -----
-            addMessage: (chatId, message) =>
-                set((s) => ({
-                    chats: s.chats.map((c) =>
-                        c.id === chatId
-                            ? {
-                                ...c,
-                                messages: [
-                                    ...c.messages,
-                                    { ...message, id: uuidv4(), timestamp: Date.now(), isFavorite: message.isFavorite ?? false },
-                                ],
-                                updatedAt: Date.now(),
-                            }
-                            : c
-                    ),
-                })),
+            addMessage: (chatId, message) => {
+                const id = uuidv4();
+                const timestamp = Date.now();
+                const fullMessage = { ...message, id, timestamp, isFavorite: message.isFavorite ?? false };
 
-            toggleFavorite: (chatId, messageId) =>
                 set((s) => ({
                     chats: s.chats.map((c) =>
                         c.id === chatId
                             ? {
                                 ...c,
-                                messages: c.messages.map((m) =>
-                                    m.id === messageId ? { ...m, isFavorite: !m.isFavorite } : m
-                                ),
+                                messages: [...c.messages, fullMessage],
+                                updatedAt: timestamp,
                             }
                             : c
                     ),
-                })),
+                }));
+
+                const user = get().user;
+                if (user) {
+                    supabase.from('messages').insert({
+                        id,
+                        chat_id: chatId,
+                        role: fullMessage.role,
+                        content: fullMessage.content,
+                        image_url: fullMessage.imageUrl,
+                        video_url: fullMessage.videoUrl,
+                        thumbnail_url: fullMessage.thumbnailUrl,
+                        is_favorite: fullMessage.isFavorite,
+                        created_at: new Date(timestamp).toISOString()
+                    }).then(({ error }) => {
+                        if (error) console.error('Failed to sync message:', error);
+                    });
+
+                    // Update chat timestamp
+                    supabase.from('chats').update({ updated_at: new Date(timestamp).toISOString() }).eq('id', chatId).then(({ error }) => {
+                        if (error) console.error('Failed to sync chat timestamp:', error);
+                    });
+                }
+            },
+
+            toggleFavorite: (chatId, messageId) => {
+                let currentStatus = false;
+                set((s) => {
+                    const chat = s.chats.find(c => c.id === chatId);
+                    const msg = chat?.messages.find(m => m.id === messageId);
+                    currentStatus = !msg?.isFavorite;
+
+                    return {
+                        chats: s.chats.map((c) =>
+                            c.id === chatId
+                                ? {
+                                    ...c,
+                                    messages: c.messages.map((m) =>
+                                        m.id === messageId ? { ...m, isFavorite: currentStatus } : m
+                                    ),
+                                }
+                                : c
+                        ),
+                    };
+                });
+
+                const user = get().user;
+                if (user) {
+                    supabase.from('messages').update({ is_favorite: currentStatus }).eq('id', messageId).then(({ error }) => {
+                        if (error) console.error('Failed to sync favorite:', error);
+                    });
+                }
+            },
 
             // ----- Generation Settings -----
             settings: DEFAULT_SETTINGS,
