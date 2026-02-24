@@ -33,9 +33,9 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
         if (containerWidth <= 0) return;
 
-        // Space available (full width on mobile, some margin on desktop)
+        // Space available (full width minus padding on mobile, some margin on desktop)
         const isMobile = window.innerWidth <= 768;
-        const margin = isMobile ? 0 : 40;
+        const margin = isMobile ? 24 : 40;
         const availW = containerWidth - margin;
         const availH = containerHeight - margin;
 

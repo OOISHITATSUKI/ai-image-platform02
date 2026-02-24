@@ -3063,8 +3063,9 @@ video {
   }
 
   .inpaint-canvas-container {
-    max-width: 100vw !important;
-    padding: 0;
+    max-width: 100% !important;
+    padding: 0 12px;
+    box-sizing: border-box;
     margin: 10px 0;
     border-radius: 0;
     background: transparent;
@@ -3075,7 +3076,8 @@ video {
   }
 
   .inpaint-canvas-container canvas {
-    max-width: 100vw !important;
+    max-width: 100% !important;
+    height: auto !important;
     touch-action: none;
     display: block;
     margin: 0 auto;
