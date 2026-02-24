@@ -31,25 +31,17 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
         if (containerWidth <= 0) return;
 
-        // Space available (account for 12px * 2 padding on mobile)
+        // Space available (the container has 12px horizontal padding via CSS if handled there, 
+        // or we can calculate it here. Container width is already available area if box-sizing is handled)
         const isMobile = window.innerWidth <= 768;
-        const marginW = isMobile ? 24 : 40;
-        const marginH = isMobile ? 20 : 40;
-        const availW = containerWidth - marginW;
-        const availH = containerHeight - marginH;
+        const availW = containerWidth;
+        const availH = containerHeight;
 
         const scaleW = availW / naturalSize.w;
         const scaleH = availH / naturalSize.h;
 
-        // Pick the scale that fits both dimensions
-        let scale = Math.min(scaleW, scaleH);
-
-        // On mobile, allow upscaling to make it easier to paint
-        if (!isMobile) {
-            scale = Math.min(1.2, scale);
-        } else {
-            scale = Math.min(2.0, scale);
-        }
+        // Pick the scale that fits both dimensions, but cap at 1.0 to preserve quality
+        let scale = Math.min(1, scaleW, scaleH);
 
         // Safety: Ensure scale is never zero
         scale = Math.max(0.1, scale);
