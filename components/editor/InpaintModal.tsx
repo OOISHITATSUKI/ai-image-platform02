@@ -22,11 +22,25 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const [displayScale, setDisplayScale] = useState(1);
     const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
 
-    // Calculate display scale based on container width
+    // Calculate display scale based on container dimensions
     const updateScale = useCallback(() => {
         if (!naturalSize || !containerRef.current) return;
-        const containerWidth = containerRef.current.clientWidth;
-        const scale = Math.min(1, containerWidth / naturalSize.w);
+        const container = containerRef.current;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        if (containerWidth <= 0 || containerHeight <= 0) return;
+
+        // Space available (account for some margin on desktop, full width on mobile)
+        const margin = window.innerWidth <= 768 ? 0 : 40;
+        const availW = containerWidth - margin;
+        const availH = containerHeight - margin;
+
+        const scaleW = availW / naturalSize.w;
+        const scaleH = availH / naturalSize.h;
+
+        // Pick the scale that fits both dimensions
+        const scale = Math.min(1, scaleW, scaleH);
         setDisplayScale(scale);
     }, [naturalSize]);
 
@@ -247,6 +261,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             {/* Canvas Area — image and canvas are exactly overlapping */}
             <div
                 ref={containerRef}
+                className="inpaint-canvas-area"
                 style={{
                     flex: 1,
                     display: 'flex',
@@ -254,13 +269,14 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                     justifyContent: 'center',
                     overflow: 'hidden',
                     background: '#111',
-                    padding: '20px',
                     minHeight: 0,
+                    width: '100%',
                 }}
             >
                 {naturalSize && (
                     <div
                         ref={wrapperRef}
+                        className="inpaint-canvas-container"
                         style={{
                             position: 'relative',
                             width: `${naturalSize.w * displayScale}px`,
