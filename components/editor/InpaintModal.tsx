@@ -19,54 +19,15 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const [tool, setTool] = useState<'brush' | 'eraser'>('brush');
     const [isDrawing, setIsDrawing] = useState(false);
     const [history, setHistory] = useState<ImageData[]>([]);
-    const [displaySize, setDisplaySize] = useState<{ w: number; h: number } | null>(null);
+    const [displayScale, setDisplayScale] = useState(1);
     const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
 
-    // Calculate display size to fill available space while preserving aspect ratio
-    const calculateDisplaySize = useCallback(() => {
+    // Calculate display scale based on container width
+    const updateScale = useCallback(() => {
         if (!naturalSize || !containerRef.current) return;
-
-        const container = containerRef.current;
-        const availW = container.clientWidth - 40; // padding
-        const availH = container.clientHeight - 40;
-        const { w: natW, h: natH } = naturalSize;
-        const imgAspect = natW / natH;
-
-        // Scale image to fill as much space as possible
-        let displayW: number, displayH: number;
-
-        if (imgAspect > availW / availH) {
-            // Image is wider than container → fit by width
-            displayW = Math.min(availW, natW * 1.5); // Allow upscale for small images
-            displayH = displayW / imgAspect;
-        } else {
-            // Image is taller than container → fit by height
-            displayH = Math.min(availH, natH * 1.5);
-            displayW = displayH * imgAspect;
-        }
-
-        // Ensure minimum size for small images (at least 400px on short side)
-        const minShortSide = 400;
-        const shortSide = Math.min(displayW, displayH);
-        if (shortSide < minShortSide) {
-            const scale = minShortSide / shortSide;
-            displayW *= scale;
-            displayH *= scale;
-        }
-
-        // Final clamp to container
-        if (displayW > availW) {
-            const s = availW / displayW;
-            displayW *= s;
-            displayH *= s;
-        }
-        if (displayH > availH) {
-            const s = availH / displayH;
-            displayW *= s;
-            displayH *= s;
-        }
-
-        setDisplaySize({ w: Math.round(displayW), h: Math.round(displayH) });
+        const containerWidth = containerRef.current.clientWidth;
+        const scale = Math.min(1, containerWidth / naturalSize.w);
+        setDisplayScale(scale);
     }, [naturalSize]);
 
     // Load image and set up canvas
@@ -91,32 +52,27 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         img.src = imageUrl;
     }, [imageUrl]);
 
-    // Recalculate display size when natural size or container changes
+    // Handle resizing
     useEffect(() => {
-        calculateDisplaySize();
+        updateScale();
 
-        const observer = new ResizeObserver(() => calculateDisplaySize());
+        const observer = new ResizeObserver(() => updateScale());
         if (containerRef.current) observer.observe(containerRef.current);
 
-        // Handle window resize for mobile orientation changes
-        const handleResize = () => calculateDisplaySize();
-        window.addEventListener('resize', handleResize);
-
+        window.addEventListener('resize', updateScale);
         return () => {
             observer.disconnect();
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', updateScale);
         };
-    }, [calculateDisplaySize]);
+    }, [updateScale]);
 
     const lastPos = useRef<{ x: number; y: number } | null>(null);
 
     const getCanvasCoords = (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current;
-        if (!canvas) return null;
+        if (!canvas || !displayScale) return null;
 
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
 
         let clientX: number, clientY: number;
         if ('touches' in e) {
@@ -128,9 +84,9 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         }
 
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY,
-            scaleX,
+            x: (clientX - rect.left) / displayScale,
+            y: (clientY - rect.top) / displayScale,
+            scaleCorrection: 1 / displayScale,
         };
     };
 
@@ -145,7 +101,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             if (canvas) {
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    const effectiveBrushSize = brushSize * coords.scaleX;
+                    const effectiveBrushSize = brushSize * coords.scaleCorrection;
                     ctx.lineWidth = effectiveBrushSize;
                     ctx.lineCap = 'round';
                     if (tool === 'brush') {
@@ -182,7 +138,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const coords = getCanvasCoords(e);
         if (!coords) return;
 
-        const effectiveBrushSize = brushSize * coords.scaleX;
+        const effectiveBrushSize = brushSize * coords.scaleCorrection;
         ctx.lineWidth = effectiveBrushSize;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -302,13 +258,13 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                     minHeight: 0,
                 }}
             >
-                {displaySize && (
+                {naturalSize && (
                     <div
                         ref={wrapperRef}
                         style={{
                             position: 'relative',
-                            width: `${displaySize.w}px`,
-                            height: `${displaySize.h}px`,
+                            width: `${naturalSize.w * displayScale}px`,
+                            height: `${naturalSize.h * displayScale}px`,
                             borderRadius: '8px',
                             overflow: 'hidden',
                             boxShadow: '0 0 40px rgba(0,0,0,0.5)',
