@@ -75,7 +75,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-            alert(`DEBUG 1 (img.onload): naturalSize=${img.naturalWidth}x${img.naturalHeight}`);
             setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
         };
         img.src = imageUrl;
@@ -89,7 +88,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         canvas.width = naturalSize.w;
         canvas.height = naturalSize.h;
 
-        alert(`DEBUG 2 (canvas setup): canvas=${canvas.width}x${canvas.height}, style=${canvas.style.width}x${canvas.style.height}`);
 
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -348,9 +346,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain', // Preserve aspect ratio
+                                width: `${Math.round(naturalSize.w * displayScale)}px`,
+                                height: `${Math.round(naturalSize.h * displayScale)}px`,
                                 display: 'block',
                                 userSelect: 'none',
                                 pointerEvents: 'none',
@@ -365,10 +362,10 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '100%',
+                                width: `${Math.round(naturalSize.w * displayScale)}px`,
+                                height: `${Math.round(naturalSize.h * displayScale)}px`,
                                 cursor: 'crosshair',
-                                touchAction: 'none' // Important for drawing precision
+                                touchAction: 'none'
                             }}
                             onMouseDown={startDrawing}
                             onMouseMove={draw}
