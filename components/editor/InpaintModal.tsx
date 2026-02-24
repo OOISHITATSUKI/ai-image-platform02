@@ -70,34 +70,36 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         setDisplayScale(scale);
     }, [naturalSize]);
 
-    // Load image and set up canvas
+    // 1. Load image to get natural dimensions
     useEffect(() => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-            alert(`DEBUG: naturalSize=${img.naturalWidth}x${img.naturalHeight}, width=${img.width}x${img.height}`);
-            console.log('[InpaintModal] img.onload:', {
-                src: imageUrl.substring(0, 50) + '...',
-                w: img.naturalWidth,
-                h: img.naturalHeight
-            });
+            alert(`DEBUG 1 (img.onload): naturalSize=${img.naturalWidth}x${img.naturalHeight}`);
             setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
-
-            const canvas = canvasRef.current;
-            if (canvas) {
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                alert(`DEBUG: canvas=${canvas.width}x${canvas.height}, style=${canvas.style.width}x${canvas.style.height}`);
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    setHistory([ctx.getImageData(0, 0, canvas.width, canvas.height)]);
-                }
-            }
         };
         img.src = imageUrl;
     }, [imageUrl]);
+
+    // 2. Setup canvas once naturalSize is set AND component has re-rendered to mount the canvas
+    useEffect(() => {
+        if (!naturalSize || !canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        canvas.width = naturalSize.w;
+        canvas.height = naturalSize.h;
+
+        alert(`DEBUG 2 (canvas setup): canvas=${canvas.width}x${canvas.height}, style=${canvas.style.width}x${canvas.style.height}`);
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            // Also need to draw the image onto the history/undo stack if needed, 
+            // but for now let's just ensure the size is correct
+            setHistory([ctx.getImageData(0, 0, canvas.width, canvas.height)]);
+        }
+    }, [naturalSize]);
 
     // Handle resizing
     useEffect(() => {
