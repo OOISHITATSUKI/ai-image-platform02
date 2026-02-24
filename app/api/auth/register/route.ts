@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         if (recentAccounts >= MAX_ACCOUNTS_PER_IP) {
             logRegistrationAttempt(ip, normalizedEmail, false);
             return NextResponse.json(
-                { error: '現在、新規登録を受け付けられません。しばらく時間を置いてからお試しください。' },
+                { error: 'Registration is currently unavailable. Please try again later.' },
                 { status: 429 }
             );
         }

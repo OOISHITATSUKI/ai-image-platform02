@@ -57,7 +57,7 @@ export default function LoginPage() {
     // ── Step 1: email + password ──────────────────────────
     const handleLogin = async () => {
         setError('');
-        if (!email || !password) { setError('メールアドレスとパスワードを入力してください'); return; }
+        if (!email || !password) { setError('Please enter your email address and password'); return; }
         setLoading(true);
         try {
             const res = await fetch('/api/auth/login', {
@@ -87,7 +87,7 @@ export default function LoginPage() {
             // Normal success
             onLoginSuccess(data.token, data.user);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'エラーが発生しました');
+            setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setLoading(false);
         }
@@ -96,7 +96,7 @@ export default function LoginPage() {
     // ── Step 2: OTP verification ──────────────────────────
     const handleVerify = async () => {
         setError('');
-        if (otpCode.length !== 6) { setError('6桁のコードを入力してください'); return; }
+        if (otpCode.length !== 6) { setError('Please enter the 6-digit code'); return; }
         setLoading(true);
         try {
             const res = await fetch('/api/auth/verify-device', {
@@ -108,7 +108,7 @@ export default function LoginPage() {
             if (!res.ok) throw new Error(data.error);
             onLoginSuccess(data.token, data.user);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'エラーが発生しました');
+            setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setLoading(false);
         }
@@ -145,7 +145,7 @@ export default function LoginPage() {
     const handleForgotPassword = async () => {
         setError('');
         setSuccessMsg('');
-        if (!resetEmail) { setError('メールアドレスを入力してください'); return; }
+        if (!resetEmail) { setError('Please enter your email address'); return; }
         setLoading(true);
         try {
             const res = await fetch('/api/auth/forgot-password', {
@@ -155,10 +155,10 @@ export default function LoginPage() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            setSuccessMsg('認証コードをメールで送信しました。有効期限は10分間です。');
+            setSuccessMsg('Verification code sent to your email. Valid for 10 minutes.');
             setStep('reset-password');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'エラーが発生しました');
+            setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setLoading(false);
         }
@@ -167,8 +167,8 @@ export default function LoginPage() {
     const handleResetPassword = async () => {
         setError('');
         setSuccessMsg('');
-        if (!resetOtp || !newPassword) { setError('コードと新しいパスワードを入力してください'); return; }
-        if (newPassword.length < 8) { setError('パスワードは8文字以上で設定してください'); return; }
+        if (!resetOtp || !newPassword) { setError('Please enter the code and your new password'); return; }
+        if (newPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
         setLoading(true);
         try {
             const res = await fetch('/api/auth/reset-password', {
@@ -182,10 +182,10 @@ export default function LoginPage() {
             // Success
             setEmail(resetEmail);
             setPassword('');
-            setSuccessMsg('パスワードの再設定が完了しました。新しいパスワードでログインしてください。');
+            setSuccessMsg('Password reset complete. Please log in with your new password.');
             setStep('password');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'エラーが発生しました');
+            setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setLoading(false);
         }
@@ -193,12 +193,12 @@ export default function LoginPage() {
 
     const riskLabel = (r: string) => {
         const labels: Record<string, string> = {
-            new_device: '新しいデバイスからのアクセス',
-            country_changed: '通常と異なる場所からのアクセス',
-            long_absence: '30日以上ぶりのログイン',
-            repeated_failures: 'パスワード入力の失敗が続いたため',
+            new_device: 'Access from a new device',
+            country_changed: 'Access from an unusual location',
+            long_absence: 'First login in over 30 days',
+            repeated_failures: 'Due to repeated login failures',
         };
-        return labels[r] ?? '通常と異なるアクセス状況を検出しました';
+        return labels[r] ?? 'Unusual access pattern detected';
     };
 
     // ── Shared styles ─────────────────────────────────────
@@ -244,7 +244,7 @@ export default function LoginPage() {
                             <p className="auth-subtitle">Sign in to your account</p>
 
                             <div className="auth-field">
-                                <label style={labelStyle}>メールアドレス</label>
+                                <label style={labelStyle}>Email Address</label>
                                 <input
                                     type="email"
                                     value={email}
@@ -258,7 +258,7 @@ export default function LoginPage() {
                             </div>
 
                             <div className="auth-field">
-                                <label style={labelStyle}>パスワード</label>
+                                <label style={labelStyle}>Password</label>
                                 <input
                                     id="pw-input"
                                     type="password"
@@ -298,17 +298,17 @@ export default function LoginPage() {
                     {step === 'mfa' && (
                         <>
                             <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🔐</div>
-                            <h2 style={{ textAlign: 'center' }}>追加認証が必要です</h2>
+                            <h2 style={{ textAlign: 'center' }}>Additional Verification Required</h2>
                             <p className="auth-subtitle" style={{ textAlign: 'center' }}>
                                 {riskLabel(riskReason)}
                             </p>
 
                             <div style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '0.88rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                <strong style={{ color: '#a78bfa' }}>{emailHint}</strong> に6桁のコードを送信しました
+                                Sent a 6-digit code to <strong style={{ color: '#a78bfa' }}>{emailHint}</strong>
                             </div>
 
                             <div className="auth-field">
-                                <label style={labelStyle}>6桁の確認コード</label>
+                                <label style={labelStyle}>6-digit Verification Code</label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -331,9 +331,9 @@ export default function LoginPage() {
                                     style={{ marginTop: '2px', accentColor: 'var(--primary)', width: '16px', height: '16px', flexShrink: 0 }}
                                 />
                                 <div>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>このデバイスを信頼する（90日間）</div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Trust this device (90 days)</div>
                                     <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                                        次回からパスワードのみでログインできます。共有PCでは使用しないことを推奨します。
+                                        You can log in with just your password next time. Not recommended for shared computers.
                                     </div>
                                 </div>
                             </label>
@@ -343,7 +343,7 @@ export default function LoginPage() {
                                 onClick={handleVerify}
                                 disabled={loading || otpCode.length !== 6}
                             >
-                                {loading ? '認証中...' : '認証する'}
+                                {loading ? 'Verifying...' : 'Verify'}
                             </button>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
@@ -351,14 +351,14 @@ export default function LoginPage() {
                                     onClick={() => setStep('password')}
                                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem' }}
                                 >
-                                    ← 戻る
+                                    ← Back
                                 </button>
                                 <button
                                     onClick={handleResend}
                                     disabled={resendCooldown > 0 || loading}
                                     style={{ background: 'none', border: 'none', color: resendCooldown > 0 ? 'var(--text-secondary)' : 'var(--primary)', cursor: resendCooldown > 0 ? 'default' : 'pointer', fontSize: '0.85rem' }}
                                 >
-                                    {resendCooldown > 0 ? `再送する（${resendCooldown}秒後）` : 'コードを再送する'}
+                                    {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : 'Resend Code'}
                                 </button>
                             </div>
                         </>
@@ -368,9 +368,9 @@ export default function LoginPage() {
                     {step === 'forgot-password' && (
                         <>
                             <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🔑</div>
-                            <h2 style={{ textAlign: 'center' }}>パスワードの再設定</h2>
+                            <h2 style={{ textAlign: 'center' }}>Reset Password</h2>
                             <p className="auth-subtitle" style={{ textAlign: 'center', marginBottom: '24px' }}>
-                                登録しているメールアドレスを入力してください。<br />パスワード再設定用のコードをお送りします。
+                                Enter your registered email address to receive a reset code.
                             </p>
 
                             {successMsg && (
@@ -380,7 +380,7 @@ export default function LoginPage() {
                             )}
 
                             <div className="auth-field">
-                                <label style={labelStyle}>メールアドレス</label>
+                                <label style={labelStyle}>Email Address</label>
                                 <input
                                     type="email"
                                     value={resetEmail}
@@ -398,7 +398,7 @@ export default function LoginPage() {
                                 onClick={handleForgotPassword}
                                 disabled={loading || !resetEmail}
                             >
-                                {loading ? '送信中...' : 'コードを送信'}
+                                {loading ? 'Sending...' : 'Send Code'}
                             </button>
 
                             <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -406,7 +406,7 @@ export default function LoginPage() {
                                     onClick={() => { setError(''); setSuccessMsg(''); setStep('password'); }}
                                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}
                                 >
-                                    ← ログイン画面に戻る
+                                    ← Back to Login
                                 </button>
                             </div>
                         </>
@@ -416,9 +416,9 @@ export default function LoginPage() {
                     {step === 'reset-password' && (
                         <>
                             <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '2rem' }}>🛡️</div>
-                            <h2 style={{ textAlign: 'center' }}>新しいパスワードの設定</h2>
+                            <h2 style={{ textAlign: 'center' }}>Set New Password</h2>
                             <p className="auth-subtitle" style={{ textAlign: 'center', marginBottom: '24px' }}>
-                                メールに届いた6桁のコードと新しいパスワードを入力してください。
+                                Enter the 6-digit code sent to your email and your new password.
                             </p>
 
                             {successMsg && (
@@ -428,7 +428,7 @@ export default function LoginPage() {
                             )}
 
                             <div className="auth-field">
-                                <label style={labelStyle}>6桁の確認コード</label>
+                                <label style={labelStyle}>6-digit Verification Code</label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -442,12 +442,12 @@ export default function LoginPage() {
                             </div>
 
                             <div className="auth-field">
-                                <label style={labelStyle}>新しいパスワード</label>
+                                <label style={labelStyle}>New Password</label>
                                 <input
                                     type="password"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
-                                    placeholder="8文字以上の新しいパスワード"
+                                    placeholder="New password (at least 8 characters)"
                                     className="auth-input"
                                     style={inputStyle}
                                     onKeyDown={e => e.key === 'Enter' && handleResetPassword()}
@@ -459,7 +459,7 @@ export default function LoginPage() {
                                 onClick={handleResetPassword}
                                 disabled={loading || resetOtp.length !== 6 || newPassword.length < 8}
                             >
-                                {loading ? '設定中...' : 'パスワードを再設定する'}
+                                {loading ? 'Saving...' : 'Reset Password'}
                             </button>
 
                             <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -467,7 +467,7 @@ export default function LoginPage() {
                                     onClick={() => { setError(''); setSuccessMsg(''); setStep('password'); }}
                                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}
                                 >
-                                    キャンセルしてログイン画面に戻る
+                                    Cancel and return to Login
                                 </button>
                             </div>
                         </>

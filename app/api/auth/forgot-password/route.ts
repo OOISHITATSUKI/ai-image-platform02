@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
         // Check if locked out
         if (user.passwordResetLockedUntil && now < user.passwordResetLockedUntil) {
             return NextResponse.json(
-                { error: '一時的にロックされています。24時間後にもう一度お試しください。' },
-                { status: 429 }
+                { error: 'This account is temporarily locked. Please try again in 24 hours.' },
+                { status: 403 }
             );
         }
 
