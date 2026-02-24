@@ -1,6 +1,16 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendInstance: Resend | null = null;
+const getResend = () => {
+  if (!resendInstance) {
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('[Email] RESEND_API_KEY is missing. Email features will be disabled.');
+      return null;
+    }
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
+};
 const FROM = process.env.RESEND_FROM || 'Image Nude <noreply@send.imagenude.com>';
 
 export async function sendOTPEmail(to: string, otp: string, type: 'register' | 'login' | 'reset' = 'register') {
@@ -32,6 +42,12 @@ export async function sendOTPEmail(to: string, otp: string, type: 'register' | '
   `;
 
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.error('[Email] Cannot send email: Resend is not initialized.');
+      return false;
+    }
+
     const { data, error } = await resend.emails.send({
       from: FROM,
       to,
