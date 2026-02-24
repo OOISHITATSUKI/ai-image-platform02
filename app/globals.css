@@ -3126,40 +3126,40 @@ video {
   .inpaint-modal-footer {
     padding: 12px;
   }
+
+  /* ── ライブラリ（生成履歴） ── */
+  .library-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  /* ── 設定ページ ── */
+  .settings-page {
+    padding: 16px;
+  }
+
+  /* ── 料金ページ ── */
+  .pricing-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  /* ── ホームページ ── */
+  .home-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .home-hero p {
+    font-size: 0.9rem;
+  }
+
+  .home-features {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* ── ライブラリ（生成履歴） ── */
-.library-grid {
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 8px;
-  padding: 8px;
-}
-
-/* ── 設定ページ ── */
-.settings-page {
-  padding: 16px;
-}
-
-/* ── 料金ページ ── */
-.pricing-grid {
-  grid-template-columns: 1fr !important;
-  gap: 16px;
-  padding: 16px;
-}
-
-/* ── ホームページ ── */
-.home-hero h1 {
-  font-size: 1.8rem;
-}
-
-.home-hero p {
-  font-size: 0.9rem;
-}
-
-.home-features {
-  grid-template-columns: 1fr;
-}
-}
 
 /* ── さらに小さい画面（iPhone SE等） ── */
 @media (max-width: 380px) {
