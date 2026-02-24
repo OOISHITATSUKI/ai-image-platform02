@@ -3058,56 +3058,107 @@ video {
   .inpaint-canvas-container {
     width: 100% !important;
     max-width: 100vw;
+    padding: 0;
     touch-action: none;
     /* キャンバスのスクロール防止 */
+    margin: 0;
+    border-radius: 0;
   }
 
-  .inpaint-toolbar {
+  .inpaint-canvas-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    touch-action: none;
+  }
+
+  /* ツールバーを横スクロール可能に */
+  .inpaint-toolbar,
+  .inpaint-tools {
+    display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px;
+    gap: 8px;
+    padding: 8px 12px;
+    justify-content: center;
   }
 
+  .inpaint-btn,
+  .inpaint-tool-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    min-height: 44px;
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+  }
+
+  /* ブラシサイズを幅いっぱいに */
   .inpaint-size-control {
     width: 100%;
-    justify-content: space-between;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .inpaint-size-slider {
     flex: 1;
+    width: 100%;
   }
 
-  /* ── ライブラリ（生成履歴） ── */
-  .library-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px;
-    padding: 8px;
+  /* Doneボタンを大きく */
+  .inpaint-done-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    min-height: 54px;
   }
 
-  /* ── 設定ページ ── */
-  .settings-page {
-    padding: 16px;
-  }
-
-  /* ── 料金ページ ── */
-  .pricing-grid {
-    grid-template-columns: 1fr !important;
-    gap: 16px;
-    padding: 16px;
-  }
-
-  /* ── ホームページ ── */
-  .home-hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .home-hero p {
+  /* 説明テキストをコンパクトに */
+  .inpaint-instructions,
+  .inpaint-modal-header h2 {
     font-size: 0.9rem;
   }
 
-  .home-features {
-    grid-template-columns: 1fr;
+  .inpaint-modal-header {
+    padding: 12px 16px;
   }
+
+  .inpaint-modal-footer {
+    padding: 12px;
+  }
+}
+
+/* ── ライブラリ（生成履歴） ── */
+.library-grid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* ── 設定ページ ── */
+.settings-page {
+  padding: 16px;
+}
+
+/* ── 料金ページ ── */
+.pricing-grid {
+  grid-template-columns: 1fr !important;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* ── ホームページ ── */
+.home-hero h1 {
+  font-size: 1.8rem;
+}
+
+.home-hero p {
+  font-size: 0.9rem;
+}
+
+.home-features {
+  grid-template-columns: 1fr;
+}
 }
 
 /* ── さらに小さい画面（iPhone SE等） ── */

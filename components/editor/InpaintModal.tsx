@@ -97,7 +97,15 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
         const observer = new ResizeObserver(() => calculateDisplaySize());
         if (containerRef.current) observer.observe(containerRef.current);
-        return () => observer.disconnect();
+
+        // Handle window resize for mobile orientation changes
+        const handleResize = () => calculateDisplaySize();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', handleResize);
+        };
     }, [calculateDisplaySize]);
 
     const lastPos = useRef<{ x: number; y: number } | null>(null);
