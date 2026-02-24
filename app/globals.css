@@ -3055,20 +3055,20 @@ video {
   }
 
   /* ── インペイント（Nude Mode） ── */
-  .inpaint-canvas-container {
-    width: 100% !important;
-    max-width: 100vw;
-    padding: 0;
-    touch-action: none;
-    /* キャンバスのスクロール防止 */
-    margin: 0;
-    border-radius: 0;
-  }
-
+  .inpaint-canvas-container,
   .inpaint-canvas-container canvas {
+    max-width: 100% !important;
     width: 100% !important;
     height: auto !important;
+    object-fit: contain;
     touch-action: none;
+    /* キャンバスのスクロール防止 */
+  }
+
+  .inpaint-canvas-container {
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
   }
 
   /* ツールバーを横スクロール可能に */
