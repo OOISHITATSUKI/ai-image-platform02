@@ -54,6 +54,16 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             ? containerWidth / imageWidth
             : Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);
 
+        console.log('[InpaintModal] updateScale:', {
+            isMobile,
+            naturalSize,
+            containerWidth,
+            containerHeight,
+            scale,
+            displayW: imageWidth * scale,
+            displayH: imageHeight * scale
+        });
+
         setDisplayScale(scale);
     }, [naturalSize]);
 
@@ -62,6 +72,11 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
+            console.log('[InpaintModal] img.onload:', {
+                src: imageUrl.substring(0, 50) + '...',
+                w: img.naturalWidth,
+                h: img.naturalHeight
+            });
             setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
 
             const canvas = canvasRef.current;
