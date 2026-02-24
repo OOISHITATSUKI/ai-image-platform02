@@ -27,31 +27,32 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     useEffect(() => {
         setMounted(true);
         // Disable body scroll when modal is open
+        const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = '';
+            document.body.style.overflow = originalOverflow;
         };
     }, []);
 
     // Calculate display scale based on container dimensions
     const updateScale = useCallback(() => {
         if (!naturalSize || !containerRef.current) return;
-        const container = containerRef.current;
 
-        // Always use window dimensions for mobile to ensure edge-to-edge
         const isMobile = window.innerWidth <= 768;
         const imageWidth = naturalSize.w;
         const imageHeight = naturalSize.h;
 
-        // On mobile, we force full width of the viewport
+        // On mobile, force full viewport width
+        // On PC, fit within container while capping scale at 1.0
+        const container = containerRef.current;
         const containerWidth = isMobile ? window.innerWidth : container.clientWidth;
         const containerHeight = container.clientHeight || (window.innerHeight * 0.6);
 
         if (containerWidth <= 0) return;
 
         const scale = isMobile
-            ? containerWidth / imageWidth          // スマホ: 常にフル幅
-            : Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);  // PC: 元サイズ以下
+            ? containerWidth / imageWidth
+            : Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);
 
         setDisplayScale(scale);
     }, [naturalSize]);
@@ -81,10 +82,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     // Handle resizing
     useEffect(() => {
         updateScale();
-
         const observer = new ResizeObserver(() => updateScale());
         if (containerRef.current) observer.observe(containerRef.current);
-
         window.addEventListener('resize', updateScale);
         return () => {
             observer.disconnect();
@@ -99,8 +98,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         if (!canvas) return null;
 
         const rect = canvas.getBoundingClientRect();
-
-        // Calculate dynamic scale based on current DOM resolution vs internal resolution
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
@@ -115,7 +112,11 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-        e.preventDefault();
+        if ('touches' in e) {
+            // Check if user is trying to scroll (two fingers or panning not on canvas)
+            // But here we want to paint. To allow scrolling, we could use a toggle, 
+            // but usually a fixed canvas is better.
+        }
         setIsDrawing(true);
         const coords = getCanvasCoords(e);
         if (coords) {
@@ -150,7 +151,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        e.preventDefault();
         if (!isDrawing) return;
 
         const canvas = canvasRef.current;
@@ -220,20 +220,17 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const handleDone = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         const tctx = tempCanvas.getContext('2d');
         if (!tctx) return;
-
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         const maskData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = maskData.data;
         const processedData = tctx.createImageData(canvas.width, canvas.height);
         const pPixels = processedData.data;
-
         for (let i = 0; i < pixels.length; i += 4) {
             if (pixels[i + 3] > 0) {
                 pPixels[i] = pPixels[i + 1] = pPixels[i + 2] = pPixels[i + 3] = 255;
@@ -253,49 +250,52 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             className="inpaint-modal-overlay"
             style={{
                 position: 'fixed',
-                inset: 0,
-                width: '100vw',
-                height: '100vh',
-                zIndex: 3500, // Above everything
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                height: '100dvh', // Use dynamic viewport height
+                zIndex: 3500,
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(0,0,0,0.95)',
-                backdropFilter: 'blur(10px)'
+                background: '#000',
+                overflow: 'hidden'
             }}
         >
-            <div className="inpaint-modal-header">
-                <h2>✨ {t('chat.inpaintModalTitle')}</h2>
-                <button className="close-btn" onClick={onClose}>
-                    {t('chat.inpaintClose')} ✕
+            <div className="inpaint-modal-header" style={{ padding: '8px 16px', minHeight: '44px' }}>
+                <h2 style={{ fontSize: '1rem' }}>✨ {t('chat.inpaintModalTitle')}</h2>
+                <button className="close-btn" onClick={onClose} style={{ padding: '8px' }}>
+                    ✕
                 </button>
             </div>
 
-            {/* Quality Notice */}
-            <div style={{
-                padding: '12px 16px',
-                fontSize: '0.82rem',
+            {/* Quality Notice - Compact and Hidden on very small screens if necessary */}
+            <div className="inpaint-quality-notice" style={{
+                padding: '8px 16px',
+                fontSize: '0.75rem',
                 color: 'var(--text-secondary)',
-                background: 'rgba(255,255,255,0.03)',
+                background: 'rgba(255,255,255,0.02)',
                 borderBottom: '1px solid var(--border)',
-                lineHeight: '1.5'
+                lineHeight: '1.4'
             }}>
                 <div style={{ whiteSpace: 'pre-line' }}>{t('chat.inpaintClothingHint')}</div>
             </div>
 
-            {/* Canvas Area */}
+            {/* Canvas Area - Scrollable on mobile */}
             <div
                 ref={containerRef}
                 className="inpaint-canvas-area"
                 style={{
                     flex: 1,
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
+                    justifyContent: 'flex-start', // Top aligned for better scrolling
+                    overflow: 'auto', // Allow scrolling
                     background: '#000',
-                    minHeight: 0,
                     width: '100%',
-                    padding: 0
+                    WebkitOverflowScrolling: 'touch'
                 }}
             >
                 {naturalSize && (
@@ -306,9 +306,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                             position: 'relative',
                             width: `${naturalSize.w * displayScale}px`,
                             height: `${naturalSize.h * displayScale}px`,
-                            boxShadow: '0 0 50px rgba(0,0,0,0.8)',
                             flexShrink: 0,
-                            margin: 0,
+                            margin: '0 auto',
                             padding: 0
                         }}
                     >
@@ -321,7 +320,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 left: 0,
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'contain',
+                                objectFit: 'cover', // Use cover or fill to avoid any incidental gaps
                                 display: 'block',
                                 userSelect: 'none',
                                 pointerEvents: 'none',
@@ -339,7 +338,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 width: '100%',
                                 height: '100%',
                                 cursor: 'crosshair',
-                                touchAction: 'none',
+                                touchAction: 'none' // Important for drawing precision
                             }}
                             onMouseDown={startDrawing}
                             onMouseMove={draw}
@@ -353,30 +352,30 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                 )}
             </div>
 
-            <div className="inpaint-modal-footer">
-                <div className="inpaint-tools">
+            <div className="inpaint-modal-footer" style={{ padding: '8px', background: 'var(--bg-panel)' }}>
+                <div className="inpaint-tools" style={{ marginBottom: '8px' }}>
                     <button
                         className={`inpaint-tool-btn ${tool === 'brush' ? 'active' : ''}`}
                         onClick={() => setTool('brush')}
                     >
-                        🖌 {t('chat.inpaintBrush')}
+                        {t('chat.inpaintBrush')}
                     </button>
                     <button
                         className={`inpaint-tool-btn ${tool === 'eraser' ? 'active' : ''}`}
                         onClick={() => setTool('eraser')}
                     >
-                        🧹 {t('chat.inpaintEraser')}
+                        {t('chat.inpaintEraser')}
                     </button>
                     <button className="inpaint-tool-btn" onClick={handleUndo}>
-                        ↩ {t('chat.inpaintUndo')}
+                        {t('chat.inpaintUndo')}
                     </button>
                     <button className="inpaint-tool-btn" onClick={handleClear}>
-                        🗑 {t('chat.inpaintClear')}
+                        {t('chat.inpaintClear')}
                     </button>
                 </div>
 
-                <div className="inpaint-size-control">
-                    <span>{t('chat.inpaintSize')}: {brushSize}px</span>
+                <div className="inpaint-size-control" style={{ marginBottom: '8px', padding: '0 8px' }}>
+                    <span style={{ fontSize: '0.8rem', minWidth: '80px' }}>{t('chat.inpaintSize')}: {brushSize}</span>
                     <input
                         type="range"
                         min="5"
@@ -387,7 +386,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                     />
                 </div>
 
-                <button className="inpaint-done-btn" onClick={handleDone}>
+                <button className="inpaint-done-btn" onClick={handleDone} style={{ padding: '12px' }}>
                     {t('chat.inpaintDone')} ✓
                 </button>
             </div>

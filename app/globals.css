@@ -3148,6 +3148,13 @@ video {
     padding: 16px;
   }
 
+  /* Hide quality notice on small mobile to save vertical space */
+  @media (max-height: 700px) {
+    .inpaint-quality-notice {
+      display: none !important;
+    }
+  }
+
   /* ── ホームページ ── */
   .home-hero h1 {
     font-size: 1.8rem;
