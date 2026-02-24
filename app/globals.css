@@ -3064,15 +3064,14 @@ video {
 
   .inpaint-canvas-container {
     max-width: 100% !important;
+    width: 100%;
     padding: 0 12px;
     box-sizing: border-box;
     margin: 10px 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 300px;
   }
 
   .inpaint-canvas-container canvas {
@@ -3080,7 +3079,8 @@ video {
     height: auto !important;
     touch-action: none;
     display: block;
-    margin: 0 auto;
+    image-rendering: pixelated;
+    /* Optional: keep mask sharp */
   }
 
   /* ツールバーを横スクロール可能に */

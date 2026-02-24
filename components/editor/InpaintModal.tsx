@@ -317,7 +317,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 left: 0,
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'fill',
+                                objectFit: 'contain',
                                 display: 'block',
                                 userSelect: 'none',
                                 pointerEvents: 'none',
