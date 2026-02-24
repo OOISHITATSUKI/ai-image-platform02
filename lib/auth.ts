@@ -172,10 +172,7 @@ export function extractToken(authHeader: string | null): string | null {
 }
 
 // ----- OTP -----
-export function generateOTP(email?: string): string {
-    if (process.env.NODE_ENV !== 'production' && email === 'ooisidegesu@gmail.com') {
-        return '123456';
-    }
+export function generateOTP(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 

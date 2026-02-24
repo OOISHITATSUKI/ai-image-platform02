@@ -145,9 +145,7 @@ export async function POST(req: NextRequest) {
 
         // ── High-risk: send OTP and return mfa_required ──────────────────
         if (riskReason) {
-            const otp = ((process.env.NODE_ENV !== 'production' || process.env.ALLOW_DEBUG_OTP === 'true') && user.email === 'ooisidegesu@gmail.com')
-                ? '123456'
-                : Math.floor(100000 + Math.random() * 900000).toString();
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
             user.deviceOtpCode = otp;
             user.deviceOtpExpiresAt = now + DEVICE_OTP_TTL_MS;
             user.deviceOtpAttempts = 0;
