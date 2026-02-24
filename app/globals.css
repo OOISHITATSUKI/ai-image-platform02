@@ -2132,9 +2132,7 @@ video {
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
+  /* .sidebar display: none removed to allow transform-based toggle */
 }
 
 /* ── Upload Thumbnails (Multi-image) ── */
@@ -2797,16 +2795,16 @@ video {
   }
 
   .sidebar {
+    display: flex !important;
+    /* Force display flex to override any other rules */
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     width: 280px;
     transform: translateX(-100%);
-    transition: transform var(--transition-slow);
+    transition: transform 0.3s ease;
     z-index: 3000;
-    box-shadow: var(--shadow-lg);
-    border-right: 1px solid var(--border);
   }
 
   /* Since the state is sidebarCollapsed, when it is FALSE, it should show on mobile */
