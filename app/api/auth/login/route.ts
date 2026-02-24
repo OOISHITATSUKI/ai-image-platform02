@@ -13,6 +13,7 @@ import {
     DEVICE_TRUST_TTL_MS,
 } from '@/lib/db/trusted_devices';
 import { rateLimit } from '@/lib/rateLimit';
+import { sendOTPEmail } from '@/lib/email';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const DEVICE_OTP_TTL_MS = 10 * 60 * 1000;  // 10 minutes
@@ -158,10 +159,10 @@ export async function POST(req: NextRequest) {
             // In dev mode, the OTP is returned in the response body (matching registration flow pattern)
             // In production: integrate your email provider here (e.g. Resend, SendGrid, etc.)
             if (process.env.NODE_ENV === 'production') {
-                // TODO: Wire up email provider
-                // e.g. await sendEmail({ to: user.email, subject: 'Verification Code', text: `Your code: ${otp}` });
                 console.log(`[Device OTP] User ${user.email}: ${otp}`);
             }
+
+            await sendOTPEmail(user.email, otp, 'login');
 
             // Issue a short-lived session token (5 minutes) for the MFA step
             // We use a standard 7-day token but the OTP expires in 10 minutes anyway

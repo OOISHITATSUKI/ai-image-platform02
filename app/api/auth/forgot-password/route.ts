@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findUserByEmail, saveUser } from '@/lib/auth';
-import nodemailer from 'nodemailer';
-
-const SMTP_HOST = process.env.SMTP_HOST || '';
-const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
-const SMTP_USER = process.env.SMTP_USER || '';
-const SMTP_PASS = process.env.SMTP_PASS || '';
-const SMTP_FROM = process.env.SMTP_FROM || 'noreply@example.com';
+import { sendOTPEmail } from '@/lib/email';
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_RESET_ATTEMPTS = 5;
@@ -65,44 +59,8 @@ export async function POST(req: NextRequest) {
 
         saveUser(user);
 
-        // Send email
-        if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-            const transporter = nodemailer.createTransport({
-                host: SMTP_HOST,
-                port: SMTP_PORT,
-                secure: SMTP_PORT === 465,
-                auth: { user: SMTP_USER, pass: SMTP_PASS },
-                // Allow self-signed for dev
-                tls: { rejectUnauthorized: false }
-            });
-
-            const htmlContent = `
-                <div style="font-family: sans-serif; background-color: #f4f4f4; padding: 20px;">
-                    <div style="max-width: 600px; background: white; padding: 30px; border-radius: 8px; margin: auto;">
-                        <h2 style="color: #333;">アカウント パスワードリセット</h2>
-                        <p style="color: #666; font-size: 16px;">
-                            パスワードの再設定がリクエストされました。以下の6桁の認証コードを入力して、新しいパスワードを設定してください。
-                        </p>
-                        <div style="background-color: #f8f9fa; padding: 15px; text-align: center; border-radius: 6px; margin: 25px 0;">
-                            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111;">${otpCode}</span>
-                        </div>
-                        <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                            このコードの有効期限は10分間です。<br>
-                            心当たりがない場合は、このメールを破棄してください。
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            await transporter.sendMail({
-                from: SMTP_FROM,
-                to: user.email,
-                subject: '【重要】パスワード再設定の認証コード',
-                html: htmlContent,
-            });
-        } else {
-            console.log(`[DEV MODE] Forgot Password OTP for ${user.email}: ${otpCode}`);
-        }
+        // Send email via Resend
+        await sendOTPEmail(user.email, otpCode, 'reset');
 
         return NextResponse.json({ success: true, message: 'OTP sent' });
 

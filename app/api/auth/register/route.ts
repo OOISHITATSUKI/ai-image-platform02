@@ -13,6 +13,7 @@ import {
 
 import { logRegistrationAttempt, countRecentAttemptsByIp } from '@/lib/db/registration_attempts';
 import { rateLimit } from '@/lib/rateLimit';
+import { sendOTPEmail } from '@/lib/email';
 
 // 24 hours in MS
 const REGISTRATION_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -95,6 +96,8 @@ export async function POST(req: NextRequest) {
                 console.log(`[Register OTP] User ${existingUser.email}: ${otp}`);
             }
 
+            await sendOTPEmail(normalizedEmail, otp, 'register');
+
             return NextResponse.json(
                 {
                     success: true,
@@ -165,6 +168,8 @@ export async function POST(req: NextRequest) {
         if (process.env.NODE_ENV === 'production') {
             console.log(`[Register OTP] User ${normalizedEmail}: ${otp}`);
         }
+
+        await sendOTPEmail(normalizedEmail, otp, 'register');
 
         return NextResponse.json(
             {
