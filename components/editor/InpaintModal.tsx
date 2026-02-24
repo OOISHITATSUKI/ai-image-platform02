@@ -75,6 +75,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
+            alert(`DEBUG: naturalSize=${img.naturalWidth}x${img.naturalHeight}, width=${img.width}x${img.height}`);
             console.log('[InpaintModal] img.onload:', {
                 src: imageUrl.substring(0, 50) + '...',
                 w: img.naturalWidth,
@@ -86,6 +87,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             if (canvas) {
                 canvas.width = img.naturalWidth;
                 canvas.height = img.naturalHeight;
+                alert(`DEBUG: canvas=${canvas.width}x${canvas.height}, style=${canvas.style.width}x${canvas.style.height}`);
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.lineCap = 'round';
