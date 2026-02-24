@@ -382,12 +382,14 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
             <div className="inpaint-modal-footer" style={{ padding: '8px', background: 'var(--bg-panel)' }}>
                 <div className="inpaint-tools" style={{ marginBottom: '8px' }}>
-                    <button
-                        className={`inpaint-tool-btn ${tool === 'move' ? 'active' : ''}`}
-                        onClick={() => setTool('move')}
-                    >
-                        🖐️ {t('chat.inpaintMove')}
-                    </button>
+                    {typeof window !== 'undefined' && window.innerWidth <= 768 && (
+                        <button
+                            className={`inpaint-tool-btn ${tool === 'move' ? 'active' : ''}`}
+                            onClick={() => setTool('move')}
+                        >
+                            🖐️ {t('chat.inpaintMove')}
+                        </button>
+                    )}
                     <button
                         className={`inpaint-tool-btn ${tool === 'brush' ? 'active' : ''}`}
                         onClick={() => setTool('brush')}
