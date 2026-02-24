@@ -67,6 +67,7 @@
         "inpaintClear": "Clear All",
         "inpaintSize": "Brush Size",
         "inpaintDone": "Done",
+        "inpaintMove": "Move",
         "inpaintClose": "Close",
         "inpaintHint": "🎨 Describe what to change in the masked area...",
         "uploadRequiredForInpaint": "🎨 Please upload an image first to use Inpaint!",

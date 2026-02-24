@@ -67,6 +67,7 @@
         "inpaintClear": "全消去",
         "inpaintSize": "ブラシサイズ",
         "inpaintDone": "マスク完了",
+        "inpaintMove": "移動",
         "inpaintClose": "閉じる",
         "inpaintHint": "🎨 マスクした部分をどう変更したいか入力してください...",
         "uploadRequiredForInpaint": "🎨 部分修正を使用するには、まず画像をアップロードしてくださいね！",

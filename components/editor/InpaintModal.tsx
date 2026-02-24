@@ -17,7 +17,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     const [brushSize, setBrushSize] = useState(12);
-    const [tool, setTool] = useState<'brush' | 'eraser'>('brush');
+    const [tool, setTool] = useState<'brush' | 'eraser' | 'move'>('brush');
     const [isDrawing, setIsDrawing] = useState(false);
     const [history, setHistory] = useState<ImageData[]>([]);
     const [displayScale, setDisplayScale] = useState(1);
@@ -132,6 +132,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+        if (tool === 'move') return;
         if ('touches' in e) {
             // Check if user is trying to scroll (two fingers or panning not on canvas)
             // But here we want to paint. To allow scrolling, we could use a toggle, 
@@ -171,7 +172,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDrawing) return;
+        if (tool === 'move' || !isDrawing) return;
 
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -364,8 +365,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 left: 0,
                                 width: `${Math.round(naturalSize.w * displayScale)}px`,
                                 height: `${Math.round(naturalSize.h * displayScale)}px`,
-                                cursor: 'crosshair',
-                                touchAction: 'none'
+                                cursor: tool === 'move' ? 'grab' : 'crosshair',
+                                touchAction: tool === 'move' ? 'pan-y pinch-zoom' : 'none'
                             }}
                             onMouseDown={startDrawing}
                             onMouseMove={draw}
@@ -382,22 +383,28 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             <div className="inpaint-modal-footer" style={{ padding: '8px', background: 'var(--bg-panel)' }}>
                 <div className="inpaint-tools" style={{ marginBottom: '8px' }}>
                     <button
+                        className={`inpaint-tool-btn ${tool === 'move' ? 'active' : ''}`}
+                        onClick={() => setTool('move')}
+                    >
+                        🖐️ {t('chat.inpaintMove')}
+                    </button>
+                    <button
                         className={`inpaint-tool-btn ${tool === 'brush' ? 'active' : ''}`}
                         onClick={() => setTool('brush')}
                     >
-                        {t('chat.inpaintBrush')}
+                        🖌️ {t('chat.inpaintBrush')}
                     </button>
                     <button
                         className={`inpaint-tool-btn ${tool === 'eraser' ? 'active' : ''}`}
                         onClick={() => setTool('eraser')}
                     >
-                        {t('chat.inpaintEraser')}
+                        🧹 {t('chat.inpaintEraser')}
                     </button>
                     <button className="inpaint-tool-btn" onClick={handleUndo}>
-                        {t('chat.inpaintUndo')}
+                        ↩️ {t('chat.inpaintUndo')}
                     </button>
                     <button className="inpaint-tool-btn" onClick={handleClear}>
-                        {t('chat.inpaintClear')}
+                        🗑️ {t('chat.inpaintClear')}
                     </button>
                 </div>
 
