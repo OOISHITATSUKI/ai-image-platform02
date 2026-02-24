@@ -310,11 +310,14 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'flex-start',
-                    overflow: 'auto',
+                    overflowY: 'auto', // Explicit vertical scroll
+                    overflowX: 'hidden',
                     background: '#000',
                     width: '100%',
+                    height: '100%', // Ensure it takes available flex space
                     WebkitOverflowScrolling: 'touch',
-                    minHeight: 0
+                    minHeight: 0,
+                    maxHeight: 'none'
                 }}
             >
                 {naturalSize && (
