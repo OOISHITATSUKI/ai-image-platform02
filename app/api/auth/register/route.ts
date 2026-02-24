@@ -93,10 +93,8 @@ export async function POST(req: NextRequest) {
             saveUser(existingUser);
 
             if (process.env.NODE_ENV === 'production') {
-                console.log(`[Register OTP] User ${existingUser.email}: ${otp}`);
+                await sendOTPEmail(normalizedEmail, otp, 'register');
             }
-
-            await sendOTPEmail(normalizedEmail, otp, 'register');
 
             return NextResponse.json(
                 {
@@ -166,10 +164,8 @@ export async function POST(req: NextRequest) {
         }
 
         if (process.env.NODE_ENV === 'production') {
-            console.log(`[Register OTP] User ${normalizedEmail}: ${otp}`);
+            await sendOTPEmail(normalizedEmail, otp, 'register');
         }
-
-        await sendOTPEmail(normalizedEmail, otp, 'register');
 
         return NextResponse.json(
             {

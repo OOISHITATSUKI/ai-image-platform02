@@ -159,10 +159,8 @@ export async function POST(req: NextRequest) {
             // In dev mode, the OTP is returned in the response body (matching registration flow pattern)
             // In production: integrate your email provider here (e.g. Resend, SendGrid, etc.)
             if (process.env.NODE_ENV === 'production') {
-                console.log(`[Device OTP] User ${user.email}: ${otp}`);
+                await sendOTPEmail(user.email, otp, 'login');
             }
-
-            await sendOTPEmail(user.email, otp, 'login');
 
             // Issue a short-lived session token (5 minutes) for the MFA step
             // We use a standard 7-day token but the OTP expires in 10 minutes anyway
