@@ -41,27 +41,30 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const isMobile = window.innerWidth <= 768;
         const imageWidth = naturalSize.w;
         const imageHeight = naturalSize.h;
-
-        // On mobile, force full viewport width
-        // On PC, fit within container while capping scale at 1.0
         const container = containerRef.current;
-        const containerWidth = isMobile ? window.innerWidth : container.clientWidth;
-        const containerHeight = container.clientHeight || (window.innerHeight * 0.6);
 
-        if (containerWidth <= 0) return;
+        let scale = 1;
 
-        const scale = isMobile
-            ? containerWidth / imageWidth
-            : Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);
+        if (isMobile) {
+            // Force full viewport width, height follows aspect ratio
+            const containerWidth = window.innerWidth;
+            scale = containerWidth / imageWidth;
+        } else {
+            // PC: fit within container while capping scale at 1.0
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight || (window.innerHeight * 0.7);
+            if (containerWidth <= 0) return;
+            scale = Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);
+        }
 
         console.log('[InpaintModal] updateScale:', {
             isMobile,
             naturalSize,
-            containerWidth,
-            containerHeight,
             scale,
-            displayW: imageWidth * scale,
-            displayH: imageHeight * scale
+            calculatedW: imageWidth * scale,
+            calculatedH: imageHeight * scale,
+            windowW: window.innerWidth,
+            windowH: window.innerHeight
         });
 
         setDisplayScale(scale);
@@ -300,30 +303,35 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             {/* Canvas Area - Scrollable on mobile */}
             <div
                 ref={containerRef}
-                className="inpaint-canvas-area"
+                className="inpaint-v3-area"
                 style={{
                     flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start', // Top aligned for better scrolling
-                    overflow: 'auto', // Allow scrolling
+                    justifyContent: 'flex-start',
+                    overflow: 'auto',
                     background: '#000',
                     width: '100%',
-                    WebkitOverflowScrolling: 'touch'
+                    WebkitOverflowScrolling: 'touch',
+                    minHeight: 0
                 }}
             >
                 {naturalSize && (
                     <div
                         ref={wrapperRef}
-                        className="inpaint-canvas-container"
+                        className="inpaint-v3-container"
                         style={{
                             position: 'relative',
-                            width: `${naturalSize.w * displayScale}px`,
-                            height: `${naturalSize.h * displayScale}px`,
+                            width: `${Math.round(naturalSize.w * displayScale)}px`,
+                            height: `${Math.round(naturalSize.h * displayScale)}px`,
                             flexShrink: 0,
                             margin: '0 auto',
-                            padding: 0
+                            padding: 0,
+                            maxWidth: 'none',
+                            maxHeight: 'none',
+                            minWidth: 'none',
+                            minHeight: 'none',
                         }}
                     >
                         <img

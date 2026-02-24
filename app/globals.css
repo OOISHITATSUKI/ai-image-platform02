@@ -3051,15 +3051,13 @@ video {
     padding: 20px 16px;
   }
 
-  .inpaint-canvas-area {
+  .inpaint-v3-area {
     padding: 0 !important;
     background: #000 !important;
-    /* Work area background */
     min-height: 40vh;
-    /* Ensure some height on small screens */
   }
 
-  .inpaint-canvas-container {
+  .inpaint-v3-container {
     padding: 0;
     box-sizing: border-box;
     overflow: hidden;
