@@ -26,25 +26,18 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const updateScale = useCallback(() => {
         if (!naturalSize || !containerRef.current) return;
         const container = containerRef.current;
-        const containerWidth = container.clientWidth;
+
+        const isMobile = window.innerWidth <= 768;
+        const imageWidth = naturalSize.w;
+        const imageHeight = naturalSize.h;
+        const containerWidth = isMobile ? window.innerWidth : container.clientWidth;
         const containerHeight = container.clientHeight || (window.innerHeight * 0.5);
 
         if (containerWidth <= 0) return;
 
-        // Space available (the container has 12px horizontal padding via CSS if handled there, 
-        // or we can calculate it here. Container width is already available area if box-sizing is handled)
-        const isMobile = window.innerWidth <= 768;
-        const availW = containerWidth;
-        const availH = containerHeight;
-
-        const scaleW = availW / naturalSize.w;
-        const scaleH = availH / naturalSize.h;
-
-        // Pick the scale that fits both dimensions, but cap at 1.0 to preserve quality
-        let scale = Math.min(1, scaleW, scaleH);
-
-        // Safety: Ensure scale is never zero
-        scale = Math.max(0.1, scale);
+        const scale = isMobile
+            ? containerWidth / imageWidth          // スマホ: 常にフル幅
+            : Math.min(1, containerWidth / imageWidth, containerHeight / imageHeight);  // PC: 元サイズ以下
 
         setDisplayScale(scale);
     }, [naturalSize]);
@@ -307,6 +300,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                             }}
                             draggable={false}
                         />
+                        {/* Drawing canvas — explicit width/height matching natural size, display size scaled */}
                         <canvas
                             ref={canvasRef}
                             width={naturalSize.w}
@@ -315,8 +309,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
-                                width: `${naturalSize.w * displayScale}px`,
-                                height: `${naturalSize.h * displayScale}px`,
+                                width: '100%',
+                                height: '100%',
                                 cursor: 'crosshair',
                                 touchAction: 'none',
                             }}
