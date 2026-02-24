@@ -2564,9 +2564,6 @@ video {
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
   border-radius: var(--radius-md);
   overflow: hidden;
-  max-width: 100%;
-  max-height: 100%;
-  width: fit-content;
   margin: auto;
 }
 
@@ -3063,7 +3060,6 @@ video {
   }
 
   .inpaint-canvas-container {
-    width: 100%;
     padding: 0;
     box-sizing: border-box;
     overflow: hidden;

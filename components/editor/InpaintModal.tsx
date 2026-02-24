@@ -320,7 +320,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                                 left: 0,
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'cover', // Use cover or fill to avoid any incidental gaps
+                                objectFit: 'contain', // Preserve aspect ratio
                                 display: 'block',
                                 userSelect: 'none',
                                 pointerEvents: 'none',
