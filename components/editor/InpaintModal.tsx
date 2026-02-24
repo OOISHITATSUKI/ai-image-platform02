@@ -105,19 +105,12 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        let clientX: number, clientY: number;
-        if ('touches' in e && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = (e as React.MouseEvent).clientX;
-            clientY = (e as React.MouseEvent).clientY;
-        }
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
 
         return {
             x: (clientX - rect.left) * scaleX,
             y: (clientY - rect.top) * scaleY,
-            // Use scaleX (or Y) to adjust brush size visually
             scaleCorrection: scaleX,
         };
     };
@@ -322,15 +315,16 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                             }}
                             draggable={false}
                         />
-                        {/* Drawing canvas — exactly same size as wrapper */}
                         <canvas
                             ref={canvasRef}
+                            width={naturalSize.w}
+                            height={naturalSize.h}
                             style={{
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '100%',
+                                width: `${naturalSize.w * displayScale}px`,
+                                height: `${naturalSize.h * displayScale}px`,
                                 cursor: 'crosshair',
                                 touchAction: 'none',
                             }}

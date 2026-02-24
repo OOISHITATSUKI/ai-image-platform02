@@ -3063,25 +3063,14 @@ video {
   }
 
   .inpaint-canvas-container {
-    max-width: 100% !important;
-    width: auto !important;
-    /* Allow inline style width to determine aspect ratio */
+    width: 100%;
     padding: 0 12px;
     box-sizing: border-box;
+    overflow: hidden;
     margin: 10px 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 200px;
-  }
-
-  .inpaint-canvas-container canvas {
-    max-width: 100% !important;
-    height: auto !important;
-    touch-action: none;
-    display: block;
-    image-rendering: pixelated;
-    /* Optional: keep mask sharp */
   }
 
   /* ツールバーを横スクロール可能に */
