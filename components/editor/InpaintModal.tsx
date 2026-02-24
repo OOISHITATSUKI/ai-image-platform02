@@ -27,12 +27,13 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         if (!naturalSize || !containerRef.current) return;
         const container = containerRef.current;
         const containerWidth = container.clientWidth;
-        // Use a default height if the container is hidden or just layout-mounting
-        const containerHeight = container.clientHeight || 1000;
+        // If the container is just appearing, it might have 0 height initially.
+        // We'll use the viewport height as a maximum constraint.
+        const containerHeight = container.clientHeight || (window.innerHeight * 0.6);
 
         if (containerWidth <= 0) return;
 
-        // Space available (account for some margin on desktop, full width on mobile)
+        // Space available (full width on mobile, some margin on desktop)
         const isMobile = window.innerWidth <= 768;
         const margin = isMobile ? 0 : 40;
         const availW = containerWidth - margin;
@@ -42,10 +43,18 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const scaleH = availH / naturalSize.h;
 
         // Pick the scale that fits both dimensions
+        // For mobile, we want to maximize the image
         let scale = Math.min(1, scaleW, scaleH);
 
+        // If the image is smaller than the container on mobile, let it scale up slightly if needed?
+        // Actually, usually we want to keep it at most 1x unless it's tiny.
+        // But for mobile, fitting to width is most important.
+        if (isMobile && scaleW < 1) {
+            scale = scaleW;
+        }
+
         // Safety: Ensure scale is never zero
-        scale = Math.max(0.01, scale);
+        scale = Math.max(0.1, scale);
 
         setDisplayScale(scale);
     }, [naturalSize]);
@@ -90,12 +99,16 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
 
     const getCanvasCoords = (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current;
-        if (!canvas || !displayScale) return null;
+        if (!canvas) return null;
 
         const rect = canvas.getBoundingClientRect();
 
+        // Calculate dynamic scale based on current DOM resolution vs internal resolution
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
         let clientX: number, clientY: number;
-        if ('touches' in e) {
+        if ('touches' in e && e.touches.length > 0) {
             clientX = e.touches[0].clientX;
             clientY = e.touches[0].clientY;
         } else {
@@ -104,9 +117,10 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         }
 
         return {
-            x: (clientX - rect.left) / displayScale,
-            y: (clientY - rect.top) / displayScale,
-            scaleCorrection: 1 / displayScale,
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY,
+            // Use scaleX (or Y) to adjust brush size visually
+            scaleCorrection: scaleX,
         };
     };
 
