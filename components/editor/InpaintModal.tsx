@@ -27,12 +27,14 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         if (!naturalSize || !containerRef.current) return;
         const container = containerRef.current;
         const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
+        // Use a default height if the container is hidden or just layout-mounting
+        const containerHeight = container.clientHeight || 1000;
 
-        if (containerWidth <= 0 || containerHeight <= 0) return;
+        if (containerWidth <= 0) return;
 
         // Space available (account for some margin on desktop, full width on mobile)
-        const margin = window.innerWidth <= 768 ? 0 : 40;
+        const isMobile = window.innerWidth <= 768;
+        const margin = isMobile ? 0 : 40;
         const availW = containerWidth - margin;
         const availH = containerHeight - margin;
 
@@ -40,7 +42,11 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const scaleH = availH / naturalSize.h;
 
         // Pick the scale that fits both dimensions
-        const scale = Math.min(1, scaleW, scaleH);
+        let scale = Math.min(1, scaleW, scaleH);
+
+        // Safety: Ensure scale is never zero
+        scale = Math.max(0.01, scale);
+
         setDisplayScale(scale);
     }, [naturalSize]);
 
