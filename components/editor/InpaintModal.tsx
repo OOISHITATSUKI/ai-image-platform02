@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '@/lib/useTranslation';
 
 interface InpaintModalProps {
@@ -21,17 +22,30 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
     const [history, setHistory] = useState<ImageData[]>([]);
     const [displayScale, setDisplayScale] = useState(1);
     const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        // Disable body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, []);
 
     // Calculate display scale based on container dimensions
     const updateScale = useCallback(() => {
         if (!naturalSize || !containerRef.current) return;
         const container = containerRef.current;
 
+        // Always use window dimensions for mobile to ensure edge-to-edge
         const isMobile = window.innerWidth <= 768;
         const imageWidth = naturalSize.w;
         const imageHeight = naturalSize.h;
+
+        // On mobile, we force full width of the viewport
         const containerWidth = isMobile ? window.innerWidth : container.clientWidth;
-        const containerHeight = container.clientHeight || (window.innerHeight * 0.5);
+        const containerHeight = container.clientHeight || (window.innerHeight * 0.6);
 
         if (containerWidth <= 0) return;
 
@@ -90,8 +104,8 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
 
         return {
             x: (clientX - rect.left) * scaleX,
@@ -106,7 +120,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const coords = getCanvasCoords(e);
         if (coords) {
             lastPos.current = { x: coords.x, y: coords.y };
-            // Draw a dot at the starting point
             const canvas = canvasRef.current;
             if (canvas) {
                 const ctx = canvas.getContext('2d');
@@ -233,8 +246,23 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         onSave(tempCanvas.toDataURL('image/png'));
     };
 
-    return (
-        <div className="inpaint-modal-overlay">
+    if (!mounted) return null;
+
+    const modalContent = (
+        <div
+            className="inpaint-modal-overlay"
+            style={{
+                position: 'fixed',
+                inset: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 3500, // Above everything
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'rgba(0,0,0,0.95)',
+                backdropFilter: 'blur(10px)'
+            }}
+        >
             <div className="inpaint-modal-header">
                 <h2>✨ {t('chat.inpaintModalTitle')}</h2>
                 <button className="close-btn" onClick={onClose}>
@@ -245,16 +273,16 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             {/* Quality Notice */}
             <div style={{
                 padding: '12px 16px',
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 color: 'var(--text-secondary)',
-                background: 'var(--bg-elevated)',
+                background: 'rgba(255,255,255,0.03)',
                 borderBottom: '1px solid var(--border)',
-                lineHeight: '1.6'
+                lineHeight: '1.5'
             }}>
                 <div style={{ whiteSpace: 'pre-line' }}>{t('chat.inpaintClothingHint')}</div>
             </div>
 
-            {/* Canvas Area — image and canvas are exactly overlapping */}
+            {/* Canvas Area */}
             <div
                 ref={containerRef}
                 className="inpaint-canvas-area"
@@ -264,9 +292,10 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                     alignItems: 'center',
                     justifyContent: 'center',
                     overflow: 'hidden',
-                    background: '#111',
+                    background: '#000',
                     minHeight: 0,
                     width: '100%',
+                    padding: 0
                 }}
             >
                 {naturalSize && (
@@ -277,13 +306,12 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                             position: 'relative',
                             width: `${naturalSize.w * displayScale}px`,
                             height: `${naturalSize.h * displayScale}px`,
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            boxShadow: '0 0 40px rgba(0,0,0,0.5)',
+                            boxShadow: '0 0 50px rgba(0,0,0,0.8)',
                             flexShrink: 0,
+                            margin: 0,
+                            padding: 0
                         }}
                     >
-                        {/* Background image */}
                         <img
                             src={imageUrl}
                             alt="Base"
@@ -300,7 +328,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
                             }}
                             draggable={false}
                         />
-                        {/* Drawing canvas — explicit width/height matching natural size, display size scaled */}
                         <canvas
                             ref={canvasRef}
                             width={naturalSize.w}
@@ -366,4 +393,6 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }
