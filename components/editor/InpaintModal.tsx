@@ -27,9 +27,7 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         if (!naturalSize || !containerRef.current) return;
         const container = containerRef.current;
         const containerWidth = container.clientWidth;
-        // If the container is just appearing, it might have 0 height initially.
-        // We'll use the viewport height as a maximum constraint.
-        const containerHeight = container.clientHeight || (window.innerHeight * 0.6);
+        const containerHeight = container.clientHeight || (window.innerHeight * 0.5);
 
         if (containerWidth <= 0) return;
 
@@ -44,14 +42,13 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         const scaleH = availH / naturalSize.h;
 
         // Pick the scale that fits both dimensions
-        // For mobile, we want to maximize the image
-        let scale = Math.min(1, scaleW, scaleH);
+        let scale = Math.min(scaleW, scaleH);
 
-        // If the image is smaller than the container on mobile, let it scale up slightly if needed?
-        // Actually, usually we want to keep it at most 1x unless it's tiny.
-        // But for mobile, fitting to width is most important.
-        if (isMobile && scaleW < 1) {
-            scale = scaleW;
+        // On mobile, allow upscaling to make it easier to paint
+        if (!isMobile) {
+            scale = Math.min(1.2, scale);
+        } else {
+            scale = Math.min(2.0, scale);
         }
 
         // Safety: Ensure scale is never zero
