@@ -216,17 +216,20 @@ export const useAppStore = create<AppState>()(
                         console.log('Supabase sync starting for user:', user.id);
 
                         // 1. Ensure user record exists in Supabase (Upsert)
-                        const { error: upsertErr } = await supabase
+                        const { data: upsertData, error: upsertErr } = await supabase
                             .from('users')
                             .upsert({
                                 id: user.id,
                                 email: user.email,
                                 username: user.username,
                                 preferred_language: user.locale || 'ja'
-                            }, { onConflict: 'id' });
+                            }, { onConflict: 'id' })
+                            .select();
 
                         if (upsertErr) {
                             console.error('Supabase user upsert failed:', upsertErr);
+                        } else {
+                            console.log('Supabase user upsert success:', upsertData);
                         }
 
                         // 2. Fetch current settings

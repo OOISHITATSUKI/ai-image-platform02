@@ -1,7 +1,17 @@
--- 1. Users table update
+-- 1. ユーザーテーブルの作成（存在しない場合）
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  email TEXT,
+  username TEXT,
+  preferred_language VARCHAR(5) DEFAULT 'ja',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 言語設定カラムの確認と追加（既存テーブルがある場合）
 ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_language VARCHAR(5) DEFAULT 'ja';
 
--- 2. Chats table
+-- 2. チャットテーブルの作成
 CREATE TABLE IF NOT EXISTS chats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -10,7 +20,7 @@ CREATE TABLE IF NOT EXISTS chats (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Messages table
+-- 3. メッセージテーブルの作成
 CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chat_id UUID REFERENCES chats(id) ON DELETE CASCADE,
@@ -23,13 +33,12 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. RLSの無効化（独自の認証システムを利用しているため）
--- これにより、クライアント側からanonキーでデータの読み書きが可能になります
+-- 4. RLSの無効化（既存の独自認証を利用するため、anonキーでの読み書きを許可）
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE chats DISABLE ROW LEVEL SECURITY;
 ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
 
--- 5. Auto-deletion logic (24 hours)
+-- 5. 自動削除ロジック（24時間）
 CREATE OR REPLACE FUNCTION delete_old_chats()
 RETURNS void AS $$
 BEGIN
@@ -37,7 +46,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 簡易的な自己クリーニング（チャット作成時に実行）
+-- 自動実行のためのトリガー
 CREATE OR REPLACE FUNCTION trigger_delete_old_chats()
 RETURNS trigger AS $$
 BEGIN
