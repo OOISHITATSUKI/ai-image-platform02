@@ -1,11 +1,10 @@
--- 1. Users table update (if you already have one in Supabase)
--- If you don't have a users table yet, you might need to create it or link it to Auth.
+-- 1. Users table update
 ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_language VARCHAR(5) DEFAULT 'ja';
 
 -- 2. Chats table
 CREATE TABLE IF NOT EXISTS chats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL, -- Link to your user ID (manual UUID or REFERENCES users(id))
+  user_id UUID NOT NULL,
   name TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -15,7 +14,7 @@ CREATE TABLE IF NOT EXISTS chats (
 CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chat_id UUID REFERENCES chats(id) ON DELETE CASCADE,
-  role TEXT NOT NULL, -- 'user', 'assistant', 'system'
+  role TEXT NOT NULL,
   content TEXT NOT NULL,
   image_url TEXT,
   video_url TEXT,
@@ -24,8 +23,13 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Auto-deletion logic (24 hours)
--- This function deletes chats and their cascade messages that are older than 24 hours.
+-- 4. RLSの無効化（独自の認証システムを利用しているため）
+-- これにより、クライアント側からanonキーでデータの読み書きが可能になります
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE chats DISABLE ROW LEVEL SECURITY;
+ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
+
+-- 5. Auto-deletion logic (24 hours)
 CREATE OR REPLACE FUNCTION delete_old_chats()
 RETURNS void AS $$
 BEGIN
@@ -33,18 +37,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- To automate this, you can use Supabase Edge Functions or pg_cron.
--- If pg_cron is enabled:
--- SELECT cron.schedule('delete-old-chats-every-hour', '0 * * * *', 'SELECT delete_old_chats();');
+-- 簡易的な自己クリーニング（チャット作成時に実行）
+CREATE OR REPLACE FUNCTION trigger_delete_old_chats()
+RETURNS trigger AS $$
+BEGIN
+  DELETE FROM chats WHERE created_at < NOW() - INTERVAL '24 hours';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- OR: simple trigger on insert to keep it "self-cleaning" (less efficient but works without cron)
--- CREATE OR REPLACE FUNCTION trigger_delete_old_chats()
--- RETURNS trigger AS $$
--- BEGIN
---   DELETE FROM chats WHERE created_at < NOW() - INTERVAL '24 hours';
---   RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
--- CREATE TRIGGER clean_old_chats_trigger
--- AFTER INSERT ON chats
--- FOR EACH STATEMENT EXECUTE FUNCTION trigger_delete_old_chats();
+DROP TRIGGER IF EXISTS clean_old_chats_trigger ON chats;
+CREATE TRIGGER clean_old_chats_trigger
+AFTER INSERT ON chats
+FOR EACH STATEMENT EXECUTE FUNCTION trigger_delete_old_chats();

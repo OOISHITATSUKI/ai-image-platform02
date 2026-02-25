@@ -111,7 +111,7 @@ interface AppState {
     // ----- User -----
     user: User | null;
     isAuthenticated: boolean;
-    setUser: (user: User | null) => void;
+    setUser: (user: User | null) => Promise<void>;
     logout: () => void;
 
     // ----- Chats -----
@@ -213,17 +213,41 @@ export const useAppStore = create<AppState>()(
                     set({ user, isAuthenticated: true });
                     // Fetch language preference and chats asynchronously
                     try {
-                        const { data: userData } = await supabase
+                        console.log('Supabase sync starting for user:', user.id);
+
+                        // 1. Ensure user record exists in Supabase (Upsert)
+                        const { error: upsertErr } = await supabase
+                            .from('users')
+                            .upsert({
+                                id: user.id,
+                                email: user.email,
+                                username: user.username,
+                                preferred_language: user.locale || 'ja'
+                            }, { onConflict: 'id' });
+
+                        if (upsertErr) {
+                            console.error('Supabase user upsert failed:', upsertErr);
+                        }
+
+                        // 2. Fetch current settings
+                        const { data: userData, error: selectErr } = await supabase
                             .from('users')
                             .select('preferred_language')
                             .eq('id', user.id)
                             .single();
 
+                        if (selectErr && selectErr.code !== 'PGRST116') { // PGRST116 is 'no rows found'
+                            console.error('Supabase select preferred_language failed:', selectErr);
+                        }
+
                         if (userData?.preferred_language) {
+                            console.log('Restored locale from Supabase:', userData.preferred_language);
                             set({ locale: userData.preferred_language as Locale });
                         }
 
+                        // 3. Load chats
                         const savedChats = await loadChatsFromSupabase(user.id);
+                        console.log(`Restored ${savedChats.length} chats from Supabase`);
                         set({
                             chats: savedChats,
                             activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
