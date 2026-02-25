@@ -72,6 +72,8 @@ async function loadChatsFromSupabase(userId: string): Promise<Chat[]> {
 
         if (error) throw error;
 
+        console.log('Raw chats data from Supabase:', chats);
+
         return (chats || []).map(chat => ({
             id: chat.id,
             name: chat.name,
@@ -191,17 +193,26 @@ export const useAppStore = create<AppState>()(
             // ----- Locale -----
             locale: 'en',
             setLocale: async (locale) => {
+                console.log('setLocale called with:', locale);
                 set({ locale });
                 const user = get().user;
                 if (user) {
                     try {
-                        await supabase
+                        console.log('Updating Supabase preferred_language for user:', user.id);
+                        const { error } = await supabase
                             .from('users')
                             .update({ preferred_language: locale })
                             .eq('id', user.id);
+                        if (error) {
+                            console.error('Failed to update locale in Supabase:', error);
+                        } else {
+                            console.log('Successfully updated locale in Supabase');
+                        }
                     } catch (e) {
                         console.error('Failed to sync locale to Supabase:', e);
                     }
+                } else {
+                    console.log('No user logged in, locale not synced to Supabase');
                 }
             },
 
@@ -369,6 +380,7 @@ export const useAppStore = create<AppState>()(
 
                 const user = get().user;
                 if (user) {
+                    console.log('Syncing message to Supabase:', id, 'for chat:', chatId);
                     supabase.from('messages').insert({
                         id,
                         chat_id: chatId,
@@ -380,7 +392,11 @@ export const useAppStore = create<AppState>()(
                         is_favorite: fullMessage.isFavorite,
                         created_at: new Date(timestamp).toISOString()
                     }).then(({ error }) => {
-                        if (error) console.error('Failed to sync message:', error);
+                        if (error) {
+                            console.error('Failed to sync message to Supabase:', error);
+                        } else {
+                            console.log('Successfully synced message to Supabase');
+                        }
                     });
 
                     // Update chat timestamp
