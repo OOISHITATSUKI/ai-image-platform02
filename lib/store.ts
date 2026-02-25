@@ -232,8 +232,7 @@ export const useAppStore = create<AppState>()(
                             .upsert({
                                 id: user.id,
                                 email: user.email,
-                                username: user.username,
-                                preferred_language: user.locale || 'ja'
+                                username: user.username
                             }, { onConflict: 'id' })
                             .select();
 
