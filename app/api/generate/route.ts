@@ -586,7 +586,6 @@ export async function POST(request: NextRequest) {
             count = 1,
             qualityPreset = 'hd',
             tagSettings,
-            nsfwEnabled = true, // Default to true if not provided
         } = body;
 
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
@@ -715,13 +714,6 @@ export async function POST(request: NextRequest) {
                 actionHint = ts.fetish.map(f => actionLabels[f] || f).join(', ');
             }
 
-            // --- NSFW Mode Toggle Refinement (Strict filtering) ---
-            if (!nsfwEnabled) {
-                console.log('NSFW Mode is OFF: Clearing tag fragments and action hints to prevent leakage.');
-                tagPromptFragment = '';
-                actionHint = '';
-            }
-
             console.log('Tag prompt fragment:', tagPromptFragment);
             console.log('Action hint:', actionHint);
         }
@@ -763,7 +755,7 @@ export async function POST(request: NextRequest) {
         const optimizedPrompt = await optimizePromptWithClaude(
             promptForClaude,
             generationType,
-            nsfwEnabled, // Pass toggle state instead of model property
+            model?.nsfw ?? true,
             isSdxl
         );
 
@@ -829,11 +821,6 @@ export async function POST(request: NextRequest) {
             finalNegative = `${finalNegative}, ${tagNegativeFragment}`;
         }
 
-        // --- NSFW Mode Toggle Refinement (Negative Enforcement) ---
-        if (!nsfwEnabled) {
-            finalNegative = `${finalNegative}, nsfw, nude, naked, nipples, genitalia, sexual, cleavage, bare breasts, uncensored`;
-        }
-
         // Remove "multiple faces/bodies" from negative if user wants 2+ people
         if (tagSettings && (tagSettings as TagSettings).peopleCount && (tagSettings as TagSettings).peopleCount !== '1') {
             finalNegative = finalNegative
@@ -877,20 +864,20 @@ export async function POST(request: NextRequest) {
             } : {}),
         };
 
-        // --- NSFW/Prompt Assembly (Step 3 of Implementation) ---
-        if (model?.nsfw && nsfwEnabled) {
+        // --- NSFW/Prompt Assembly ---
+        if (model?.nsfw) {
             if (inpaintMode) {
                 novitaRequest.prompt = enforceLimit(`(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`);
                 novitaRequest.negative_prompt = enforceLimit(`(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`);
             } else {
-                // Txt2Img / Img2Img logic from user
+                // Txt2Img / Img2Img
                 novitaRequest.prompt = isSdxl
                     ? enforceLimit(`nsfw, nude, naked, explicit, ${enhancedPrompt}`)
                     : enforceLimit(`(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`);
                 novitaRequest.negative_prompt = enforceLimit(finalNegative);
             }
         } else {
-            // NSFW OFF or non-NSFW model
+            // non-NSFW model
             novitaRequest.prompt = enforceLimit(enhancedPrompt);
             novitaRequest.negative_prompt = enforceLimit(finalNegative);
         }
@@ -1003,7 +990,7 @@ export async function POST(request: NextRequest) {
         const novitaBody = {
             extra: {
                 response_image_type: 'png',
-                enable_nsfw_detection: !nsfwEnabled,
+                enable_nsfw_detection: false,
             },
             request: novitaRequest,
         };

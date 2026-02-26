@@ -60,7 +60,6 @@ export interface GenerationSettings {
   img2imgStrength?: number;
   promptTemplate?: string;
   tagSettings?: TagSettings;
-  nsfwEnabled?: boolean;
 }
 
 // ----- Tag-based Parameter Types -----
@@ -178,12 +177,8 @@ export interface AIModel {
 
 export const AVAILABLE_MODELS: AIModel[] = [
   // ── NSFW Realistic Models ──
-  { id: 'novita-realistic-vision-6', name: '🔞 Realistic Vision V6.0', type: 'image', provider: 'novita', description: 'Best photorealistic NSFW', novitaModelName: 'realisticVisionV60B1_v60B1VAE_190174.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-epicrealism', name: '🔞 epiCRealism', type: 'image', provider: 'novita', description: 'Natural skin excellence', novitaModelName: 'epicrealism_naturalSinRC1VAE_106430.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-bra', name: '🔞 Beautiful Realistic Asians', type: 'image', provider: 'novita', description: 'Specialized for Asian beauty', novitaModelName: 'beautifulRealistic_brav3_31664.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-majicmix', name: '🔞 majicMIX Realistic', type: 'image', provider: 'novita', description: 'Classic realistic model', novitaModelName: 'majicmixRealistic_v7_134792.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-cyberrealistic', name: '🔞 CyberRealistic', type: 'image', provider: 'novita', description: 'Modern photorealism', novitaModelName: 'cyberrealistic_v40_151857.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
-  { id: 'novita-dreamshaper', name: '🔞 DreamShaper', type: 'image', provider: 'novita', description: 'Fantasy versatile', novitaModelName: 'dreamshaper_8_93211.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+
+  // ── SDXL Photoreal Models (txt2img only) ──
 
   // ── SDXL Photoreal Models (txt2img only) ──
   { id: 'novita-realvis-xl', name: '✨ RealVisXL V5.0', type: 'image', provider: 'novita', description: 'High-end SDXL photorealism (V5.0)', novitaModelName: 'realvisxlV50_v50LightningBakedvae_718065.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
