@@ -89,7 +89,10 @@
         "error_permanent_ban": "生成に失敗しました: 重大な規約違反のため、アカウントは永久凍結されました。",
         "error_access_denied": "アクセスが拒否されました: ",
         "faceSwapBody": "体",
-        "faceSwapFace": "顔"
+        "faceSwapFace": "顔",
+        "pleaseCheckConsent": "⚠️ 同意事項にすべてチェックしてください。",
+        "img2imgNoImage": "⚠️ img2imgモードでは画像のアップロードが必須です。",
+        "promptRequired": "⚠️ プロンプトを入力してください。"
     },
     "actions": {
         "generateVideo": "動画生成",

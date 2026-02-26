@@ -89,7 +89,10 @@
         "error_permanent_ban": "Generation failed: Account permanently banned for strict policy violations.",
         "error_access_denied": "Access denied: ",
         "faceSwapBody": "Body",
-        "faceSwapFace": "Face"
+        "faceSwapFace": "Face",
+        "pleaseCheckConsent": "⚠️ Please check all consent items.",
+        "img2imgNoImage": "⚠️ Image upload is required for img2img mode.",
+        "promptRequired": "⚠️ Please enter a prompt."
     },
     "actions": {
         "generateVideo": "Generate Video",

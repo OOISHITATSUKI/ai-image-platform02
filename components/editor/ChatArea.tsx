@@ -313,7 +313,7 @@ export default function ChatArea() {
                     return;
                 }
                 if (!allConsentChecked) {
-                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    setGenerationError(t('chat.pleaseCheckConsent'));
                     return;
                 }
             } else if (inpaintMode) {
@@ -322,21 +322,21 @@ export default function ChatArea() {
                     return;
                 }
                 if (!allConsentChecked) {
-                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    setGenerationError(t('chat.pleaseCheckConsent'));
                     return;
                 }
             } else {
                 // Standard img2img
                 if (uploads.length === 0) {
-                    setGenerationError('⚠️ img2imgモードでは画像のアップロードが必須です。');
+                    setGenerationError(t('chat.img2imgNoImage'));
                     return;
                 }
                 if (!inputText.trim()) {
-                    setGenerationError('⚠️ プロンプトを入力してください。');
+                    setGenerationError(t('chat.promptRequired'));
                     return;
                 }
                 if (!allConsentChecked) {
-                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    setGenerationError(t('chat.pleaseCheckConsent'));
                     return;
                 }
             }
