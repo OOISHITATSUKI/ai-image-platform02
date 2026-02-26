@@ -137,7 +137,7 @@ Output ONLY the tags for the masked area.`;
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20241022',
+                model: 'claude-3-5-sonnet-latest',
                 max_tokens: 1000,
                 system: systemPrompt,
                 messages: [
@@ -715,6 +715,13 @@ export async function POST(request: NextRequest) {
                 actionHint = ts.fetish.map(f => actionLabels[f] || f).join(', ');
             }
 
+            // --- NSFW Mode Toggle Refinement (Strict filtering) ---
+            if (!nsfwEnabled) {
+                console.log('NSFW Mode is OFF: Clearing tag fragments and action hints to prevent leakage.');
+                tagPromptFragment = '';
+                actionHint = '';
+            }
+
             console.log('Tag prompt fragment:', tagPromptFragment);
             console.log('Action hint:', actionHint);
         }
@@ -756,7 +763,7 @@ export async function POST(request: NextRequest) {
         const optimizedPrompt = await optimizePromptWithClaude(
             promptForClaude,
             generationType,
-            model?.nsfw ?? true,
+            nsfwEnabled, // Pass toggle state instead of model property
             isSdxl
         );
 
@@ -821,6 +828,12 @@ export async function POST(request: NextRequest) {
         if (tagNegativeFragment && !isSdxl) {
             finalNegative = `${finalNegative}, ${tagNegativeFragment}`;
         }
+
+        // --- NSFW Mode Toggle Refinement (Negative Enforcement) ---
+        if (!nsfwEnabled) {
+            finalNegative = `${finalNegative}, nsfw, nude, naked, nipples, genitalia, sexual, cleavage, bare breasts, uncensored`;
+        }
+
         // Remove "multiple faces/bodies" from negative if user wants 2+ people
         if (tagSettings && (tagSettings as TagSettings).peopleCount && (tagSettings as TagSettings).peopleCount !== '1') {
             finalNegative = finalNegative
@@ -1022,6 +1035,16 @@ export async function POST(request: NextRequest) {
             console.error('Novita submit error:', submitRes.status, errText);
             return NextResponse.json(
                 { error: `Novita API error: ${submitRes.status} — ${errText.slice(0, 500)}` },
+                { status: 502 }
+            );
+        }
+
+        // --- Defensive check for HTML response (SDXL/Novita stability) ---
+        const contentType = submitRes.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+            console.error('Novita returned HTML instead of JSON. Head:', await submitRes.text());
+            return NextResponse.json(
+                { error: 'Novita API returned an unexpected HTML error page. This often happens if the model is currently unavailable or invalid.' },
                 { status: 502 }
             );
         }
