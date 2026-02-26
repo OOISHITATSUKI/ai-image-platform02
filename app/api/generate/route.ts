@@ -258,9 +258,11 @@ async function pollTaskResult(taskId: string): Promise<{
     const maxAttempts = 60; // 2s * 60 = 120s max wait
     const pollInterval = 2000;
 
+    console.log(`Polling for task: ${taskId}, max attempts: ${maxAttempts}`);
     for (let i = 0; i < maxAttempts; i++) {
         await new Promise((r) => setTimeout(r, pollInterval));
 
+        console.log(`Fetching task result for: ${taskId}...`);
         const res = await fetch(
             `${NOVITA_BASE}/task-result?task_id=${taskId}`,
             {
@@ -276,6 +278,7 @@ async function pollTaskResult(taskId: string): Promise<{
 
         const data = await res.json();
         const status = data?.task?.status;
+        console.log(`Task status for ${taskId}: ${status}`);
 
         if (status === 'TASK_STATUS_SUCCEED') {
             const rawImages = data.images || [];
@@ -1048,8 +1051,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        console.log(`Starting polling for task: ${taskId}`);
         // Poll for the result
-        const result = await pollTaskResult(taskId);
+        let result;
+        try {
+            result = await pollTaskResult(taskId);
+        } catch (pollErr) {
+            console.error(`Poll task error for ${taskId}:`, pollErr);
+            throw pollErr;
+        }
+        console.log(`Polling finished for task: ${taskId}, success: ${result.success}`);
 
         if (!result.success) {
             return NextResponse.json(
