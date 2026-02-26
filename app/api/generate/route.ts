@@ -82,8 +82,8 @@ CRITICAL RULES:
 1. Translate to English if needed (Japanese, etc.)
 2. ALWAYS prioritize photorealistic quality tags: RAW photo, DSLR, 85mm lens, natural lighting, film grain, detailed skin texture, skin pores, realistic skin
 3. NEVER use anime/illustration/cartoon tags. This is STRICTLY photorealistic generation.
-4. For NSFW content, use direct descriptive tags: "nude", "naked", "bare breasts", "exposed skin", etc.
-5. For Inpainting requests, focus ONLY on what should appear in the masked area. Keep it concise.
+4. For NSFW content, be EXPLICIT and direct. Use specific anatomical terms: (completely nude:1.5), (bare breasts:1.4), (detailed pussy:1.4), (spreading legs:1.3), (exposed clitoris:1.3), (large nipples:1.3), (penetration:1.4), (cum:1.3).
+5. For sexual positions, describe the action clearly: cowgirl, missionary, doggy style, standing sex, facial, oral sex (fellatio/cunnilingus).
 6. Emphasize camera equipment and lighting: "Fujifilm XT4", "85mm portrait", "soft studio lighting", "natural volumetric light", "bokeh"
 7. Add extreme skin realism tags: "detailed skin texture", "skin pores", "peach fuzz", "goosebumps", "subtle sweat", "anatomically correct"
 
@@ -93,7 +93,8 @@ Output ONLY the comma-separated list of English tags, nothing else. Keep under 1
 Convert input into natural English descriptions (NOT comma-separated tags).
 SDXL responds best to descriptive sentences, not weighted tags.
 Focus on: lighting description, camera angle, atmosphere, skin detail.
-Example: "A young Japanese woman in a white t-shirt standing on a Tokyo street at night, warm streetlight illuminating her face, shallow depth of field, shot on Sony A7III, 85mm f/1.4, natural skin texture with visible pores"
+For NSFW content, be explicitly descriptive about the scene, body parts, and sexual actions to ensure high explicitness.
+Example: "A highly detailed photorealistic image of a completely naked Japanese woman, bare breasts with large detailed nipples, spreading her legs to show her pussy, shot on Sony A7III, 85mm f/1.4, natural skin texture with visible pores"
 Do NOT use (tag:weight) syntax. Output natural language only.`;
 
     const img2imgSystemPrompt = `You are a prompt expert for Stable Diffusion img2img.
@@ -115,7 +116,7 @@ Focus EXCLUSIVELY on what should appear in the painted (masked) area.
 
 CRITICAL RULES:
 1. Translate to English if needed
-2. For clothing removal: use "(completely naked:1.5), (bare breasts:1.4), (detailed skin:1.3), natural skin texture, uncensored"
+2. For clothing removal: use "(completely naked:1.6), (bare breasts:1.5), (large nipples:1.4), (detailed pussy:1.5), (exposed clitoris:1.4), bare skin, natural skin texture, uncensored, no clothes, undressed"
 3. Do NOT describe the whole scene, ONLY the masked part
 4. Add realism tags: "detailed skin texture", "skin pores", "peach fuzz"
 
@@ -867,13 +868,13 @@ export async function POST(request: NextRequest) {
         // --- NSFW/Prompt Assembly ---
         if (model?.nsfw) {
             if (inpaintMode) {
-                novitaRequest.prompt = enforceLimit(`(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`);
-                novitaRequest.negative_prompt = enforceLimit(`(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`);
+                novitaRequest.prompt = enforceLimit(`(nsfw:1.6), (completely nude:1.6), (detailed genitalia:1.5), (pussy:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`);
+                novitaRequest.negative_prompt = enforceLimit(`(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar, text, logo:1.5), ${finalNegative}`);
             } else {
                 // Txt2Img / Img2Img
                 novitaRequest.prompt = isSdxl
-                    ? enforceLimit(`nsfw, nude, naked, explicit, ${enhancedPrompt}`)
-                    : enforceLimit(`(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`);
+                    ? enforceLimit(`(nsfw:1.5), (completely nude:1.6), (explicit:1.5), (bare breasts:1.4), (detailed pussy:1.5), ${enhancedPrompt}`)
+                    : enforceLimit(`(nsfw:1.5), (completely nude:1.5), (bare breasts:1.4), (detailed genitalia:1.4), high quality, detailed skin, ${enhancedPrompt}`);
                 novitaRequest.negative_prompt = enforceLimit(finalNegative);
             }
         } else {
@@ -955,10 +956,10 @@ export async function POST(request: NextRequest) {
 
                 // Mode-specific prompts for inpaint
                 novitaRequest.negative_prompt = enforceLimit(
-                    `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}`
+                    `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}, (censor, mosaic, bar:1.5)`
                 );
                 novitaRequest.prompt = enforceLimit(
-                    `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), ${enhancedPrompt}`
+                    `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.8), (nude:1.8), (detailed genitalia:1.6), (pussy:1.6), (bare skin:1.5), (no clothing:1.6), ${enhancedPrompt}`
                 );
             } else if (isPureImg2Img) {
                 if (editAnalysis.region !== 'full') {
