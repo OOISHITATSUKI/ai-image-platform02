@@ -138,7 +138,7 @@ Output ONLY the tags for the masked area.`;
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-latest',
+                model: 'claude-3-5-sonnet-20240620',
                 max_tokens: 1000,
                 system: systemPrompt,
                 messages: [
@@ -1041,7 +1041,7 @@ export async function POST(request: NextRequest) {
         }
 
         const submitData = await submitRes.json();
-        console.log('Novita submit response data:', JSON.stringify(submitData).slice(0, 500));
+        console.log('Novita submit response received. Task ID:', submitData?.task_id);
         const taskId = submitData?.task_id;
 
         if (!taskId) {
