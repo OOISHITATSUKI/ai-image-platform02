@@ -851,7 +851,7 @@ export async function POST(request: NextRequest) {
             image_num: Math.min(count, 4),
             steps: isSdxl ? 30 : quality.steps,
             seed: -1,
-            clip_skip: 2,
+            clip_skip: isSdxl ? 1 : 2,
             sampler_name: quality.sampler,
             guidance_scale: isSdxl ? 4.5 : (isPureImg2Img ? 5 : quality.guidance),
             ...(model?.nsfw ? {
@@ -863,12 +863,15 @@ export async function POST(request: NextRequest) {
                     : finalNegative)
             } : {}),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
-            loras: isSdxl ? [] : [
-                {
-                    model_name: 'add_detail_44319',
-                    strength: 0.7,
-                },
-            ],
+            // Omit loras field if empty to avoid potential API body errors
+            ...(!isSdxl ? {
+                loras: [
+                    {
+                        model_name: 'add_detail_44319',
+                        strength: 0.7,
+                    },
+                ]
+            } : {}),
         };
 
         // No HiRes Fix — it causes "failed to exec task" errors on Novita async API
