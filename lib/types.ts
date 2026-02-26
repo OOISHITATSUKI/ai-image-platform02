@@ -57,6 +57,7 @@ export interface GenerationSettings {
   qualityPreset: QualityPreset;
   referenceImageUrl?: string;
   faceSwapImageUrl?: string;
+  img2imgStrength?: number;
   promptTemplate?: string;
   tagSettings?: TagSettings;
 }

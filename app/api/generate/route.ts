@@ -96,7 +96,37 @@ Focus on: lighting description, camera angle, atmosphere, skin detail.
 Example: "A young Japanese woman in a white t-shirt standing on a Tokyo street at night, warm streetlight illuminating her face, shallow depth of field, shot on Sony A7III, 85mm f/1.4, natural skin texture with visible pores"
 Do NOT use (tag:weight) syntax. Output natural language only.`;
 
-    const systemPrompt = isSdxl ? sdxlSystemPrompt : sd15SystemPrompt;
+    const img2imgSystemPrompt = `You are a prompt expert for Stable Diffusion img2img.
+The user has uploaded a reference image and wants to MODIFY it, not create a new one.
+
+CRITICAL RULES:
+1. Translate to English if needed
+2. Focus ONLY on what the user wants to CHANGE about the image
+3. Do NOT add descriptive tags about the person's appearance (face, ethnicity, body type) — the reference image already provides this
+4. Do NOT add camera/lighting/quality tags — these override the original image's look
+5. Keep the output SHORT and focused: only the modification tags
+6. If user says "巨乳にしてください" → output: "(large breasts:1.3), (bigger breasts:1.2)"
+   NOT: "beautiful woman, large breasts, photorealistic, RAW photo..."
+
+Output ONLY the modification tags, nothing else. Keep under 30 tags.`;
+
+    const inpaintSystemPrompt = `You are a prompt expert for Stable Diffusion inpainting (Nude Mode).
+Focus EXCLUSIVELY on what should appear in the painted (masked) area.
+
+CRITICAL RULES:
+1. Translate to English if needed
+2. For clothing removal: use "(completely naked:1.5), (bare breasts:1.4), (detailed skin:1.3), natural skin texture, uncensored"
+3. Do NOT describe the whole scene, ONLY the masked part
+4. Add realism tags: "detailed skin texture", "skin pores", "peach fuzz"
+
+Output ONLY the tags for the masked area.`;
+
+    let systemPrompt = isSdxl ? sdxlSystemPrompt : sd15SystemPrompt;
+    if (generationType === 'img2img') {
+        systemPrompt = img2imgSystemPrompt;
+    } else if (generationType === 'img_edit') {
+        systemPrompt = inpaintSystemPrompt;
+    }
 
     try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -460,6 +490,7 @@ export async function POST(request: NextRequest) {
             faceSwapMode = false,
             inpaintMode = false,
             maskBase64,
+            img2imgStrength,
             count = 1,
             qualityPreset = 'hd',
             tagSettings,
@@ -563,6 +594,9 @@ export async function POST(request: NextRequest) {
         const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
 
         // ── Build tag-based prompt fragment ──
+        // Force Ultra quality for all requests to ensure maximum output
+        const quality = QUALITY_CONFIGS.ultra;
+
         let tagPromptFragment = '';
         let tagNegativeFragment = '';
         let actionHint = '';          // ← Action/pose hint sent to Claude
@@ -605,6 +639,9 @@ export async function POST(request: NextRequest) {
         const isSdxl = novitaModelName.toLowerCase().includes('xl');
 
         // ── Claude Optimization Step (user prompt + action context) ──
+        const isImg2ImgValue = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
+        const isPureImg2Img = generationType === 'img2img' && !!imageBase64;
+
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
         // Pass the action hint to Claude so it can generate matching scene context
         const promptForClaude = actionHint
@@ -635,6 +672,11 @@ export async function POST(request: NextRequest) {
         }
         combinedPrompt = trimPromptToLimit(combinedPrompt);
         console.log(`Final combined prompt (${combinedPrompt.length} chars):`, combinedPrompt);
+
+        // ── Prompt Prefix Selection ──
+        // Skip quality prefixes for img2img to preserve original image characteristics
+        const promptPrefix = (inpaintMode || isPureImg2Img) ? '' : quality.qualityPrefix;
+        const enhancedPrompt = promptPrefix + combinedPrompt;
         // image1 (imageBase64) = body/target, image2 (additionalImages[0]) = face source
         if (faceSwapMode && imageBase64 && additionalImages?.length > 0) {
             try {
@@ -648,8 +690,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Standard SD branch ──
-        // Force Ultra quality for all requests to ensure maximum output
-        const quality = QUALITY_CONFIGS.ultra;
+        // (Moved quality up)
 
         const { width, height } = getResolutionFromAspectRatio(
             aspectRatio as AspectRatio,
@@ -659,12 +700,12 @@ export async function POST(request: NextRequest) {
 
         // Decide endpoint
         // Inpainting is a specialized img2img request
-        const isImg2Img = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
+        const isNovitaImg2Img = isImg2ImgValue;
 
         // Use dedicated inpainting endpoint if mask is provided
         const endpoint = (inpaintMode && maskBase64)
             ? `${NOVITA_BASE}/inpainting`
-            : isImg2Img
+            : isNovitaImg2Img
                 ? `${NOVITA_BASE}/img2img`
                 : `${NOVITA_BASE}/txt2img`;
 
@@ -681,8 +722,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Prompt Assembly ──
-        const promptPrefix = inpaintMode ? '' : quality.qualityPrefix;
-        const enhancedPrompt = promptPrefix + combinedPrompt;
+        // (Moved up)
 
         // ── Helper to enforce 1024 character limit safely ──
         const enforceLimit = (text: string, limit: number = 1000) => {
@@ -707,11 +747,11 @@ export async function POST(request: NextRequest) {
             seed: -1,
             clip_skip: 2,
             sampler_name: quality.sampler,
-            guidance_scale: isSdxl ? 4.5 : quality.guidance,
+            guidance_scale: isSdxl ? 4.5 : (isPureImg2Img ? 5 : quality.guidance),
             ...(model?.nsfw ? {
                 prompt: enforceLimit(inpaintMode
                     ? `(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`
-                    : (isSdxl ? enhancedPrompt : `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`)),
+                    : ((isSdxl || isPureImg2Img) ? enhancedPrompt : `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`)),
                 negative_prompt: enforceLimit(inpaintMode
                     ? `(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`
                     : finalNegative)
@@ -726,13 +766,14 @@ export async function POST(request: NextRequest) {
         };
 
         // No HiRes Fix — it causes "failed to exec task" errors on Novita async API
-        if (isImg2Img) {
+        if (isImg2ImgValue) {
             // For inpainting: both image + mask MUST have identical resolution.
             // Resize both to the same dimensions using the image's natural size
             // (capped at 1024 on longest side to be safe with Novita).
             let finalImageBase64 = imageBase64!.replace(/^data:image\/\w+;base64,/, '');
 
             if (inpaintMode && maskBase64) {
+                // ... inpaint specific resize logic ...
                 const MAX_INPAINT_PX = 1024;
 
                 // Get image natural size
@@ -780,43 +821,31 @@ export async function POST(request: NextRequest) {
 
             if (inpaintMode) {
                 // ═══ Inpaint Optimization for Near-Perfect Clothing Removal ═══
-
-                // (1) strength=1.0: 完全にマスク領域のピクセルを無視
-                //     衣類のテクスチャが残らないようにする
                 novitaRequest.strength = 1.0;
-
-                // (2) guidance_scale: 12に上げてプロンプトへの忠実度を最大化
-                //     10→12 で「nude」指示への従属度が上がる
                 novitaRequest.guidance_scale = 12;
-
-                // (3) steps: 50に増加
-                //     細部の描写が改善される（ストラップの除去精度向上）
                 novitaRequest.steps = 50;
-
-                // (4) mask_blur: 8に増加
-                //     マスク境界のブレンドが自然になる
                 novitaRequest.mask_blur = 8;
-
-                // (5) ★ inpaint_full_res: マスク領域だけを拡大してインペイント
-                //     これにより細部の精度が大幅に向上する
                 novitaRequest.inpaint_full_res = 1;
                 novitaRequest.inpaint_full_res_padding = 48;
-
-                // (6) sampler: Euler a はインペイントで安定した結果を出す
                 novitaRequest.sampler_name = 'Euler a';
 
-                // (7) 強化されたネガティブプロンプト (Mode-specific)
+                // Mode-specific prompts for inpaint
                 novitaRequest.negative_prompt = enforceLimit(
                     `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}`
                 );
-
-                // (8) 強化されたプロンプト
                 novitaRequest.prompt = enforceLimit(
                     `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), ${enhancedPrompt}`
                 );
-            } else {
-                novitaRequest.strength = 0.7;
+            } else if (isPureImg2Img) {
+                // ═══ img2img optimization: 元画像保持 ═══
+                // Use user-provided strength (default 0.35)
+                novitaRequest.strength = img2imgStrength ?? 0.35;
+                novitaRequest.steps = 30;
+                // guidance_scale is already set to 5 in the base novitaRequest
+                console.log(`Pure img2img mode (Strength: ${novitaRequest.strength})`);
             }
+        } else {
+            // txt2img: No specific strength/guidance override needed here beyond base params
         }
 
         const novitaBody = {

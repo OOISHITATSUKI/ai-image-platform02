@@ -46,6 +46,9 @@
         "upload": "Upload",
         "imgNotice": "Images are generated using AI. Results may vary.",
         "vidNotice": "Video generation is in beta.",
+        "img2imgStrength": "Modification Strength",
+        "img2imgStrengthLow": "Keep Original",
+        "img2imgStrengthHigh": "Strong Change",
         "autoDeleteWarning": "⚠️ Generated images are automatically deleted after 1 hour. Please download them if you wish to save them."
     },
     "chat": {

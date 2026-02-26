@@ -114,6 +114,38 @@ export default function SettingsPanel() {
                     </div>
                 </div>
 
+                {/* img2img Strength Slider */}
+                {settings.generationType === 'img2img' && (
+                    <div className="control-group">
+                        <label>
+                            {t('editor.img2imgStrength')}: <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{settings.img2imgStrength ?? 0.35}</span>
+                        </label>
+                        <div style={{ padding: '8px 0' }}>
+                            <input
+                                type="range"
+                                min="0.1"
+                                max="0.8"
+                                step="0.05"
+                                value={settings.img2imgStrength ?? 0.35}
+                                onChange={(e) => updateSettings({ img2imgStrength: parseFloat(e.target.value) })}
+                                className="tag-slider"
+                                style={{ display: 'block', width: '100%' }}
+                            />
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '0.65rem',
+                                color: 'var(--text-tertiary)',
+                                marginTop: '4px',
+                                padding: '0 2px',
+                            }}>
+                                <span>{t('editor.img2imgStrengthLow')}</span>
+                                <span>{t('editor.img2imgStrengthHigh')}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Duration (Video only) */}
                 {isVideoMode && (
                     <div className="control-group">

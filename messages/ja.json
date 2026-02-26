@@ -46,6 +46,9 @@
         "upload": "アップロード",
         "imgNotice": "AIにより生成された画像です。結果は異なる場合があります。",
         "vidNotice": "動画生成はベータ版です。",
+        "img2imgStrength": "変更の強さ / Modification Strength",
+        "img2imgStrengthLow": "元画像を保持",
+        "img2imgStrengthHigh": "大きく変更",
         "autoDeleteWarning": "⚠️ 生成画像は1時間後に自動削除されます。保存したい場合はダウンロードしてください。"
     },
     "chat": {

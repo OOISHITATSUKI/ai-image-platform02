@@ -45,7 +45,11 @@
         "fromLibrary": "라이브러리에서",
         "upload": "업로드",
         "imgNotice": "AI로 생성된 이미지입니다. 결과는 다를 수 있습니다.",
-        "vidNotice": "동영상 생성은 베타 버전입니다."
+        "vidNotice": "동영상 생성은 베타 버전입니다.",
+        "img2imgStrength": "변경 강도 / Modification Strength",
+        "img2imgStrengthLow": "원본 유지",
+        "img2imgStrengthHigh": "크게 변경",
+        "autoDeleteWarning": "⚠️ 생성된 이미지는 1시간 후에 자동 삭제됩니다. 저장하려면 다운로드하세요."
     },
     "chat": {
         "newChat": "새 채팅",
