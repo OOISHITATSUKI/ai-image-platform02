@@ -137,8 +137,8 @@ Output ONLY the tags for the masked area.`;
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5-20250929',
-                max_tokens: 200,
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 1000,
                 system: systemPrompt,
                 messages: [
                     { role: 'user', content: `Generation Type: ${generationType}, NSFW Mode: ${isNsfw}\nUser Input: ${prompt}` }
@@ -586,6 +586,7 @@ export async function POST(request: NextRequest) {
             count = 1,
             qualityPreset = 'hd',
             tagSettings,
+            nsfwEnabled = true, // Default to true if not provided
         } = body;
 
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
@@ -844,8 +845,6 @@ export async function POST(request: NextRequest) {
         // Build request body
         const novitaRequest: Record<string, unknown> = {
             model_name: novitaModelName,
-            prompt: enforceLimit(enhancedPrompt),
-            negative_prompt: enforceLimit(finalNegative),
             width,
             height,
             image_num: Math.min(count, 4),
@@ -854,16 +853,7 @@ export async function POST(request: NextRequest) {
             clip_skip: isSdxl ? 1 : 2,
             sampler_name: quality.sampler,
             guidance_scale: isSdxl ? 4.5 : (isPureImg2Img ? 5 : quality.guidance),
-            ...(model?.nsfw ? {
-                prompt: enforceLimit(inpaintMode
-                    ? `(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`
-                    : ((isSdxl || isPureImg2Img) ? enhancedPrompt : `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`)),
-                negative_prompt: enforceLimit(inpaintMode
-                    ? `(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`
-                    : finalNegative)
-            } : {}),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
-            // Omit loras field if empty to avoid potential API body errors
             ...(!isSdxl ? {
                 loras: [
                     {
@@ -873,6 +863,24 @@ export async function POST(request: NextRequest) {
                 ]
             } : {}),
         };
+
+        // --- NSFW/Prompt Assembly (Step 3 of Implementation) ---
+        if (model?.nsfw && nsfwEnabled) {
+            if (inpaintMode) {
+                novitaRequest.prompt = enforceLimit(`(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`);
+                novitaRequest.negative_prompt = enforceLimit(`(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`);
+            } else {
+                // Txt2Img / Img2Img logic from user
+                novitaRequest.prompt = isSdxl
+                    ? enforceLimit(`nsfw, nude, naked, explicit, ${enhancedPrompt}`)
+                    : enforceLimit(`(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`);
+                novitaRequest.negative_prompt = enforceLimit(finalNegative);
+            }
+        } else {
+            // NSFW OFF or non-NSFW model
+            novitaRequest.prompt = enforceLimit(enhancedPrompt);
+            novitaRequest.negative_prompt = enforceLimit(finalNegative);
+        }
 
         // No HiRes Fix — it causes "failed to exec task" errors on Novita async API
         if (isImg2ImgValue) {
@@ -982,7 +990,7 @@ export async function POST(request: NextRequest) {
         const novitaBody = {
             extra: {
                 response_image_type: 'png',
-                enable_nsfw_detection: false,
+                enable_nsfw_detection: !nsfwEnabled,
             },
             request: novitaRequest,
         };
@@ -998,6 +1006,7 @@ export async function POST(request: NextRequest) {
         console.log('Steps:', novitaRequest.steps, 'Guidance:', novitaRequest.guidance_scale);
         console.log('================================');
 
+        console.log('Sending request to Novita...');
         const submitRes = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -1006,6 +1015,7 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify(novitaBody),
         });
+        console.log('Novita request sent. Status:', submitRes.status);
 
         if (!submitRes.ok) {
             const errText = await submitRes.text();
@@ -1017,6 +1027,7 @@ export async function POST(request: NextRequest) {
         }
 
         const submitData = await submitRes.json();
+        console.log('Novita submit response data:', JSON.stringify(submitData).slice(0, 500));
         const taskId = submitData?.task_id;
 
         if (!taskId) {

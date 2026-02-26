@@ -146,6 +146,23 @@ export default function SettingsPanel() {
                     </div>
                 )}
 
+                {/* NSFW Toggle — txt2imgのみ */}
+                {settings.generationType === 'txt2img' && (
+                    <div className="control-group">
+                        <div className="toggle-row">
+                            <label style={{ marginBottom: 0 }}>🔞 NSFW Mode</label>
+                            <label className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={settings.nsfwEnabled ?? true}
+                                    onChange={(e) => updateSettings({ nsfwEnabled: e.target.checked })}
+                                />
+                                <span className="toggle-slider" />
+                            </label>
+                        </div>
+                    </div>
+                )}
+
                 {/* Duration (Video only) */}
                 {isVideoMode && (
                     <div className="control-group">

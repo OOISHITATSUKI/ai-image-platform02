@@ -60,6 +60,7 @@ export interface GenerationSettings {
   img2imgStrength?: number;
   promptTemplate?: string;
   tagSettings?: TagSettings;
+  nsfwEnabled?: boolean;
 }
 
 // ----- Tag-based Parameter Types -----
