@@ -251,19 +251,19 @@
         "term4": "生成されたデータを第三者へ共有や公開しません。"
     },
     "firstGenModal": {
-        "title": "画像生成を始める前に",
-        "privacyTitle": "📄 プライバシーポリシー（データの取り扱い）",
-        "privacyPoint1": "・入力されたプロンプトはAIモデルの学習には使用されません。",
-        "privacyPoint2": "・フィルタリング精度向上のため匿名化された統計分析に使用される場合があります。",
-        "privacyPoint3": "・生成画像は最大72時間キャッシュ後、自動削除されます。",
-        "readFullText": "全文を読む →",
-        "privacyCheck": "データの取り扱いについて確認し、同意します。",
-        "complianceTitle": "📄 2257コンプライアンス声明",
-        "complianceSubtitle": "※ 米国にお住まいの方は必ずお読みください",
-        "compliancePoint1": "本サービスのすべての画像はAIにより生成されたものです。\n実在の人物は一切含まれていません。",
-        "complianceCheck": "上記を確認しました。",
-        "prohibitedCheck": "禁止コンテンツ（未成年、実在人物等）を生成しないことを改めて確認します。",
-        "startButton": "生成を始める"
+        "title": "Before You Start Generating",
+        "privacyTitle": "📄 Privacy Policy (Data Handling)",
+        "privacyPoint1": "• Prompts entered are not used for AI model training.",
+        "privacyPoint2": "• Anonymized statistical analysis may be performed to improve filtering accuracy.",
+        "privacyPoint3": "• Generated images are automatically deleted after 1 hour.",
+        "readFullText": "Read Full Text →",
+        "privacyCheck": "I have reviewed and agree to the data handling policy.",
+        "complianceTitle": "📄 2257 Compliance Statement",
+        "complianceSubtitle": "※ Required notice for US residents",
+        "compliancePoint1": "All images on this service are 100% AI-generated.\nNo real individuals are depicted in any generated content.",
+        "complianceCheck": "I have read and acknowledged the statement above.",
+        "prohibitedCheck": "I reaffirm that I will not generate prohibited content (minors, real persons, etc.).",
+        "startButton": "Start Generating"
     },
     "history": {
         "title": "生成履歴",

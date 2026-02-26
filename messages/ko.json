@@ -239,18 +239,18 @@
         "term4": "생성된 데이터를 제3자에게 공유하거나 공개하지 않습니다."
     },
     "firstGenModal": {
-        "title": "Before you start generating",
+        "title": "Before You Start Generating",
         "privacyTitle": "📄 Privacy Policy (Data Handling)",
-        "privacyPoint1": "• Prompts entered are not used to train AI models.",
-        "privacyPoint2": "• They may be used for anonymized statistical analysis to improve filtering accuracy.",
-        "privacyPoint3": "• Generated images are automatically deleted after being cached for up to 72 hours.",
-        "readFullText": "Read full text →",
-        "privacyCheck": "I confirm and agree to the data handling terms.",
+        "privacyPoint1": "• Prompts entered are not used for AI model training.",
+        "privacyPoint2": "• Anonymized statistical analysis may be performed to improve filtering accuracy.",
+        "privacyPoint3": "• Generated images are automatically deleted after 1 hour.",
+        "readFullText": "Read Full Text →",
+        "privacyCheck": "I have reviewed and agree to the data handling policy.",
         "complianceTitle": "📄 2257 Compliance Statement",
-        "complianceSubtitle": "※ US residents must read carefully",
-        "compliancePoint1": "All images on this service are AI-generated.\nNo real individuals are depicted.",
-        "complianceCheck": "I have read and acknowledged the above.",
-        "prohibitedCheck": "I reiterate that I will not generate prohibited content (minors, real people, etc.).",
+        "complianceSubtitle": "※ Required notice for US residents",
+        "compliancePoint1": "All images on this service are 100% AI-generated.\nNo real individuals are depicted in any generated content.",
+        "complianceCheck": "I have read and acknowledged the statement above.",
+        "prohibitedCheck": "I reaffirm that I will not generate prohibited content (minors, real persons, etc.).",
         "startButton": "Start Generating"
     }
 }
