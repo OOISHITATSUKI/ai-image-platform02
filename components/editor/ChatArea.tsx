@@ -925,16 +925,10 @@ export default function ChatArea() {
 
                     {/* Security: Mandatory Img2Img Consent Checkboxes */}
                     {(() => {
-                        let shouldShowConsent = false;
-                        if (uploads.length > 0) {
-                            if (faceSwapMode) {
-                                shouldShowConsent = uploads.length >= 2;
-                            } else if (inpaintMode) {
-                                shouldShowConsent = !!uploads[0]?.maskBase64;
-                            } else {
-                                shouldShowConsent = true; // Standard img2img
-                            }
-                        }
+                        const isImg2ImgActive = settings.generationType === 'img2img';
+                        // Show consent if any image-to-image mode is active
+                        // inpaintMode and faceSwapMode are internal flags
+                        const shouldShowConsent = isImg2ImgActive && (uploads.length > 0 || inpaintMode || faceSwapMode);
 
                         return shouldShowConsent ? (
                             <div className="img2img-consent-block" style={{
@@ -1036,7 +1030,29 @@ export default function ChatArea() {
                         <button
                             type="submit"
                             className={`send-btn ${isGenerating ? 'generating' : ''}`}
-                            disabled={isGenerating || (showAttach && uploads.length === 0) || (!inputText.trim() && uploads.length === 0) || (uploads.length > 0 && !allConsentChecked)}
+                            disabled={(() => {
+                                if (isGenerating) return true;
+
+                                const isImg2ImgMode = settings.generationType === 'img2img';
+
+                                if (isImg2ImgMode) {
+                                    // 1. Must check all consent boxes
+                                    if (!allConsentChecked) return true;
+
+                                    // 2. Mode-specific requirements
+                                    if (faceSwapMode) {
+                                        return uploads.length < 2; // FaceSwap requires 2 images
+                                    } else if (inpaintMode) {
+                                        // Inpaint requires at least 1 image with a mask
+                                        return uploads.length < 1 || !uploads[0]?.maskBase64;
+                                    } else {
+                                        return uploads.length < 1; // Standard img2img requires 1 image
+                                    }
+                                }
+
+                                // txt2img requires at least a prompt
+                                return !inputText.trim();
+                            })()}
                             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minWidth: '80px', height: 'auto', padding: '8px 12px' }}
                         >
                             {isGenerating ? (
