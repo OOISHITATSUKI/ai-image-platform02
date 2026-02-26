@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractToken, verifyToken, findUserById, saveUser } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+
 
 // GET: Get current user from JWT token
 export async function GET(req: NextRequest) {

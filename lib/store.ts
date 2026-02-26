@@ -259,12 +259,8 @@ export const useAppStore = create<AppState>()(
                             set({ locale: userData.preferred_language as Locale });
                         }
 
-                        if (userData && typeof userData.credits === 'number') {
-                            console.log('Restored credits from Supabase:', userData.credits);
-                            set((s) => ({
-                                user: s.user ? { ...s.user, credits: userData.credits } : null
-                            }));
-                        }
+                        // Credits are now handled by /api/auth/me synchronization
+                        // so we don't need to double-fetch them here and cause a flash.
 
                         // 3. Load chats
                         const savedChats = await loadChatsFromSupabase(user.id);

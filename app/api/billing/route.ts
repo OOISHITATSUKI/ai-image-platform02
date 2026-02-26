@@ -9,6 +9,8 @@ import {
     updateTransactionStatus,
     type TransactionRecord,
 } from '@/lib/db/billing';
+import { supabase } from '@/lib/supabase';
+
 
 // GET /api/billing — return transaction history + credit log for authenticated user
 export async function GET(req: NextRequest) {
@@ -91,6 +93,12 @@ export async function POST(req: NextRequest) {
             relatedId: generationId,
         });
 
+        // Sync to Supabase
+        await supabase
+            .from('users')
+            .update({ credits: newBalance })
+            .eq('id', decoded.userId);
+
         return NextResponse.json({ balance: newBalance, log });
     }
 
@@ -117,6 +125,12 @@ export async function POST(req: NextRequest) {
             relatedId: generationId,
             note: reason || 'Generation failure refund',
         });
+
+        // Sync to Supabase
+        await supabase
+            .from('users')
+            .update({ credits: newBalance })
+            .eq('id', decoded.userId);
 
         return NextResponse.json({ balance: newBalance, log });
     }
@@ -164,6 +178,12 @@ export async function POST(req: NextRequest) {
             balanceAfter: newBalance,
             relatedId: transactionId,
         });
+
+        // Sync to Supabase
+        await supabase
+            .from('users')
+            .update({ credits: newBalance })
+            .eq('id', decoded.userId);
 
         return NextResponse.json({ balance: newBalance, transaction: updated, log });
     }
