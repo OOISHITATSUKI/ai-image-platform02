@@ -39,8 +39,8 @@ async function cleanupOldFiles() {
 
 
 // ── Rate Limit Constants ──
-const FREE_RATE_LIMIT = 5; // Increased from 1
-const PAID_RATE_LIMIT = 15; // Increased from 5
+const FREE_RATE_LIMIT = 6; // Increased from 5
+const PAID_RATE_LIMIT = 20; // Increased from 15
 const WINDOW_MS = 60 * 1000; // 1 minute
 
 // ... (rest of the file until the POST handler) ...
