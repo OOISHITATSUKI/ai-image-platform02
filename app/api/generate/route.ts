@@ -50,9 +50,12 @@ const WINDOW_MS = 60 * 1000; // 1 minute
 const DEFAULT_NEGATIVE_PROMPT =
     '(worst quality:1.4), (low quality:1.4), (illustration, 3d, 2d, painting, cartoons, sketch:1.5), (plastic skin:1.4), (airbrushed:1.4), (synthetic:1.4), lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, blurry, deformed, disfigured, ugly, (deformed genitalia:1.5), (extra genitalia:1.3), (fused body parts:1.3), (extra limbs:1.3), (missing limbs:1.3), (bad proportions:1.3), (child:1.5), (loli:1.5), (underage:1.5), (baby face:1.3), (doll face:1.3), (uncanny valley:1.3), (cloned face:1.3), (malformed hands:1.4), (extra fingers:1.3), (multiple faces:1.5), (multiple bodies:1.5), (extra breasts:1.5), (three breasts:1.5), (anime:1.5), (cartoon:1.5), (oversaturated:1.3)';
 
-// Extra negative prompt specifically for inpaint clothing removal
-const INPAINT_CLOTHING_NEGATIVE =
-    '(clothing:1.8), (fabric:1.7), (cloth:1.7), (dressed:1.8), (shirt:1.7), (dress:1.8), (bra:1.8), (underwear:1.8), (panties:1.8), (lingerie:1.7), (bikini:1.8), (swimsuit:1.8), (tank top:1.7), (t-shirt:1.7), (skirt:1.7), (pants:1.7), (shorts:1.7), (leotard:1.7), (bodysuit:1.8), (tight dress:1.8), (knit dress:1.8), (sweater:1.7), (corset:1.7), (stockings:1.6), (socks:1.6), (gloves:1.6), (latex:1.7), (spandex:1.7), (textile:1.6), (fiber:1.6), (texture:1.5), (strap:1.8), (string:1.8), (necklace:1.8), (choker:1.8), (harness:1.8), (jewelry:1.6), (ribbon:1.6), (lace:1.6)';
+// ── Inpaint (Nude Mode) specific prompts ──
+const INPAINT_NEGATIVE_PROMPT =
+    '(worst quality:1.4), (low quality:1.4), deformed, blurry, bad anatomy, bad hands, extra fingers, missing fingers, (clothing:1.5), (straps:1.5), (shoulder straps:1.5), (bra straps:1.5), (string:1.4), (ribbon:1.4), (fabric:1.4), (deformed nipples:1.5), (misshapen nipples:1.5), (extra nipples:1.5), (asymmetric nipples:1.4), (distorted breasts:1.4), (unnatural skin texture:1.3), (seam:1.3), (visible edge:1.3), (clothing remnants:1.5), (partial clothing:1.5), (torn fabric:1.4), (lingerie:1.4), (underwear:1.5), (bra:1.5)';
+
+const INPAINT_POSITIVE_MODIFIERS =
+    '(natural skin:1.3), (realistic skin texture:1.3), (anatomically correct:1.4), (smooth natural skin:1.3)';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -766,7 +769,6 @@ export async function POST(request: NextRequest) {
 
                 // (4) mask_blur: 8に増加
                 //     マスク境界のブレンドが自然になる
-                //     細いストラップがマスクの端に引っかかるのを防ぐ
                 novitaRequest.mask_blur = 8;
 
                 // (5) ★ inpaint_full_res: マスク領域だけを拡大してインペイント
@@ -777,14 +779,14 @@ export async function POST(request: NextRequest) {
                 // (6) sampler: Euler a はインペイントで安定した結果を出す
                 novitaRequest.sampler_name = 'Euler a';
 
-                // (7) 強化されたネガティブプロンプト（ストラップ・紐を明示的に追加 + 巨乳化抑制）
+                // (7) 強化されたネガティブプロンプト (Mode-specific)
                 novitaRequest.negative_prompt = enforceLimit(
-                    `${finalNegative}, ${INPAINT_CLOTHING_NEGATIVE}, (huge nipples:1.6), (giant areola:1.6), (oversized nipples:1.6), (exaggerated proportions:1.5), (straps:1.5), (shoulder straps:1.5), (bra straps:1.5), (string:1.4), (ribbon:1.4), (elastic band:1.4), (neckline:1.3), (collar:1.3), (seam:1.3), (stitching:1.3), (trim:1.3), (lace:1.4), (wire:1.3)`
+                    `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}`
                 );
 
                 // (8) 強化されたプロンプト
                 novitaRequest.prompt = enforceLimit(
-                    `(completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), (topless:1.5), (exposed breasts:1.5), (exposed nipples:1.4), (natural size nipples:1.4), (small areola:1.4), (proportional anatomy:1.4), natural skin tone, realistic skin texture, skin pores, smooth natural skin, detailed skin, soft shadows on skin, anatomically correct body, photorealistic skin, ${enhancedPrompt}`
+                    `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), ${enhancedPrompt}`
                 );
             } else {
                 novitaRequest.strength = 0.7;
