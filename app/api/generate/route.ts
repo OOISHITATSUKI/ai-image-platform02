@@ -283,7 +283,7 @@ async function pollTaskResult(taskId: string): Promise<{
         if (status === 'TASK_STATUS_SUCCEED') {
             const rawImages = data.images || [];
 
-            // Fetch each image URL and convert to Base64 data URI
+            // Fetch each image URL and convert to Base64 data URI with compression
             const images = await Promise.all(
                 rawImages.map(async (img: { image_url: string; image_type: string }) => {
                     try {
@@ -292,16 +292,22 @@ async function pollTaskResult(taskId: string): Promise<{
                             console.error(`Failed to fetch image: ${imgRes.status}`);
                             return { url: img.image_url, type: img.image_type }; // Fallback
                         }
-                        const buffer = await imgRes.arrayBuffer();
-                        const base64 = Buffer.from(buffer).toString('base64');
-                        const mimeType = img.image_type === 'jpeg' ? 'image/jpeg' : 'image/png';
+                        const rawBuffer = await imgRes.arrayBuffer();
+                        const buffer = Buffer.from(rawBuffer);
+
+                        // Compress using sharp to prevent crash during JSON serialization
+                        const compressedBuffer = await sharp(buffer)
+                            .jpeg({ quality: 80, progressive: true })
+                            .toBuffer();
+
+                        const base64 = compressedBuffer.toString('base64');
                         return {
-                            url: `data:${mimeType};base64,${base64}`,
-                            type: img.image_type,
+                            url: `data:image/jpeg;base64,${base64}`,
+                            type: 'jpeg',
                         };
                     } catch (err) {
-                        console.error('Image fetch/convert error:', err);
-                        return { url: img.image_url, type: img.image_type }; // Fallback
+                        console.error('Image fetch/convert/compress error:', err);
+                        return { url: img.image_url, type: img.image_type || 'jpeg' }; // Fallback
                     }
                 })
             );
