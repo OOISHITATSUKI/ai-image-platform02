@@ -183,6 +183,11 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-cyberrealistic', name: '🔞 CyberRealistic', type: 'image', provider: 'novita', description: 'Modern photorealism', novitaModelName: 'cyberrealistic_v40_151857.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-dreamshaper', name: '🔞 DreamShaper', type: 'image', provider: 'novita', description: 'Fantasy versatile', novitaModelName: 'dreamshaper_8_93211.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
 
+  // ── SDXL Photoreal Models (txt2img only) ──
+  { id: 'novita-realvis-xl', name: '✨ RealVisXL V4.0', type: 'image', provider: 'novita', description: 'High-end SDXL photorealism', novitaModelName: 'realvisxlV40_v40Bakedvae_615025.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-juggernaut-xl', name: '✨ JuggernautXL V9', type: 'image', provider: 'novita', description: 'Powerful SDXL versatile', novitaModelName: 'juggernautXL_v9_142750.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+  { id: 'novita-helloworld-xl', name: '✨ HelloWorld XL', type: 'image', provider: 'novita', description: 'Natural SDXL realism', novitaModelName: 'helloworld_v10_88849.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
+
   // ── Video Models ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },
   { id: 'wan-2.6', name: 'WAN 2.6 Pro', type: 'video', provider: 'wan', description: 'High quality video' },

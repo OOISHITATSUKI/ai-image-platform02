@@ -57,17 +57,25 @@ const INPAINT_NEGATIVE_PROMPT =
 const INPAINT_POSITIVE_MODIFIERS =
     '(natural skin:1.3), (realistic skin texture:1.3), (anatomically correct:1.4), (smooth natural skin:1.3)';
 
+// ── SDXL specific negative prompt ──
+const SDXL_NEGATIVE_PROMPT =
+    'illustration, 3d render, cartoon, anime, sketch, painting, ' +
+    'plastic skin, airbrushed, synthetic, lowres, bad anatomy, ' +
+    'bad hands, text, watermark, blurry, deformed, ugly, ' +
+    'child, underage, extra fingers, missing fingers, ' +
+    'extra limbs, multiple faces, multiple bodies';
+
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
-async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean): Promise<string> {
+async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean, isSdxl: boolean): Promise<string> {
     if (!ANTHROPIC_API_KEY) {
         console.warn('ANTHROPIC_API_KEY not found, using raw prompt');
         return prompt;
     }
 
-    console.log(`Optimizing prompt with Claude: ${prompt}`);
+    console.log(`Optimizing prompt with Claude (isSdxl: ${isSdxl}): ${prompt}`);
 
-    const systemPrompt = `You are a prompt engineering expert for Stable Diffusion 1.5 photorealistic models.
+    const sd15SystemPrompt = `You are a prompt engineering expert for Stable Diffusion 1.5 photorealistic models.
 Convert the user's input into a highly effective comma-separated list of English tags for PHOTOREALISTIC image generation.
 
 CRITICAL RULES:
@@ -80,6 +88,15 @@ CRITICAL RULES:
 7. Add extreme skin realism tags: "detailed skin texture", "skin pores", "peach fuzz", "goosebumps", "subtle sweat", "anatomically correct"
 
 Output ONLY the comma-separated list of English tags, nothing else. Keep under 120 tags.`;
+
+    const sdxlSystemPrompt = `You are a prompt expert for SDXL photorealistic models.
+Convert input into natural English descriptions (NOT comma-separated tags).
+SDXL responds best to descriptive sentences, not weighted tags.
+Focus on: lighting description, camera angle, atmosphere, skin detail.
+Example: "A young Japanese woman in a white t-shirt standing on a Tokyo street at night, warm streetlight illuminating her face, shallow depth of field, shot on Sony A7III, 85mm f/1.4, natural skin texture with visible pores"
+Do NOT use (tag:weight) syntax. Output natural language only.`;
+
+    const systemPrompt = isSdxl ? sdxlSystemPrompt : sd15SystemPrompt;
 
     try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -156,27 +173,32 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
 // Map aspect ratios to pixel dimensions
 function getResolutionFromAspectRatio(
     aspectRatio: AspectRatio,
-    resolution: string
+    resolution: string,
+    isSdxl: boolean
 ): { width: number; height: number } {
-    // Use appropriate base sizes directly — no HiRes Fix (causes Novita API failures)
-    // SD 1.5 optimal range: 512-768, max safe: 1024
+    // SDXL: Native 1024px base
+    // SD 1.5: 512-768 base
     let baseSize: number;
 
-    switch (resolution) {
-        case '512':
-            baseSize = 512;
-            break;
-        case '1024':
-            baseSize = 768;  // SD 1.5 optimal high-res
-            break;
-        case '2K':
-            baseSize = 1024; // Maximum safe for SD 1.5
-            break;
-        case '4K':
-            baseSize = 1024; // Capped at 1024 for stability
-            break;
-        default:
-            baseSize = 512;
+    if (isSdxl) {
+        baseSize = 1024;
+    } else {
+        switch (resolution) {
+            case '512':
+                baseSize = 512;
+                break;
+            case '1024':
+                baseSize = 768;  // SD 1.5 optimal high-res
+                break;
+            case '2K':
+                baseSize = 1024; // Maximum safe for SD 1.5
+                break;
+            case '4K':
+                baseSize = 1024; // Capped at 1024 for stability
+                break;
+            default:
+                baseSize = 512;
+        }
     }
 
     // Round to nearest multiple of 64 (required by SD)
@@ -570,6 +592,18 @@ export async function POST(request: NextRequest) {
             console.log('Action hint:', actionHint);
         }
 
+        // ── Model Selection Logic ──
+        let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
+
+        // ── Inpaint Model Mapping ──
+        if (inpaintMode) {
+            novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
+            console.log(`Inpaint detected. Swapping model to: ${novitaModelName}`);
+        }
+
+        // Detect SDXL models
+        const isSdxl = novitaModelName.toLowerCase().includes('xl');
+
         // ── Claude Optimization Step (user prompt + action context) ──
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
         // Pass the action hint to Claude so it can generate matching scene context
@@ -579,7 +613,8 @@ export async function POST(request: NextRequest) {
         const optimizedPrompt = await optimizePromptWithClaude(
             promptForClaude,
             generationType,
-            model?.nsfw ?? true
+            model?.nsfw ?? true,
+            isSdxl
         );
 
         // ── Combine: optimized prompt + all character/quality tag fragment ──
@@ -616,19 +651,10 @@ export async function POST(request: NextRequest) {
         // Force Ultra quality for all requests to ensure maximum output
         const quality = QUALITY_CONFIGS.ultra;
 
-        let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
-
-        // ── Inpaint Model Mapping ──
-        // Dedicated Inpainting API (/v3/async/inpainting) requires specialized models.
-        // If we are in inpaintMode, we switch to a proven inpainting model.
-        if (inpaintMode) {
-            novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
-            console.log(`Inpaint detected. Swapping model to: ${novitaModelName}`);
-        }
-
         const { width, height } = getResolutionFromAspectRatio(
             aspectRatio as AspectRatio,
-            resolution
+            resolution,
+            isSdxl
         );
 
         // Decide endpoint
@@ -643,8 +669,8 @@ export async function POST(request: NextRequest) {
                 : `${NOVITA_BASE}/txt2img`;
 
         // ── Negative Prompt: combine default + tag-specific negatives ──
-        let finalNegative = quality.negativePrompt;
-        if (tagNegativeFragment) {
+        let finalNegative = isSdxl ? SDXL_NEGATIVE_PROMPT : quality.negativePrompt;
+        if (tagNegativeFragment && !isSdxl) {
             finalNegative = `${finalNegative}, ${tagNegativeFragment}`;
         }
         // Remove "multiple faces/bodies" from negative if user wants 2+ people
@@ -677,21 +703,21 @@ export async function POST(request: NextRequest) {
             width,
             height,
             image_num: Math.min(count, 4),
-            steps: quality.steps,
+            steps: isSdxl ? 30 : quality.steps,
             seed: -1,
             clip_skip: 2,
             sampler_name: quality.sampler,
-            guidance_scale: quality.guidance,
+            guidance_scale: isSdxl ? 4.5 : quality.guidance,
             ...(model?.nsfw ? {
                 prompt: enforceLimit(inpaintMode
                     ? `(nsfw:1.5), (completely nude:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`
-                    : `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`),
+                    : (isSdxl ? enhancedPrompt : `(nsfw:1.3), high quality, detailed skin, ${enhancedPrompt}`)),
                 negative_prompt: enforceLimit(inpaintMode
                     ? `(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar:1.5), ${finalNegative}`
                     : finalNegative)
             } : {}),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
-            loras: novitaModelName.toLowerCase().includes('xl') ? [] : [
+            loras: isSdxl ? [] : [
                 {
                     model_name: 'add_detail_44319',
                     strength: 0.7,
