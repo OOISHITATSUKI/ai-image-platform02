@@ -1,4 +1,7 @@
 {
+    "common": {
+        "paid": "유료"
+    },
     "nav": {
         "home": "홈",
         "library": "라이브러리",
@@ -30,7 +33,7 @@
         "uploadHint": "드래그하거나 클릭",
         "generate": "생성",
         "generating": "생성 중...",
-        "creditCost": "크레딧: {cost}",
+        "creditCost": "1회 {cost} 크레딧",
         "hide": "설정 숨기기",
         "showSettings": "설정",
         "firstFrame": "시작 프레임",

@@ -163,6 +163,7 @@ interface AppState {
 
     // ----- Credits -----
     deductCredits: (amount: number) => void;
+    addCredits: (amount: number) => void;
 }
 
 const DEFAULT_TAG_SETTINGS: TagSettings = {
@@ -478,9 +479,13 @@ export const useAppStore = create<AppState>()(
             resetTagSettings: () => set({ tagSettings: DEFAULT_TAG_SETTINGS }),
 
             // ----- Credits -----
-            deductCredits: (amount) =>
+            deductCredits: (amount: number) =>
                 set((s) => ({
                     user: s.user ? { ...s.user, credits: Math.max(0, s.user.credits - amount) } : null,
+                })),
+            addCredits: (amount: number) =>
+                set((s) => ({
+                    user: s.user ? { ...s.user, credits: (s.user?.credits ?? 0) + amount } : null,
                 })),
         }),
         {

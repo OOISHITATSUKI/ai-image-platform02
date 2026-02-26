@@ -23,8 +23,8 @@ export default function SettingsPanel() {
 
     const modeLabels: Record<string, string> = {
         txt2img: t('create.txt2img'),
-        img2img: t('create.img2img'),
-        img_edit: t('create.imgEdit'),
+        img2img: `${t('create.img2img')} [${t('common.paid')}]`,
+        img_edit: `${t('create.imgEdit')} [${t('common.paid')}]`,
         txt2vid: t('create.txt2vid'),
         img2vid: t('create.img2vid'),
         ref2vid: t('create.ref2vid'),
@@ -33,7 +33,7 @@ export default function SettingsPanel() {
 
 
 
-    const creditCost = isVideoMode ? settings.count * 5 : settings.count * 1;
+    const creditCost = isVideoMode ? settings.count * 5 : settings.count * 2;
 
     return (
         <aside className={`settings-panel ${!settingsPanelVisible ? 'hidden' : ''}`}>

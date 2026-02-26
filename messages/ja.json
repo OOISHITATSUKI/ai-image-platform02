@@ -1,4 +1,7 @@
 {
+    "common": {
+        "paid": "有料"
+    },
     "nav": {
         "home": "ホーム",
         "library": "ライブラリ",
@@ -30,7 +33,7 @@
         "uploadHint": "ドラッグ＆ドロップまたはクリック",
         "generate": "生成する",
         "generating": "生成中...",
-        "creditCost": "クレジット: {cost}",
+        "creditCost": "1回 {cost} クレジット",
         "hide": "設定を非表示",
         "showSettings": "設定",
         "firstFrame": "最初のフレーム",

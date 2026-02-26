@@ -1,4 +1,7 @@
 {
+    "common": {
+        "paid": "Paid"
+    },
     "nav": {
         "home": "Home",
         "library": "Library",
@@ -30,7 +33,7 @@
         "uploadHint": "Drag & drop or click to upload",
         "generate": "Generate",
         "generating": "Creating your masterpiece...",
-        "creditCost": "Credits: {cost}",
+        "creditCost": "{cost} credits / gen",
         "hide": "Hide Settings",
         "showSettings": "Settings",
         "firstFrame": "First Frame",

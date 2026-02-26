@@ -83,17 +83,17 @@ export default function Sidebar() {
         { icon: '📂', labelKey: 'nav.library', href: '/library' },
     ];
 
-    const imageGenItems: { icon: string; labelKey: string; type: GenerationType }[] = [
+    const imageGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
         { icon: '✏️', labelKey: 'create.txt2img', type: 'txt2img' },
-        { icon: '🖼️', labelKey: 'create.img2img', type: 'img2img' },
-        // { icon: '🎨', labelKey: 'create.imgEdit', type: 'img_edit' },  // Hidden: overlaps with img2img. Uncomment to restore.
+        { icon: '🖼️', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
+        // { icon: '🎨', labelKey: 'create.imgEdit', type: 'img_edit', isPaid: true },  // Hidden: overlaps with img2img.
     ];
 
-    const videoGenItems: { icon: string; labelKey: string; type: GenerationType }[] = [
-        { icon: '📝', labelKey: 'create.txt2vid', type: 'txt2vid' },
-        { icon: '🎬', labelKey: 'create.img2vid', type: 'img2vid' },
-        { icon: '👤', labelKey: 'create.ref2vid', type: 'ref2vid' },
-        { icon: '📹', labelKey: 'create.vid2vid', type: 'vid2vid' },
+    const videoGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
+        { icon: '📝', labelKey: 'create.txt2vid', type: 'txt2vid', isPaid: true },
+        { icon: '🎬', labelKey: 'create.img2vid', type: 'img2vid', isPaid: true },
+        { icon: '👤', labelKey: 'create.ref2vid', type: 'ref2vid', isPaid: true },
+        { icon: '📹', labelKey: 'create.vid2vid', type: 'vid2vid', isPaid: true },
     ];
 
     const languages: { value: Locale; label: string }[] = [
@@ -172,7 +172,12 @@ export default function Sidebar() {
                             onClick={() => handleGenTypeClick(item.type)}
                         >
                             <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && t(item.labelKey)}
+                            {!sidebarCollapsed && (
+                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                    {t(item.labelKey)}
+                                    {item.isPaid && <span className="paid-badge">{t('common.paid')}</span>}
+                                </span>
+                            )}
                         </Link>
                     ))}
                 </div>

@@ -32,6 +32,7 @@ export default function ChatArea() {
         toggleSettingsPanel,
         user,
         deductCredits,
+        addCredits,
         updateSettings,
         tagSettings,
     } = useAppStore();
@@ -306,7 +307,7 @@ export default function ChatArea() {
 
         const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
-        const creditCost = isVideoGeneration ? settings.count * 5 : settings.count * 1;
+        const creditCost = isVideoGeneration ? settings.count * 5 : settings.count * 2; // Increased from 1 to 2
 
         const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
 
@@ -341,6 +342,15 @@ export default function ChatArea() {
         setIsGenerating(true);
         if (!isTestAccount) {
             deductCredits(creditCost);
+            // Persistent sync
+            const token = window.localStorage.getItem('auth_token');
+            if (token) {
+                fetch('/api/billing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ action: 'deduct', amount: creditCost }),
+                }).catch(e => console.error('Failed to sync credit deduction:', e));
+            }
         }
 
         if (isImageGeneration) {
@@ -472,6 +482,19 @@ export default function ChatArea() {
                     content: `❌ ${isSafetyErrorCode || errorMsg.includes('INVALID_IMAGE_FORMAT') ? '' : 'Generation failed: '}${friendly}`,
                     isFavorite: false,
                 });
+
+                // Refund credits on failure
+                if (!isTestAccount && user) {
+                    addCredits(creditCost);
+                    const token = window.localStorage.getItem('auth_token');
+                    if (token) {
+                        fetch('/api/billing', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ action: 'refund', amount: creditCost, reason: errorMsg }),
+                        }).catch(e => console.error('Failed to sync credit refund:', e));
+                    }
+                }
             }
         } else if (isVideoGeneration) {
             // Video generation is still mock for now
@@ -1010,11 +1033,17 @@ export default function ChatArea() {
                             type="submit"
                             className={`send-btn ${isGenerating ? 'generating' : ''}`}
                             disabled={isGenerating || (showAttach && uploads.length === 0) || (!inputText.trim() && uploads.length === 0) || (uploads.length > 0 && !allConsentChecked)}
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minWidth: '80px', height: 'auto', padding: '8px 12px' }}
                         >
                             {isGenerating ? (
                                 <span className="send-btn-spinner" />
                             ) : (
-                                '▶'
+                                <>
+                                    <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>▶</span>
+                                    <span style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.9 }}>
+                                        {['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType) ? settings.count * 5 : settings.count * 2}
+                                    </span>
+                                </>
                             )}
                         </button>
                     </form>

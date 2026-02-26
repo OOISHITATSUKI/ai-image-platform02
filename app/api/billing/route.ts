@@ -94,6 +94,33 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ balance: newBalance, log });
     }
 
+    // Action: 'refund' — restore credits after generation failure
+    if (action === 'refund') {
+        const { amount, generationId, reason } = body;
+        if (!amount || amount <= 0) {
+            return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
+        }
+
+        if (isTestAccount) {
+            return NextResponse.json({ balance: user.credits, log: null });
+        }
+
+        const newBalance = user.credits + amount;
+        user.credits = newBalance;
+        saveUser(user);
+
+        const log = recordCreditChange({
+            userId: decoded.userId,
+            changeType: 'refund',
+            delta: amount,
+            balanceAfter: newBalance,
+            relatedId: generationId,
+            note: reason || 'Generation failure refund',
+        });
+
+        return NextResponse.json({ balance: newBalance, log });
+    }
+
     // Action: 'create_transaction' — initiate a new payment
     if (action === 'create_transaction') {
         const { packType, creditsGranted, amountUsd, currency, nowpaymentsId } = body;
