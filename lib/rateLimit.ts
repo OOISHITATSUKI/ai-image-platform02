@@ -12,6 +12,7 @@ const store = new Map<string, RateLimitInfo>();
 
 export interface RateLimitResult {
     allowed: boolean;
+    count: number;
     remaining: number;
     resetAt: number;
 }
@@ -37,6 +38,7 @@ export function rateLimit(key: string, maxRequests: number, windowMs: number): R
 
     return {
         allowed,
+        count: record.count,
         remaining,
         resetAt: record.resetAt
     };

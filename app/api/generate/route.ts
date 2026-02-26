@@ -478,6 +478,7 @@ export async function POST(request: NextRequest) {
         if (!isTestAccount) {
             const allowedReqsPerMin = isFreeLimitedUser || !user ? FREE_RATE_LIMIT : PAID_RATE_LIMIT;
             const rl = rateLimit(rateLimitKey, allowedReqsPerMin, WINDOW_MS);
+            console.log(`[RateLimit Debug] Key: ${rateLimitKey}, Count: ${rl.count}, Max: ${allowedReqsPerMin}, Allowed: ${rl.allowed}`);
             if (!rl.allowed) {
                 return NextResponse.json(
                     { error: 'error_rate_limit' },
