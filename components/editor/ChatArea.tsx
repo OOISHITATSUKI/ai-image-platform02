@@ -303,7 +303,44 @@ export default function ChatArea() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inputText.trim() && uploads.length === 0) return;
+        if (isGenerating) return;
+
+        // ★ 追加: モード別バリデーション（UIをバイパスされた場合の防御）
+        if (settings.generationType === 'img2img') {
+            if (faceSwapMode) {
+                if (uploads.length < 2) {
+                    setGenerationError(t('chat.faceSwapNoImage'));
+                    return;
+                }
+                if (!allConsentChecked) {
+                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    return;
+                }
+            } else if (inpaintMode) {
+                if (uploads.length === 0) {
+                    setGenerationError(t('chat.uploadRequiredForInpaint'));
+                    return;
+                }
+                if (!allConsentChecked) {
+                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    return;
+                }
+            } else {
+                // Standard img2img
+                if (uploads.length === 0) {
+                    setGenerationError('⚠️ img2imgモードでは画像のアップロードが必須です。');
+                    return;
+                }
+                if (!inputText.trim()) {
+                    setGenerationError('⚠️ プロンプトを入力してください。');
+                    return;
+                }
+                if (!allConsentChecked) {
+                    setGenerationError('⚠️ 同意事項にすべてチェックしてください。');
+                    return;
+                }
+            }
+        }
 
         const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
@@ -925,10 +962,21 @@ export default function ChatArea() {
 
                     {/* Security: Mandatory Img2Img Consent Checkboxes */}
                     {(() => {
-                        const isImg2ImgActive = settings.generationType === 'img2img';
-                        // Show consent if any image-to-image mode is active
-                        // inpaintMode and faceSwapMode are internal flags
-                        const shouldShowConsent = isImg2ImgActive && (uploads.length > 0 || inpaintMode || faceSwapMode);
+                        let shouldShowConsent = false;
+                        if (settings.generationType === 'img2img') {
+                            // img2img/inpaint/faceSwap はすべて同意必須
+                            // 画像のアップロード有無に関わらず、利用者の意思を確認するために表示
+                            if (faceSwapMode) {
+                                // FaceSwap: 画像2枚以上アップ時に表示
+                                shouldShowConsent = uploads.length >= 2;
+                            } else if (inpaintMode) {
+                                // Inpaint: チェックのみでOK（画像はモーダルで選択済み）
+                                shouldShowConsent = uploads.length > 0;
+                            } else {
+                                // Standard img2img: 画像がアップされたら表示
+                                shouldShowConsent = uploads.length > 0;
+                            }
+                        }
 
                         return shouldShowConsent ? (
                             <div className="img2img-consent-block" style={{
@@ -1030,29 +1078,23 @@ export default function ChatArea() {
                         <button
                             type="submit"
                             className={`send-btn ${isGenerating ? 'generating' : ''}`}
-                            disabled={(() => {
-                                if (isGenerating) return true;
-
-                                const isImg2ImgMode = settings.generationType === 'img2img';
-
-                                if (isImg2ImgMode) {
-                                    // 1. Must check all consent boxes
-                                    if (!allConsentChecked) return true;
-
-                                    // 2. Mode-specific requirements
-                                    if (faceSwapMode) {
-                                        return uploads.length < 2; // FaceSwap requires 2 images
-                                    } else if (inpaintMode) {
-                                        // Inpaint requires at least 1 image with a mask
-                                        return uploads.length < 1 || !uploads[0]?.maskBase64;
-                                    } else {
-                                        return uploads.length < 1; // Standard img2img requires 1 image
-                                    }
-                                }
-
-                                // txt2img requires at least a prompt
-                                return !inputText.trim();
-                            })()}
+                            disabled={
+                                isGenerating ||
+                                // txt2img: プロンプト必須
+                                (settings.generationType === 'txt2img' && !inputText.trim()) ||
+                                // img2img (通常): 画像+プロンプト+同意チェック全て必須
+                                (settings.generationType === 'img2img' && !faceSwapMode && !inpaintMode && (
+                                    uploads.length === 0 || !inputText.trim() || !allConsentChecked
+                                )) ||
+                                // inpaint: 画像+同意チェック必須（プロンプトはオプション）
+                                (settings.generationType === 'img2img' && inpaintMode && (
+                                    uploads.length === 0 || !allConsentChecked
+                                )) ||
+                                // faceSwap: 画像2枚+同意チェック必須（プロンプトはオプション）
+                                (settings.generationType === 'img2img' && faceSwapMode && (
+                                    uploads.length < 2 || !allConsentChecked
+                                ))
+                            }
                             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minWidth: '80px', height: 'auto', padding: '8px 12px' }}
                         >
                             {isGenerating ? (
