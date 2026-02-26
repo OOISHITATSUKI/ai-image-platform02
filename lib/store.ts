@@ -243,24 +243,13 @@ export const useAppStore = create<AppState>()(
                             console.log('Supabase user upsert success:', upsertData);
                         }
 
-                        // 2. Fetch current settings and credits
-                        const { data: userData, error: selectErr } = await supabase
-                            .from('users')
-                            .select('preferred_language, credits')
-                            .eq('id', user.id)
-                            .single();
-
-                        if (selectErr && selectErr.code !== 'PGRST116') { // PGRST116 is 'no rows found'
-                            console.error('Supabase select preferred_language failed:', selectErr);
+                        if (user.locale) {
+                            console.log('Applying locale from auth response:', user.locale);
+                            set({ locale: user.locale as Locale });
                         }
 
-                        if (userData?.preferred_language) {
-                            console.log('Restored locale from Supabase:', userData.preferred_language);
-                            set({ locale: userData.preferred_language as Locale });
-                        }
-
-                        // Credits are now handled by /api/auth/me synchronization
-                        // so we don't need to double-fetch them here and cause a flash.
+                        // Status check for debugging
+                        console.log('Auth check: credits in store from /api/auth/me:', user.credits);
 
                         // 3. Load chats
                         const savedChats = await loadChatsFromSupabase(user.id);

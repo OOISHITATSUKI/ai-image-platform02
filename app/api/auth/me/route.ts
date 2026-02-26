@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // ── Sync credits from Supabase ──
+        // ── Sync credits from Supabase (Maximal sync) ──
         try {
             const { data: sbUser } = await supabase
                 .from('users')
@@ -29,10 +29,26 @@ export async function GET(req: NextRequest) {
                 .eq('id', user.id)
                 .single();
 
-            if (sbUser && typeof sbUser.credits === 'number' && sbUser.credits !== user.credits) {
-                console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits})`);
-                user.credits = sbUser.credits;
-                saveUser(user);
+            if (sbUser && typeof sbUser.credits === 'number') {
+                if (user.credits > sbUser.credits) {
+                    console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits}) [Local is higher]`);
+                    // Update Supabase to match local (e.g. manual edit or sync delay)
+                    await supabase.from('users').update({ credits: user.credits }).eq('id', user.id);
+                } else if (sbUser.credits > user.credits) {
+                    console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits}) [Supabase is higher]`);
+                    // Update Local to match Supabase
+                    user.credits = sbUser.credits;
+                    saveUser(user);
+                }
+            } else if (!sbUser) {
+                // User doesn't exist in Supabase yet, create them with current credits
+                console.log(`Creating user ${user.id} in Supabase with ${user.credits} credits`);
+                await supabase.from('users').upsert({
+                    id: user.id,
+                    email: user.email,
+                    username: user.username,
+                    credits: user.credits
+                });
             }
         } catch (syncErr) {
             console.error('Failed to sync credits from Supabase:', syncErr);
