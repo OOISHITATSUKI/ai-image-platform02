@@ -469,6 +469,98 @@ async function handleMergeFace(
     }
 }
 
+// ── Solution A: Auto-inpainting region analysis via Claude ──
+async function analyzeEditRegion(prompt: string): Promise<{
+    region: 'breasts' | 'body' | 'face' | 'clothing' | 'background' | 'full';
+    maskBox: { x: number; y: number; w: number; h: number }; // 0-1 normalized
+}> {
+    if (!ANTHROPIC_API_KEY) {
+        return { region: 'full', maskBox: { x: 0, y: 0, w: 1, h: 1 } };
+    }
+
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20240620',
+                max_tokens: 200,
+                system: `You analyze image editing requests to determine which body region to modify.
+Given a user's edit instruction, output ONLY a JSON object:
+{
+  "region": "breasts"|"body"|"face"|"clothing"|"background"|"full",
+  "maskBox": {"x": 0.0-1.0, "y": 0.0-1.0, "w": 0.0-1.0, "h": 0.0-1.0}
+}
+maskBox defines the rectangular area to edit (normalized 0-1 coordinates).
+Examples:
+- "巨乳にして" → {"region":"breasts","maskBox":{"x":0.2,"y":0.25,"w":0.6,"h":0.4}}
+- "服を脱がせて" → {"region":"body","maskBox":{"x":0.05,"y":0.15,"w":0.9,"h":0.75}}
+- "金髪にして" → {"region":"face","maskBox":{"x":0.2,"y":0.0,"w":0.6,"h":0.4}}
+- "背景を変えて" → {"region":"background","maskBox":{"x":0.0,"y":0.0,"w":1.0,"h":1.0}}
+Output ONLY the JSON, nothing else.`,
+                messages: [{ role: 'user', content: prompt }],
+            }),
+        });
+
+        const data = await res.json();
+        const text = data.content[0].text.trim();
+        const json = JSON.parse(text.replace(/```json|```/g, ''));
+        return json;
+    } catch (err) {
+        console.error('analyzeEditRegion error:', err);
+        return { region: 'full', maskBox: { x: 0, y: 0, w: 1, h: 1 } };
+    }
+}
+
+// ── Solution A: Generate mask image based on bounding box ──
+async function generateAutoMask(
+    imageBase64: string,
+    maskBox: { x: number; y: number; w: number; h: number }
+): Promise<string> {
+    const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const imgBuf = Buffer.from(cleanBase64, 'base64');
+    const meta = await sharp(imgBuf).metadata();
+    const imgW = meta.width || 512;
+    const imgH = meta.height || 512;
+
+    // maskBox to real pixels
+    const mx = Math.round(maskBox.x * imgW);
+    const my = Math.round(maskBox.y * imgH);
+    const mw = Math.round(maskBox.w * imgW);
+    const mh = Math.round(maskBox.h * imgH);
+
+    // Create mask (white = edit area, black = preserve area for Novita)
+    const mask = await sharp({
+        create: {
+            width: imgW,
+            height: imgH,
+            channels: 3,
+            background: { r: 0, g: 0, b: 0 },
+        },
+    })
+        .composite([{
+            input: await sharp({
+                create: {
+                    width: mw,
+                    height: mh,
+                    channels: 3,
+                    background: { r: 255, g: 255, b: 255 },
+                },
+            }).png().toBuffer(),
+            left: mx,
+            top: my,
+        }])
+        .blur(20) // Smooth blending
+        .png()
+        .toBuffer();
+
+    return mask.toString('base64');
+}
+
 export async function POST(request: NextRequest) {
     if (!NOVITA_API_KEY) {
         return NextResponse.json(
@@ -627,21 +719,34 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Model Selection Logic ──
+        // ── Model Selection Logic ──
         let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
 
+        const isImg2ImgValue = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
+        const isPureImg2Img = generationType === 'img2img' && !!imageBase64;
+
+        // ★ Solution A: Auto-inpainting region analysis via Claude
+        let editAnalysis: { region: string; maskBox: { x: number; y: number; w: number; h: number } } = {
+            region: 'full',
+            maskBox: { x: 0, y: 0, w: 1, h: 1 }
+        };
+
+        if (isPureImg2Img && !faceSwapMode) {
+            console.log('Solution A: Analyzing edit region for img2img...');
+            editAnalysis = await analyzeEditRegion(prompt || 'a beautiful image');
+            console.log(`Region analysis result: ${editAnalysis.region}`, editAnalysis.maskBox);
+        }
+
         // ── Inpaint Model Mapping ──
-        if (inpaintMode) {
+        if (inpaintMode || (isPureImg2Img && editAnalysis.region !== 'full')) {
             novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
-            console.log(`Inpaint detected. Swapping model to: ${novitaModelName}`);
+            console.log(`${inpaintMode ? 'Inpaint' : 'Auto-inpaint (' + editAnalysis.region + ')'} detected. Model: ${novitaModelName}`);
         }
 
         // Detect SDXL models
         const isSdxl = novitaModelName.toLowerCase().includes('xl');
 
         // ── Claude Optimization Step (user prompt + action context) ──
-        const isImg2ImgValue = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
-        const isPureImg2Img = generationType === 'img2img' && !!imageBase64;
-
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
         // Pass the action hint to Claude so it can generate matching scene context
         const promptForClaude = actionHint
@@ -703,9 +808,10 @@ export async function POST(request: NextRequest) {
         const isNovitaImg2Img = isImg2ImgValue;
 
         // Use dedicated inpainting endpoint if mask is provided
-        const endpoint = (inpaintMode && maskBase64)
+        // Use dedicated inpainting endpoint if mask is provided OR auto-inpaint is triggered
+        const endpoint = ((inpaintMode && maskBase64) || (isPureImg2Img && editAnalysis.region !== 'full'))
             ? `${NOVITA_BASE}/inpainting`
-            : isNovitaImg2Img
+            : isPureImg2Img
                 ? `${NOVITA_BASE}/img2img`
                 : `${NOVITA_BASE}/txt2img`;
 
@@ -772,7 +878,7 @@ export async function POST(request: NextRequest) {
             // (capped at 1024 on longest side to be safe with Novita).
             let finalImageBase64 = imageBase64!.replace(/^data:image\/\w+;base64,/, '');
 
-            if (inpaintMode && maskBase64) {
+            if ((inpaintMode && maskBase64) || (isPureImg2Img && editAnalysis.region !== 'full')) {
                 // ... inpaint specific resize logic ...
                 const MAX_INPAINT_PX = 1024;
 
@@ -801,9 +907,16 @@ export async function POST(request: NextRequest) {
                     .toBuffer();
                 finalImageBase64 = resizedImg.toString('base64');
 
+                // Generate automatic mask if needed (Solution A)
+                let finalMaskRaw: string;
+                if (isPureImg2Img && editAnalysis.region !== 'full') {
+                    finalMaskRaw = await generateAutoMask(finalImageBase64, editAnalysis.maskBox);
+                } else {
+                    finalMaskRaw = maskBase64!.replace(/^data:image\/\w+;base64,/, '');
+                }
+
                 // Resize mask to exact same dimensions
-                const maskRaw = maskBase64.replace(/^data:image\/\w+;base64,/, '');
-                const maskBuf = Buffer.from(maskRaw, 'base64');
+                const maskBuf = Buffer.from(finalMaskRaw, 'base64');
                 const resizedMask = await sharp(maskBuf)
                     .resize(targetW, targetH, { fit: 'fill' })
                     .png()
@@ -814,7 +927,7 @@ export async function POST(request: NextRequest) {
                 novitaRequest.image_base64 = finalImageBase64;
                 novitaRequest.mask_image_base64 = resizedMask.toString('base64');
 
-                console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH}`);
+                console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH} (Auto: ${isPureImg2Img})`);
             } else {
                 novitaRequest.image_base64 = finalImageBase64;
             }
@@ -837,12 +950,27 @@ export async function POST(request: NextRequest) {
                     `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.6), (nude:1.6), (bare skin:1.5), (no clothing:1.5), ${enhancedPrompt}`
                 );
             } else if (isPureImg2Img) {
-                // ═══ img2img optimization: 元画像保持 ═══
-                // Use user-provided strength (default 0.35)
-                novitaRequest.strength = img2imgStrength ?? 0.35;
-                novitaRequest.steps = 30;
-                // guidance_scale is already set to 5 in the base novitaRequest
-                console.log(`Pure img2img mode (Strength: ${novitaRequest.strength})`);
+                if (editAnalysis.region !== 'full') {
+                    // ═══ Solution A: Targeted Auto-Inpaint parameters ═══
+                    novitaRequest.strength = 0.85;
+                    novitaRequest.guidance_scale = 8;
+                    novitaRequest.steps = 35;
+                    novitaRequest.mask_blur = 8;
+                    novitaRequest.inpaint_full_res = 1;
+                    novitaRequest.sampler_name = 'Euler a';
+
+                    // Re-optimize prompt for targeted edit region attributes
+                    novitaRequest.prompt = enforceLimit(
+                        `${combinedPrompt}, natural skin texture, realistic skin, anatomically correct`
+                    );
+                    console.log(`Solution A: Applied targeted params for ${editAnalysis.region}`);
+                } else {
+                    // ═══ Global img2img: Very low strength to preserve identity ═══
+                    novitaRequest.strength = 0.25;
+                    novitaRequest.steps = 25;
+                    novitaRequest.guidance_scale = 4;
+                    console.log(`Solution A: Global img2img (Strength: 0.25)`);
+                }
             }
         } else {
             // txt2img: No specific strength/guidance override needed here beyond base params
