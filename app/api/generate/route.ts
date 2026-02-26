@@ -12,10 +12,35 @@ const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const NOVITA_BASE = 'https://api.novita.ai/v3/async';
 const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
+import fs from 'fs';
+import path from 'path';
+
+// ── Image Deletion Policy ──
+const DELETION_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
+const OUTPUT_DIR = path.join(process.cwd(), 'public', 'outputs');
+
+async function cleanupOldFiles() {
+    if (!fs.existsSync(OUTPUT_DIR)) return;
+    const now = Date.now();
+    try {
+        const files = fs.readdirSync(OUTPUT_DIR);
+        for (const file of files) {
+            const filePath = path.join(OUTPUT_DIR, file);
+            const stats = fs.statSync(filePath);
+            if (now - stats.mtimeMs > DELETION_THRESHOLD_MS) {
+                fs.unlinkSync(filePath);
+                console.log(`Deleted expired image: ${file}`);
+            }
+        }
+    } catch (err) {
+        console.error('Cleanup failed:', err);
+    }
+}
+
 
 // ── Rate Limit Constants ──
-const FREE_RATE_LIMIT = 1; // 1 per min
-const PAID_RATE_LIMIT = 5; // 5 per min
+const FREE_RATE_LIMIT = 5; // Increased from 1
+const PAID_RATE_LIMIT = 15; // Increased from 5
 const WINDOW_MS = 60 * 1000; // 1 minute
 
 // ... (rest of the file until the POST handler) ...
@@ -821,6 +846,9 @@ export async function POST(request: NextRequest) {
                 { status: 500 }
             );
         }
+
+        // Run cleanup asynchronously
+        cleanupOldFiles().catch(console.error);
 
         return NextResponse.json({
             images: result.images,

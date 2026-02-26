@@ -45,7 +45,8 @@
         "fromLibrary": "From Library",
         "upload": "Upload",
         "imgNotice": "Images are generated using AI. Results may vary.",
-        "vidNotice": "Video generation is in beta."
+        "vidNotice": "Video generation is in beta.",
+        "autoDeleteWarning": "⚠️ Generated images are automatically deleted after 1 hour. Please download them if you wish to save them."
     },
     "chat": {
         "newChat": "New Chat",
@@ -268,5 +269,12 @@
         "complianceCheck": "I have read and acknowledged the above.",
         "prohibitedCheck": "I reiterate that I will not generate prohibited content (minors, real people, etc.).",
         "startButton": "Start Generating"
+    },
+    "history": {
+        "title": "Generation History",
+        "empty": "No generations yet",
+        "deleteConfirm": "Delete this record?",
+        "expired": "Expired",
+        "expiredDesc": "Auto-deleted after 1 hour"
     }
 }

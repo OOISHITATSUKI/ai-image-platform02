@@ -45,7 +45,8 @@
         "fromLibrary": "ライブラリから選択",
         "upload": "アップロード",
         "imgNotice": "AIにより生成された画像です。結果は異なる場合があります。",
-        "vidNotice": "動画生成はベータ版です。"
+        "vidNotice": "動画生成はベータ版です。",
+        "autoDeleteWarning": "⚠️ 生成画像は1時間後に自動削除されます。保存したい場合はダウンロードしてください。"
     },
     "chat": {
         "newChat": "新しいチャット",
@@ -263,5 +264,12 @@
         "complianceCheck": "上記を確認しました。",
         "prohibitedCheck": "禁止コンテンツ（未成年、実在人物等）を生成しないことを改めて確認します。",
         "startButton": "生成を始める"
+    },
+    "history": {
+        "title": "生成履歴",
+        "empty": "履歴はありません",
+        "deleteConfirm": "この画像を削除しますか？",
+        "expired": "期限切れ",
+        "expiredDesc": "1時間経過したため自動削除されました"
     }
 }

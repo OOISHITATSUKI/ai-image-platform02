@@ -1010,6 +1010,10 @@ export default function ChatArea() {
                         ) : null;
                     })()}
 
+                    <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: 'var(--warning)', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+                        {t('editor.autoDeleteWarning')}
+                    </div>
+
                     <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
                         <textarea
                             ref={textareaRef}

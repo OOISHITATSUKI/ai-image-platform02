@@ -286,16 +286,24 @@ export default function GenerationHistoryPage() {
                             <div key={gen.id} style={styles.card}>
                                 {/* Image */}
                                 <div
-                                    style={styles.cardImage}
-                                    onClick={() => setLightbox(gen)}
+                                    style={{ position: 'relative', width: '100%', aspectRatio: '1/1', borderRadius: '12px', overflow: 'hidden', background: 'var(--bg-secondary)', cursor: gen.status === 'expired' ? 'default' : 'pointer' }}
+                                    onClick={() => gen.status !== 'expired' && setLightbox(gen)}
                                 >
                                     {gen.fileUrl ? (
-                                        <img
-                                            src={gen.fileUrl}
-                                            alt={gen.prompt}
-                                            style={styles.img}
-                                            loading="lazy"
-                                        />
+                                        gen.status === 'expired' ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                                <span style={{ fontSize: '2rem', marginBottom: '8px' }}>⚠️</span>
+                                                <span style={{ fontSize: '0.8rem' }}>{t('history.expired')}</span>
+                                                <span style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: '4px' }}>{t('history.expiredDesc')}</span>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={gen.fileUrl}
+                                                alt={gen.prompt}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                loading="lazy"
+                                            />
+                                        )
                                     ) : (
                                         <div style={styles.noImage}>🖼️</div>
                                     )}

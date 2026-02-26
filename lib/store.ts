@@ -243,10 +243,10 @@ export const useAppStore = create<AppState>()(
                             console.log('Supabase user upsert success:', upsertData);
                         }
 
-                        // 2. Fetch current settings
+                        // 2. Fetch current settings and credits
                         const { data: userData, error: selectErr } = await supabase
                             .from('users')
-                            .select('preferred_language')
+                            .select('preferred_language, credits')
                             .eq('id', user.id)
                             .single();
 
@@ -257,6 +257,13 @@ export const useAppStore = create<AppState>()(
                         if (userData?.preferred_language) {
                             console.log('Restored locale from Supabase:', userData.preferred_language);
                             set({ locale: userData.preferred_language as Locale });
+                        }
+
+                        if (userData && typeof userData.credits === 'number') {
+                            console.log('Restored credits from Supabase:', userData.credits);
+                            set((s) => ({
+                                user: s.user ? { ...s.user, credits: userData.credits } : null
+                            }));
                         }
 
                         // 3. Load chats
