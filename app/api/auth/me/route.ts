@@ -21,6 +21,23 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
+        // ── Sync credits from Supabase ──
+        try {
+            const { data: sbUser } = await supabase
+                .from('users')
+                .select('credits')
+                .eq('id', user.id)
+                .single();
+
+            if (sbUser && typeof sbUser.credits === 'number' && sbUser.credits !== user.credits) {
+                console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits})`);
+                user.credits = sbUser.credits;
+                saveUser(user);
+            }
+        } catch (syncErr) {
+            console.error('Failed to sync credits from Supabase:', syncErr);
+        }
+
         return NextResponse.json({
             user: {
                 id: user.id,
