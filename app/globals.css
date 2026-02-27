@@ -4004,3 +4004,10 @@ video {
 [data-theme="light"] .logo-light {
   display: block;
 }
+/* Aspect Ratio Pill Hints */
+.pill-hint {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}

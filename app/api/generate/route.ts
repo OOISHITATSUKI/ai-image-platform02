@@ -96,14 +96,14 @@ Focus on: lighting description, camera angle, atmosphere, skin detail.
 For NSFW content, be explicitly descriptive about the scene, body parts, and sexual actions to ensure high explicitness.
 
 COMPOSITION RULES (CRITICAL):
-- If user mentions 全身/full body → ALWAYS start with: "full body shot, head to toe, wide shot"
-- If user mentions 上半身/waist up → start with: "upper body, waist up portrait"  
-- If user mentions 顔/face → start with: "face closeup, head portrait"
+- If user mentions 全身/full body → ALWAYS start with: "full body shot, head to toe, wide angle"
+- If user mentions 上半身/waist up → start with: "upper body, waist up"  
+- If user mentions 顔/face → start with: "face closeup, portrait"
 - If no composition specified → default to "upper body portrait"
-- NEVER let quality/detail tags override composition. Composition tags MUST come first.
+- NEVER let quality/detail tags override composition. Composition tags MUST come first in the output string.
 
 Output format: composition tags FIRST, then subject, then scene, then quality.
-Example: "full body shot, head to toe, wide shot, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight"
+Example: "full body shot, head to toe, wide angle, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight"
 
 Do NOT use (tag:weight) syntax. Output natural language only.`;
 
@@ -215,35 +215,42 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
 function getResolutionFromAspectRatio(
     aspectRatio: AspectRatio,
     resolution: string,
-    isXL: boolean
+    modelName: string,
 ): { width: number; height: number } {
-    // SDXL: Native 1024px base
-    // SD 1.5: 512-768 base
-    let baseSize: number;
+    const isXL = modelName.toLowerCase().includes('xl');
+    const round64 = (n: number) => Math.round(n / 64) * 64;
 
     if (isXL) {
-        baseSize = 1024;
-    } else {
-        switch (resolution) {
-            case '512':
-                baseSize = 512;
-                break;
-            case '1024':
-                baseSize = 768;  // SD 1.5 optimal high-res
-                break;
-            case '2K':
-                baseSize = 1024; // Maximum safe for SD 1.5
-                break;
-            case '4K':
-                baseSize = 1024; // Capped at 1024 for stability
-                break;
-            default:
-                baseSize = 512;
-        }
+        // ★ SDXL: Native 1024px base (optimized for resolution buckets)
+        const sdxlMap: Record<AspectRatio, { width: number; height: number }> = {
+            '1:1': { width: 1024, height: 1024 },
+            '4:3': { width: 1024, height: 768 },
+            '3:4': { width: 768, height: 1024 },
+            '16:9': { width: 1024, height: 576 },
+            '9:16': { width: 576, height: 1024 },
+            '21:9': { width: 1024, height: 448 },
+        };
+        return sdxlMap[aspectRatio] || { width: 1024, height: 1024 };
     }
 
-    // Round to nearest multiple of 64 (required by SD)
-    const round64 = (n: number) => Math.round(n / 64) * 64;
+    // SD 1.5: 512-768 base
+    let baseSize: number;
+    switch (resolution) {
+        case '512':
+            baseSize = 512;
+            break;
+        case '1024':
+            baseSize = 768;  // SD 1.5 optimal high-res
+            break;
+        case '2K':
+            baseSize = 1024; // Maximum safe for SD 1.5
+            break;
+        case '4K':
+            baseSize = 1024; // Capped at 1024 for stability
+            break;
+        default:
+            baseSize = 512;
+    }
 
     const map: Record<AspectRatio, { width: number; height: number }> = {
         '1:1': { width: baseSize, height: baseSize },
@@ -254,7 +261,7 @@ function getResolutionFromAspectRatio(
         '21:9': { width: baseSize, height: round64(baseSize * 9 / 21) },
     };
 
-    return map[aspectRatio] || { width: 512, height: 512 };
+    return map[aspectRatio] || { width: baseSize, height: baseSize };
 }
 
 
@@ -862,7 +869,7 @@ export async function POST(request: NextRequest) {
         const { width, height } = getResolutionFromAspectRatio(
             aspectRatio as AspectRatio,
             resolution,
-            isXL
+            novitaModelName
         );
 
         // Decide endpoint

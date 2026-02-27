@@ -17,7 +17,7 @@ export default function SettingsPanel() {
         isImageMode ? m.type === 'image' : m.type === 'video'
     );
 
-    const aspectRatios: AspectRatio[] = ['4:3', '3:4', '16:9', '9:16'];
+    const aspectRatios: AspectRatio[] = ['1:1', '4:3', '3:4', '16:9', '9:16'];
     const resolutions: Resolution[] = ['512', '1024', '2K', '4K'];
     const durations = [3, 5, 8, 10, 15, 20];
 
@@ -29,6 +29,14 @@ export default function SettingsPanel() {
         img2vid: t('create.img2vid'),
         ref2vid: t('create.ref2vid'),
         vid2vid: t('create.vid2vid'),
+    };
+
+    const aspectLabels: Record<string, string> = {
+        '1:1': '正方形',
+        '4:3': '横 / 風景',
+        '3:4': '縦 / 上半身',
+        '16:9': 'ワイド',
+        '9:16': '縦長 / 全身',
     };
 
 
@@ -91,8 +99,10 @@ export default function SettingsPanel() {
                                 key={ratio}
                                 className={`pill ${settings.aspectRatio === ratio ? 'active' : ''}`}
                                 onClick={() => updateSettings({ aspectRatio: ratio })}
+                                style={{ display: 'flex', flexDirection: 'column', height: 'auto', padding: '8px 4px' }}
                             >
-                                {ratio}
+                                <span>{ratio}</span>
+                                <span className="pill-hint">{aspectLabels[ratio]}</span>
                             </button>
                         ))}
                     </div>
