@@ -116,7 +116,9 @@
         "subtitle": "Next-generation NSFW image and video generation with unprecedented control.",
         "headline": "Undress Any Photo with AI",
         "subheadline": "Photorealistic AI nude generation. Nude Mode · Face Swap · Text-to-Image. Free credits, no card required.",
-        "ctaButton": "✨ Try Free Now →",
+        "flipButton": "✨ Click to Undress",
+        "flipButtonAlt": "🔄 Show Original",
+        "ctaButton": "Try Free Now →",
         "ctaSub": "No card needed",
         "recentCreations": "Recent Creations",
         "viewAll": "View All"
