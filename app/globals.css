@@ -4004,157 +4004,186 @@ video {
 [data-theme="light"] .logo-light {
   display: block;
 }
+
 /* Aspect Ratio Pill Hints */
-.pill-hint {
-    display: block;
-    font-size: 0.6rem;
-    color: var(--text-tertiary);
-    margin-top: 2px;
+.aspect-ratio-label {
+  display: block;
+  font-size: 0.65rem;
+  opacity: 0.7;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
+.aspect-ratio-value {
+  font-weight: 600;
 }
 
 /* ── Hero Section ── */
-.hero-outer {
-  background: radial-gradient(circle at top center, rgba(124, 92, 252, 0.1) 0%, transparent 70%);
-  padding: 60px 20px 40px;
+.hero-section {
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-
-.hero-content {
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  padding: 60px 24px 40px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .hero-headline {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-size: 2.8rem;
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: 16px;
+  line-height: 1.2;
 }
 
 .hero-subheadline {
   color: var(--text-secondary);
-  font-size: clamp(1rem, 4vw, 1.25rem);
-  line-height: 1.6;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 40px;
   max-width: 600px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.hero-cta-group {
+/* ── Flip Card Container ── */
+.flip-card-grid {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 0 16px;
 }
 
-.hero-cta-button {
+.flip-card {
+  perspective: 1000px;
+  width: 280px;
+  /* デスクトップ */
+  aspect-ratio: 9/16;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* フリップ状態 */
+.flip-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* カスケード遅延 */
+.flip-card:nth-child(1) .flip-card-inner {
+  transition-delay: 0ms;
+}
+
+.flip-card:nth-child(2) .flip-card-inner {
+  transition-delay: 150ms;
+}
+
+.flip-card:nth-child(3) .flip-card-inner {
+  transition-delay: 300ms;
+}
+
+/* グロー演出（回転中のみ） */
+.flip-card-inner.flipping {
+  box-shadow: 0 0 30px rgba(124, 92, 252, 0.6);
+  border-radius: var(--radius-xl);
+}
+
+/* 前面・背面共通 */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+/* 背面は最初から反転 */
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.flip-trigger-btn {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 12px 32px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.flip-trigger-btn:hover {
   background: var(--primary);
   color: #fff;
-  padding: 16px 48px;
-  border-radius: var(--radius-xl);
-  font-size: 1.1rem;
-  font-weight: 700;
-  transition: all var(--transition-normal);
-  box-shadow: 0 10px 20px -10px var(--primary-glow);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  box-shadow: 0 0 20px rgba(124, 92, 252, 0.4);
 }
 
-.hero-cta-button:hover {
-  transform: translateY(-2px);
+.hero-cta-btn {
+  background: var(--primary);
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+.hero-cta-btn:hover {
   background: var(--primary-hover);
-  box-shadow: 0 15px 30px -10px var(--primary-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 92, 252, 0.4);
 }
 
 .hero-cta-sub {
-  font-size: 0.8rem;
   color: var(--text-tertiary);
+  font-size: 0.85rem;
+  margin-top: 4px;
 }
 
-/* ── Showcase Slider (Embla) ── */
-.embla {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  overflow: hidden;
-  position: relative;
-  cursor: grab;
-}
-
-.embla:active {
-  cursor: grabbing;
-}
-
-.embla__container {
-  display: flex;
-  backface-visibility: hidden;
-  will-change: transform;
-}
-
-.embla__slide {
-  flex: 0 0 45%; /* Desktop: 3 images partially visible */
-  min-width: 0;
-  padding-right: 16px;
-  transition: transform 0.3s ease;
-}
-
+/* レスポンシブ */
 @media (max-width: 768px) {
-  .embla__slide {
-    flex: 0 0 85%; /* Mobile: 1 image + peek */
+  .hero-headline {
+    font-size: 1.8rem;
+  }
+
+  .hero-subheadline {
+    font-size: 0.95rem;
+  }
+
+  .flip-card-grid {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 0 24px;
+  }
+
+  .flip-card {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    width: 85vw;
+    max-width: 320px;
   }
 }
 
-.showcase-image-wrapper {
-  position: relative;
-  aspect-ratio: 9/16;
-  width: 100%;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-lg);
-  background: var(--bg-card);
-}
-
-.showcase-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.embla__slide:hover img {
-  transform: scale(1.05);
-}
-
-/* ── Slider Controls ── */
-.embla-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.embla-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--border);
-  transition: all var(--transition-fast);
-}
-
-.embla-dot--selected {
-  background: var(--primary);
-  width: 24px;
-  border-radius: var(--radius-full);
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner {
+    transition: none !important;
+  }
 }

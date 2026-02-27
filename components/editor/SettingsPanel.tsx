@@ -32,11 +32,11 @@ export default function SettingsPanel() {
     };
 
     const aspectLabels: Record<string, string> = {
-        '1:1': '正方形',
-        '4:3': '横 / 風景',
-        '3:4': '縦 / 上半身',
-        '16:9': 'ワイド',
-        '9:16': '縦長 / 全身',
+        '1:1': t('editor.aspectRatioValues.1:1'),
+        '4:3': t('editor.aspectRatioValues.4:3'),
+        '3:4': t('editor.aspectRatioValues.3:4'),
+        '16:9': t('editor.aspectRatioValues.16:9'),
+        '9:16': t('editor.aspectRatioValues.9:16'),
     };
 
 
@@ -101,8 +101,8 @@ export default function SettingsPanel() {
                                 onClick={() => updateSettings({ aspectRatio: ratio })}
                                 style={{ display: 'flex', flexDirection: 'column', height: 'auto', padding: '8px 4px' }}
                             >
-                                <span>{ratio}</span>
-                                <span className="pill-hint">{aspectLabels[ratio]}</span>
+                                <span className="aspect-ratio-value">{ratio}</span>
+                                <span className="aspect-ratio-label">{aspectLabels[ratio]}</span>
                             </button>
                         ))}
                     </div>

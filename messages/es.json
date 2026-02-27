@@ -96,6 +96,12 @@
     "home": {
         "title": "Crea contenido increíble con IA",
         "subtitle": "Generación de imagen y video NSFW de próxima generación.",
+        "headline": "Desnuda cualquier foto con IA",
+        "subheadline": "Generación de desnudos con IA fotorrealista. Nude Mode · Face Swap · Text-to-Image. Créditos gratis, sin tarjeta.",
+        "flipButton": "✨ Haz clic para desnudar",
+        "flipButtonAlt": "🔄 Mostrar original",
+        "ctaButton": "Prueba gratis →",
+        "ctaSub": "Sin tarjeta",
         "recentCreations": "Creaciones recientes",
         "viewAll": "Ver todo"
     },

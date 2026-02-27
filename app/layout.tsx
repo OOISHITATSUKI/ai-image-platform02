@@ -6,6 +6,18 @@ export const metadata: Metadata = {
   title: 'Image Nude — AI Undress & Nude Generator | Free',
   description: 'Upload any photo and let AI remove clothes instantly. Photorealistic nude generation with Nude Mode, Face Swap & Text-to-Image. Try free.',
   keywords: ['AI undress', 'AI nude generator', 'NSFW AI', 'nude mode', 'face swap AI', 'text to image NSFW', 'free AI nude'],
+  openGraph: {
+    title: 'Image Nude — AI Undress & Nude Generator',
+    description: 'Upload any photo and let AI remove clothes instantly. Try free.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Image Nude — AI Undress & Nude Generator',
+    description: 'Upload any photo and let AI remove clothes instantly. Try free.',
+    images: ['/og-image.jpg'],
+  },
   icons: {
     icon: '/favicon.png',
     apple: '/logo-dark.png',

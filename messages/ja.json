@@ -25,6 +25,13 @@
         "settings": "生成設定",
         "model": "モデル",
         "aspectRatio": "アスペクト比",
+        "aspectRatioValues": {
+            "1:1": "正方形",
+            "4:3": "横向き",
+            "3:4": "縦向き",
+            "16:9": "ワイド",
+            "9:16": "全身"
+        },
         "resolution": "解像度",
         "duration": "再生時間",
         "count": "生成数",
@@ -109,7 +116,9 @@
         "subtitle": "次世代のNSFW画像・動画生成を、かつてないコントロールで。",
         "headline": "AIが、服を脱がす。",
         "subheadline": "フォトリアルなAIヌード生成。Nude Mode · 顔入れ替え · テキスト生成。無料クレジット付き、カード不要。",
-        "ctaButton": "✨ 無料で生成してみる →",
+        "flipButton": "✨ クリックで脱がす",
+        "flipButtonAlt": "🔄 元に戻す",
+        "ctaButton": "無料で生成してみる →",
         "ctaSub": "カード不要",
         "recentCreations": "最近の作品",
         "viewAll": "すべて表示"
