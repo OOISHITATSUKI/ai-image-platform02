@@ -425,7 +425,7 @@ export default function ChatArea() {
                         faceSwapMode,
                         inpaintMode,
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
-                        tagSettings,
+                        nudeMode: settings.nudeMode ?? true,
                     }),
                 });
 

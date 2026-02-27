@@ -67,13 +67,13 @@ const SDXL_NEGATIVE_PROMPT =
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
-async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean, isSdxl: boolean): Promise<string> {
+async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean, isXL: boolean): Promise<string> {
     if (!ANTHROPIC_API_KEY) {
         console.warn('ANTHROPIC_API_KEY not found, using raw prompt');
         return prompt;
     }
 
-    console.log(`Optimizing prompt with Claude (isSdxl: ${isSdxl}): ${prompt}`);
+    console.log(`Optimizing prompt with Claude (isXL: ${isXL}): ${prompt}`);
 
     const sd15SystemPrompt = `You are a prompt engineering expert for Stable Diffusion 1.5 photorealistic models.
 Convert the user's input into a highly effective comma-separated list of English tags for PHOTOREALISTIC image generation.
@@ -122,7 +122,7 @@ CRITICAL RULES:
 
 Output ONLY the tags for the masked area.`;
 
-    let systemPrompt = isSdxl ? sdxlSystemPrompt : sd15SystemPrompt;
+    let systemPrompt = isXL ? sdxlSystemPrompt : sd15SystemPrompt;
     if (generationType === 'img2img') {
         systemPrompt = img2imgSystemPrompt;
     } else if (generationType === 'img_edit') {
@@ -205,13 +205,13 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
 function getResolutionFromAspectRatio(
     aspectRatio: AspectRatio,
     resolution: string,
-    isSdxl: boolean
+    isXL: boolean
 ): { width: number; height: number } {
     // SDXL: Native 1024px base
     // SD 1.5: 512-768 base
     let baseSize: number;
 
-    if (isSdxl) {
+    if (isXL) {
         baseSize = 1024;
     } else {
         switch (resolution) {
@@ -370,7 +370,7 @@ async function restoreFaceViaImg2Img(base64Image: string): Promise<string> {
             nsfw_detection_level: 0,
         },
         request: {
-            model_name: 'realisticVisionV60B1_v60B1VAE_190174.safetensors',
+            model_name: 'realvisxlV50_v50LightningBakedvae_718065.safetensors',
             prompt: 'best quality, highly detailed, sharp focus, clear face, detailed eyes, detailed skin',
             negative_prompt: DEFAULT_NEGATIVE_PROMPT,
             image_base64: base64Image,
@@ -432,50 +432,81 @@ async function handleMergeFace(
 
     const url = `${NOVITA_BASE_SYNC}/merge-face`;
 
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${NOVITA_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            face_image_file: faceResized,
-            image_file: targetResized,
-            response_image_type: 'jpeg',
-        }),
-    });
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${NOVITA_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    face_image_file: faceResized,
+                    image_file: targetResized,
+                    response_image_type: 'jpeg',
+                }),
+            });
 
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error('Merge Face API error:', res.status, errText);
-        let msg = `Face Swap API error: ${res.status}`;
-        if (errText.includes('"code":2') || res.status === 500) {
-            msg += " — 顔が検出されなかったか、画像が不適切です。別の画像（正面を向いたはっきりした顔）で試してください。";
-        } else {
-            msg += ` — ${errText.slice(0, 200)}`;
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error(`Merge Face API error (Attempt ${attempt}/3):`, res.status, errText);
+
+                if (res.status === 500 && attempt < 3) {
+                    const delay = 1000 * attempt;
+                    console.warn(`Face swap failed with 500, retrying in ${delay}ms...`);
+                    await new Promise(r => setTimeout(r, delay));
+                    continue;
+                }
+
+                let msg = `Face Swap API error: ${res.status}`;
+                if (errText.includes('"code":2') || res.status === 500) {
+                    msg += " — 顔が検出されなかったか、画像が不適切です。別の画像（正面を向いたはっきりした顔）で試してください。";
+                } else {
+                    msg += ` — ${errText.slice(0, 200)}`;
+                }
+                throw new Error(msg);
+            }
+
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const htmlText = await res.text();
+                console.error('Face Swap returned non-JSON:', htmlText.slice(0, 500));
+                throw new Error('Face Swap API error: Unexpected HTML response. Please try again.');
+            }
+
+            const data = await res.json();
+            if (!data.image_file) {
+                throw new Error('No image returned from Face Swap API');
+            }
+            return data.image_file;
+        } catch (err) {
+            if (attempt >= 3) throw err;
         }
-        throw new Error(msg);
     }
+    throw new Error('Face Swap failed after max retries');
+}
 
-    const data = await res.json();
-
-    if (!data.image_file) {
-        throw new Error('No image returned from Face Swap API');
-    }
-
-    // ── Post-process: restore face quality via img2img ──
+// ── Wrapper to match expected return type ──
+async function handleFaceSwapFinal(
+    faceImageBase64: string,
+    targetImageBase64: string,
+) {
     try {
-        const restoredData = await restoreFaceViaImg2Img(data.image_file);
-        // If restoredData is a full URL (from task result), return it
-        if (restoredData.startsWith('http')) {
-            return [{ url: restoredData, type: 'png' }];
+        const faceSwappedBase64 = await handleMergeFace(faceImageBase64, targetImageBase64);
+
+        // Post-process: restore face quality via img2img
+        try {
+            const restoredData = await restoreFaceViaImg2Img(faceSwappedBase64);
+            if (restoredData.startsWith('http')) {
+                return [{ url: restoredData, type: 'png' }];
+            }
+            return [{ url: `data:image/png;base64,${restoredData}`, type: 'png' }];
+        } catch (restoreErr) {
+            console.error('Face restoration error, using raw face swap result:', restoreErr);
+            return [{ url: `data:image/jpeg;base64,${faceSwappedBase64}`, type: 'jpeg' }];
         }
-        // Otherwise it's the processed/fallback base64 string
-        return [{ url: `data:image/png;base64,${restoredData}`, type: 'png' }];
-    } catch (restoreErr) {
-        console.error('Face restoration error, using raw face swap result:', restoreErr);
-        // Fallback: return raw face swap result
-        return [{ url: `data:image/jpeg;base64,${data.image_file}`, type: 'jpeg' }];
+    } catch (err) {
+        throw err;
     }
 }
 
@@ -596,7 +627,16 @@ export async function POST(request: NextRequest) {
             count = 1,
             qualityPreset = 'hd',
             tagSettings,
+            nudeMode = true,
         } = body;
+
+        // BUG-03: Friendly error messages (duplicated from ChatArea but for backend errors)
+        const friendlyError = (raw: string): string => {
+            if (raw.includes('INVALID_IMAGE_FORMAT')) {
+                return '❌ この画像形式には対応していません。JPGまたはPNGを試してください。';
+            }
+            return raw;
+        };
 
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
 
@@ -702,13 +742,13 @@ export async function POST(request: NextRequest) {
         let tagPromptFragment = '';
         let tagNegativeFragment = '';
         let actionHint = '';          // ← Action/pose hint sent to Claude
+        /* 
         if (tagSettings) {
             const ts = tagSettings as TagSettings;
             const tagResult = buildTagPromptResult(ts);
             tagPromptFragment = tagResult.prompt;
             tagNegativeFragment = tagResult.negativePrompt;
 
-            // Extract action/pose tags to hint Claude about the desired scene type
             if (ts.fetish && ts.fetish.length > 0) {
                 const actionLabels: Record<string, string> = {
                     fellatio: 'blowjob oral sex',
@@ -727,6 +767,7 @@ export async function POST(request: NextRequest) {
             console.log('Tag prompt fragment:', tagPromptFragment);
             console.log('Action hint:', actionHint);
         }
+        */
 
         // ── Model Selection Logic ──
         // ── Model Selection Logic ──
@@ -754,7 +795,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Detect SDXL models
-        const isSdxl = novitaModelName.toLowerCase().includes('xl');
+        const isXL = novitaModelName.toLowerCase().includes('xl');
 
         // ── Claude Optimization Step (user prompt + action context) ──
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
@@ -765,8 +806,8 @@ export async function POST(request: NextRequest) {
         const optimizedPrompt = await optimizePromptWithClaude(
             promptForClaude,
             generationType,
-            model?.nsfw ?? true,
-            isSdxl
+            nudeMode,
+            isXL
         );
 
         // ── Combine: optimized prompt + all character/quality tag fragment ──
@@ -796,11 +837,11 @@ export async function POST(request: NextRequest) {
         if (faceSwapMode && imageBase64 && additionalImages?.length > 0) {
             try {
                 // Correct order: face=additionalImages[0], target body=imageBase64
-                const images = await handleMergeFace(additionalImages[0], imageBase64);
+                const images = await handleFaceSwapFinal(additionalImages[0], imageBase64);
                 return NextResponse.json({ images });
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : 'Face swap failed';
-                return NextResponse.json({ error: errorMsg }, { status: 502 });
+                return NextResponse.json({ error: friendlyError(errorMsg) }, { status: 502 });
             }
         }
 
@@ -810,7 +851,7 @@ export async function POST(request: NextRequest) {
         const { width, height } = getResolutionFromAspectRatio(
             aspectRatio as AspectRatio,
             resolution,
-            isSdxl
+            isXL
         );
 
         // Decide endpoint
@@ -826,8 +867,8 @@ export async function POST(request: NextRequest) {
                 : `${NOVITA_BASE}/txt2img`;
 
         // ── Negative Prompt: combine default + tag-specific negatives ──
-        let finalNegative = isSdxl ? SDXL_NEGATIVE_PROMPT : quality.negativePrompt;
-        if (tagNegativeFragment && !isSdxl) {
+        let finalNegative = isXL ? SDXL_NEGATIVE_PROMPT : quality.negativePrompt;
+        if (tagNegativeFragment && !isXL) {
             finalNegative = `${finalNegative}, ${tagNegativeFragment}`;
         }
 
@@ -858,13 +899,13 @@ export async function POST(request: NextRequest) {
             width,
             height,
             image_num: Math.min(count, 4),
-            steps: isSdxl ? 30 : quality.steps,
+            steps: isXL ? 30 : quality.steps,
             seed: -1,
-            clip_skip: isSdxl ? 1 : 2,
+            clip_skip: isXL ? 1 : 2,
             sampler_name: quality.sampler,
-            guidance_scale: isSdxl ? 4.5 : (isPureImg2Img ? 5 : quality.guidance),
+            guidance_scale: isXL ? 6.5 : (isPureImg2Img ? 5 : quality.guidance),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
-            ...(!isSdxl ? {
+            ...(!isXL ? {
                 loras: [
                     {
                         model_name: 'add_detail_44319',
@@ -874,20 +915,24 @@ export async function POST(request: NextRequest) {
             } : {}),
         };
 
-        // --- NSFW/Prompt Assembly ---
-        if (model?.nsfw) {
-            if (inpaintMode) {
-                novitaRequest.prompt = enforceLimit(`(nsfw:1.6), (completely nude:1.6), (detailed genitalia:1.5), (pussy:1.5), (uncensored:1.4), bare skin, realistic skin texture, no clothes, undressed, ${enhancedPrompt}`);
-                novitaRequest.negative_prompt = enforceLimit(`(clothes, clothing, fabric, bra, underwear, bikini, swimsuit, censor, mosaic, bar, text, logo:1.5), ${finalNegative}`);
-            } else {
-                // Txt2Img / Img2Img
-                novitaRequest.prompt = isSdxl
-                    ? enforceLimit(`(nsfw:1.5), (completely nude:1.6), (explicit:1.5), (bare breasts:1.4), (detailed pussy:1.5), ${enhancedPrompt}`)
-                    : enforceLimit(`(nsfw:1.5), (completely nude:1.5), (bare breasts:1.4), (detailed genitalia:1.4), high quality, detailed skin, ${enhancedPrompt}`);
-                novitaRequest.negative_prompt = enforceLimit(finalNegative);
-            }
+        // --- nudeModeによるプロンプト注入 ---
+        const hasClothingInPrompt = /bikini|dress|uniform|lingerie|shirt|wear|outfit|cloth|swimsuit/i
+            .test(optimizedPrompt);
+
+        if (nudeMode && !hasClothingInPrompt) {
+            // Nude ON + 服装指定なし → ヌード生成
+            novitaRequest.prompt = enforceLimit(
+                `nsfw, nude, naked, bare skin, ${enhancedPrompt}`
+            );
+            novitaRequest.negative_prompt = enforceLimit(finalNegative);
+        } else if (!nudeMode) {
+            // Nude OFF → ヌード禁止（SFW画像）
+            novitaRequest.prompt = enforceLimit(enhancedPrompt);
+            novitaRequest.negative_prompt = enforceLimit(
+                `${finalNegative}, nsfw, nude, naked, nipples, genitalia`
+            );
         } else {
-            // non-NSFW model
+            // Nude ON + 服装指定あり → ユーザーの服装指定を優先
             novitaRequest.prompt = enforceLimit(enhancedPrompt);
             novitaRequest.negative_prompt = enforceLimit(finalNegative);
         }
@@ -1038,10 +1083,11 @@ export async function POST(request: NextRequest) {
 
         // --- Defensive check for HTML response (SDXL/Novita stability) ---
         const contentType = submitRes.headers.get('content-type') || '';
-        if (contentType.includes('text/html')) {
-            console.error('Novita returned HTML instead of JSON. Head:', await submitRes.text());
+        if (!contentType.includes('application/json')) {
+            const errText = await submitRes.text();
+            console.error('Novita returned non-JSON:', submitRes.status, errText.slice(0, 500));
             return NextResponse.json(
-                { error: 'Novita API returned an unexpected HTML error page. This often happens if the model is currently unavailable or invalid.' },
+                { error: `Novita API error (${submitRes.status}). The model may be temporarily unavailable.` },
                 { status: 502 }
             );
         }

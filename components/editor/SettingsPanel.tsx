@@ -179,182 +179,21 @@ export default function SettingsPanel() {
                     </div>
                 )}
 
-                {/* Character Tags (txt2img only — not shown for img2img) */}
-                {isImageMode && settings.generationType === 'txt2img' && (
-                    <>
-                        <div className="control-group-divider" />
-                        <div className="control-group-section-title">{t('tags.sectionTitle')}</div>
-
-                        {/* Age */}
-                        <div className="control-group">
-                            <label>{t('tags.age')}</label>
-                            <div className="pill-grid">
-                                {(['20s', '30s'] as AgeTag[]).map((age) => (
-                                    <button
-                                        key={age}
-                                        className={`pill ${tagSettings.age === age ? 'active' : ''}`}
-                                        onClick={() => updateTagSettings({ age: tagSettings.age === age ? undefined : age })}
-                                    >
-                                        {t(`tags.age${age.charAt(0).toUpperCase() + age.slice(1)}`)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* People Count */}
-                        <div className="control-group">
-                            <label>{t('tags.peopleCount')}</label>
-                            <div className="pill-grid">
-                                {(['1', '2', 'multiple'] as PeopleCountTag[]).map((cnt) => (
-                                    <button
-                                        key={cnt}
-                                        className={`pill ${tagSettings.peopleCount === cnt ? 'active' : ''}`}
-                                        onClick={() => updateTagSettings({ peopleCount: tagSettings.peopleCount === cnt ? undefined : cnt })}
-                                    >
-                                        {t(`tags.people${cnt === '1' ? '1' : cnt === '2' ? '2' : 'Multiple'}`)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Ethnicity */}
-                        <div className="control-group">
-                            <label>{t('tags.ethnicity')}</label>
-                            <div className="pill-grid">
-                                {(['asian', 'european', 'american', 'southeast_asian', 'latina', 'african'] as EthnicityTag[]).map((eth) => {
-                                    const keyMap: Record<string, string> = {
-                                        asian: 'Asian',
-                                        european: 'European', american: 'American',
-                                        southeast_asian: 'SoutheastAsian', latina: 'Latina', african: 'African',
-                                    };
-                                    return (
-                                        <button
-                                            key={eth}
-                                            className={`pill ${tagSettings.ethnicity === eth ? 'active' : ''}`}
-                                            onClick={() => updateTagSettings({ ethnicity: tagSettings.ethnicity === eth ? undefined : eth })}
-                                        >
-                                            {t(`tags.eth${keyMap[eth]}`)}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Breast Size Slider */}
-                        <div className="control-group">
-                            <label>{t('tags.breastSize')}: <span style={{
-                                color: 'var(--primary)',
-                                fontWeight: 600,
-                            }}>
-                                {tagSettings.breastSize < 20 ? '🔹 Flat' :
-                                    tagSettings.breastSize < 40 ? '🔸 Small' :
-                                        tagSettings.breastSize < 60 ? '🟡 Medium' :
-                                            tagSettings.breastSize < 80 ? '🟠 Large' :
-                                                '🔴 Huge'}
-                            </span></label>
-                            <div style={{ padding: '8px 0' }}>
+                {/* Nude Toggle (txt2img only) */}
+                {settings.generationType === 'txt2img' && (
+                    <div className="control-group">
+                        <div className="toggle-row">
+                            <label>🔞 Nude</label>
+                            <label className="toggle-switch">
                                 <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={tagSettings.breastSize}
-                                    onChange={(e) => updateTagSettings({ breastSize: parseInt(e.target.value) })}
-                                    className="tag-slider"
-                                    style={{ display: 'block', width: '100%' }}
+                                    type="checkbox"
+                                    checked={settings.nudeMode ?? true}
+                                    onChange={(e) => updateSettings({ nudeMode: e.target.checked })}
                                 />
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    fontSize: '0.65rem',
-                                    color: 'var(--text-tertiary)',
-                                    marginTop: '4px',
-                                    padding: '0 2px',
-                                }}>
-                                    <span>Flat</span>
-                                    <span>Small</span>
-                                    <span>Medium</span>
-                                    <span>Large</span>
-                                    <span>Huge</span>
-                                </div>
-                            </div>
+                                <span className="toggle-slider" />
+                            </label>
                         </div>
-
-                        {/* Breast Position */}
-                        <div className="control-group">
-                            <label>{t('tags.breastPosition')}</label>
-                            <div className="pill-grid">
-                                {(['cleavage', 'asymmetric', 'natural', 'pushed_together'] as BreastPositionTag[]).map((bp) => {
-                                    const keyMap: Record<string, string> = {
-                                        cleavage: 'Cleavage', asymmetric: 'Asymmetric',
-                                        natural: 'Natural', pushed_together: 'PushedTogether',
-                                    };
-                                    return (
-                                        <button
-                                            key={bp}
-                                            className={`pill ${tagSettings.breastPosition === bp ? 'active' : ''}`}
-                                            onClick={() => updateTagSettings({ breastPosition: tagSettings.breastPosition === bp ? undefined : bp })}
-                                        >
-                                            {t(`tags.bp${keyMap[bp]}`)}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Photorealism */}
-                        <div className="control-group">
-                            <label>{t('tags.photorealism')}</label>
-                            <div className="pill-grid">
-                                {(['photorealistic', 'realistic'] as PhotorealismTag[]).map((pr) => (
-                                    <button
-                                        key={pr}
-                                        className={`pill ${tagSettings.photorealism === pr ? 'active' : ''}`}
-                                        onClick={() => updateTagSettings({ photorealism: tagSettings.photorealism === pr ? undefined : pr })}
-                                    >
-                                        {t(`tags.pr${pr.charAt(0).toUpperCase() + pr.slice(1)}`)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Composition */}
-                        <div className="control-group">
-                            <label>{t('tags.composition')}</label>
-                            <div className="pill-grid">
-                                {(['full_body', 'waist_up', 'bust', 'face_closeup'] as CompositionTag[]).map((comp) => {
-                                    const keyMap: Record<string, string> = {
-                                        full_body: 'FullBody', waist_up: 'WaistUp',
-                                        bust: 'Bust', face_closeup: 'FaceCloseup',
-                                    };
-                                    return (
-                                        <button
-                                            key={comp}
-                                            className={`pill ${tagSettings.composition === comp ? 'active' : ''}`}
-                                            onClick={() => updateTagSettings({ composition: tagSettings.composition === comp ? undefined : comp })}
-                                        >
-                                            {t(`tags.comp${keyMap[comp]}`)}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Fetish / Action (multi-select) */}
-                        <div className="control-group">
-                            <label>{t('tags.fetish')}</label>
-                            <div className="pill-grid">
-                                {(['fellatio', 'cowgirl', 'insertion', 'kiss', 'missionary', 'doggy', 'standing', 'handjob', 'paizuri'] as FetishTag[]).map((f) => (
-                                    <button
-                                        key={f}
-                                        className={`pill ${tagSettings.fetish.includes(f) ? 'active' : ''}`}
-                                        onClick={() => toggleFetishTag(f)}
-                                    >
-                                        {t(`tags.fet${f.charAt(0).toUpperCase() + f.slice(1)}`)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </>
+                    </div>
                 )}
 
                 {/* Count — at the bottom so users set it last */}
