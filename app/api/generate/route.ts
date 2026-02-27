@@ -94,7 +94,17 @@ Convert input into natural English descriptions (NOT comma-separated tags).
 SDXL responds best to descriptive sentences, not weighted tags.
 Focus on: lighting description, camera angle, atmosphere, skin detail.
 For NSFW content, be explicitly descriptive about the scene, body parts, and sexual actions to ensure high explicitness.
-Example: "A highly detailed photorealistic image of a completely naked Japanese woman, bare breasts with large detailed nipples, spreading her legs to show her pussy, shot on Sony A7III, 85mm f/1.4, natural skin texture with visible pores"
+
+COMPOSITION RULES (CRITICAL):
+- If user mentions 全身/full body → ALWAYS start with: "full body shot, head to toe, wide shot"
+- If user mentions 上半身/waist up → start with: "upper body, waist up portrait"  
+- If user mentions 顔/face → start with: "face closeup, head portrait"
+- If no composition specified → default to "upper body portrait"
+- NEVER let quality/detail tags override composition. Composition tags MUST come first.
+
+Output format: composition tags FIRST, then subject, then scene, then quality.
+Example: "full body shot, head to toe, wide shot, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight"
+
 Do NOT use (tag:weight) syntax. Output natural language only.`;
 
     const img2imgSystemPrompt = `You are a prompt expert for Stable Diffusion img2img.
@@ -197,7 +207,7 @@ const QUALITY_CONFIGS: Record<QualityPreset, {
         sampler: 'DPM++ 2M Karras',
         guidance: 7.5,
         negativePrompt: DEFAULT_NEGATIVE_PROMPT,
-        qualityPrefix: '(RAW photo:1.3), (photorealistic:1.4), professional DSLR portrait, high resolution, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT4, detailed facial features, realistic skin texture, intricate details, ',
+        qualityPrefix: '(RAW photo:1.3), (photorealistic:1.4), professional DSLR shot, high resolution, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT4, detailed facial features, realistic skin texture, intricate details, ',
     },
 };
 
@@ -832,7 +842,8 @@ export async function POST(request: NextRequest) {
         // ── Prompt Prefix Selection ──
         // Skip quality prefixes for img2img to preserve original image characteristics
         const promptPrefix = (inpaintMode || isPureImg2Img) ? '' : quality.qualityPrefix;
-        const enhancedPrompt = promptPrefix + combinedPrompt;
+        // Quality tags should come AFTER composition tags to avoid overriding shot type
+        const enhancedPrompt = promptPrefix ? `${combinedPrompt}, ${promptPrefix}` : combinedPrompt;
         // image1 (imageBase64) = body/target, image2 (additionalImages[0]) = face source
         if (faceSwapMode && imageBase64 && additionalImages?.length > 0) {
             try {
