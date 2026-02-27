@@ -99,7 +99,9 @@ COMPOSITION RULES (CRITICAL):
 - If user mentions 全身/full body → ALWAYS start with: "full body shot, head to toe, wide angle"
 - If user mentions 上半身/waist up → start with: "upper body, waist up"  
 - If user mentions 顔/face → start with: "face closeup, portrait"
-- If no composition specified → default to "upper body portrait"
+- If no composition specified → default to "upper body shot, waist up, from chest up"
+- NEVER use the word "portrait" unless user explicitly asks for face/顔
+- NEVER add "detailed face", "detailed eyes" tags — these cause extreme face zoom
 - NEVER let quality/detail tags override composition. Composition tags MUST come first in the output string.
 
 Output format: composition tags FIRST, then subject, then scene, then quality.
@@ -848,7 +850,7 @@ export async function POST(request: NextRequest) {
 
         // ── Prompt Prefix Selection ──
         // Skip quality prefixes for img2img to preserve original image characteristics
-        const promptPrefix = (inpaintMode || isPureImg2Img) ? '' : quality.qualityPrefix;
+        const promptPrefix = (inpaintMode || isPureImg2Img || isXL) ? '' : quality.qualityPrefix;
         // Quality tags should come AFTER composition tags to avoid overriding shot type
         const enhancedPrompt = promptPrefix ? `${combinedPrompt}, ${promptPrefix}` : combinedPrompt;
         // image1 (imageBase64) = body/target, image2 (additionalImages[0]) = face source
