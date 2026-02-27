@@ -59,11 +59,12 @@ const INPAINT_POSITIVE_MODIFIERS =
 
 // ── SDXL specific negative prompt ──
 const SDXL_NEGATIVE_PROMPT =
-    'illustration, 3d render, cartoon, anime, sketch, painting, ' +
-    'plastic skin, airbrushed, synthetic, lowres, bad anatomy, ' +
-    'bad hands, text, watermark, blurry, deformed, ugly, ' +
-    'child, underage, extra fingers, missing fingers, ' +
-    'extra limbs, multiple faces, multiple bodies';
+    'illustration, 3d render, cartoon, anime, ' +
+    'ugly face, asymmetrical face, deformed face, disfigured, ' +
+    'crooked nose, crooked mouth, bad teeth, ' +
+    'plastic skin, airbrushed, lowres, bad anatomy, ' +
+    'bad hands, text, watermark, blurry, deformed, ' +
+    'child, underage, extra fingers, missing fingers';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -103,6 +104,11 @@ COMPOSITION RULES (CRITICAL):
 - NEVER use the word "portrait" unless user explicitly asks for face/顔
 - NEVER add "detailed face", "detailed eyes" tags — these cause extreme face zoom
 - NEVER let quality/detail tags override composition. Composition tags MUST come first in the output string.
+
+FACE QUALITY (ALWAYS INCLUDE):
+- Always add: "beautiful face, symmetrical face, detailed eyes, natural makeup"
+- For Asian women: "korean beauty, japanese idol, ulzzang"
+- NEVER use: "ugly", "deformed face" in prompt (negative prompt handles this)
 
 Output format: composition tags FIRST, then subject, then scene, then quality.
 Example: "full body shot, head to toe, wide angle, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight"
