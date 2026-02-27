@@ -3,9 +3,9 @@ import './globals.css';
 import ClientLayout from '@/components/layout/ClientLayout';
 
 export const metadata: Metadata = {
-  title: 'Image Nude - AI Image Generator',
-  description: 'Next-generation AI-powered NSFW image and video generation platform. Create stunning content with text-to-video, image-to-video, and more.',
-  keywords: ['AI', 'video generation', 'image generation', 'NSFW', 'text to video', 'image to video'],
+  title: 'Image Nude — AI Undress & Nude Generator | Free',
+  description: 'Upload any photo and let AI remove clothes instantly. Photorealistic nude generation with Nude Mode, Face Swap & Text-to-Image. Try free.',
+  keywords: ['AI undress', 'AI nude generator', 'NSFW AI', 'nude mode', 'face swap AI', 'text to image NSFW', 'free AI nude'],
   icons: {
     icon: '/favicon.png',
     apple: '/logo-dark.png',

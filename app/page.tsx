@@ -1,13 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+
+const showcaseImages = [
+  { src: '/showcase/showcase-1.png', alt: 'AI Nude Generation Sample 1' },
+  { src: '/showcase/showcase-2.png', alt: 'AI Nude Generation Sample 2' },
+  { src: '/showcase/showcase-3.png', alt: 'AI Nude Generation Sample 3' },
+  { src: '/showcase/showcase-4.png', alt: 'AI Nude Generation Sample 4' },
+  { src: '/showcase/showcase-5.png', alt: 'AI Nude Generation Sample 5' },
+];
 
 export default function HomePage() {
   const { createChat, setGenerationType, chats } = useAppStore();
   const { t } = useTranslation();
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 3500, stopOnInteraction: false })]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi, setSelectedIndex]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+  }, [emblaApi, setScrollSnaps, onSelect]);
+
+  const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 
   const toolCards = [
     { icon: '✏️', titleKey: 'create.txt2img', desc: 'Generate images from text descriptions', type: 'txt2img' as const },
@@ -28,11 +58,48 @@ export default function HomePage() {
 
   return (
     <div className="home-view">
-      <header className="home-header">
-        <h1 className="home-title">{t('home.title')}</h1>
-        <p className="home-subtitle">{t('home.subtitle')}</p>
-      </header>
+      {/* ── Hero Section ── */}
+      <section className="hero-outer">
+        <div className="hero-content">
+          <h1 className="hero-headline">{t('home.headline')}</h1>
+          <p className="hero-subheadline">{t('home.subheadline')}</p>
+        </div>
 
+        {/* ── Image Slider ── */}
+        <div className="embla" ref={emblaRef}>
+          <div className="embla__container">
+            {showcaseImages.map((img, index) => (
+              <div className="embla__slide" key={index}>
+                <div className="showcase-image-wrapper">
+                  {/* Using standard img for now to ensure visibility without public assets yet, 
+                      transitioning to Next/Image when assets are verified */}
+                  <img src={img.src} alt={img.alt} loading={index < 2 ? 'eager' : 'lazy'} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="embla-dots">
+            {scrollSnaps.map((_, index) => (
+              <button
+                key={index}
+                className={`embla-dot ${index === selectedIndex ? 'embla-dot--selected' : ''}`}
+                onClick={() => scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="hero-cta-group">
+          <Link href="/editor" className="hero-cta-button" onClick={() => handleToolClick('txt2img')}>
+            {t('home.ctaButton')}
+          </Link>
+          <span className="hero-cta-sub">{t('home.ctaSub')}</span>
+        </div>
+      </section>
+
+      {/* ── Existing Content Below ── */}
       <div className="tool-cards-grid">
         {toolCards.map((card) => (
           <Link

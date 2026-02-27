@@ -13,6 +13,8 @@
     "@supabase/supabase-js": "^2.97.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "jsonwebtoken": "^9.0.3",
     "next": "16.1.6",
     "next-intl": "^4.8.2",
