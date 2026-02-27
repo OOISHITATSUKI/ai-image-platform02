@@ -59,12 +59,15 @@ const INPAINT_POSITIVE_MODIFIERS =
 
 // ── SDXL specific negative prompt ──
 const SDXL_NEGATIVE_PROMPT =
-    'illustration, 3d render, cartoon, anime, ' +
+    'illustration, 3d render, cartoon, anime, manga, sketch, painting, drawing, ' +
+    'comic, cel shading, vector art, digital art, pop art, ' +
+    'male, man, boy, masculine, ' +
     'ugly face, asymmetrical face, deformed face, disfigured, ' +
     'crooked nose, crooked mouth, bad teeth, ' +
     'plastic skin, airbrushed, lowres, bad anatomy, ' +
-    'bad hands, text, watermark, blurry, deformed, ' +
-    'child, underage, extra fingers, missing fingers';
+    'bad hands, text, watermark, blurry, deformed, ugly, ' +
+    'child, underage, extra fingers, missing fingers, ' +
+    'extra limbs, multiple faces, multiple bodies';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -108,10 +111,27 @@ COMPOSITION RULES (CRITICAL):
 FACE QUALITY (ALWAYS INCLUDE):
 - Always add: "beautiful face, symmetrical face, detailed eyes, natural makeup"
 - For Asian women: "korean beauty, japanese idol, ulzzang"
-- NEVER use: "ugly", "deformed face" in prompt (negative prompt handles this)
+
+GENDER RULES (CRITICAL):
+- If user mentions 女性/woman/girl → ALWAYS include "1woman, female"
+- If user does NOT mention gender → DEFAULT to "1woman, female"  
+- NEVER generate male unless user explicitly requests 男性/man/male/boy
+
+STYLE RULES (CRITICAL):
+- ALWAYS enforce photorealistic style
+- NEVER output anime, illustration, cartoon, drawing, sketch style
+
+QUALITY (ALWAYS APPEND AT END):
+- ALWAYS end output with: "photorealistic, RAW photo, 8k uhd, DSLR, natural skin texture, natural lighting"
+- NEVER omit these quality tags
+
+CRITICAL: NEVER drop user-specified attributes.
+If user mentions clothing (水着/bikini), hairstyle (ボブ/bob),
+expression (笑って/smiling), body features (巨乳/large breasts),
+these MUST appear in your output.
 
 Output format: composition tags FIRST, then subject, then scene, then quality.
-Example: "full body shot, head to toe, wide angle, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight"
+Example: "full body shot, head to toe, wide angle, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight, photorealistic, RAW photo, 8k uhd, DSLR, natural skin texture, natural lighting"
 
 Do NOT use (tag:weight) syntax. Output natural language only.`;
 
