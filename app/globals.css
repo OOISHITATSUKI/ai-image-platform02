@@ -4004,12 +4004,18 @@ video {
 [data-theme="light"] .logo-light {
   display: block;
 }
+
 /* Aspect Ratio Pill Hints */
-.pill-hint {
-    display: block;
-    font-size: 0.6rem;
-    color: var(--text-tertiary);
-    margin-top: 2px;
+.aspect-ratio-label {
+  display: block;
+  font-size: 0.65rem;
+  opacity: 0.7;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
+.aspect-ratio-value {
+  font-weight: 600;
 }
 
 /* ── Hero Section ── */
@@ -4103,7 +4109,8 @@ video {
 }
 
 .embla__slide {
-  flex: 0 0 45%; /* Desktop: 3 images partially visible */
+  flex: 0 0 45%;
+  /* Desktop: 3 images partially visible */
   min-width: 0;
   padding-right: 16px;
   transition: transform 0.3s ease;
@@ -4111,7 +4118,8 @@ video {
 
 @media (max-width: 768px) {
   .embla__slide {
-    flex: 0 0 85%; /* Mobile: 1 image + peek */
+    flex: 0 0 85%;
+    /* Mobile: 1 image + peek */
   }
 }
 

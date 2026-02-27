@@ -108,9 +108,12 @@ COMPOSITION RULES (CRITICAL):
 - NEVER add "detailed face", "detailed eyes" tags — these cause extreme face zoom
 - NEVER let quality/detail tags override composition. Composition tags MUST come first in the output string.
 
-FACE QUALITY (ALWAYS INCLUDE):
-- Always add: "beautiful face, symmetrical face, detailed eyes, natural makeup"
-- For Asian women: "korean beauty, japanese idol, ulzzang"
+BEAUTY (ALWAYS INCLUDE FOR FEMALE SUBJECTS):
+- Always add: "pretty face, cute face, small face, big eyes, double eyelids, 
+  soft skin, glossy lips, slim nose, v-shaped jawline, flawless skin, dewy skin"
+- For Asian women: "korean beauty, japanese idol, ulzzang, aegyo"
+- NEVER use "symmetrical face" (makes face look unnatural)
+- NEVER use "detailed eyes" or "detailed face" (causes extreme zoom)
 
 GENDER RULES (CRITICAL):
 - If user mentions 女性/woman/girl → ALWAYS include "1woman, female"

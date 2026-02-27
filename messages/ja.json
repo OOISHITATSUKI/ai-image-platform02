@@ -25,6 +25,13 @@
         "settings": "生成設定",
         "model": "モデル",
         "aspectRatio": "アスペクト比",
+        "aspectRatioValues": {
+            "1:1": "正方形",
+            "4:3": "横向き",
+            "3:4": "縦向き",
+            "16:9": "ワイド",
+            "9:16": "全身"
+        },
         "resolution": "解像度",
         "duration": "再生時間",
         "count": "生成数",
