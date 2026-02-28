@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
+import { AVAILABLE_MODELS } from '@/lib/types';
 import type { MediaFilter, AspectRatio } from '@/lib/types';
 import InpaintModal from './InpaintModal';
 
@@ -62,6 +63,14 @@ export default function ChatArea() {
     const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
 
     const activeChat = chats.find((c) => c.id === activeChatId) || null;
+
+    // Derived states for model selection
+    const isImageMode = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+    const filteredModels = AVAILABLE_MODELS.filter((m) =>
+        isImageMode ? m.type === 'image' : m.type === 'video'
+    );
+    const activeModel = AVAILABLE_MODELS.find(m => m.id === settings.model);
+    const modelDisplayName = activeModel ? activeModel.name : settings.model;
 
     // Show attach for modes that need images
     const showAttach = !['txt2img', 'txt2vid'].includes(settings.generationType);
@@ -1066,12 +1075,41 @@ export default function ChatArea() {
                             onClick={() => setMobileSettingsOpen(!mobileSettingsOpen)}
                         >
                             <span className="summary-text">
-                                {settings.aspectRatio} / {settings.resolution} / Nude {settings.nudeMode ? 'ON' : 'OFF'} / {settings.count}枚
+                                {modelDisplayName} / {settings.aspectRatio} / {settings.resolution} / Nude {settings.nudeMode ? 'ON' : 'OFF'} / {settings.count}枚
                             </span>
                             <span className={`summary-icon ${mobileSettingsOpen ? 'open' : ''}`}>▼</span>
                         </div>
                         <div className={`mobile-settings-content ${mobileSettingsOpen ? 'open' : ''}`}>
                             <div className="mobile-settings-inner">
+                                <div className="mobile-param-row">
+                                    <label>Model</label>
+                                    <select
+                                        value={settings.model}
+                                        onChange={(e) => updateSettings({ model: e.target.value })}
+                                        style={{ maxWidth: '65%', textOverflow: 'ellipsis' }}
+                                    >
+                                        {/* NSFW Realistic Models */}
+                                        {filteredModels.some((m) => m.category === 'nsfw-realistic') && (
+                                            <optgroup label="🔞 NSFW — Realistic">
+                                                {filteredModels.filter((m) => m.category === 'nsfw-realistic').map((model) => (
+                                                    <option key={model.id} value={model.id}>
+                                                        {model.name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                        {/* Video Models */}
+                                        {filteredModels.filter((m) => m.type === 'video').length > 0 && (
+                                            <optgroup label="🎬 Video Models">
+                                                {filteredModels.filter((m) => m.type === 'video').map((model) => (
+                                                    <option key={model.id} value={model.id}>
+                                                        {model.name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                    </select>
+                                </div>
                                 <div className="mobile-param-row">
                                     <label>Aspect</label>
                                     <select
