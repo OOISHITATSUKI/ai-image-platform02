@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import ClientLayout from '@/components/layout/ClientLayout';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'Image Nude — AI Undress & Nude Generator | Free',
@@ -42,6 +43,12 @@ export default function RootLayout({
       </head>
       <body>
         <ClientLayout>{children}</ClientLayout>
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="c3ed5e74-ea4f-435f-bac5-7deade11fd68"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
