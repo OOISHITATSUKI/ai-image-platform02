@@ -58,6 +58,9 @@ export default function ChatArea() {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Mobile Accordion state
+    const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
+
     const activeChat = chats.find((c) => c.id === activeChatId) || null;
 
     // Show attach for modes that need images
@@ -1054,6 +1057,69 @@ export default function ChatArea() {
 
                     <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: 'var(--warning)', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
                         {t('editor.autoDeleteWarning')}
+                    </div>
+
+                    {/* Mobile Settings Accordion */}
+                    <div className="mobile-settings-container">
+                        <div
+                            className="mobile-settings-summary"
+                            onClick={() => setMobileSettingsOpen(!mobileSettingsOpen)}
+                        >
+                            <span className="summary-text">
+                                {settings.aspectRatio} / {settings.resolution} / Nude {settings.nudeMode ? 'ON' : 'OFF'} / {settings.count}枚
+                            </span>
+                            <span className={`summary-icon ${mobileSettingsOpen ? 'open' : ''}`}>▼</span>
+                        </div>
+                        <div className={`mobile-settings-content ${mobileSettingsOpen ? 'open' : ''}`}>
+                            <div className="mobile-settings-inner">
+                                <div className="mobile-param-row">
+                                    <label>Aspect</label>
+                                    <select
+                                        value={settings.aspectRatio}
+                                        onChange={(e) => updateSettings({ aspectRatio: e.target.value as AspectRatio })}
+                                    >
+                                        <option value="1:1">1:1</option>
+                                        <option value="4:3">4:3</option>
+                                        <option value="3:4">3:4</option>
+                                        <option value="16:9">16:9</option>
+                                        <option value="9:16">9:16</option>
+                                    </select>
+                                </div>
+                                <div className="mobile-param-row">
+                                    <label>Res</label>
+                                    <select
+                                        value={settings.resolution}
+                                        onChange={(e) => updateSettings({ resolution: e.target.value as any })}
+                                    >
+                                        <option value="512">512</option>
+                                        <option value="1024">1024</option>
+                                        <option value="2K">2K</option>
+                                        <option value="4K">4K</option>
+                                    </select>
+                                </div>
+                                {settings.generationType === 'txt2img' && (
+                                    <div className="mobile-param-row">
+                                        <label>Nude</label>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.nudeMode ?? true}
+                                                onChange={(e) => updateSettings({ nudeMode: e.target.checked })}
+                                            />
+                                            <span className="toggle-slider" />
+                                        </label>
+                                    </div>
+                                )}
+                                <div className="mobile-param-row">
+                                    <label>Count</label>
+                                    <div className="counter-control mobile-counter">
+                                        <button onClick={(e) => { e.preventDefault(); updateSettings({ count: Math.max(1, settings.count - 1) }) }}>−</button>
+                                        <span>{settings.count}</span>
+                                        <button onClick={(e) => { e.preventDefault(); updateSettings({ count: Math.min(4, settings.count + 1) }) }}>＋</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <form onSubmit={handleSubmit} style={{ position: 'relative' }}>

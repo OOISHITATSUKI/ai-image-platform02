@@ -2769,6 +2769,11 @@ video {
   display: none;
 }
 
+.mobile-settings-container {
+  display: none;
+  /* Hidden on desktop by default */
+}
+
 @media (max-width: 1024px) {
   :root {
     --sidebar-width: 240px;
@@ -2789,6 +2794,112 @@ video {
     flex-direction: column;
     height: 100vh;
     padding-top: var(--header-height);
+  }
+
+  .settings-panel {
+    display: none !important;
+  }
+
+  .settings-toggle-btn {
+    display: none !important;
+  }
+
+  /* Mobile Settings Accordion */
+  .mobile-settings-container {
+    display: block;
+    margin-bottom: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .mobile-settings-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    user-select: none;
+  }
+
+  .summary-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 12px;
+  }
+
+  .summary-icon {
+    font-size: 0.6rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .summary-icon.open {
+    transform: rotate(180deg);
+  }
+
+  .mobile-settings-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+  }
+
+  .mobile-settings-content.open {
+    grid-template-rows: 1fr;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .mobile-settings-inner {
+    overflow: hidden;
+    padding: 0 12px;
+  }
+
+  .mobile-settings-content.open .mobile-settings-inner {
+    padding: 12px;
+  }
+
+  .mobile-param-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+  }
+
+  .mobile-param-row label {
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .mobile-param-row select {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .mobile-counter {
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+
+  .mobile-counter button {
+    padding: 2px 8px;
+    font-size: 1rem;
+  }
+
+  .mobile-counter span {
+    padding: 0 8px;
   }
 
   .sidebar {
@@ -3190,7 +3301,7 @@ video {
   z-index: 99999;
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
 }
 
 .age-gate-modal {
