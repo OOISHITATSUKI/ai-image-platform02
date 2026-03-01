@@ -1627,36 +1627,99 @@ textarea:focus {
   text-decoration: underline;
 }
 
-/* Gallery */
-.gallery-grid {
+/* ── Showcase Gallery Grid ── */
+.showcase-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 60px;
 }
 
-.gallery-item {
+.showcase-card {
+  position: relative;
   aspect-ratio: 9/16;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: var(--radius-lg);
+  perspective: 1000px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  background-color: var(--bg-card);
 }
 
-.gallery-item:hover {
-  border-color: var(--border-hover);
-  transform: scale(1.02);
-}
-
-.gallery-placeholder {
+.showcase-inner {
+  position: relative;
   width: 100%;
   height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.showcase-front,
+.showcase-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.showcase-back {
+  transform: rotateY(180deg);
+}
+
+.flip-tag {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.flip-tag-before {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.flip-tag-after {
+  background: rgba(124, 92, 252, 0.85);
+  /* Primary Accent */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Desktop Hover Effects (Disabled on Touch) */
+@media (hover: hover) and (pointer: fine) {
+  .showcase-card:hover .showcase-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Mobile/JS Override Flipping */
+.showcase-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Placeholder Empty Cards */
+.showcase-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-input);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
   color: var(--text-tertiary);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* ── Pricing ── */
@@ -2812,6 +2875,10 @@ textarea:focus {
   :root {
     --sidebar-width: 240px;
     --settings-panel-width: 280px;
+  }
+
+  .showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

@@ -5,10 +5,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
-const showcaseImages = [
-  { before: '/showcase/before-1.jpg', after: '/showcase/after-1.jpg', alt: 'AI undress demonstration 1' },
-  { before: '/showcase/before-2.jpg', after: '/showcase/after-2.jpg', alt: 'AI undress demonstration 2' },
-  { before: '/showcase/before-3.jpg', after: '/showcase/after-3.jpg', alt: 'AI undress demonstration 3' },
+import ShowcaseFlipCard from '@/components/ui/ShowcaseFlipCard';
+
+const showcaseGridImages = [
+  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 1' },
+  // Phase 2 placeholders:
+  { before: '', after: '', alt: 'Placeholder 2' },
+  { before: '', after: '', alt: 'Placeholder 3' },
+  { before: '', after: '', alt: 'Placeholder 4' },
+  { before: '', after: '', alt: 'Placeholder 5' },
+  { before: '', after: '', alt: 'Placeholder 6' },
 ];
 
 export default function HomePage() {
@@ -52,36 +58,25 @@ export default function HomePage() {
         <h1 className="hero-headline">{t('home.headline')}</h1>
         <p className="hero-subheadline">{t('home.subheadline')}</p>
 
-        <div className="flip-card-grid">
-          {showcaseImages.map((img, i) => (
-            <div className="flip-card" key={i}>
-              <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''} ${isFlipping ? 'flipping' : ''}`}>
-                <div className="flip-card-front">
-                  <Image src={img.before} alt={img.alt} fill style={{ objectFit: 'cover' }} priority={i < 3} sizes="(max-width: 768px) 320px, 280px" />
+        <div className="showcase-grid">
+          {showcaseGridImages.map((img, i) => (
+            <React.Fragment key={i}>
+              {img.before ? (
+                <ShowcaseFlipCard
+                  beforeSrc={img.before}
+                  afterSrc={img.after}
+                  imgAlt={img.alt}
+                  autoFlip={true}
+                  priority={i < 3}
+                />
+              ) : (
+                <div className="showcase-card showcase-placeholder">
+                  <span>Coming Soon</span>
                 </div>
-                <div className="flip-card-back">
-                  <Image
-                    src={img.after}
-                    alt={img.alt}
-                    fill
-                    style={{
-                      objectFit: 'cover',
-                      filter: (!ageVerified && isFlipped) ? 'blur(20px)' : 'none'
-                    }}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 320px, 280px"
-                  />
-                </div>
-              </div>
-            </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
-
-        {ageVerified && (
-          <button className="flip-trigger-btn" onClick={handleFlip} aria-label="Toggle Image State">
-            {isFlipped ? t('home.flipButtonAlt') : t('home.flipButton')}
-          </button>
-        )}
 
         <br />
 
@@ -111,12 +106,10 @@ export default function HomePage() {
         <h3>{t('home.recentCreations')}</h3>
         <Link href="/library" className="view-all-link">{t('home.viewAll')}</Link>
       </div>
-      <div className="gallery-grid">
+      <div className="showcase-grid" style={{ marginBottom: 0 }}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="gallery-item">
-            <div className="gallery-placeholder">
-              {i <= 3 ? '🖼️' : '🎬'}
-            </div>
+          <div key={i} className="showcase-card showcase-placeholder">
+            <span style={{ fontSize: '2rem' }}>{i <= 3 ? '🖼️' : '🎬'}</span>
           </div>
         ))}
       </div>
