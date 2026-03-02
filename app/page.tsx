@@ -7,14 +7,11 @@ import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import ShowcaseFlipCard from '@/components/ui/ShowcaseFlipCard';
 
-const showcaseGridImages = [
+// Using the single phase 1 image across 3 cards for a complete carousel demo
+const baseShowcaseImages = [
   { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 1' },
-  // Phase 2 placeholders:
-  { before: '', after: '', alt: 'Placeholder 2' },
-  { before: '', after: '', alt: 'Placeholder 3' },
-  { before: '', after: '', alt: 'Placeholder 4' },
-  { before: '', after: '', alt: 'Placeholder 5' },
-  { before: '', after: '', alt: 'Placeholder 6' },
+  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 2' },
+  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 3' },
 ];
 
 export default function HomePage() {
@@ -58,24 +55,21 @@ export default function HomePage() {
         <h1 className="hero-headline">{t('home.headline')}</h1>
         <p className="hero-subheadline">{t('home.subheadline')}</p>
 
-        <div className="showcase-grid">
-          {showcaseGridImages.map((img, i) => (
-            <React.Fragment key={i}>
-              {img.before ? (
-                <ShowcaseFlipCard
-                  beforeSrc={img.before}
-                  afterSrc={img.after}
-                  imgAlt={img.alt}
-                  autoFlip={true}
-                  priority={i < 3}
-                />
-              ) : (
-                <div className="showcase-card showcase-placeholder">
-                  <span>Coming Soon</span>
-                </div>
-              )}
-            </React.Fragment>
-          ))}
+        <div className="carousel-container">
+          <div className="carousel-track">
+            {/* Duplicate the array to create a seamless infinite scrolling loop */}
+            {[...baseShowcaseImages, ...baseShowcaseImages].map((img, i) => (
+              <ShowcaseFlipCard
+                key={i}
+                beforeSrc={img.before}
+                afterSrc={img.after}
+                imgAlt={img.alt}
+                autoFlip={true}
+                flipDelayMs={(i % baseShowcaseImages.length) * 1000} // Stagger delays: 0s, 1s, 2s
+                priority={i < 4}
+              />
+            ))}
+          </div>
         </div>
 
         <br />
@@ -105,13 +99,6 @@ export default function HomePage() {
       <div className="section-header">
         <h3>{t('home.recentCreations')}</h3>
         <Link href="/library" className="view-all-link">{t('home.viewAll')}</Link>
-      </div>
-      <div className="showcase-grid" style={{ marginBottom: 0 }}>
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="showcase-card showcase-placeholder">
-            <span style={{ fontSize: '2rem' }}>{i <= 3 ? '🖼️' : '🎬'}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

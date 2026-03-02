@@ -1627,21 +1627,40 @@ textarea:focus {
   text-decoration: underline;
 }
 
-/* ── Showcase Gallery Grid ── */
-.showcase-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* ── Showcase Carousel ── */
+.carousel-container {
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0 60px 0;
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
   gap: 16px;
-  margin-bottom: 60px;
+  width: max-content;
+  animation: scroll-left 30s linear infinite;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  /* Translate by exactly half minus half the gap to perfectly match up seamless duplicates */
+  100% {
+    transform: translateX(calc(-50% - 8px));
+  }
 }
 
 .showcase-card {
   position: relative;
-  aspect-ratio: 9/16;
+  height: 450px;
   border-radius: var(--radius-lg);
   perspective: 1000px;
   cursor: pointer;
   background-color: var(--bg-card);
+  flex-shrink: 0;
 }
 
 .showcase-inner {
@@ -1683,6 +1702,8 @@ textarea:focus {
   text-transform: uppercase;
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .flip-tag-before {
@@ -1698,6 +1719,10 @@ textarea:focus {
 
 /* Desktop Hover Effects (Disabled on Touch) */
 @media (hover: hover) and (pointer: fine) {
+  .carousel-track:hover {
+    animation-play-state: paused;
+  }
+
   .showcase-card:hover .showcase-inner {
     transform: rotateY(180deg);
   }
@@ -2877,14 +2902,19 @@ textarea:focus {
     --settings-panel-width: 280px;
   }
 
-  .showcase-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .inpaint-size-control {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
 @media (max-width: 768px) {
   :root {
     --header-height: 60px;
+  }
+
+  .showcase-card {
+    height: 350px;
   }
 
   body {
@@ -3354,6 +3384,19 @@ textarea:focus {
 
   .inpaint-modal-footer {
     padding: 12px;
+  }
+
+  .inpaint-mod .nav-center {
+    display: none;
+  }
+
+  /* Desktop layout tweaks */
+  .section-header {
+    margin-top: 10px;
+  }
+
+  .showcase-card {
+    height: 350px;
   }
 
   /* ── ライブラリ（生成履歴） ── */

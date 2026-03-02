@@ -9,9 +9,10 @@ interface ShowcaseFlipCardProps {
     imgAlt: string;
     autoFlip: boolean;
     priority?: boolean;
+    flipDelayMs?: number;
 }
 
-export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip, priority = false }: ShowcaseFlipCardProps) {
+export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip, priority = false, flipDelayMs = 0 }: ShowcaseFlipCardProps) {
     const [isFlipped, setIsFlipped] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
 
@@ -19,17 +20,22 @@ export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip
         if (!autoFlip) return;
 
         let intervalId: NodeJS.Timeout;
+        let timeoutId: NodeJS.Timeout;
 
         const observer = new IntersectionObserver(
             (entries) => {
                 const [entry] = entries;
                 if (entry.isIntersecting) {
-                    // Element is visible, start auto flipping every 3 seconds
-                    intervalId = setInterval(() => {
-                        setIsFlipped((prev) => !prev);
-                    }, 3000);
+                    // Element is visible, wait for stagger delay then start interval
+                    timeoutId = setTimeout(() => {
+                        setIsFlipped(true); // Initial flip
+                        intervalId = setInterval(() => {
+                            setIsFlipped((prev) => !prev);
+                        }, 3000);
+                    }, flipDelayMs);
                 } else {
                     // Element is out of view, stop interval to save resources
+                    if (timeoutId) clearTimeout(timeoutId);
                     if (intervalId) clearInterval(intervalId);
                     setIsFlipped(false); // Reset to front
                 }
@@ -43,9 +49,10 @@ export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip
 
         return () => {
             observer.disconnect();
+            if (timeoutId) clearTimeout(timeoutId);
             if (intervalId) clearInterval(intervalId);
         };
-    }, [autoFlip]);
+    }, [autoFlip, flipDelayMs]);
 
     const handleManualFlip = () => {
         setIsFlipped((prev) => !prev);
@@ -58,7 +65,7 @@ export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip
             onClick={handleManualFlip}
         >
             <div className={`showcase-inner ${isFlipped ? 'flipped' : ''}`}>
-                <div className="showcase-front">
+                <div className="showcase-front" style={{ transform: 'rotateY(0deg)' }}>
                     <Image
                         src={beforeSrc}
                         alt={`${imgAlt} Before`}
