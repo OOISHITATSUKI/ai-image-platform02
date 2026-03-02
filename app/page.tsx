@@ -7,11 +7,14 @@ import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import ShowcaseFlipCard from '@/components/ui/ShowcaseFlipCard';
 
-// Using the single phase 1 image across 3 cards for a complete carousel demo
+// Using 6 showcase cards for the carousel
 const baseShowcaseImages = [
   { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 1' },
-  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 2' },
-  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 3' },
+  { before: '/images/showcase/card2-before.webp', after: '/images/showcase/card2-after.webp', alt: 'Demonstration 2' },
+  { before: '/images/showcase/card3-before.webp', after: '/images/showcase/card3-after.webp', alt: 'Demonstration 3' },
+  { before: '/images/showcase/card4-before.webp', after: '/images/showcase/card4-after.webp', alt: 'Demonstration 4' },
+  { before: '/images/showcase/card5-before.webp', after: '/images/showcase/card5-after.webp', alt: 'Demonstration 5' },
+  { before: '/images/showcase/card6-before.webp', after: '/images/showcase/card6-after.webp', alt: 'Demonstration 6' },
 ];
 
 export default function HomePage() {
