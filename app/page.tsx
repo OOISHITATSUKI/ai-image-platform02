@@ -5,10 +5,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
-const showcaseImages = [
-  { before: '/showcase/before-1.jpg', after: '/showcase/after-1.jpg', alt: 'AI undress demonstration 1' },
-  { before: '/showcase/before-2.jpg', after: '/showcase/after-2.jpg', alt: 'AI undress demonstration 2' },
-  { before: '/showcase/before-3.jpg', after: '/showcase/after-3.jpg', alt: 'AI undress demonstration 3' },
+import ShowcaseFlipCard from '@/components/ui/ShowcaseFlipCard';
+
+// Using 6 showcase cards for the carousel
+const baseShowcaseImages = [
+  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 1' },
+  { before: '/images/showcase/card2-before.webp', after: '/images/showcase/card2-after.webp', alt: 'Demonstration 2' },
+  { before: '/images/showcase/card3-before.webp', after: '/images/showcase/card3-after.webp', alt: 'Demonstration 3' },
+  { before: '/images/showcase/card4-before.webp', after: '/images/showcase/card4-after.webp', alt: 'Demonstration 4' },
+  { before: '/images/showcase/card5-before.webp', after: '/images/showcase/card5-after.webp', alt: 'Demonstration 5' },
+  { before: '/images/showcase/card6-before.webp', after: '/images/showcase/card6-after.webp', alt: 'Demonstration 6' },
 ];
 
 export default function HomePage() {
@@ -52,36 +58,22 @@ export default function HomePage() {
         <h1 className="hero-headline">{t('home.headline')}</h1>
         <p className="hero-subheadline">{t('home.subheadline')}</p>
 
-        <div className="flip-card-grid">
-          {showcaseImages.map((img, i) => (
-            <div className="flip-card" key={i}>
-              <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''} ${isFlipping ? 'flipping' : ''}`}>
-                <div className="flip-card-front">
-                  <Image src={img.before} alt={img.alt} fill style={{ objectFit: 'cover' }} priority={i < 3} sizes="(max-width: 768px) 320px, 280px" />
-                </div>
-                <div className="flip-card-back">
-                  <Image
-                    src={img.after}
-                    alt={img.alt}
-                    fill
-                    style={{
-                      objectFit: 'cover',
-                      filter: (!ageVerified && isFlipped) ? 'blur(20px)' : 'none'
-                    }}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 320px, 280px"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="carousel-container">
+          <div className="carousel-track">
+            {/* Duplicate the array to create a seamless infinite scrolling loop */}
+            {[...baseShowcaseImages, ...baseShowcaseImages].map((img, i) => (
+              <ShowcaseFlipCard
+                key={i}
+                beforeSrc={img.before}
+                afterSrc={img.after}
+                imgAlt={img.alt}
+                autoFlip={true}
+                flipDelayMs={(i % baseShowcaseImages.length) * 1000} // Stagger delays: 0s, 1s, 2s
+                priority={i < 4}
+              />
+            ))}
+          </div>
         </div>
-
-        {ageVerified && (
-          <button className="flip-trigger-btn" onClick={handleFlip} aria-label="Toggle Image State">
-            {isFlipped ? t('home.flipButtonAlt') : t('home.flipButton')}
-          </button>
-        )}
 
         <br />
 
@@ -110,15 +102,6 @@ export default function HomePage() {
       <div className="section-header">
         <h3>{t('home.recentCreations')}</h3>
         <Link href="/library" className="view-all-link">{t('home.viewAll')}</Link>
-      </div>
-      <div className="gallery-grid">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="gallery-item">
-            <div className="gallery-placeholder">
-              {i <= 3 ? '🖼️' : '🎬'}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
