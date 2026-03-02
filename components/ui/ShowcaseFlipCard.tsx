@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 
 interface ShowcaseFlipCardProps {
     beforeSrc: string;
@@ -66,24 +65,20 @@ export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip
         >
             <div className={`showcase-inner ${isFlipped ? 'flipped' : ''}`}>
                 <div className="showcase-front" style={{ transform: 'rotateY(0deg)' }}>
-                    <Image
+                    <img
                         src={beforeSrc}
                         alt={`${imgAlt} Before`}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        priority={priority}
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 300px"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        loading={priority ? 'eager' : 'lazy'}
                     />
                     <span className="flip-tag flip-tag-before">Before</span>
                 </div>
                 <div className="showcase-back">
-                    <Image
+                    <img
                         src={afterSrc}
                         alt={`${imgAlt} After`}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        loading={priority ? 'eager' : 'lazy'}
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 300px"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        loading="lazy"
                     />
                     <span className="flip-tag flip-tag-after">After</span>
                 </div>
@@ -91,3 +86,4 @@ export default function ShowcaseFlipCard({ beforeSrc, afterSrc, imgAlt, autoFlip
         </div>
     );
 }
+
