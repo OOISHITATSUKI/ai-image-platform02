@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-    title: '18 U.S.C. § 2257 Compliance - Image Nude AI',
+    title: '18 U.S.C. § 2257 Compliance - [Service Name]',
 };
 
 export default function Model2257Page() {

@@ -43,7 +43,7 @@ export default function TermsPage() {
 
                 <section id="section-1" style={{ marginBottom: '40px' }}>
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '1.5rem', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>1. ACCEPTANCE OF TERMS</h2>
-                    <p>These Terms of Service ("Terms") govern the use of the AI image generation service "Image Nude AI" ("Service") operated by Image Nude AI ("Company," "we," "us," or "our").</p>
+                    <p>These Terms of Service ("Terms") govern the use of the AI image generation service "[Service Name]" ("Service") operated by [Company Name] ("Company," "we," "us," or "our").</p>
                     <p>By creating an account or using the Service, you agree to be bound by these Terms in their entirety. If you do not agree to these Terms, you may not use the Service.</p>
                 </section>
 
@@ -257,8 +257,8 @@ export default function TermsPage() {
                 <section id="section-15" style={{ marginBottom: '40px' }}>
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '1.5rem', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>15. CONTACT</h2>
                     <p>For questions regarding these Terms, please contact us at:</p>
-                    <p>Email: support@imagenude.com</p>
-                    <p>Operator: Image Nude AI</p>
+                    <p>Email: [Contact Email]</p>
+                    <p>Operator: [Company Name]</p>
                 </section>
 
                 <section id="section-16" style={{ marginBottom: '40px' }}>

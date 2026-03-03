@@ -405,26 +405,16 @@ export default function Sidebar() {
 
                 {/* Condensed Legal Footer */}
                 {!sidebarCollapsed && (
-                    <div style={{
-                        marginTop: '16px',
-                        padding: '0 8px',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '4px 8px',
-                        fontSize: '12px',
-                        color: 'var(--text-secondary)',
-                        opacity: 0.5,
-                        lineHeight: 1.4
-                    }}>
-                        <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</Link>
-                        <span>·</span>
-                        <Link href="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</Link>
-                        <span>·</span>
-                        <Link href="/content-policy" style={{ color: 'inherit', textDecoration: 'none' }}>Content Policy</Link>
-                        <span>·</span>
-                        <Link href="/dmca" style={{ color: 'inherit', textDecoration: 'none' }}>DMCA</Link>
-                        <span>·</span>
-                        <Link href="/2257" style={{ color: 'inherit', textDecoration: 'none' }}>2257</Link>
+                    <div style={{ padding: '8px 16px', display: 'flex', flexWrap: 'wrap', gap: '4px 8px', justifyContent: 'center' }}>
+                        <Link href="/terms" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Terms</Link>
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                        <Link href="/privacy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Privacy</Link>
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                        <Link href="/content-policy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Content</Link>
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                        <Link href="/dmca" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>DMCA</Link>
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                        <Link href="/2257" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>2257</Link>
                     </div>
                 )}
             </div>

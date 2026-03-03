@@ -74,7 +74,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         return (
             <>
                 {children}
-                <Footer />
             </>
         );
     }
@@ -126,7 +125,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <div className="sidebar-overlay" onClick={toggleSidebar} />
                 <main className="main-content">
                     {children}
-                    <Footer />
                 </main>
             </div>
         </>

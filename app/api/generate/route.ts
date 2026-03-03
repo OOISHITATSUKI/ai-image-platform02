@@ -180,7 +180,7 @@ Output ONLY the tags for the masked area.`;
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20240620',
+                model: 'claude-sonnet-4-5-20250929',
                 max_tokens: 1000,
                 system: systemPrompt,
                 messages: [
@@ -577,7 +577,7 @@ async function analyzeEditRegion(prompt: string): Promise<{
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20240620',
+                model: 'claude-sonnet-4-5-20250929',
                 max_tokens: 200,
                 system: `You analyze image editing requests to determine which body region to modify.
 Given a user's edit instruction, output ONLY a JSON object:

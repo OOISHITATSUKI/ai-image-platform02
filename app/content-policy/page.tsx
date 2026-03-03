@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-    title: 'Content Policy - Image Nude AI',
+    title: 'Content Policy - [Service Name]',
 };
 
 export default function ContentPolicyPage() {
@@ -27,7 +27,7 @@ export default function ContentPolicyPage() {
 
             <section style={{ marginBottom: '32px' }}>
                 <h2 style={{ color: 'var(--text-primary)', marginTop: '24px', marginBottom: '16px' }}>1. Purpose</h2>
-                <p>This Content Policy outlines the types of content that are permitted and prohibited on the Image Nude AI platform. All users must comply with this policy at all times.</p>
+                <p>This Content Policy outlines the types of content that are permitted and prohibited on the [Service Name] platform. All users must comply with this policy at all times.</p>
             </section>
 
             <section style={{ marginBottom: '32px' }}>

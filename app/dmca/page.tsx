@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-    title: 'DMCA Policy - Image Nude AI',
+    title: 'DMCA Policy - [Service Name]',
 };
 
 export default function DmcaPage() {
@@ -36,7 +36,7 @@ export default function DmcaPage() {
                     <li style={{ marginBottom: '8px' }}>A statement that you have a good faith belief that the use of the material is not authorized by the copyright owner.</li>
                     <li style={{ marginBottom: '8px' }}>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner.</li>
                 </ul>
-                <p>Notices can be sent to our designated Copyright Agent at: <strong>support@imagenude.com</strong></p>
+                <p>Notices can be sent to our designated Copyright Agent at: <strong>[Contact Email]</strong></p>
             </section>
 
             <section style={{ marginBottom: '32px' }}>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-    title: 'Privacy Policy - Image Nude AI',
+    title: 'Privacy Policy - [Service Name]',
 };
 
 export default function PrivacyPage() {
