@@ -157,7 +157,12 @@
         "sendCode": "Enviar código",
         "enterCode": "Digite o código",
         "verify": "Verificar",
-        "guest": "Visitante"
+        "guest": "Visitante",
+        "registerRequired": "Registro de conta necessário",
+        "registerMessage": "Você precisa registrar uma conta para gerar imagens. O registro é gratuito e você receberá 20 créditos de boas-vindas!",
+        "registerFree": "Registrar gratuitamente",
+        "closeModal": "Fechar",
+        "toastMessage": "🎁 Registre-se grátis e ganhe 20 créditos! Comece a criar agora"
     },
     "ageGate": {
         "title": "年齢確認 / Age Verification",

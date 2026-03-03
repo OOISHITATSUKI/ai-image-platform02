@@ -175,7 +175,12 @@
         "enterCode": "Enter verification code",
         "verify": "Verify",
         "guest": "Guest",
-        "forgotPassword": "Forgot Password?"
+        "forgotPassword": "Forgot Password?",
+        "registerRequired": "Account Registration Required",
+        "registerMessage": "You need to register an account to generate images. Registration is free and you'll receive 20 credits as a welcome gift!",
+        "registerFree": "Register for Free",
+        "closeModal": "Close",
+        "toastMessage": "🎁 Register for free and get 20 credits! Start creating now"
     },
     "errors": {
         "error_rate_limit": "Rate limit exceeded. Please wait a minute before generating again.",

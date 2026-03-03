@@ -1654,6 +1654,8 @@ textarea:focus {
 }
 
 .showcase-card {
+  aspect-ratio: 9/16;
+  width: 253px;
   position: relative;
   height: 450px;
   border-radius: var(--radius-lg);
@@ -2914,6 +2916,8 @@ textarea:focus {
   }
 
   .showcase-card {
+  aspect-ratio: 9/16;
+  width: 253px;
     height: 350px;
   }
 
@@ -3396,6 +3400,8 @@ textarea:focus {
   }
 
   .showcase-card {
+  aspect-ratio: 9/16;
+  width: 253px;
     height: 350px;
   }
 
@@ -4464,4 +4470,9 @@ textarea:focus {
   .flip-card-inner {
     transition: none !important;
   }
+}
+/* Registration toast animation */
+@keyframes slideDown {
+    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }

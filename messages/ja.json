@@ -175,7 +175,12 @@
         "enterCode": "認証コードを入力",
         "verify": "認証",
         "guest": "ゲスト",
-        "forgotPassword": "パスワードをお忘れですか？"
+        "forgotPassword": "パスワードをお忘れですか？",
+        "registerRequired": "アカウント登録が必要です",
+        "registerMessage": "画像を生成するにはアカウント登録が必要です。登録は無料で、20クレジットをプレゼント！",
+        "registerFree": "無料で登録する",
+        "closeModal": "閉じる",
+        "toastMessage": "🎁 無料登録で20クレジットプレゼント！今すぐ始めよう"
     },
     "errors": {
         "error_rate_limit": "生成制限に達しました。1分待ってから再度お試しください。",

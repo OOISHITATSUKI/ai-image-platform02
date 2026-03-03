@@ -150,7 +150,12 @@
         "sendCode": "发送验证码",
         "enterCode": "输入验证码",
         "verify": "验证",
-        "guest": "访客"
+        "guest": "访客",
+        "registerRequired": "需要注册账户",
+        "registerMessage": "生成图片需要注册账户。注册免费，还能获得20积分欢迎礼！",
+        "registerFree": "免费注册",
+        "closeModal": "关闭",
+        "toastMessage": "🎁 免费注册即送20积分！立即开始创作"
     },
     "ageGate": {
         "title": "年齢確認 / Age Verification",

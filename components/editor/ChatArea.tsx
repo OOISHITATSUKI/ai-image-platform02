@@ -43,6 +43,8 @@ export default function ChatArea() {
     // BUG-02: multi-image support
     const [uploads, setUploads] = useState<UploadSlot[]>([]);
     const [faceSwapMode, setFaceSwapMode] = useState(false);
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [showRegisterToast, setShowRegisterToast] = useState(false);
     const [inpaintMode, setInpaintMode] = useState(false);
     const [showInpaintModal, setShowInpaintModal] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
@@ -315,6 +317,19 @@ export default function ChatArea() {
         return raw;
     };
 
+    
+    // Toast for unregistered users (once per session)
+    useEffect(() => {
+        if (!user || !user.email) {
+            const toastShown = window.sessionStorage.getItem('register_toast_shown');
+            if (!toastShown) {
+                setShowRegisterToast(true);
+                window.sessionStorage.setItem('register_toast_shown', '1');
+                const timer = setTimeout(() => setShowRegisterToast(false), 5000);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [user]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isGenerating) return;
@@ -365,6 +380,11 @@ export default function ChatArea() {
         else if (inpaintMode) creditCost = settings.count * 3;
         else if (settings.generationType === 'img2img') creditCost = settings.count * 2;
 
+        // ── Require login ──
+        if (!user || !user.email) {
+            setShowRegisterModal(true);
+            return;
+        }
         const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
 
         if (!isTestAccount && user && user.credits < creditCost) {
@@ -712,6 +732,68 @@ export default function ChatArea() {
                 )}
             </div>
 
+            
+            
+            {/* Registration Toast */}
+            {showRegisterToast && (
+                <div onClick={() => { window.location.href = '/register'; }} style={{
+                    position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+                    background: 'linear-gradient(135deg, #7c5cfc, #6366f1)',
+                    color: '#fff', padding: '12px 24px', borderRadius: '12px',
+                    cursor: 'pointer', zIndex: 10000, fontSize: '0.95rem', fontWeight: 600,
+                    boxShadow: '0 8px 30px rgba(124,92,252,0.4)',
+                    animation: 'slideDown 0.3s ease-out',
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    maxWidth: '90%'
+                }}>
+                    <span>{t('auth.toastMessage')}</span>
+                    <span onClick={(e) => { e.stopPropagation(); setShowRegisterToast(false); }}
+                        style={{ marginLeft: '8px', opacity: 0.7, cursor: 'pointer' }}>✕</span>
+                </div>
+            )}
+            {/* Registration Modal */}
+            {showRegisterModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+                    backdropFilter: 'blur(4px)'
+                }} onClick={() => setShowRegisterModal(false)}>
+                    <div style={{
+                        background: 'var(--bg-card, #1a1a2e)', borderRadius: '16px',
+                        padding: '32px', maxWidth: '420px', width: '90%',
+                        border: '1px solid var(--border-subtle, #333)',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                        textAlign: 'center'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎨</div>
+                        <h2 style={{
+                            color: 'var(--text-primary, #fff)', fontSize: '1.4rem',
+                            fontWeight: 700, marginBottom: '12px'
+                        }}>{t('auth.registerRequired')}</h2>
+                        <p style={{
+                            color: 'var(--text-secondary, #aaa)', fontSize: '0.95rem',
+                            lineHeight: 1.6, marginBottom: '24px'
+                        }}>{t('auth.registerMessage')}</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <a href="/register" style={{
+                                display: 'block', padding: '14px 24px',
+                                background: 'linear-gradient(135deg, #7c5cfc, #6366f1)',
+                                color: '#fff', borderRadius: '12px', fontWeight: 700,
+                                fontSize: '1rem', textDecoration: 'none',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                boxShadow: '0 4px 15px rgba(124,92,252,0.4)'
+                            }}>{t('auth.registerFree')}</a>
+                            <button onClick={() => setShowRegisterModal(false)} style={{
+                                padding: '12px 24px', background: 'transparent',
+                                color: 'var(--text-tertiary, #888)', border: '1px solid var(--border-subtle, #333)',
+                                borderRadius: '12px', cursor: 'pointer', fontSize: '0.9rem',
+                                transition: 'background 0.2s'
+                            }}>{t('auth.closeModal')}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Error Banner */}
             {generationError && (
                 <div className="chat-error-banner">
@@ -1222,21 +1304,21 @@ export default function ChatArea() {
                                     uploads.length < 2 || !allConsentChecked
                                 ))
                             }
-                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minWidth: '80px', height: 'auto', padding: '8px 12px' }}
+                            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '4px', position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', padding: '8px 14px', borderRadius: '8px', fontSize: '0.75rem', lineHeight: '1' }}
                         >
                             {isGenerating ? (
                                 <span className="send-btn-spinner" />
                             ) : (
                                 <>
-                                    <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>▶</span>
-                                    <span style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.9 }}>
+                                    <span style={{ fontSize: '0.75rem', lineHeight: 1 }}>▶</span>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>
                                         {(() => {
                                             let cost = settings.count * 1;
                                             if (['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType)) cost = settings.count * 5;
                                             else if (faceSwapMode) cost = settings.count * 5;
                                             else if (inpaintMode) cost = settings.count * 3;
                                             else if (settings.generationType === 'img2img') cost = settings.count * 2;
-                                            return t('chat.creditCostHint', { cost });
+                                            return '⚡ ' + cost;
                                         })()}
                                     </span>
                                 </>
