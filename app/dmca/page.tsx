@@ -1,12 +1,29 @@
+import Link from 'next/link';
+
 export const metadata = {
-    title: 'DMCA Policy - VideoGen',
+    title: 'DMCA Policy - Image Nude AI',
 };
 
 export default function DmcaPage() {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
+            <Link
+                href="/"
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: 'var(--primary)',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    marginBottom: '32px'
+                }}
+            >
+                ← Back
+            </Link>
+
             <h1 style={{ color: 'var(--text-primary)', marginBottom: '24px' }}>Digital Millennium Copyright Act (DMCA) Policy</h1>
-            <p style={{ marginBottom: '16px' }}>Last updated: {new Date().toLocaleDateString()}</p>
+            <p style={{ marginBottom: '16px' }}>Last updated: March 2, 2026</p>
 
             <section style={{ marginBottom: '32px' }}>
                 <h2 style={{ color: 'var(--text-primary)', marginTop: '24px', marginBottom: '16px' }}>1. Notice of Infringement</h2>
@@ -19,7 +36,7 @@ export default function DmcaPage() {
                     <li style={{ marginBottom: '8px' }}>A statement that you have a good faith belief that the use of the material is not authorized by the copyright owner.</li>
                     <li style={{ marginBottom: '8px' }}>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner.</li>
                 </ul>
-                <p>Notices can be sent to our designated Copyright Agent at: <strong>[TBD Email Address]</strong></p>
+                <p>Notices can be sent to our designated Copyright Agent at: <strong>support@imagenude.com</strong></p>
             </section>
 
             <section style={{ marginBottom: '32px' }}>

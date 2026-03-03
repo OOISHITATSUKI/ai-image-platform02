@@ -6,6 +6,7 @@ import { validatePrompt } from '@/lib/security';
 import { processViolation, checkBanStatus } from '@/lib/auditLogger';
 import { rateLimit } from '@/lib/rateLimit';
 import { findUserById, verifyToken } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import sharp from 'sharp';
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
@@ -743,11 +744,36 @@ export async function POST(request: NextRequest) {
 
         // ── Free Feature Restrictions ──
         if (!isTestAccount && (isFreeLimitedUser || !user)) {
-            if (generationType !== 'txt2img') {
+            // Updated: Allow txt2img for free users, and allow Face Swap (img2img + faceSwapMode) 
+            // once per day (checked below).
+            const isAllowedFreeFeature = generationType === 'txt2img' || faceSwapMode;
+
+            if (!isAllowedFreeFeature) {
                 return NextResponse.json(
                     { error: 'error_free_credits_feature' },
                     { status: 403 }
                 );
+            }
+
+            // Specific check for Face Swap daily limit
+            if (faceSwapMode) {
+                const today = new Date().toISOString().slice(0, 10);
+                const { data: todaySwaps, error: swapCheckErr } = await supabase
+                    .from('generations')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .eq('generation_type', 'faceswap')
+                    .gte('created_at', `${today}T00:00:00Z`)
+                    .limit(1);
+
+                if (swapCheckErr) {
+                    console.error('Face swap limit check failed:', swapCheckErr);
+                } else if (todaySwaps && todaySwaps.length > 0) {
+                    return NextResponse.json(
+                        { error: 'Free users can only use Face Swap once per day. Please purchase credits for unlimited access.' },
+                        { status: 403 }
+                    );
+                }
             }
         }
 

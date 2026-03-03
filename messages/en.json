@@ -99,7 +99,10 @@
         "faceSwapFace": "Face",
         "pleaseCheckConsent": "⚠️ Please check all consent items.",
         "img2imgNoImage": "⚠️ Image upload is required for img2img mode.",
-        "promptRequired": "⚠️ Please enter a prompt."
+        "promptRequired": "⚠️ Please enter a prompt.",
+        "faceSwapLimitFree": "Free: 1/day",
+        "faceSwapLimitReached": "You have used your free Face Swap for today. Upgrade for unlimited access.",
+        "creditCostHint": "⚡ {cost} Credits"
     },
     "actions": {
         "generateVideo": "Generate Video",

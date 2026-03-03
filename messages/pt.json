@@ -81,7 +81,11 @@
         "error_permanent_ban": "Falha na geração: Conta permanentemente banida por violações estritas da política.",
         "error_access_denied": "Acesso negado: ",
         "faceSwapBody": "Corpo",
-        "faceSwapFace": "Rosto"
+        "faceSwapFace": "Rosto",
+        "promptRequired": "⚠️ Por favor, insira um prompt.",
+        "faceSwapLimitFree": "Grátis: 1 por dia",
+        "faceSwapLimitReached": "Você usou seu Face Swap gratuito de hoje. Atualize para acesso ilimitado.",
+        "creditCostHint": "⚡ {cost} Créditos"
     },
     "actions": {
         "generateVideo": "Gerar vídeo",

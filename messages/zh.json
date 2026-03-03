@@ -41,7 +41,6 @@
         "optimize": "优化",
         "fromLibrary": "从素材库选择",
         "upload": "上传",
-        "imgNotice": "图片由AI生成，结果可能有所不同。",
         "vidNotice": "视频生成为测试版。"
     },
     "chat": {
@@ -81,7 +80,11 @@
         "error_permanent_ban": "生成失败：由于严重违反政策，账户已被永久封禁。",
         "error_access_denied": "访问被拒绝：",
         "faceSwapBody": "身体",
-        "faceSwapFace": "脸部"
+        "faceSwapFace": "脸部",
+        "promptRequired": "⚠️ 请输入提示词。",
+        "faceSwapLimitFree": "免费：每天1次",
+        "faceSwapLimitReached": "您今天免费的换脸次数已用完。请购买点数以获得无限访问权限。",
+        "creditCostHint": "⚡ {cost} 点数"
     },
     "actions": {
         "generateVideo": "生成视频",

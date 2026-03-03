@@ -114,6 +114,8 @@ export default function ChatArea() {
         setInputText('');
         setUploads([]);
         setGenerationError(null);
+        // Clean up old messages (1h TTL) on mount
+        useAppStore.getState().cleanupOldMessages();
     }, [activeChatId]);
 
     // Clear files when switching to text-only mode
@@ -356,7 +358,12 @@ export default function ChatArea() {
 
         const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
-        const creditCost = isVideoGeneration ? settings.count * 5 : settings.count * 2; // Increased from 1 to 2
+
+        let creditCost = settings.count * 1; // txt2img
+        if (isVideoGeneration) creditCost = settings.count * 5;
+        else if (faceSwapMode) creditCost = settings.count * 5;
+        else if (inpaintMode) creditCost = settings.count * 3;
+        else if (settings.generationType === 'img2img') creditCost = settings.count * 2;
 
         const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
 
@@ -525,6 +532,9 @@ export default function ChatArea() {
                     friendly = t(`errors.${errorMsg}`);
                 }
 
+                if (errorMsg.includes('Face Swap once per day')) {
+                    friendly = t('chat.faceSwapLimitReached');
+                }
                 setGenerationError(friendly);
                 addMessage(chatId, {
                     role: 'assistant',
@@ -926,6 +936,19 @@ export default function ChatArea() {
                                 title={t('chat.faceSwap')}
                             >
                                 🔄 {t('chat.faceSwap')}
+                                {user?.plan === 'free' && (user.credits <= 20) && (
+                                    <span style={{
+                                        fontSize: '0.6rem',
+                                        background: 'rgba(255,170,0,0.2)',
+                                        color: '#fbbf24',
+                                        padding: '1px 4px',
+                                        borderRadius: '4px',
+                                        marginLeft: '4px',
+                                        border: '1px solid rgba(255,170,0,0.3)'
+                                    }}>
+                                        {t('chat.faceSwapLimitFree')}
+                                    </span>
+                                )}
                             </button>
                             <button
                                 className={`input-tool-btn inpaint-btn ${inpaintMode ? 'active' : ''}`}
@@ -1207,7 +1230,14 @@ export default function ChatArea() {
                                 <>
                                     <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>▶</span>
                                     <span style={{ fontSize: '0.65rem', fontWeight: 600, opacity: 0.9 }}>
-                                        {['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType) ? settings.count * 5 : settings.count * 2}
+                                        {(() => {
+                                            let cost = settings.count * 1;
+                                            if (['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType)) cost = settings.count * 5;
+                                            else if (faceSwapMode) cost = settings.count * 5;
+                                            else if (inpaintMode) cost = settings.count * 3;
+                                            else if (settings.generationType === 'img2img') cost = settings.count * 2;
+                                            return t('chat.creditCostHint', { cost });
+                                        })()}
                                     </span>
                                 </>
                             )}

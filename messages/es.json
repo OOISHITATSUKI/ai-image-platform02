@@ -81,7 +81,11 @@
         "error_permanent_ban": "Error de generación: Cuenta bloqueada permanentemente por violaciones estrictas de la política.",
         "error_access_denied": "Acceso denegado: ",
         "faceSwapBody": "Cuerpo",
-        "faceSwapFace": "Cara"
+        "faceSwapFace": "Cara",
+        "promptRequired": "⚠️ Por favor, introduce un prompt.",
+        "faceSwapLimitFree": "Gratis: 1 al día",
+        "faceSwapLimitReached": "Has agotado tu Face Swap gratuito de hoy. Actualiza para acceso ilimitado.",
+        "creditCostHint": "⚡ {cost} Créditos"
     },
     "actions": {
         "generateVideo": "Generar video",

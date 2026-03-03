@@ -91,7 +91,10 @@
         "faceSwapFace": "얼굴",
         "pleaseCheckConsent": "⚠️ 모든 동의 사항에 체크해 주세요.",
         "img2imgNoImage": "⚠️ img2img 모드에서는 이미지 업로드가 필수입니다.",
-        "promptRequired": "⚠️ 프롬프트를 입력해 주세요."
+        "promptRequired": "⚠️ 프롬프트를 입력해 주세요.",
+        "faceSwapLimitFree": "무료: 하루 1회",
+        "faceSwapLimitReached": "오늘의 무료 페이스 스왑을 모두 사용했습니다. 무제한 이용을 위해 크레딧을 구매하세요.",
+        "creditCostHint": "⚡ {cost} 크레딧"
     },
     "actions": {
         "generateVideo": "동영상 생성",

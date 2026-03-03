@@ -99,7 +99,10 @@
         "faceSwapFace": "顔",
         "pleaseCheckConsent": "⚠️ 同意事項にすべてチェックしてください。",
         "img2imgNoImage": "⚠️ img2imgモードでは画像のアップロードが必須です。",
-        "promptRequired": "⚠️ プロンプトを入力してください。"
+        "promptRequired": "⚠️ プロンプトを入力してください。",
+        "faceSwapLimitFree": "無料: 1日1回まで",
+        "faceSwapLimitReached": "本日の無料Face Swapは使用済みです。クレジットを購入すると無制限に使えます。",
+        "creditCostHint": "⚡ {cost} クレジット"
     },
     "actions": {
         "generateVideo": "動画生成",

@@ -1,16 +1,33 @@
+import Link from 'next/link';
+
 export const metadata = {
-    title: 'Content Policy - VideoGen',
+    title: 'Content Policy - Image Nude AI',
 };
 
 export default function ContentPolicyPage() {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
+            <Link
+                href="/"
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: 'var(--primary)',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    marginBottom: '32px'
+                }}
+            >
+                ← Back
+            </Link>
+
             <h1 style={{ color: 'var(--text-primary)', marginBottom: '24px' }}>Content Policy</h1>
-            <p style={{ marginBottom: '16px' }}>Last updated: {new Date().toLocaleDateString()}</p>
+            <p style={{ marginBottom: '16px' }}>Last updated: March 2, 2026</p>
 
             <section style={{ marginBottom: '32px' }}>
                 <h2 style={{ color: 'var(--text-primary)', marginTop: '24px', marginBottom: '16px' }}>1. Purpose</h2>
-                <p>This Content Policy outlines the types of content that are permitted and prohibited on the VideoGen platform. All users must comply with this policy at all times.</p>
+                <p>This Content Policy outlines the types of content that are permitted and prohibited on the Image Nude AI platform. All users must comply with this policy at all times.</p>
             </section>
 
             <section style={{ marginBottom: '32px' }}>

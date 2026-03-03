@@ -164,6 +164,9 @@ interface AppState {
     // ----- Credits -----
     deductCredits: (amount: number) => void;
     addCredits: (amount: number) => void;
+
+    // ----- Chat Cleanup -----
+    cleanupOldMessages: () => void;
 }
 
 const DEFAULT_TAG_SETTINGS: TagSettings = {
@@ -254,10 +257,15 @@ export const useAppStore = create<AppState>()(
                         // 3. Load chats
                         const savedChats = await loadChatsFromSupabase(user.id);
                         console.log(`Restored ${savedChats.length} chats from Supabase`);
-                        set({
-                            chats: savedChats,
-                            activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
-                        });
+
+                        // Fix for Bug 1: Only overwrite if we got data from Supabase,
+                        // otherwise keep the hydrated localStorage chats.
+                        if (savedChats.length > 0) {
+                            set({
+                                chats: savedChats,
+                                activeChatId: savedChats.length > 0 ? savedChats[0].id : null,
+                            });
+                        }
                     } catch (e) {
                         console.error('Failed to fetch user data from Supabase:', e);
                     }
@@ -304,7 +312,7 @@ export const useAppStore = create<AppState>()(
                     activeChatId: id,
                 }));
 
-                // Async sync
+                // Sync new chat to Supabase if logged in
                 const user = get().user;
                 if (user) {
                     supabase.from('chats').insert({
@@ -318,6 +326,21 @@ export const useAppStore = create<AppState>()(
                     });
                 }
                 return id;
+            },
+
+            setActiveChatId: (id: string | null) => set({ activeChatId: id }),
+
+            cleanupOldMessages: () => {
+                const now = Date.now();
+                const ONE_HOUR = 3600_000;
+                set((s) => ({
+                    chats: s.chats
+                        .map((c) => ({
+                            ...c,
+                            messages: c.messages.filter((m) => now - m.timestamp < ONE_HOUR),
+                        }))
+                        .filter((c) => c.messages.length > 0),
+                }));
             },
 
             renameChat: (id, name) => {

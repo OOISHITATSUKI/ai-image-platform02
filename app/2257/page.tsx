@@ -1,12 +1,29 @@
+import Link from 'next/link';
+
 export const metadata = {
-    title: '18 U.S.C. § 2257 Compliance - VideoGen',
+    title: '18 U.S.C. § 2257 Compliance - Image Nude AI',
 };
 
 export default function Model2257Page() {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
+            <Link
+                href="/"
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: 'var(--primary)',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    marginBottom: '32px'
+                }}
+            >
+                ← Back
+            </Link>
+
             <h1 style={{ color: 'var(--text-primary)', marginBottom: '24px' }}>18 U.S.C. § 2257 Compliance Exemption</h1>
-            <p style={{ marginBottom: '16px' }}>Last updated: {new Date().toLocaleDateString()}</p>
+            <p style={{ marginBottom: '16px' }}>Last updated: March 2, 2026</p>
 
             <div style={{ padding: '24px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '8px', marginTop: '32px' }}>
                 <p style={{ marginBottom: '16px' }}>

@@ -417,6 +417,14 @@ export default function RegisterPage() {
                                 <span>📄 Privacy Policy</span>
                                 <Link href="/privacy" target="_blank">Read full text →</Link>
                             </div>
+                            <div className="auth-policy-item">
+                                <span>📄 DMCA Policy</span>
+                                <Link href="/dmca" target="_blank">Read full text →</Link>
+                            </div>
+                            <div className="auth-policy-item">
+                                <span>📄 2257 Statement</span>
+                                <Link href="/2257" target="_blank">Read full text →</Link>
+                            </div>
                         </div>
 
                         <div className="auth-agreements-list">

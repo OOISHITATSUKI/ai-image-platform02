@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import AgeGate from '@/components/ui/AgeGate';
 import FirstGenModal from '@/components/ui/FirstGenModal';
 import { useAppStore } from '@/lib/store';
@@ -70,12 +71,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     // Auth pages (login/register) render without sidebar
     if (isAuthPage) {
-        return <>{children}</>;
+        return (
+            <>
+                {children}
+                <Footer />
+            </>
+        );
     }
 
     // Public pages render without sidebar but with simple styling
     if (isPublicPage) {
-        return <>{children}</>;
+        return (
+            <div className="public-page-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <main style={{ flex: 1 }}>
+                    {children}
+                </main>
+                <Footer />
+            </div>
+        );
     }
 
     // Admin pages have their own layout
@@ -113,6 +126,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <div className="sidebar-overlay" onClick={toggleSidebar} />
                 <main className="main-content">
                     {children}
+                    <Footer />
                 </main>
             </div>
         </>

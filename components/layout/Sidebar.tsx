@@ -350,31 +350,6 @@ export default function Sidebar() {
                             </Link>
                         </div>
 
-                        <div className="account-menu-section">
-                            <Link href="/terms" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">📄</span>
-                                <span className="account-menu-item-label">{t('account.terms')}</span>
-                            </Link>
-                            <Link href="/content-policy" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">📄</span>
-                                <span className="account-menu-item-label">{t('account.contentPolicy')}</span>
-                            </Link>
-                            <Link href="/privacy" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">📄</span>
-                                <span className="account-menu-item-label">{t('account.privacy')}</span>
-                            </Link>
-                            <Link href="/dmca" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                <span className="account-menu-item-icon">📄</span>
-                                <span className="account-menu-item-label">{t('account.dmcaPolicy')}</span>
-                            </Link>
-                            {user?.country === 'US' && (
-                                <Link href="/terms#2257" className="account-menu-item" onClick={() => setShowAccountMenu(false)}>
-                                    <span className="account-menu-item-icon">📄</span>
-                                    <span className="account-menu-item-label">{t('account.compliance2257')}</span>
-                                </Link>
-                            )}
-                        </div>
-
                         <div className="account-menu-footer">
                             <button className="account-menu-item logout-item" onClick={() => { logout(); router.push('/login'); }}>
                                 <span className="account-menu-item-icon">🚪</span>
@@ -425,6 +400,31 @@ export default function Sidebar() {
                         <Link href="/register" className="sidebar-register-btn">
                             Create Account
                         </Link>
+                    </div>
+                )}
+
+                {/* Condensed Legal Footer */}
+                {!sidebarCollapsed && (
+                    <div style={{
+                        marginTop: '16px',
+                        padding: '0 8px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px 8px',
+                        fontSize: '12px',
+                        color: 'var(--text-secondary)',
+                        opacity: 0.5,
+                        lineHeight: 1.4
+                    }}>
+                        <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</Link>
+                        <span>·</span>
+                        <Link href="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</Link>
+                        <span>·</span>
+                        <Link href="/content-policy" style={{ color: 'inherit', textDecoration: 'none' }}>Content Policy</Link>
+                        <span>·</span>
+                        <Link href="/dmca" style={{ color: 'inherit', textDecoration: 'none' }}>DMCA</Link>
+                        <span>·</span>
+                        <Link href="/2257" style={{ color: 'inherit', textDecoration: 'none' }}>2257</Link>
                     </div>
                 )}
             </div>

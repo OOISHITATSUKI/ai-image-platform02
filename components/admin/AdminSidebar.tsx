@@ -80,6 +80,23 @@ export default function AdminSidebar() {
                         alignItems: 'center',
                         padding: '12px 16px',
                         borderRadius: '8px',
+                        color: 'var(--text-secondary)',
+                        textDecoration: 'none',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    🏠 ホームに戻る (Back to Home)
+                </Link>
+
+                <Link
+                    href="/"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '12px 16px',
+                        borderRadius: '8px',
                         color: '#ff4d4f',
                         textDecoration: 'none',
                         fontSize: '0.95rem',
