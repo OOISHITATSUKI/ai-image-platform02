@@ -73,6 +73,20 @@ export async function POST(req: NextRequest) {
                     user.status = value as UserRecord['status'];
                 }
                 break;
+            case 'delete': {
+                const { writeUsers } = await import('@/lib/auth');
+                const allUsers = (await import('@/lib/auth')).readUsers();
+                delete allUsers[userId];
+                writeUsers(allUsers);
+                return NextResponse.json({ success: true, deleted: true });
+            }
+            case 'delete': {
+                const allUsers = readUsers();
+                delete allUsers[userId];
+                const { writeUsers } = await import('@/lib/auth');
+                writeUsers(allUsers);
+                return NextResponse.json({ success: true, deleted: true });
+            }
             default:
                 return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
         }

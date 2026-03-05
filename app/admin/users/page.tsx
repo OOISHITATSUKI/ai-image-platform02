@@ -96,6 +96,7 @@ export default function AdminUsersPage() {
                                                 const c = prompt('新しいクレジット数:', String(u.credits));
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>💰 Credits</button>
+                                            <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>🗑 Delete</button>
                                         </div>
                                     </td>
                                 </tr>
