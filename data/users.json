@@ -174,23 +174,76 @@
     "dateOfBirth": "1987-05-25",
     "country": "IN"
   },
-  "31de3891-8018-4125-9d1d-5a142ab3e905": {
-    "id": "31de3891-8018-4125-9d1d-5a142ab3e905",
+  "bfbc6870-3105-4c47-bea9-fc56deb3762d": {
+    "id": "bfbc6870-3105-4c47-bea9-fc56deb3762d",
     "email": "asobo.link@gmail.com",
+    "passwordHash": "$2b$10$V82cTm8W.Qe7DmDN4U0UDePEeIUJVZvmBHUjpfInAhiKCnrVOAln.",
+    "username": "asobo.link",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 18,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1772722101325,
+    "firstGenerationConfirmed": true,
+    "fingerprintHash": "64953d0de2074cfcaddb37448f75d3ed",
+    "freeCreditsExpireAt": 1773326901325,
+    "createdAt": 1772722101325,
+    "updatedAt": 1772722225925,
+    "termsAgreedAt": 1772722215955,
+    "termsVersion": "1.0",
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1772722215955,
+        "version": "1.0",
+        "ip": "1.75.72.206"
+      },
+      "contentPolicy": {
+        "agreedAt": 1772722215955,
+        "version": "1.0",
+        "ip": "1.75.72.206"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1772722215955,
+        "version": "1.0",
+        "ip": "1.75.72.206"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1772722215955,
+        "version": "1.0",
+        "ip": "1.75.72.206"
+      },
+      "minorContentBan": {
+        "agreedAt": 1772722215955,
+        "version": "1.0",
+        "ip": "1.75.72.206"
+      }
+    }
+  },
+  "828e562a-a4d7-45aa-8e90-260e18834190": {
+    "id": "828e562a-a4d7-45aa-8e90-260e18834190",
+    "email": "zigoku.makai@gmail.com",
     "passwordHash": "",
     "username": "",
-    "status": "pending_password",
-    "emailVerified": true,
+    "status": "pending_otp",
+    "emailVerified": false,
     "plan": "free",
     "credits": 20,
     "locale": "en",
     "theme": "dark",
+    "otpCode": "543377",
+    "otpExpiresAt": 1772751258680,
     "otpAttempts": 0,
-    "otpLastSentAt": 1772709230758,
+    "otpLastSentAt": 1772750658680,
     "firstGenerationConfirmed": false,
-    "fingerprintHash": "fc14b9e49e03a06ebda603a8cfbbe596",
-    "freeCreditsExpireAt": 1773314030758,
-    "createdAt": 1772709230758,
-    "updatedAt": 1772709245036
+    "fingerprintHash": "64953d0de2074cfcaddb37448f75d3ed",
+    "freeCreditsExpireAt": 1773355458680,
+    "createdAt": 1772750658680,
+    "updatedAt": 1772750732638,
+    "passwordResetAttempts": 1,
+    "passwordResetOtp": "307973",
+    "passwordResetExpiresAt": 1772751332638
   }
 }

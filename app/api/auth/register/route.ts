@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
         // Resend OTP for existing pending user
         if (resend && existingUser) {
-            if (existingUser.status !== 'pending_otp') {
+            if (existingUser.status !== 'pending_otp' && existingUser.status !== 'pending_password') {
                 return NextResponse.json({ error: 'This email is already registered' }, { status: 409 });
             }
             if (!canResendOTP(existingUser)) {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if already registered (active account)
-        if (existingUser && existingUser.status !== 'pending_otp') {
+        if (existingUser && existingUser.status !== 'pending_otp' && existingUser.status !== 'pending_password') {
             return NextResponse.json({ error: 'This email is already registered' }, { status: 409 });
         }
 
@@ -116,7 +116,9 @@ export async function POST(req: NextRequest) {
         const now = Date.now();
         const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-        if (existingUser && existingUser.status === 'pending_otp') {
+        if (existingUser && (existingUser.status === 'pending_otp' || existingUser.status === 'pending_password')) {
+            // Reset status to pending_otp for re-registration
+            existingUser.status = 'pending_otp';
             // Update existing pending user
             if (!canResendOTP(existingUser)) {
                 return NextResponse.json({ error: 'Please wait 60 seconds before requesting a new code' }, { status: 429 });
