@@ -356,7 +356,7 @@ export default function RegisterPage() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="At least 8 characters"
+                                placeholder="At least 6 characters"
                                 className="auth-input"
                                 autoFocus
                             />

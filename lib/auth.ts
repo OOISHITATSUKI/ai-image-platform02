@@ -145,9 +145,9 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function validatePasswordStrength(password: string): { valid: boolean; error?: string } {
-    if (password.length < 8) return { valid: false, error: 'Password must be at least 8 characters' };
-    if (!/[a-zA-Z]/.test(password)) return { valid: false, error: 'Password must contain at least one letter' };
-    if (!/[0-9]/.test(password)) return { valid: false, error: 'Password must contain at least one number' };
+    if (password.length < 6) return { valid: false, error: 'Password must be at least 6 characters' };
+    // Removed: letter requirement
+    // Removed: number requirement
     return { valid: true };
 }
 

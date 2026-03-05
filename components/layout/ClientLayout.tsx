@@ -47,11 +47,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
         restoreSession();
 
-        if (window.innerWidth <= 768) {
-            // Force sidebar and settings collapsed on mobile mount
-            useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });
-        }
     }, []);
+
+    // Handle mobile initial state (only if no persisted value exists)
+    useEffect(() => {
+        if (!mounted) return;
+        if (window.innerWidth <= 768) {
+            const stored = localStorage.getItem('videogen-storage-v3');
+            if (!stored) {
+                useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });
+            }
+        }
+    }, [mounted]);
 
     // Apply theme to document
     useEffect(() => {
