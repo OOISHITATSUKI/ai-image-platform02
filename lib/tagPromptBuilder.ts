@@ -1,9 +1,10 @@
 import type { TagSettings } from './types';
 
 const AGE_MAP: Record<string, string> = {
-    '10s': '(18 year old girl:1.3), youthful face, young',
-    '20s': '(25 year old woman:1.3), young adult',
-    '30s': '(35 year old woman:1.3), mature beauty',
+    '20s_early': '(20 year old woman:1.3), youthful, fresh face, young adult',
+    '20s_late': '(27 year old woman:1.3), young adult, mature beauty',
+    '30s': '(35 year old woman:1.3), mature beauty, elegant',
+    '40s': '(42 year old woman:1.3), mature, sophisticated, graceful',
 };
 
 const ETHNICITY_MAP: Record<string, { prompt: string; negative?: string }> = {
@@ -26,6 +27,58 @@ const ETHNICITY_MAP: Record<string, { prompt: string; negative?: string }> = {
     african: {
         prompt: '(african woman:1.4), (dark skin:1.2)',
     },
+};
+
+
+const STYLE_MAP: Record<string, { prompt: string; negative?: string }> = {
+    film: {
+        prompt: '(film grain:1.3), (Kodak Portra 400:1.2), (natural lighting:1.2), (retro color grading:1.2), warm tones, cinematic, 35mm photograph, analog, golden hour light, soft shadows',
+        negative: '(digital:1.2), (sharp:1.1), (clean:1.1), oversaturated',
+    },
+    dreamy: {
+        prompt: '(soft focus:1.3), (ethereal:1.3), (bokeh:1.4), (lens flare:1.2), (dreamy atmosphere:1.3), pastel tones, glowing light, magical, hazy, soft diffusion, backlit',
+        negative: '(harsh lighting:1.2), (sharp:1.2), (high contrast:1.2)',
+    },
+    natural: {
+        prompt: '(natural lighting:1.4), (morning light:1.3), (transparent skin:1.2), (dewy skin:1.2), fresh, clean, minimal makeup, soft window light, airy, bright',
+        negative: '(artificial lighting:1.2), (studio:1.1), (dramatic:1.1), heavy makeup',
+    },
+    glamour: {
+        prompt: '(glamour photography:1.3), (vivid colors:1.2), (golden hour:1.3), (sun-kissed:1.2), vibrant, beach, outdoor, bright, saturated, fashion photography, editorial',
+        negative: '(dull:1.2), (dark:1.2), (indoor:1.1), (gloomy:1.2)',
+    },
+    night: {
+        prompt: '(night scene:1.3), (neon lights:1.2), (moody:1.3), (cinematic lighting:1.3), dark atmosphere, city lights, dramatic shadows, blue hour, ambient glow',
+        negative: '(daylight:1.3), (bright:1.2), (natural light:1.2), (sunny:1.3)',
+    },
+    raw: {
+        prompt: '(RAW photo:1.4), (DSLR:1.3), (unedited:1.2), Canon EOS R5, 85mm f/1.4, shallow depth of field, documentary style, no filter, natural colors, authentic',
+        negative: '(filtered:1.2), (edited:1.2), (retouched:1.2), (artistic:1.1)',
+    },
+    anime: {
+        prompt: '(anime style:1.4), (illustration:1.3), (cel shading:1.2), vibrant colors, clean lines, detailed eyes, anime girl, manga style',
+        negative: '(photorealistic:1.4), (RAW photo:1.3), (realistic:1.3), (photograph:1.3), (skin pores:1.3)',
+    },
+};
+
+const HAIR_COLOR_MAP: Record<string, string> = {
+    black_hair: '(black hair:1.3), dark hair',
+    brown_hair: '(brown hair:1.3), chestnut hair',
+    blonde_hair: '(blonde hair:1.3), golden hair',
+    red_hair: '(red hair:1.3), ginger hair',
+    pink_hair: '(pink hair:1.3), pastel pink hair',
+    silver_hair: '(silver hair:1.3), platinum hair, white hair',
+    blue_hair: '(blue hair:1.3), vivid blue hair',
+};
+
+const HAIR_STYLE_MAP: Record<string, string> = {
+    long_straight: '(long straight hair:1.3), sleek hair, flowing hair',
+    long_wavy: '(long wavy hair:1.3), flowing curls, soft waves',
+    short_bob: '(short bob:1.3), bob cut, chin-length hair',
+    ponytail: '(ponytail:1.3), hair tied up, high ponytail',
+    twin_tails: '(twin tails:1.3), pigtails, two ponytails',
+    messy_bun: '(messy bun:1.3), hair bun, casual updo',
+    pixie_cut: '(pixie cut:1.3), short hair, cropped hair',
 };
 
 const BREAST_SIZE_MAP: Record<string, string> = {
@@ -85,8 +138,25 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
         parts.push('(1girl:1.2), solo');
     }
 
+    // Style Preset (highest priority — affects overall look)
+    if (tags.stylePreset && STYLE_MAP[tags.stylePreset]) {
+        const style = STYLE_MAP[tags.stylePreset];
+        parts.unshift(style.prompt);
+        if (style.negative) negativeParts.push(style.negative);
+    }
+
     // Age
     if (tags.age && AGE_MAP[tags.age]) parts.push(AGE_MAP[tags.age]);
+
+    // Hair Color
+    if (tags.hairColor && HAIR_COLOR_MAP[tags.hairColor]) {
+        parts.push(HAIR_COLOR_MAP[tags.hairColor]);
+    }
+
+    // Hair Style
+    if (tags.hairStyle && HAIR_STYLE_MAP[tags.hairStyle]) {
+        parts.push(HAIR_STYLE_MAP[tags.hairStyle]);
+    }
 
     // Ethnicity (high priority — includes skin tone)
     if (tags.ethnicity && ETHNICITY_MAP[tags.ethnicity]) {

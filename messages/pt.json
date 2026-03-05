@@ -42,7 +42,9 @@
         "fromLibrary": "Da biblioteca",
         "upload": "Enviar",
         "imgNotice": "Imagens geradas por IA. Os resultados podem variar.",
-        "vidNotice": "Geração de vídeo está em beta."
+        "vidNotice": "Geração de vídeo está em beta.",
+        "resolutionLocked": "Resoluções maiores disponíveis com plano pago.",
+        "resolutionFreeHint": "🔒 Plano grátis: apenas 512. Upgrade para HD+"
     },
     "chat": {
         "newChat": "Novo chat",
@@ -85,7 +87,10 @@
         "promptRequired": "⚠️ Por favor, insira um prompt.",
         "faceSwapLimitFree": "Grátis: 1 por dia",
         "faceSwapLimitReached": "Você usou seu Face Swap gratuito de hoje. Atualize para acesso ilimitado.",
-        "creditCostHint": "⚡ {cost} Créditos"
+        "creditCostHint": "⚡ {cost} Créditos",
+        "repose": "Repose",
+        "reposeNoImage": "Envie uma imagem para usar Repose.",
+        "nudeModeBtn": "Modo Nude"
     },
     "actions": {
         "generateVideo": "Gerar vídeo",
@@ -240,7 +245,34 @@
         "fetStanding": "Em pé",
         "fetHandjob": "Manual",
         "fetPaizuri": "Paizuri",
-        "ethAsian": "Asiático/a"
+        "ethAsian": "Asiático/a",
+        "styleTitle": "Estilo",
+        "styleFilm": "Filme",
+        "styleDreamy": "Sonhador",
+        "styleNatural": "Natural",
+        "styleGlamour": "Glamour",
+        "styleNight": "Noite",
+        "styleRaw": "Raw",
+        "styleAnime": "Anime",
+        "hairColor": "Cor do cabelo",
+        "hairBlack": "Preto",
+        "hairBrown": "Castanho",
+        "hairBlonde": "Loiro",
+        "hairRed": "Ruivo",
+        "hairPink": "Rosa",
+        "hairSilver": "Prata",
+        "hairBlue": "Azul",
+        "hairStyle": "Penteado",
+        "hairLongStraight": "Longo liso",
+        "hairLongWavy": "Longo ondulado",
+        "hairShortBob": "Bob curto",
+        "hairPonytail": "Rabo de cavalo",
+        "hairTwinTails": "Maria chiquinha",
+        "hairMessyBun": "Coque bagunçado",
+        "hairPixieCut": "Corte pixie",
+        "age20sEarly": "Início dos 20",
+        "age20sLate": "Final dos 20",
+        "age40s": "40s"
     },
     "img2imgConsent": {
         "title": "⚠️ Acordo Obrigatório de Upload de Imagens",

@@ -46,6 +46,8 @@ export default function ChatArea() {
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [showRegisterToast, setShowRegisterToast] = useState(false);
     const [inpaintMode, setInpaintMode] = useState(false);
+    const [reposeMode, setReposeMode] = useState(false);
+    const [poseType, setPoseType] = useState<string>('standing');
     const [showInpaintModal, setShowInpaintModal] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -330,13 +332,44 @@ export default function ChatArea() {
             }
         }
     }, [user]);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsChecks, setTermsChecks] = useState({ terms: false, content: false, age: false });
+
+    const handleAgreeTerms = async () => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        try {
+            const res = await fetch('/api/auth/agree-terms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            });
+            const data = await res.json();
+            if (res.ok && user) {
+                useAppStore.getState().setUser({ ...user, termsAgreedAt: data.termsAgreedAt });
+                setShowTermsModal(false);
+            }
+        } catch (err) {
+            console.error('Failed to agree terms:', err);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isGenerating) return;
+        // Check if user has agreed to terms
+        if (user && !user.termsAgreedAt) {
+            setShowTermsModal(true);
+            return;
+        }
 
         // ★ 追加: モード別バリデーション（UIをバイパスされた場合の防御）
         if (settings.generationType === 'img2img') {
-            if (faceSwapMode) {
+            if (reposeMode) {
+                if (uploads.length === 0) {
+                    setGenerationError(t('chat.reposeNoImage'));
+                    return;
+                }
+            } else if (faceSwapMode) {
                 if (uploads.length < 2) {
                     setGenerationError(t('chat.faceSwapNoImage'));
                     return;
@@ -463,8 +496,10 @@ export default function ChatArea() {
                         additionalImages,
                         faceSwapMode,
                         inpaintMode,
+                        reposeMode,
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                         nudeMode: settings.nudeMode ?? true,
+                        tagSettings,
                     }),
                 });
 
@@ -476,6 +511,7 @@ export default function ChatArea() {
 
                 setInpaintMode(false);
                 setFaceSwapMode(false);
+                setReposeMode(false);
 
                 // Add AI response for each generated image
                 const images = data.images || [];
@@ -710,6 +746,8 @@ export default function ChatArea() {
 
     return (
         <section className="chat-area">
+            {/* Terms Agreement Modal */}
+            {showTermsModal && (<div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}><div style={{background:'#1a1a2e',borderRadius:12,padding:32,maxWidth:480,width:'100%',border:'1px solid #2a2a3e'}}><h2 style={{fontSize:'1.2rem',fontWeight:700,marginBottom:8,color:'#e0e0e8'}}>Before You Start Generating</h2><p style={{fontSize:'0.85rem',color:'#8b8ba7',marginBottom:20}}>Please review and agree to continue.</p><div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:24}}><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.terms} onChange={(e)=>setTermsChecks(p=>({...p,terms:e.target.checked}))} style={{marginTop:3}}/><span>I agree to the <a href="/terms" target="_blank" style={{color:'#7c5cfc'}}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{color:'#7c5cfc'}}>Privacy Policy</a></span></label><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.content} onChange={(e)=>setTermsChecks(p=>({...p,content:e.target.checked}))} style={{marginTop:3}}/><span>I agree to the <a href="/content-policy" target="_blank" style={{color:'#7c5cfc'}}>Content Policy</a></span></label><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.age} onChange={(e)=>setTermsChecks(p=>({...p,age:e.target.checked}))} style={{marginTop:3}}/><span>I confirm I am 18+ and will not generate prohibited content (minors, real persons)</span></label></div><div style={{display:'flex',gap:10}}><button onClick={()=>setShowTermsModal(false)} style={{flex:1,padding:'10px 16px',borderRadius:8,border:'1px solid #2a2a3e',background:'transparent',color:'#8b8ba7',cursor:'pointer',fontSize:'0.9rem'}}>Cancel</button><button onClick={handleAgreeTerms} disabled={!termsChecks.terms||!termsChecks.content||!termsChecks.age} style={{flex:1,padding:'10px 16px',borderRadius:8,border:'none',background:termsChecks.terms&&termsChecks.content&&termsChecks.age?'linear-gradient(135deg,#7c5cfc,#6a4ff0)':'#333',color:'#fff',cursor:termsChecks.terms&&termsChecks.content&&termsChecks.age?'pointer':'not-allowed',fontSize:'0.9rem',fontWeight:600}}>Agree & Continue</button></div></div></div>)}
             {/* Filter Tabs + Settings Toggle */}
             <div className="chat-filter-tabs">
                 {filters.map((f) => (
@@ -1008,45 +1046,53 @@ export default function ChatArea() {
                             >
                                 📎 {t('chat.attachFile')} ({uploads.length}/{MAX_UPLOADS})
                             </button>
-                            <button
-                                className={`input-tool-btn face-swap-btn ${faceSwapMode ? 'active' : ''}`}
-                                onClick={() => {
-                                    setFaceSwapMode((v) => !v);
-                                    if (!faceSwapMode) setInpaintMode(false);
-                                }}
-                                disabled={uploads.length === 0}
-                                title={t('chat.faceSwap')}
-                            >
-                                🔄 {t('chat.faceSwap')}
-                                {user?.plan === 'free' && (user.credits <= 20) && (
-                                    <span style={{
-                                        fontSize: '0.6rem',
-                                        background: 'rgba(255,170,0,0.2)',
-                                        color: '#fbbf24',
-                                        padding: '1px 4px',
-                                        borderRadius: '4px',
-                                        marginLeft: '4px',
-                                        border: '1px solid rgba(255,170,0,0.3)'
-                                    }}>
-                                        {t('chat.faceSwapLimitFree')}
-                                    </span>
-                                )}
-                            </button>
-                            <button
-                                className={`input-tool-btn inpaint-btn ${inpaintMode ? 'active' : ''}`}
-                                onClick={() => {
-                                    if (uploads.length === 0) {
-                                        setGenerationError(t('chat.uploadRequiredForInpaint') || 'Please upload or drag & drop an image first to use Inpaint.');
-                                        return;
-                                    }
-                                    setInpaintMode(true);
-                                    setFaceSwapMode(false);
-                                    setShowInpaintModal(true);
-                                }}
-                                title={t('chat.inpaint')}
-                            >
-                                🖌 {t('chat.inpaint')}
-                            </button>
+
+                            {/* Mode Selection — exclusive toggle */}
+                            <div className="img2img-mode-selector">
+                                <button
+                                    className={`mode-btn ${reposeMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setReposeMode((v) => !v);
+                                        setFaceSwapMode(false);
+                                        setInpaintMode(false);
+                                    }}
+                                    disabled={uploads.length === 0}
+                                    title={t('chat.repose')}
+                                >
+                                    🔄 {t('chat.repose')}
+                                </button>
+                                <button
+                                    className={`mode-btn ${faceSwapMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setFaceSwapMode((v) => !v);
+                                        setReposeMode(false);
+                                        setInpaintMode(false);
+                                    }}
+                                    disabled={uploads.length === 0}
+                                    title={t('chat.faceSwap')}
+                                >
+                                    👤 {t('chat.faceSwap')}
+                                </button>
+                                <button
+                                    className={`mode-btn ${inpaintMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        if (uploads.length === 0) {
+                                            setGenerationError(t('chat.uploadRequiredForInpaint') || 'Please upload an image first.');
+                                            return;
+                                        }
+                                        setInpaintMode(true);
+                                        setReposeMode(false);
+                                        setFaceSwapMode(false);
+                                        setShowInpaintModal(true);
+                                    }}
+                                    title={t('chat.inpaint')}
+                                >
+                                    ✏️ {t('chat.nudeModeBtn')}
+                                </button>
+                            </div>
+
+
+                            
                             {faceSwapMode && uploads.length >= 2 && (
                                 <button
                                     className="input-tool-btn"

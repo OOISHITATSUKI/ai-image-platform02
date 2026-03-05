@@ -303,5 +303,122 @@
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
     "id": "0ff0b998-ed87-4600-b3ad-019033136dc6",
     "createdAt": 1771827652167
+  },
+  "5be45f6b-ef01-46e8-b914-0bb7d0745360": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.76.191",
+    "id": "5be45f6b-ef01-46e8-b914-0bb7d0745360",
+    "createdAt": 1772603110704
+  },
+  "2f9719fb-0cfb-4a16-af2e-96d0e18814e5": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.76.191",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "id": "2f9719fb-0cfb-4a16-af2e-96d0e18814e5",
+    "createdAt": 1772603124961
+  },
+  "db36f890-8efb-43d4-a228-d2edc9296a54": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.89.134",
+    "id": "db36f890-8efb-43d4-a228-d2edc9296a54",
+    "createdAt": 1772632913497
+  },
+  "5ebb5fa6-412a-470f-bf9a-26c33346487f": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.89.134",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "id": "5ebb5fa6-412a-470f-bf9a-26c33346487f",
+    "createdAt": 1772632925478
+  },
+  "43f70bc6-e5ed-4984-b4cb-23e4eed0eda6": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.89.134",
+    "id": "43f70bc6-e5ed-4984-b4cb-23e4eed0eda6",
+    "createdAt": 1772636803123
+  },
+  "1f4354b4-f181-4c5a-b01f-ba61501b0ca1": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.89.134",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
+    "id": "1f4354b4-f181-4c5a-b01f-ba61501b0ca1",
+    "createdAt": 1772636816423
+  },
+  "62935e6b-b917-4654-9f4e-a696edfd02e4": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.66.96",
+    "id": "62935e6b-b917-4654-9f4e-a696edfd02e4",
+    "createdAt": 1772639587471
+  },
+  "3a4555c2-8926-4c3a-b390-b29a7d0be4a7": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.66.96",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Mobile/15E148 Safari/604.1",
+    "id": "3a4555c2-8926-4c3a-b390-b29a7d0be4a7",
+    "createdAt": 1772639605413
+  },
+  "ab835483-af7b-40b3-bf10-e81f51f257e5": {
+    "email": "asobo.link@gmail.com",
+    "success": false,
+    "failReason": "user_not_found",
+    "ipAddress": "1.75.89.134",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
+    "id": "ab835483-af7b-40b3-bf10-e81f51f257e5",
+    "createdAt": 1772641179079
+  },
+  "453b00b9-5d13-47c2-a561-321f42a02c40": {
+    "userId": "10e9b37f-756d-421d-9a6f-b7148f5003b9",
+    "email": "asobo.link@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "49.109.105.193",
+    "id": "453b00b9-5d13-47c2-a561-321f42a02c40",
+    "createdAt": 1772664992756
+  },
+  "1e058ff2-6620-4c7d-b0cc-f65f6c8225f5": {
+    "userId": "10e9b37f-756d-421d-9a6f-b7148f5003b9",
+    "email": "asobo.link@gmail.com",
+    "success": true,
+    "ipAddress": "49.109.105.193",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Mobile/15E148 Safari/604.1",
+    "id": "1e058ff2-6620-4c7d-b0cc-f65f6c8225f5",
+    "createdAt": 1772665007918
+  },
+  "c5610efb-521e-409a-9858-82dbc82a8523": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.76.191",
+    "id": "c5610efb-521e-409a-9858-82dbc82a8523",
+    "createdAt": 1772711172776
+  },
+  "216e94c3-3a77-4a43-95e5-8304d4e66def": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.76.191",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
+    "id": "216e94c3-3a77-4a43-95e5-8304d4e66def",
+    "createdAt": 1772711183641
   }
 }

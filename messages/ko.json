@@ -49,7 +49,9 @@
         "img2imgStrength": "변경 강도 / Modification Strength",
         "img2imgStrengthLow": "원본 유지",
         "img2imgStrengthHigh": "크게 변경",
-        "autoDeleteWarning": "⚠️ 생성된 이미지는 1시간 후에 자동 삭제됩니다. 저장하려면 다운로드하세요."
+        "autoDeleteWarning": "⚠️ 생성된 이미지는 1시간 후에 자동 삭제됩니다. 저장하려면 다운로드하세요.",
+        "resolutionLocked": "고해상도는 유료 플랜에서 사용 가능합니다.",
+        "resolutionFreeHint": "🔒 무료 플랜: 512만 가능. HD+는 업그레이드"
     },
     "chat": {
         "newChat": "새 채팅",
@@ -94,7 +96,10 @@
         "promptRequired": "⚠️ 프롬프트를 입력해 주세요.",
         "faceSwapLimitFree": "무료: 하루 1회",
         "faceSwapLimitReached": "오늘의 무료 페이스 스왑을 모두 사용했습니다. 무제한 이용을 위해 크레딧을 구매하세요.",
-        "creditCostHint": "⚡ {cost} 크레딧"
+        "creditCostHint": "⚡ {cost} 크레딧",
+        "repose": "리포즈",
+        "reposeNoImage": "리포즈를 사용하려면 이미지를 업로드하세요.",
+        "nudeModeBtn": "누드 모드"
     },
     "actions": {
         "generateVideo": "동영상 생성",
@@ -243,7 +248,34 @@
         "fetStanding": "입위",
         "fetHandjob": "핸드잡",
         "fetPaizuri": "파이즈리",
-        "ethAsian": "아시아인"
+        "ethAsian": "아시아인",
+        "styleTitle": "스타일",
+        "styleFilm": "필름",
+        "styleDreamy": "드리미",
+        "styleNatural": "내추럴",
+        "styleGlamour": "글래머",
+        "styleNight": "나이트",
+        "styleRaw": "Raw",
+        "styleAnime": "애니메",
+        "hairColor": "머리색",
+        "hairBlack": "블랙",
+        "hairBrown": "브라운",
+        "hairBlonde": "블론드",
+        "hairRed": "레드",
+        "hairPink": "핑크",
+        "hairSilver": "실버",
+        "hairBlue": "블루",
+        "hairStyle": "헤어스타일",
+        "hairLongStraight": "롱 스트레이트",
+        "hairLongWavy": "롱 웨이브",
+        "hairShortBob": "숏 보브",
+        "hairPonytail": "포니테일",
+        "hairTwinTails": "트윈테일",
+        "hairMessyBun": "메시번",
+        "hairPixieCut": "픽시컷",
+        "age20sEarly": "20대 초반",
+        "age20sLate": "20대 후반",
+        "age40s": "40대"
     },
     "img2imgConsent": {
         "title": "⚠️ 이미지 업로드 시 필수 동의 사항",

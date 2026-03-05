@@ -87,7 +87,7 @@ export default function RegisterPage() {
     const getPasswordStrength = () => {
         if (!password) return { level: 0, label: '', color: '' };
         let score = 0;
-        if (password.length >= 8) score++;
+        if (password.length >= 6) score++;
         if (password.length >= 12) score++;
         if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
         if (/[0-9]/.test(password)) score++;
@@ -160,7 +160,12 @@ export default function RegisterPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            setStep('agreements');
+            // Save token and go straight to editor
+            localStorage.setItem('auth_token', data.token);
+            setUser(data.user);
+            useAppStore.setState({ isAuthenticated: true, ageVerified: true });
+            setTimeout(() => router.push('/editor'), 100);
+            return;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
@@ -228,7 +233,7 @@ export default function RegisterPage() {
         }
     };
 
-    const stepIndex = ['email', 'otp', 'password', 'agreements', 'profile'].indexOf(step);
+    const stepIndex = ['email', 'otp', 'password'].indexOf(step);
     const strength = getPasswordStrength();
 
     // Generate year options
@@ -246,7 +251,7 @@ export default function RegisterPage() {
 
                 {/* Step indicator */}
                 <div className="auth-steps">
-                    {['Email', 'Verify', 'Password', 'Terms', 'Profile'].map((label, i) => (
+                    {['Email', 'Verify', 'Password'].map((label, i) => (
                         <div key={i} className={`auth-step ${i <= stepIndex ? 'active' : ''} ${i < stepIndex ? 'completed' : ''}`}>
                             <div className="auth-step-circle">
                                 {i < stepIndex ? '✓' : i + 1}

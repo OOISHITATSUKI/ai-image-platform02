@@ -42,7 +42,9 @@
         "fromLibrary": "De la biblioteca",
         "upload": "Subir",
         "imgNotice": "Las imágenes son generadas por IA. Los resultados pueden variar.",
-        "vidNotice": "La generación de video está en beta."
+        "vidNotice": "La generación de video está en beta.",
+        "resolutionLocked": "Resoluciones más altas disponibles con plan de pago.",
+        "resolutionFreeHint": "🔒 Plan gratis: solo 512. Mejora para HD+"
     },
     "chat": {
         "newChat": "Nuevo chat",
@@ -85,7 +87,10 @@
         "promptRequired": "⚠️ Por favor, introduce un prompt.",
         "faceSwapLimitFree": "Gratis: 1 al día",
         "faceSwapLimitReached": "Has agotado tu Face Swap gratuito de hoy. Actualiza para acceso ilimitado.",
-        "creditCostHint": "⚡ {cost} Créditos"
+        "creditCostHint": "⚡ {cost} Créditos",
+        "repose": "Repose",
+        "reposeNoImage": "Sube una imagen para usar Repose.",
+        "nudeModeBtn": "Modo Desnudo"
     },
     "actions": {
         "generateVideo": "Generar video",
@@ -240,7 +245,34 @@
         "fetStanding": "De pie",
         "fetHandjob": "Manual",
         "fetPaizuri": "Paizuri",
-        "ethAsian": "Asiático/a"
+        "ethAsian": "Asiático/a",
+        "styleTitle": "Estilo",
+        "styleFilm": "Film",
+        "styleDreamy": "Soñador",
+        "styleNatural": "Natural",
+        "styleGlamour": "Glamour",
+        "styleNight": "Noche",
+        "styleRaw": "Raw",
+        "styleAnime": "Anime",
+        "hairColor": "Color de cabello",
+        "hairBlack": "Negro",
+        "hairBrown": "Castaño",
+        "hairBlonde": "Rubio",
+        "hairRed": "Rojo",
+        "hairPink": "Rosa",
+        "hairSilver": "Plata",
+        "hairBlue": "Azul",
+        "hairStyle": "Peinado",
+        "hairLongStraight": "Largo liso",
+        "hairLongWavy": "Largo ondulado",
+        "hairShortBob": "Bob corto",
+        "hairPonytail": "Cola de caballo",
+        "hairTwinTails": "Coletas",
+        "hairMessyBun": "Moño despeinado",
+        "hairPixieCut": "Corte pixie",
+        "age20sEarly": "20s temprano",
+        "age20sLate": "20s tardío",
+        "age40s": "40s"
     },
     "img2imgConsent": {
         "title": "⚠️ Acuerdo Obligatorio de Subida de Imágenes",

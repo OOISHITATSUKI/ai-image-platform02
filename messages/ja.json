@@ -56,7 +56,9 @@
         "img2imgStrength": "変更の強さ / Modification Strength",
         "img2imgStrengthLow": "元画像を保持",
         "img2imgStrengthHigh": "大きく変更",
-        "autoDeleteWarning": "⚠️ 生成画像は1時間後に自動削除されます。保存したい場合はダウンロードしてください。"
+        "autoDeleteWarning": "⚠️ 生成画像は1時間後に自動削除されます。保存したい場合はダウンロードしてください。",
+        "resolutionLocked": "高解像度は有料プランで利用できます。アップグレードして1024、2K、4Kを解除しましょう！",
+        "resolutionFreeHint": "🔒 無料プラン: 512のみ。HDはアップグレード"
     },
     "chat": {
         "newChat": "新しいチャット",
@@ -102,7 +104,10 @@
         "promptRequired": "⚠️ プロンプトを入力してください。",
         "faceSwapLimitFree": "無料: 1日1回まで",
         "faceSwapLimitReached": "本日の無料Face Swapは使用済みです。クレジットを購入すると無制限に使えます。",
-        "creditCostHint": "⚡ {cost} クレジット"
+        "creditCostHint": "⚡ {cost} クレジット",
+        "repose": "リポーズ",
+        "reposeNoImage": "リポーズを使用するには画像をアップロードしてください。",
+        "nudeModeBtn": "ヌードモード"
     },
     "actions": {
         "generateVideo": "動画生成",
@@ -267,7 +272,34 @@
         "fetStanding": "立位",
         "fetHandjob": "手コキ",
         "fetPaizuri": "パイズリ",
-        "ethAsian": "アジア人"
+        "ethAsian": "アジア人",
+        "styleTitle": "スタイル",
+        "styleFilm": "フィルム",
+        "styleDreamy": "ドリーミー",
+        "styleNatural": "ナチュラル",
+        "styleGlamour": "グラマー",
+        "styleNight": "ナイト",
+        "styleRaw": "RAW",
+        "styleAnime": "アニメ",
+        "hairColor": "髪色",
+        "hairBlack": "ブラック",
+        "hairBrown": "ブラウン",
+        "hairBlonde": "ブロンド",
+        "hairRed": "レッド",
+        "hairPink": "ピンク",
+        "hairSilver": "シルバー",
+        "hairBlue": "ブルー",
+        "hairStyle": "髪型",
+        "hairLongStraight": "ロングストレート",
+        "hairLongWavy": "ロングウェーブ",
+        "hairShortBob": "ショートボブ",
+        "hairPonytail": "ポニーテール",
+        "hairTwinTails": "ツインテール",
+        "hairMessyBun": "おだんご",
+        "hairPixieCut": "ピクシーカット",
+        "age20sEarly": "20代前半",
+        "age20sLate": "20代後半",
+        "age40s": "40代"
     },
     "img2imgConsent": {
         "title": "⚠️ 画像アップロード時の同意事項（必須）",

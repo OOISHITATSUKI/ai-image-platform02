@@ -359,6 +359,12 @@ export default function Sidebar() {
                     </div>
                 )}
 
+                {/* Terms Warning */}
+                {!sidebarCollapsed && user && !user.termsAgreedAt && (
+                    <div style={{margin:'0 12px 8px',padding:'8px 12px',background:'#3a2a1a',border:'1px solid #f59e0b44',borderRadius:8,fontSize:'0.75rem',color:'#fbbf24',display:'flex',alignItems:'center',gap:6}}>
+                        <span>⚠</span><span>Terms not yet accepted</span>
+                    </div>
+                )}
                 {/* Credits - Hidden when collapsed */}
                 {!sidebarCollapsed && (
                     <div className="credits-panel" style={{ marginBottom: 12 }}>

@@ -7,3 +7,4 @@
 {"timestamp":"2026-02-21T22:57:34.334Z","user_id":"guest","ip_address":"::1","blocked_prompt":"幼い娘の裸","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
 {"timestamp":"2026-02-22T13:11:34.547Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}
 {"timestamp":"2026-02-22T13:19:47.434Z","user_id":"guest","ip_address":"::1","blocked_prompt":"子供","matched_rule":"Category 1: Direct Minor Expression","action_taken":"temp_ban"}
+{"timestamp":"2026-03-05T06:42:16.106Z","user_id":"d7d3fd6b-14e4-40ee-a42d-f462f052c053","ip_address":"1.75.72.206","blocked_prompt":"日本人女性。可愛い顔。幼い","matched_rule":"Category 1: Direct Minor Expression","action_taken":"warning"}

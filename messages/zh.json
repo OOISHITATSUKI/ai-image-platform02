@@ -41,7 +41,9 @@
         "optimize": "优化",
         "fromLibrary": "从素材库选择",
         "upload": "上传",
-        "vidNotice": "视频生成为测试版。"
+        "vidNotice": "视频生成为测试版。",
+        "resolutionLocked": "更高分辨率需要付费计划。升级解锁1024、2K、4K！",
+        "resolutionFreeHint": "🔒 免费版: 仅512。升级获取高清"
     },
     "chat": {
         "newChat": "新对话",
@@ -84,7 +86,10 @@
         "promptRequired": "⚠️ 请输入提示词。",
         "faceSwapLimitFree": "免费：每天1次",
         "faceSwapLimitReached": "您今天免费的换脸次数已用完。请购买点数以获得无限访问权限。",
-        "creditCostHint": "⚡ {cost} 点数"
+        "creditCostHint": "⚡ {cost} 点数",
+        "repose": "重新姿势",
+        "reposeNoImage": "请上传图片以使用重新姿势功能。",
+        "nudeModeBtn": "裸体模式"
     },
     "actions": {
         "generateVideo": "生成视频",
@@ -233,7 +238,34 @@
         "fetStanding": "站立",
         "fetHandjob": "手交",
         "fetPaizuri": "乳交",
-        "ethAsian": "亚裔"
+        "ethAsian": "亚裔",
+        "styleTitle": "风格",
+        "styleFilm": "胶片",
+        "styleDreamy": "梦幻",
+        "styleNatural": "自然",
+        "styleGlamour": "魅力",
+        "styleNight": "夜景",
+        "styleRaw": "原片",
+        "styleAnime": "动漫",
+        "hairColor": "发色",
+        "hairBlack": "黑色",
+        "hairBrown": "棕色",
+        "hairBlonde": "金色",
+        "hairRed": "红色",
+        "hairPink": "粉色",
+        "hairSilver": "银色",
+        "hairBlue": "蓝色",
+        "hairStyle": "发型",
+        "hairLongStraight": "长直发",
+        "hairLongWavy": "长卷发",
+        "hairShortBob": "短发",
+        "hairPonytail": "马尾",
+        "hairTwinTails": "双马尾",
+        "hairMessyBun": "丸子头",
+        "hairPixieCut": "精灵短发",
+        "age20sEarly": "20岁出头",
+        "age20sLate": "20岁末",
+        "age40s": "40多岁"
     },
     "img2imgConsent": {
         "title": "⚠️ 图片上传必读同意事项",

@@ -65,7 +65,10 @@ export interface GenerationSettings {
 
 // ----- Tag-based Parameter Types -----
 
-export type AgeTag = '20s' | '30s';
+export type AgeTag = '20s_early' | '20s_late' | '30s' | '40s';
+export type StylePresetTag = 'film' | 'dreamy' | 'natural' | 'glamour' | 'night' | 'raw' | 'anime';
+export type HairColorTag = 'black_hair' | 'brown_hair' | 'blonde_hair' | 'red_hair' | 'pink_hair' | 'silver_hair' | 'blue_hair';
+export type HairStyleTag = 'long_straight' | 'long_wavy' | 'short_bob' | 'ponytail' | 'twin_tails' | 'messy_bun' | 'pixie_cut';
 export type PeopleCountTag = '1' | '2' | 'multiple';
 export type EthnicityTag = 'asian' | 'european' | 'american' | 'southeast_asian' | 'latina' | 'african';
 export type PhotorealismTag = 'photorealistic' | 'realistic';
@@ -74,6 +77,9 @@ export type BreastPositionTag = 'cleavage' | 'asymmetric' | 'natural' | 'pushed_
 export type FetishTag = 'fellatio' | 'cowgirl' | 'insertion' | 'kiss' | 'missionary' | 'doggy' | 'standing' | 'handjob' | 'paizuri';
 
 export interface TagSettings {
+  stylePreset?: StylePresetTag;
+  hairColor?: HairColorTag;
+  hairStyle?: HairStyleTag;
   age?: AgeTag;
   peopleCount?: PeopleCountTag;
   ethnicity?: EthnicityTag;
@@ -101,6 +107,7 @@ export interface User {
   dateOfBirth?: string;
   country?: string;
   firstGenerationConfirmed?: boolean;
+  termsAgreedAt?: number;
 }
 
 // ----- Plan Limits -----

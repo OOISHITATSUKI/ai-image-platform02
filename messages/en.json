@@ -56,7 +56,9 @@
         "img2imgStrength": "Modification Strength",
         "img2imgStrengthLow": "Keep Original",
         "img2imgStrengthHigh": "Strong Change",
-        "autoDeleteWarning": "⚠️ Generated images are automatically deleted after 1 hour. Please download them if you wish to save them."
+        "autoDeleteWarning": "⚠️ Generated images are automatically deleted after 1 hour. Please download them if you wish to save them.",
+        "resolutionLocked": "Higher resolutions are available with a paid plan. Upgrade to unlock 1024, 2K, and 4K!",
+        "resolutionFreeHint": "🔒 Free plan: 512 only. Upgrade for HD+"
     },
     "chat": {
         "newChat": "New Chat",
@@ -102,7 +104,10 @@
         "promptRequired": "⚠️ Please enter a prompt.",
         "faceSwapLimitFree": "Free: 1/day",
         "faceSwapLimitReached": "You have used your free Face Swap for today. Upgrade for unlimited access.",
-        "creditCostHint": "⚡ {cost} Credits"
+        "creditCostHint": "⚡ {cost} Credits",
+        "repose": "Repose",
+        "reposeNoImage": "Please upload an image to use Repose.",
+        "nudeModeBtn": "Nude Mode"
     },
     "actions": {
         "generateVideo": "Generate Video",
@@ -272,7 +277,34 @@
         "fetStanding": "Standing",
         "fetHandjob": "Handjob",
         "fetPaizuri": "Paizuri",
-        "ethAsian": "Asian"
+        "ethAsian": "Asian",
+        "styleTitle": "Style",
+        "styleFilm": "Film",
+        "styleDreamy": "Dreamy",
+        "styleNatural": "Natural",
+        "styleGlamour": "Glamour",
+        "styleNight": "Night",
+        "styleRaw": "Raw",
+        "styleAnime": "Anime",
+        "hairColor": "Hair Color",
+        "hairBlack": "Black",
+        "hairBrown": "Brown",
+        "hairBlonde": "Blonde",
+        "hairRed": "Red",
+        "hairPink": "Pink",
+        "hairSilver": "Silver",
+        "hairBlue": "Blue",
+        "hairStyle": "Hair Style",
+        "hairLongStraight": "Long Straight",
+        "hairLongWavy": "Long Wavy",
+        "hairShortBob": "Short Bob",
+        "hairPonytail": "Ponytail",
+        "hairTwinTails": "Twin Tails",
+        "hairMessyBun": "Messy Bun",
+        "hairPixieCut": "Pixie Cut",
+        "age20sEarly": "Early 20s",
+        "age20sLate": "Late 20s",
+        "age40s": "40s"
     },
     "img2imgConsent": {
         "title": "⚠️ Mandatory Image Upload Agreement",

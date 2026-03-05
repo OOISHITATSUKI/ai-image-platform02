@@ -1,60 +1,4 @@
 {
-  "143251b7-ff67-4dce-8f5a-e400b9fcf9a5": {
-    "id": "143251b7-ff67-4dce-8f5a-e400b9fcf9a5",
-    "email": "test@example.com",
-    "passwordHash": "$2b$10$eJwqmdJUSCUwf74IIJnspOKiXChwlAbOJYn3a5eLaxHH.xafsOPOq",
-    "username": "testuser1",
-    "status": "active",
-    "emailVerified": true,
-    "plan": "free",
-    "credits": 50,
-    "locale": "en",
-    "theme": "dark",
-    "otpAttempts": 0,
-    "otpLastSentAt": 1771751892904,
-    "firstGenerationConfirmed": true,
-    "createdAt": 1771751892904,
-    "updatedAt": 1771755903017,
-    "agreements": {
-      "termsOfService": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "contentPolicy": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "privacyPolicy": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "ageConfirmation": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "minorContentBan": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "noRefund": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      },
-      "personalUseOnly": {
-        "agreedAt": 1771752154894,
-        "version": "1.0",
-        "ip": "::1"
-      }
-    },
-    "dateOfBirth": "2000-01-01",
-    "country": "US"
-  },
   "e6a3cf3f-cac0-4e29-9836-730def02e082": {
     "id": "e6a3cf3f-cac0-4e29-9836-730def02e082",
     "email": "testuser_new@example.com",
@@ -126,7 +70,7 @@
     "otpLastSentAt": 1771759420211,
     "firstGenerationConfirmed": true,
     "createdAt": 1771757809717,
-    "updatedAt": 1771827652162,
+    "updatedAt": 1772711183640,
     "agreements": {
       "termsOfService": {
         "agreedAt": 1771759458006,
@@ -166,10 +110,87 @@
     },
     "dateOfBirth": "1990-05-05",
     "country": "US",
-    "lastLoginAt": 1771827652136,
+    "lastLoginAt": 1772711183640,
     "loginFailCount": 0,
     "deviceOtpAttempts": 0,
     "lastKnownCountry": "XX",
     "loginFailResetAt": 1771814575937
+  },
+  "29a01a5d-c44b-4d1b-b63d-c747b42698f2": {
+    "id": "29a01a5d-c44b-4d1b-b63d-c747b42698f2",
+    "email": "rajaryan2386@yahoo.com",
+    "passwordHash": "$2b$10$2VqLsWnJg0Iir/53POrdf.uL6lXcFHNaN9xkus25SLxH0sMRWl/Q.",
+    "username": "Rajaryan",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 17,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1772648139827,
+    "firstGenerationConfirmed": true,
+    "fingerprintHash": "c6593964642d0eded866281dfcc8b416",
+    "freeCreditsExpireAt": 1773252939827,
+    "createdAt": 1772648139827,
+    "updatedAt": 1772649633152,
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "contentPolicy": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "minorContentBan": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "noRefund": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      },
+      "personalUseOnly": {
+        "agreedAt": 1772648214751,
+        "version": "1.0",
+        "ip": "171.61.167.175"
+      }
+    },
+    "dateOfBirth": "1987-05-25",
+    "country": "IN"
+  },
+  "31de3891-8018-4125-9d1d-5a142ab3e905": {
+    "id": "31de3891-8018-4125-9d1d-5a142ab3e905",
+    "email": "asobo.link@gmail.com",
+    "passwordHash": "",
+    "username": "",
+    "status": "pending_password",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 20,
+    "locale": "en",
+    "theme": "dark",
+    "otpAttempts": 0,
+    "otpLastSentAt": 1772709230758,
+    "firstGenerationConfirmed": false,
+    "fingerprintHash": "fc14b9e49e03a06ebda603a8cfbbe596",
+    "freeCreditsExpireAt": 1773314030758,
+    "createdAt": 1772709230758,
+    "updatedAt": 1772709245036
   }
 }
