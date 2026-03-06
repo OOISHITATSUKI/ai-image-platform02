@@ -51,13 +51,13 @@ export default function SettingsPage() {
                     <div className="pill-grid">
                         <button
                             className={`pill ${theme === 'dark' ? 'active' : ''}`}
-                            onClick={() => setTheme('dark')}
+                            onClick={() => { setTheme('dark'); const token = localStorage.getItem('auth_token'); if (token) fetch('/api/auth/me', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ theme: 'dark' }) }); }}
                         >
                             🌙 {t('settings.dark')}
                         </button>
                         <button
                             className={`pill ${theme === 'light' ? 'active' : ''}`}
-                            onClick={() => setTheme('light')}
+                            onClick={() => { setTheme('light'); const token = localStorage.getItem('auth_token'); if (token) fetch('/api/auth/me', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ theme: 'light' }) }); }}
                         >
                             ☀️ {t('settings.light')}
                         </button>
@@ -69,7 +69,12 @@ export default function SettingsPage() {
                         className="custom-select"
                         style={{ width: 'auto', minWidth: 160 }}
                         value={locale}
-                        onChange={(e) => setLocale(e.target.value as Locale)}
+                        onChange={(e) => {
+                            const newLocale = e.target.value as Locale;
+                            setLocale(newLocale);
+                            const token = localStorage.getItem('auth_token');
+                            if (token) fetch('/api/auth/me', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ locale: newLocale }) });
+                        }}
                     >
                         {languages.map((lang) => (
                             <option key={lang.value} value={lang.value}>

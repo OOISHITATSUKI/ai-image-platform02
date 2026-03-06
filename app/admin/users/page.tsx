@@ -32,13 +32,13 @@ export default function AdminUsersPage() {
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-    const doAction = async (userId: string, action: string, value?: number) => {
+    const doAction = async (userId: string, action: string, value?: number, strValue?: string) => {
         const token = localStorage.getItem('auth_token');
         const headers: Record<string, string> = { 'Content-Type': 'application/json', Authorization: token ?? '' };
         await fetch('/api/admin/users', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ userId, action, value }),
+            body: JSON.stringify({ userId, action, value, strValue }),
         });
         fetchUsers();
     };
@@ -96,6 +96,7 @@ export default function AdminUsersPage() {
                                                 const c = prompt('新しいクレジット数:', String(u.credits));
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>💰 Credits</button>
+                                            <button onClick={() => { const p = prompt('プランを入力 (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>👑 Plan</button>
                                             <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>🗑 Delete</button>
                                         </div>
                                     </td>

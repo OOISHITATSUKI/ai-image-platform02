@@ -6,10 +6,12 @@ const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY || '';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 const PACK_PRICES: Record<PackType, { usd: number; credits: number }> = {
-    starter: { usd: 4.99, credits: 500 },
-    light: { usd: 9.99, credits: 1200 },
-    standard: { usd: 24.99, credits: 4000 },
-    premium: { usd: 49.99, credits: 10000 },
+    starter:   { usd: 4.99,  credits: 500 },
+    light:     { usd: 9.99,  credits: 1200 },
+    standard:  { usd: 24.99, credits: 4000 },
+    premium:   { usd: 49.99, credits: 10000 },
+    basic:     { usd: 14.99, credits: 100 },
+    unlimited: { usd: 29.99, credits: 300 },
 };
 
 export async function POST(req: NextRequest) {
@@ -38,7 +40,6 @@ export async function POST(req: NextRequest) {
 
         const pack = PACK_PRICES[packType];
 
-        // 1. Create a pending transaction in our local DB
         const transaction = createTransaction({
             userId: user.id,
             packType,
@@ -48,12 +49,11 @@ export async function POST(req: NextRequest) {
             status: 'pending',
         });
 
-        // 2. Call NowPayments API to create an invoice
         const nowpaymentsPayload = {
             price_amount: pack.usd,
             price_currency: 'USD',
             order_id: transaction.id,
-            order_description: `${packType.toUpperCase()} Credit Pack - ${pack.credits} Credits`,
+            order_description: `${packType.toUpperCase()} Plan - ${pack.credits} Credits`,
             ipn_callback_url: `${APP_URL}/api/webhooks/nowpayments`,
             success_url: `${APP_URL}/pricing/success`,
             cancel_url: `${APP_URL}/pricing`,
@@ -75,7 +75,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Failed to create payment invoice' }, { status: 500 });
         }
 
-        // Return the hosted checkout URL
         return NextResponse.json({ invoice_url: npData.invoice_url });
 
     } catch (e) {

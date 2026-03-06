@@ -11,7 +11,7 @@ const CREDIT_LOG_FILE = path.join(process.cwd(), 'data', 'credit_log.json');
 
 // ----- Transaction Record (one per payment) -----
 
-export type PackType = 'starter' | 'light' | 'standard' | 'premium';
+export type PackType = 'starter' | 'light' | 'standard' | 'premium' | 'basic' | 'unlimited';
 export type TransactionStatus = 'pending' | 'confirming' | 'completed' | 'failed' | 'expired';
 
 export interface TransactionRecord {

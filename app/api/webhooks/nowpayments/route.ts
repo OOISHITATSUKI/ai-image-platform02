@@ -27,20 +27,30 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
+    // ソートあり
     const sortedJson = JSON.stringify(body, Object.keys(body).sort());
-    const hmac = crypto.createHmac('sha512', IPN_SECRET);
-    hmac.update(sortedJson);
-    const calculated = hmac.digest('hex');
+    const hmac1 = crypto.createHmac('sha512', IPN_SECRET);
+    hmac1.update(sortedJson);
+    const calcSorted = hmac1.digest('hex');
 
-    console.log('[NowPayments] Signature check:', {
+    // ソートなし（rawBodyそのまま）
+    const hmac2 = crypto.createHmac('sha512', IPN_SECRET);
+    hmac2.update(rawBody);
+    const calcRaw = hmac2.digest('hex');
+
+    console.log('[NowPayments] Signature debug:', {
         received: sig,
-        calculated,
-        match: calculated === sig,
+        calcSorted,
+        calcRaw,
+        matchSorted: calcSorted === sig,
+        matchRaw: calcRaw === sig,
         secretLength: IPN_SECRET.length,
     });
 
-    if (calculated !== sig) {
-        console.error('[NowPayments] Invalid signature — check NOWPAYMENTS_IPN_SECRET in .env matches dashboard');
+    const isValid = calcSorted === sig || calcRaw === sig;
+
+    if (!isValid) {
+        console.error('[NowPayments] Invalid signature — both methods failed');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -52,7 +62,7 @@ export async function POST(req: NextRequest) {
         pay_currency?: string;
     };
 
-    console.log(`[NowPayments] IPN received: status=${payment_status}, order_id=${order_id}, payment_id=${payment_id}`);
+    console.log(`[NowPayments] IPN received: status=${payment_status}, order_id=${order_id}`);
 
     const transaction = getTransactionById(order_id);
     if (!transaction) {
@@ -61,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (transaction.status === 'completed') {
-        console.log('[NowPayments] Already processed, skipping:', order_id);
+        console.log('[NowPayments] Already processed:', order_id);
         return NextResponse.json({ message: 'Already processed' });
     }
 
@@ -74,13 +84,10 @@ export async function POST(req: NextRequest) {
 
         const newBalance = user.credits + transaction.creditsGranted;
         user.credits = newBalance;
-        if (user.plan === 'free') {
-            user.plan = 'paid';
-        }
+        if (user.plan === 'free') user.plan = 'paid';
         saveUser(user);
 
         updateTransactionStatus(order_id, 'completed');
-
         recordCreditChange({
             userId: transaction.userId,
             changeType: 'charge',
@@ -96,16 +103,13 @@ export async function POST(req: NextRequest) {
 
     if (payment_status === 'confirming' || payment_status === 'sending') {
         updateTransactionStatus(order_id, 'confirming');
-        console.log(`[NowPayments] Payment confirming: ${order_id}`);
         return NextResponse.json({ message: 'Confirming' });
     }
 
     if (payment_status === 'failed' || payment_status === 'refunded' || payment_status === 'expired') {
         updateTransactionStatus(order_id, payment_status === 'expired' ? 'expired' : 'failed');
-        console.warn(`[NowPayments] Payment ${payment_status}: ${order_id}`);
         return NextResponse.json({ message: `Marked as ${payment_status}` });
     }
 
-    console.log(`[NowPayments] Unhandled status "${payment_status}" for order ${order_id}`);
     return NextResponse.json({ message: 'Status noted' });
 }

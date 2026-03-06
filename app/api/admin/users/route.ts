@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
                 }
                 break;
             case 'set_plan':
-                if (['free', 'basic', 'pro', 'ultimate'].includes(value)) {
+                if (['free', 'paid', 'basic', 'unlimited'].includes(value)) {
                     user.plan = value;
                 }
                 break;
