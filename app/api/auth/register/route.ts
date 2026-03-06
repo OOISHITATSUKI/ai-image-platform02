@@ -17,7 +17,7 @@ import { sendOTPEmail } from '@/lib/email';
 
 // 24 hours in MS
 const REGISTRATION_WINDOW_MS = 24 * 60 * 60 * 1000;
-const MAX_ACCOUNTS_PER_IP = 2;
+const MAX_ACCOUNTS_PER_IP = 999;
 
 function getIp(req: NextRequest): string {
     return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         const ip = getIp(req);
 
         // ── 1. General Rate Limit (3 attempts per IP per 24h) ──
-        const rl = rateLimit(`${ip}:register`, 3, REGISTRATION_WINDOW_MS);
+        const rl = rateLimit(`${ip}:register`, 999, REGISTRATION_WINDOW_MS);
         if (!rl.allowed) {
             return NextResponse.json(
                 { error: 'Too many registration attempts. Please try again later.' },

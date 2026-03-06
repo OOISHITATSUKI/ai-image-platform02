@@ -70,32 +70,32 @@
     "otpLastSentAt": 1771759420211,
     "firstGenerationConfirmed": true,
     "createdAt": 1771757809717,
-    "updatedAt": 1772711183640,
+    "updatedAt": 1772794402527,
     "agreements": {
       "termsOfService": {
-        "agreedAt": 1771759458006,
+        "agreedAt": 1772794369642,
         "version": "1.0",
-        "ip": "::1"
+        "ip": "1.75.66.138"
       },
       "contentPolicy": {
-        "agreedAt": 1771759458006,
+        "agreedAt": 1772794369642,
         "version": "1.0",
-        "ip": "::1"
+        "ip": "1.75.66.138"
       },
       "privacyPolicy": {
-        "agreedAt": 1771759458006,
+        "agreedAt": 1772794369642,
         "version": "1.0",
-        "ip": "::1"
+        "ip": "1.75.66.138"
       },
       "ageConfirmation": {
-        "agreedAt": 1771759458006,
+        "agreedAt": 1772794369642,
         "version": "1.0",
-        "ip": "::1"
+        "ip": "1.75.66.138"
       },
       "minorContentBan": {
-        "agreedAt": 1771759458006,
+        "agreedAt": 1772794369642,
         "version": "1.0",
-        "ip": "::1"
+        "ip": "1.75.66.138"
       },
       "noRefund": {
         "agreedAt": 1771759458006,
@@ -110,11 +110,13 @@
     },
     "dateOfBirth": "1990-05-05",
     "country": "US",
-    "lastLoginAt": 1772711183640,
+    "lastLoginAt": 1772794402527,
     "loginFailCount": 0,
     "deviceOtpAttempts": 0,
     "lastKnownCountry": "XX",
-    "loginFailResetAt": 1771814575937
+    "loginFailResetAt": 1772797614330,
+    "termsAgreedAt": 1772794369642,
+    "termsVersion": "1.0"
   },
   "29a01a5d-c44b-4d1b-b63d-c747b42698f2": {
     "id": "29a01a5d-c44b-4d1b-b63d-c747b42698f2",
@@ -174,76 +176,52 @@
     "dateOfBirth": "1987-05-25",
     "country": "IN"
   },
-  "bfbc6870-3105-4c47-bea9-fc56deb3762d": {
-    "id": "bfbc6870-3105-4c47-bea9-fc56deb3762d",
-    "email": "asobo.link@gmail.com",
-    "passwordHash": "$2b$10$V82cTm8W.Qe7DmDN4U0UDePEeIUJVZvmBHUjpfInAhiKCnrVOAln.",
-    "username": "asobo.link",
+  "c99b5e31-f621-4551-be95-a404fc99710c": {
+    "id": "c99b5e31-f621-4551-be95-a404fc99710c",
+    "email": "zigoku.makai@gmail.com",
+    "passwordHash": "$2b$10$TATqqgP3SuF7ANWH0p/Z6uvGmQRZdoUiBmv4CspwK.N4I1DDJ9Xcu",
+    "username": "zigoku.makai",
     "status": "active",
     "emailVerified": true,
-    "plan": "free",
-    "credits": 18,
-    "locale": "en",
-    "theme": "dark",
-    "otpAttempts": 0,
-    "otpLastSentAt": 1772722101325,
-    "firstGenerationConfirmed": true,
-    "fingerprintHash": "64953d0de2074cfcaddb37448f75d3ed",
-    "freeCreditsExpireAt": 1773326901325,
-    "createdAt": 1772722101325,
-    "updatedAt": 1772722225925,
-    "termsAgreedAt": 1772722215955,
-    "termsVersion": "1.0",
-    "agreements": {
-      "termsOfService": {
-        "agreedAt": 1772722215955,
-        "version": "1.0",
-        "ip": "1.75.72.206"
-      },
-      "contentPolicy": {
-        "agreedAt": 1772722215955,
-        "version": "1.0",
-        "ip": "1.75.72.206"
-      },
-      "privacyPolicy": {
-        "agreedAt": 1772722215955,
-        "version": "1.0",
-        "ip": "1.75.72.206"
-      },
-      "ageConfirmation": {
-        "agreedAt": 1772722215955,
-        "version": "1.0",
-        "ip": "1.75.72.206"
-      },
-      "minorContentBan": {
-        "agreedAt": 1772722215955,
-        "version": "1.0",
-        "ip": "1.75.72.206"
-      }
-    }
-  },
-  "828e562a-a4d7-45aa-8e90-260e18834190": {
-    "id": "828e562a-a4d7-45aa-8e90-260e18834190",
-    "email": "zigoku.makai@gmail.com",
-    "passwordHash": "",
-    "username": "",
-    "status": "pending_otp",
-    "emailVerified": false,
     "plan": "free",
     "credits": 20,
     "locale": "en",
     "theme": "dark",
-    "otpCode": "543377",
-    "otpExpiresAt": 1772751258680,
     "otpAttempts": 0,
-    "otpLastSentAt": 1772750658680,
-    "firstGenerationConfirmed": false,
+    "otpLastSentAt": 1772752044626,
+    "firstGenerationConfirmed": true,
     "fingerprintHash": "64953d0de2074cfcaddb37448f75d3ed",
-    "freeCreditsExpireAt": 1773355458680,
-    "createdAt": 1772750658680,
-    "updatedAt": 1772750732638,
-    "passwordResetAttempts": 1,
-    "passwordResetOtp": "307973",
-    "passwordResetExpiresAt": 1772751332638
+    "freeCreditsExpireAt": 1773356844626,
+    "createdAt": 1772752044626,
+    "updatedAt": 1772752518684,
+    "termsAgreedAt": 1772752518684,
+    "termsVersion": "1.0",
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1772752518684,
+        "version": "1.0",
+        "ip": "1.75.64.228"
+      },
+      "contentPolicy": {
+        "agreedAt": 1772752518684,
+        "version": "1.0",
+        "ip": "1.75.64.228"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1772752518684,
+        "version": "1.0",
+        "ip": "1.75.64.228"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1772752518684,
+        "version": "1.0",
+        "ip": "1.75.64.228"
+      },
+      "minorContentBan": {
+        "agreedAt": 1772752518684,
+        "version": "1.0",
+        "ip": "1.75.64.228"
+      }
+    }
   }
 }

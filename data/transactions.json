@@ -98,5 +98,15 @@
     "status": "pending",
     "id": "ee7b548a-9486-432c-8dd1-5d49e85d8e30",
     "createdAt": 1771828451002
+  },
+  "ec651769-29e3-4324-9be6-14355c1d242c": {
+    "userId": "c99b5e31-f621-4551-be95-a404fc99710c",
+    "packType": "starter",
+    "creditsGranted": 500,
+    "amountUsd": 4.99,
+    "currency": "USD",
+    "status": "pending",
+    "id": "ec651769-29e3-4324-9be6-14355c1d242c",
+    "createdAt": 1772752581329
   }
 }

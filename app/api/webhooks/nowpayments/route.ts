@@ -7,86 +7,105 @@ const IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET || '';
 
 export async function POST(req: NextRequest) {
     if (!IPN_SECRET) {
-        console.error('NOWPAYMENTS_IPN_SECRET is not configured');
+        console.error('[NowPayments] NOWPAYMENTS_IPN_SECRET is not configured');
         return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
     }
 
     const sig = req.headers.get('x-nowpayments-sig');
     if (!sig) {
+        console.error('[NowPayments] Missing x-nowpayments-sig header');
         return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
+    const rawBody = await req.text();
+
+    let body: Record<string, unknown>;
     try {
-        const body = await req.json();
-
-        // NowPayments requires sorting keys alphabetically for HMAC validation
-        const hmac = crypto.createHmac('sha512', IPN_SECRET);
-        hmac.update(JSON.stringify(body, Object.keys(body).sort()));
-        const signature = hmac.digest('hex');
-
-        if (signature !== sig) {
-            console.error('Invalid NowPayments IPN signature', { received: sig, calculated: signature });
-            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-        }
-
-        const { payment_status, order_id, payment_id } = body;
-
-        // Find our local transaction record
-        const transaction = getTransactionById(order_id);
-        if (!transaction) {
-            console.error('NowPayments IPN: Transaction not found', order_id);
-            return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
-        }
-
-        // If the transaction was already completed, ignore
-        if (transaction.status === 'completed') {
-            return NextResponse.json({ message: 'Already processed' });
-        }
-
-        // Handle various payment statuses
-        if (payment_status === 'finished' || payment_status === 'confirmed') {
-            const user = findUserById(transaction.userId);
-            if (!user) {
-                console.error('NowPayments IPN: User not found for transaction', transaction.userId);
-                return NextResponse.json({ error: 'User not found' }, { status: 404 });
-            }
-
-            // Grant Credits
-            const newBalance = user.credits + transaction.creditsGranted;
-            // Also reset their 'plan' flag to 'basic' if they were free
-            if (user.plan === 'free') {
-                user.plan = 'basic';
-            }
-            delete user.freeCreditsExpireAt;
-            user.credits = newBalance;
-            saveUser(user);
-
-            // Mark transaction as completed
-            updateTransactionStatus(transaction.id, 'completed');
-
-            // Log the credit change
-            recordCreditChange({
-                userId: user.id,
-                changeType: 'charge',
-                delta: transaction.creditsGranted,
-                balanceAfter: newBalance,
-                relatedId: transaction.id,
-                note: `NowPayments payment ${payment_id}`
-            });
-
-            console.log(`Credit granted to ${user.email} -> +${transaction.creditsGranted}`);
-
-        } else if (payment_status === 'failed' || payment_status === 'expired') {
-            updateTransactionStatus(transaction.id, payment_status);
-        } else if (payment_status === 'confirming' || payment_status === 'sending') {
-            // Can optionally update status to confirming
-            updateTransactionStatus(transaction.id, 'confirming');
-        }
-
-        return NextResponse.json({ status: 'OK' });
-
-    } catch (e) {
-        console.error('Webhook processing error', e);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        body = JSON.parse(rawBody);
+    } catch {
+        console.error('[NowPayments] Invalid JSON body');
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
+
+    const sortedJson = JSON.stringify(body, Object.keys(body).sort());
+    const hmac = crypto.createHmac('sha512', IPN_SECRET);
+    hmac.update(sortedJson);
+    const calculated = hmac.digest('hex');
+
+    console.log('[NowPayments] Signature check:', {
+        received: sig,
+        calculated,
+        match: calculated === sig,
+        secretLength: IPN_SECRET.length,
+    });
+
+    if (calculated !== sig) {
+        console.error('[NowPayments] Invalid signature — check NOWPAYMENTS_IPN_SECRET in .env matches dashboard');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    const { payment_status, order_id, payment_id, actually_paid, pay_currency } = body as {
+        payment_status: string;
+        order_id: string;
+        payment_id: string;
+        actually_paid?: number;
+        pay_currency?: string;
+    };
+
+    console.log(`[NowPayments] IPN received: status=${payment_status}, order_id=${order_id}, payment_id=${payment_id}`);
+
+    const transaction = getTransactionById(order_id);
+    if (!transaction) {
+        console.error('[NowPayments] Transaction not found:', order_id);
+        return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
+    }
+
+    if (transaction.status === 'completed') {
+        console.log('[NowPayments] Already processed, skipping:', order_id);
+        return NextResponse.json({ message: 'Already processed' });
+    }
+
+    if (payment_status === 'finished' || payment_status === 'confirmed') {
+        const user = findUserById(transaction.userId);
+        if (!user) {
+            console.error('[NowPayments] User not found:', transaction.userId);
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const newBalance = user.credits + transaction.creditsGranted;
+        user.credits = newBalance;
+        if (user.plan === 'free') {
+            user.plan = 'paid';
+        }
+        saveUser(user);
+
+        updateTransactionStatus(order_id, 'completed');
+
+        recordCreditChange({
+            userId: transaction.userId,
+            changeType: 'charge',
+            delta: transaction.creditsGranted,
+            balanceAfter: newBalance,
+            relatedId: order_id,
+            note: `NowPayments payment_id=${payment_id}, paid=${actually_paid} ${pay_currency ?? ''}`.trim(),
+        });
+
+        console.log(`[NowPayments] ✅ Credits granted: +${transaction.creditsGranted} → user ${transaction.userId}, new balance: ${newBalance}`);
+        return NextResponse.json({ message: 'Credits granted' });
+    }
+
+    if (payment_status === 'confirming' || payment_status === 'sending') {
+        updateTransactionStatus(order_id, 'confirming');
+        console.log(`[NowPayments] Payment confirming: ${order_id}`);
+        return NextResponse.json({ message: 'Confirming' });
+    }
+
+    if (payment_status === 'failed' || payment_status === 'refunded' || payment_status === 'expired') {
+        updateTransactionStatus(order_id, payment_status === 'expired' ? 'expired' : 'failed');
+        console.warn(`[NowPayments] Payment ${payment_status}: ${order_id}`);
+        return NextResponse.json({ message: `Marked as ${payment_status}` });
+    }
+
+    console.log(`[NowPayments] Unhandled status "${payment_status}" for order ${order_id}`);
+    return NextResponse.json({ message: 'Status noted' });
 }
