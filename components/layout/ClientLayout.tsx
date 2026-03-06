@@ -35,6 +35,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     const data = await res.json();
                     // use setUser to trigger the chat loading logic
                     useAppStore.getState().setUser(data.user);
+                    // Ensure termsAgreedAt persists in store
+                    const currentUser = useAppStore.getState().user;
+                    if (currentUser && data.user.termsAgreedAt && !currentUser.termsAgreedAt) {
+                        useAppStore.setState({ user: { ...currentUser, termsAgreedAt: data.user.termsAgreedAt } });
+                    }
                     useAppStore.setState({ ageVerified: true });
                 } else {
                     // Invalid token -> clean up securely using the store logout
