@@ -681,5 +681,32 @@
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
     "id": "43ab9434-ebce-4603-9a4c-98cb1174abb9",
     "createdAt": 1772796046842
+  },
+  "f28cdf46-1f67-472a-84f0-39a8c4c3d98e": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.76.191",
+    "id": "f28cdf46-1f67-472a-84f0-39a8c4c3d98e",
+    "createdAt": 1772872290126
+  },
+  "3c99f074-a02a-4d58-b844-96c57d553f26": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": false,
+    "failReason": "mfa_required:new_device",
+    "ipAddress": "1.75.82.147",
+    "id": "3c99f074-a02a-4d58-b844-96c57d553f26",
+    "createdAt": 1772872360947
+  },
+  "2e7e621e-e062-4c09-909c-93873ac9fad8": {
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "email": "ooisidegesu@gmail.com",
+    "success": true,
+    "ipAddress": "1.75.82.147",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Mobile/15E148 Safari/604.1",
+    "id": "2e7e621e-e062-4c09-909c-93873ac9fad8",
+    "createdAt": 1772872374089
   }
 }

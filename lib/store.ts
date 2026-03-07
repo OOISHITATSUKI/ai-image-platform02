@@ -154,6 +154,10 @@ interface AppState {
     // ----- Generating -----
     isGenerating: boolean;
     setIsGenerating: (generating: boolean) => void;
+    submitTrigger: number;
+    triggerSubmit: () => void;
+    img2vidImageUrl: string | null;
+    setImg2vidImageUrl: (url: string | null) => void;
 
     // ----- Tag Settings -----
     tagSettings: TagSettings;
@@ -477,6 +481,10 @@ export const useAppStore = create<AppState>()(
             // ----- Generating -----
             isGenerating: false,
             setIsGenerating: (generating) => set({ isGenerating: generating }),
+            submitTrigger: 0,
+            triggerSubmit: () => set((state) => ({ submitTrigger: state.submitTrigger + 1 })),
+            img2vidImageUrl: null,
+            setImg2vidImageUrl: (url) => set({ img2vidImageUrl: url }),
 
             // ----- Tag Settings -----
             tagSettings: DEFAULT_TAG_SETTINGS,

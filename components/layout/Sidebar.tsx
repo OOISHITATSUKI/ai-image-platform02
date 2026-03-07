@@ -182,7 +182,6 @@ export default function Sidebar() {
                     ))}
                 </div>
 
-                {/* VIDEO GENERATION — Hidden for now. Uncomment to restore when video features are ready.
                 <div className="nav-section">
                     <div className="nav-label">{t('create.videoGen')}</div>
                     {videoGenItems.map((item) => (
@@ -197,7 +196,6 @@ export default function Sidebar() {
                         </Link>
                     ))}
                 </div>
-                */}
 
                 {/* Chat History */}
                 <div className="chat-history-section">

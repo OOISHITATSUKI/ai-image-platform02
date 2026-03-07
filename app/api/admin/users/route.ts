@@ -38,7 +38,7 @@ export async function GET() {
 // POST: Admin actions on users (ban, unban, update credits, change status)
 export async function POST(req: NextRequest) {
     try {
-        const { userId, action, value } = await req.json();
+        const { userId, action, value, strValue } = await req.json();
 
         if (!userId || !action) {
             return NextResponse.json({ error: 'userId and action are required' }, { status: 400 });
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
                 }
                 break;
             case 'set_plan':
-                if (['free', 'paid', 'basic', 'unlimited'].includes(value)) {
-                    user.plan = value;
+                if (['free', 'paid', 'basic', 'unlimited'].includes(strValue || value)) {
+                    user.plan = strValue || value;
                 }
                 break;
             case 'set_status':

@@ -28,8 +28,6 @@ export default function ChatArea() {
         setMediaFilter,
         isGenerating,
         setIsGenerating,
-        submitTrigger,
-        img2vidImageUrl,
         settings,
         settingsPanelVisible,
         toggleSettingsPanel,
@@ -614,82 +612,17 @@ export default function ChatArea() {
                 }
             }
         } else if (isVideoGeneration) {
-            try {
-                const imageBase64 = img2vidImageUrl ?? '';
-                if (!imageBase64) {
-                    addMessage(chatId, { role: 'assistant', content: '画像をアップロードしてください。', generationType: settings.generationType, model: settings.model, isFavorite: false });
-                    setIsGenerating(false);
-                    return;
-                }
-                const actionTag = (tagSettings.fetish || [])
-                    .map((f: string) => ({
-                        fellatio: 'blowjob, oral sex',
-                        cowgirl: 'cowgirl position, riding on top',
-                        insertion: 'penetration, vaginal insertion',
-                        kiss: 'passionate kissing',
-                        missionary: 'missionary position',
-                        doggy: 'doggy style, from behind',
-                        standing: 'standing sex position',
-                        handjob: 'handjob, stroking penis',
-                        paizuri: 'paizuri, titjob',
-                    } as Record<string, string>)[f])
-                    .filter(Boolean)
-                    .join(', ');
-
-                const authToken = localStorage.getItem('auth_token') ?? '';
-                const res = await fetch('/api/video', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`,
-                    },
-                    body: JSON.stringify({
-                        imageBase64,
-                        prompt: userPrompt,
-                        actionTag,
-                        duration: settings.duration,
-                        model: settings.model,
-                    }),
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    const errorMsg = data.error === 'plan_upgrade_required'
-                        ? '動画生成は有料プランが必要です。アップグレードしてください。'
-                        : data.error === 'insufficient_credits'
-                        ? `クレジットが不足しています。必要: ${data.required} / 残り: ${data.current}`
-                        : data.error === 'duration_exceeded'
-                        ? '選択した動画時間は現在のプランでは利用できません。'
-                        : `動画生成に失敗しました: ${data.error}`;
-                    addMessage(chatId, {
-                        role: 'assistant',
-                        content: errorMsg,
-                        generationType: settings.generationType,
-                        model: settings.model,
-                        isFavorite: false,
-                    });
-                } else {
-                    addMessage(chatId, {
-                        role: 'assistant',
-                        content: '',
-                        videoUrl: data.videoUrl,
-                        generationType: settings.generationType,
-                        model: settings.model,
-                        isFavorite: false,
-                        settings: { ...settings },
-                    });
-                }
-            } catch (err) {
-                console.error('Video generation error:', err);
-                addMessage(chatId, {
-                    role: 'assistant',
-                    content: '動画生成中にエラーが発生しました。しばらくしてから再試してください。',
-                    generationType: settings.generationType,
-                    model: settings.model,
-                    isFavorite: false,
-                });
-            }
+            // Video generation is still mock for now
+            await new Promise((r) => setTimeout(r, 2500 + Math.random() * 2000));
+            addMessage(chatId, {
+                role: 'assistant',
+                content: `Here's your video based on: "${userPrompt || 'uploaded reference'}" (mock — video API not yet connected)`,
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                generationType: settings.generationType,
+                model: settings.model,
+                isFavorite: false,
+                settings: { ...settings },
+            });
         }
 
         setIsGenerating(false);
@@ -771,14 +704,6 @@ export default function ChatArea() {
     const handleThumbDragEnd = () => {
         setDraggedThumbIndex(null);
     };
-
-    useEffect(() => {
-        console.log('submitTrigger changed:', submitTrigger);
-        if (submitTrigger > 0) {
-            console.log('calling handleSubmit from trigger');
-            handleSubmit(new Event('submit') as unknown as React.FormEvent);
-        }
-    }, [submitTrigger]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -1012,21 +937,6 @@ export default function ChatArea() {
                                             >
                                                 🔄 {t('chat.actionFaceSwap')}
                                             </button>
-                                            <button
-                                                className="msg-action-btn"
-                                                onClick={() => {
-                                                    updateSettings({ generationType: 'img2img' });
-                                                    reUploadImage(msg.imageUrl!).then(ok => {
-                                                        if (ok) {
-                                                            setReposeMode(true);
-                                                            setFaceSwapMode(false);
-                                                            setInpaintMode(false);
-                                                        }
-                                                    });
-                                                }}
-                                            >
-                                                🎯 Change Pose
-                                            </button>
                                         </>
                                     )}
                                 </div>
@@ -1047,7 +957,7 @@ export default function ChatArea() {
             </div>
 
             {/* Input */}
-            <div className="chat-input-container" style={settings.generationType === 'img2vid' ? { display: 'none' } : {}}>
+            <div className="chat-input-container">
                 {/* Credit Display */}
                 {user && (
                     <div className={`credit-display ${user.credits <= 10 ? 'credit-low' : ''}`}>
@@ -1149,7 +1059,7 @@ export default function ChatArea() {
                                     disabled={uploads.length === 0}
                                     title={t('chat.repose')}
                                 >
-                                    🎯 Change Pose
+                                    🔄 {t('chat.repose')}
                                 </button>
                                 <button
                                     className={`mode-btn ${faceSwapMode ? 'active' : ''}`}

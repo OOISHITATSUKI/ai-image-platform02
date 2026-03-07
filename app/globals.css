@@ -4660,3 +4660,200 @@ textarea:focus {
         gap: 8px;
     }
 }
+
+/* == Img2VidPanel CSS == */
+.vid-model-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    background: var(--bg-panel); cursor: pointer;
+    transition: background var(--transition-fast); flex-shrink: 0;
+}
+.vid-model-header:hover { background: var(--bg-card-hover); }
+.vid-model-thumbnail {
+    position: relative; width: 56px; height: 40px;
+    border-radius: var(--radius-md); overflow: hidden;
+    background: linear-gradient(135deg, #2a1a4e 0%, #1a0e30 100%);
+    border: 1px solid rgba(124,92,252,0.3); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+.vid-model-thumbnail-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(124,92,252,0.2), rgba(232,67,147,0.1));
+}
+.vid-play-icon { position: relative; font-size: 1rem; color: rgba(255,255,255,0.8); }
+.vid-model-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.vid-model-label { font-size: 0.68rem; color: var(--text-tertiary); letter-spacing: 0.04em; }
+.vid-model-name { font-family: var(--font-display); font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+.vid-model-chevron { color: var(--text-tertiary); font-size: 0.8rem; background: none; border: none; cursor: pointer; padding: 4px; }
+.vid-upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius-lg);
+    background: rgba(124,92,252,0.03); cursor: pointer; overflow: hidden;
+    transition: all var(--transition-fast); margin-bottom: 10px;
+    min-height: 140px; display: flex; align-items: center; justify-content: center;
+}
+.vid-upload-zone:hover, .vid-upload-zone.drag-over {
+    border-color: var(--primary); background: var(--primary-subtle);
+}
+.vid-upload-zone.has-image { border-style: solid; border-color: var(--primary); cursor: default; }
+.vid-upload-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 24px; }
+.vid-upload-icon { font-size: 2rem; color: var(--secondary); line-height: 1; }
+.vid-upload-text { font-size: 0.9rem; color: var(--text-accent); font-weight: 500; }
+.vid-upload-sub { font-size: 0.72rem; color: var(--text-tertiary); }
+.vid-upload-preview { position: relative; width: 100%; }
+.vid-upload-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.vid-upload-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,12,0.7) 0%, transparent 50%);
+}
+.vid-upload-remove {
+    position: absolute; top: 8px; right: 8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 0.65rem; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: background var(--transition-fast);
+}
+.vid-upload-remove:hover { background: var(--error); }
+.vid-upload-badge { position: absolute; bottom: 10px; left: 12px; font-size: 0.72rem; color: var(--text-accent); }
+.vid-option-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 14px; border-radius: var(--radius-md);
+    background: var(--bg-card); border: 1px solid var(--border);
+    margin-bottom: 8px; transition: border-color var(--transition-fast);
+}
+.vid-option-row:hover { border-color: var(--border-hover); }
+.vid-action-row:hover { border-color: var(--primary); background: var(--primary-subtle); }
+.vid-option-left { display: flex; align-items: center; gap: 10px; }
+.vid-option-icon { font-size: 1rem; width: 20px; text-align: center; }
+.vid-option-label { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; }
+.vid-option-chevron { color: var(--text-tertiary); font-size: 0.75rem; }
+.vid-toggle {
+    width: 44px; height: 24px; border-radius: 12px;
+    background: var(--bg-input); border: 1px solid var(--border);
+    position: relative; cursor: pointer;
+    transition: all var(--transition-normal); flex-shrink: 0;
+}
+.vid-toggle.on { background: var(--primary); border-color: var(--primary); }
+.vid-toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; transition: left var(--transition-normal); box-shadow: var(--shadow-sm);
+}
+.vid-toggle.on .vid-toggle-thumb { left: 23px; }
+.vid-duration-group { display: flex; gap: 6px; }
+.vid-duration-btn {
+    padding: 5px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--bg-input);
+    color: var(--text-secondary); font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all var(--transition-fast);
+}
+.vid-duration-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.vid-duration-btn.active {
+    background: var(--info); border-color: var(--info); color: #fff;
+    box-shadow: 0 0 10px rgba(59,130,246,0.3);
+}
+.vid-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; padding-bottom: 8px; }
+.vid-generate-btn {
+    width: 100%; padding: 15px; border-radius: var(--radius-md); border: none;
+    font-size: 0.95rem; font-weight: 700; font-family: var(--font-display);
+    letter-spacing: 0.5px; cursor: not-allowed;
+    background: var(--bg-elevated); color: var(--text-tertiary);
+    transition: all var(--transition-normal);
+}
+.vid-generate-btn.active {
+    cursor: pointer;
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.35);
+}
+.vid-generate-btn.active:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(239,68,68,0.45); }
+.vid-credit-btn {
+    width: 100%; padding: 13px; border-radius: var(--radius-md); border: none;
+    background: linear-gradient(135deg, var(--warning) 0%, #f97316 100%);
+    color: #fff; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all var(--transition-fast);
+}
+.vid-credit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245,158,11,0.35); }
+.vid-hint { text-align: center; font-size: 0.75rem; color: var(--text-tertiary); padding: 4px 0; }
+.vid-hint--warn { color: var(--primary); }
+.vid-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px); z-index: 1000;
+    display: flex; align-items: flex-end; justify-content: center;
+}
+.vid-modal {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    width: 100%; max-width: 440px; max-height: 80vh;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg);
+}
+.vid-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
+    font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; color: var(--text-primary);
+}
+.vid-modal-close {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-secondary); font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all var(--transition-fast);
+}
+.vid-modal-close:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.vid-modal-body { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.vid-action-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: var(--radius-md);
+    background: var(--bg-card); border: 1px solid var(--border);
+    cursor: pointer; transition: all var(--transition-fast); text-align: left; width: 100%;
+}
+.vid-action-item:hover { border-color: var(--primary); background: var(--primary-subtle); }
+.vid-action-item.selected { border-color: var(--primary); background: rgba(124,92,252,0.12); }
+.vid-action-emoji { font-size: 1.1rem; width: 24px; text-align: center; flex-shrink: 0; }
+.vid-action-label { font-size: 0.88rem; color: var(--text-primary); font-weight: 500; flex: 1; }
+.vid-action-badge {
+    font-size: 0.68rem; padding: 2px 8px; border-radius: var(--radius-full);
+    background: rgba(16,185,129,0.15); color: var(--success); font-weight: 600;
+    border: 1px solid rgba(16,185,129,0.2);
+}
+.vid-action-check { color: var(--primary); font-size: 0.85rem; font-weight: 700; margin-left: 4px; }
+.vid-modal-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-top: 1px solid var(--border);
+}
+.vid-modal-count { font-size: 0.82rem; color: var(--text-secondary); }
+.vid-modal-done {
+    padding: 9px 24px; border-radius: var(--radius-md);
+    background: var(--primary); color: #fff; font-weight: 600;
+    font-size: 0.88rem; cursor: pointer; border: none;
+    transition: all var(--transition-fast); box-shadow: 0 0 12px var(--primary-glow);
+}
+.vid-modal-done:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+.vid-prompt-row { align-items: flex-start !important; }
+.vid-prompt-textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    padding: 8px 10px;
+    resize: none;
+    transition: border-color var(--transition-fast);
+    font-family: var(--font-body);
+    line-height: 1.5;
+}
+.vid-prompt-textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+.vid-prompt-textarea::placeholder { color: var(--text-tertiary); }
+
+.vid-result { margin-top: 12px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+.vid-result-video { width: 100%; display: block; max-height: 300px; background: #000; }
+.vid-download-btn {
+    display: block; text-align: center; padding: 10px;
+    background: var(--bg-card); color: var(--text-accent);
+    font-size: 0.85rem; font-weight: 600; text-decoration: none;
+    transition: background var(--transition-fast);
+}
+.vid-download-btn:hover { background: var(--bg-elevated); }

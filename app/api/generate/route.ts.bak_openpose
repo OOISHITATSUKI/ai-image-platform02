@@ -102,7 +102,7 @@ async function optimizePromptWithClaude(prompt: string, generationType: string, 
                 "content-type": "application/json",
             },
             body: JSON.stringify({
-                model: "claude-sonnet-4-5",
+                model: "claude-3-5-sonnet-latest",
                 max_tokens: 200,
                 system: systemPrompt,
                 messages: [{ role: "user", content: "Generation Type: " + generationType + ", NSFW: " + isNsfw + ", isXL: " + isXL + "\nUser Input: " + prompt }],
@@ -500,7 +500,7 @@ async function analyzeEditRegion(prompt: string): Promise<{
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5',
+                model: 'claude-sonnet-4-5-20250929',
                 max_tokens: 200,
                 system: `You analyze image editing requests to determine which body region to modify.
 Given a user's edit instruction, output ONLY a JSON object:
@@ -813,7 +813,6 @@ export async function POST(request: NextRequest) {
         let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
 
 
-        console.log(`[DEBUG] reposeMode=${reposeMode} generationType=${generationType} hasImage=${!!imageBase64}`);
         const isImg2ImgValue = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
         const isPureImg2Img = generationType === 'img2img' && !!imageBase64;
 
@@ -830,7 +829,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Inpaint Model Mapping ──
-        if (!reposeMode && (inpaintMode || (isPureImg2Img && editAnalysis.region !== 'full'))) {
+        if (inpaintMode || (isPureImg2Img && editAnalysis.region !== 'full')) {
             novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
             console.log(`${inpaintMode ? 'Inpaint' : 'Auto-inpaint (' + editAnalysis.region + ')'} detected. Model: ${novitaModelName}`);
         }
@@ -905,7 +904,7 @@ export async function POST(request: NextRequest) {
         // Decide endpoint
         const endpoint = ((inpaintMode && maskBase64) || (isPureImg2Img && !reposeMode && editAnalysis.region !== 'full'))
             ? `${NOVITA_BASE}/inpainting`
-            : (isPureImg2Img || reposeMode)
+            : isPureImg2Img
                 ? `${NOVITA_BASE}/img2img`
                 : `${NOVITA_BASE}/txt2img`;
 
@@ -1008,7 +1007,13 @@ export async function POST(request: NextRequest) {
                 if (imgW >= imgH) {
                     targetW = Math.min(imgW, MAX_INPAINT_PX);
                     targetH = round64(targetW / imgAspect);
-                } else {
+                } else if (reposeMode) {
+                // Repose: resize main image to avoid API size limits
+                const repBuf = Buffer.from(finalImageBase64, 'base64');
+                const repResized = await sharp(repBuf).resize(768, 768, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                novitaRequest.image_base64 = repResized.toString('base64');
+                console.log('Repose: resized main image to 768px');
+            } else {
                     targetH = Math.min(imgH, MAX_INPAINT_PX);
                     targetW = round64(targetH * imgAspect);
                 }
@@ -1024,35 +1029,35 @@ export async function POST(request: NextRequest) {
                 let finalMaskRaw: string = '';
                 if (isPureImg2Img && editAnalysis.region !== 'full') {
                     finalMaskRaw = await generateAutoMask(finalImageBase64, editAnalysis.maskBox);
-                } else if (maskBase64) {
-                    finalMaskRaw = maskBase64.replace(/^data:image\/\w+;base64,/, '');
-                }
-
-                if (finalMaskRaw) {
-                    // Resize mask to exact same dimensions
-                    const maskBuf = Buffer.from(finalMaskRaw, 'base64');
-                    const resizedMask = await sharp(maskBuf)
-                        .resize(targetW, targetH, { fit: 'fill' })
-                        .png()
-                        .toBuffer();
-
-                    novitaRequest.width = targetW;
-                    novitaRequest.height = targetH;
-                    novitaRequest.image_base64 = finalImageBase64;
-                    novitaRequest.mask_image_base64 = resizedMask.toString('base64');
-                    console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH} (Auto: ${isPureImg2Img})`);
-                } else {
-                    novitaRequest.image_base64 = finalImageBase64;
-                }
-            } else if (reposeMode) {
-                // ═══ Change Pose: OpenPose ControlNet ═══
+                } else if (reposeMode) {
+                // Repose: resize main image to avoid API size limits
                 const repBuf = Buffer.from(finalImageBase64, 'base64');
-                const repResized = await sharp(repBuf)
-                    .resize(768, 768, { fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 85 })
-                    .toBuffer();
+                const repResized = await sharp(repBuf).resize(768, 768, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
                 novitaRequest.image_base64 = repResized.toString('base64');
-                console.log('Change Pose: image resized to 768px');
+                console.log('Repose: resized main image to 768px');
+            } else {
+                    finalMaskRaw = maskBase64!.replace(/^data:image\/\w+;base64,/, '');
+                }
+
+                // Resize mask to exact same dimensions
+                const maskBuf = Buffer.from(finalMaskRaw, 'base64');
+                const resizedMask = await sharp(maskBuf)
+                    .resize(targetW, targetH, { fit: 'fill' })
+                    .png()
+                    .toBuffer();
+
+                novitaRequest.width = targetW;
+                novitaRequest.height = targetH;
+                novitaRequest.image_base64 = finalImageBase64;
+                novitaRequest.mask_image_base64 = resizedMask.toString('base64');
+
+                console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH} (Auto: ${isPureImg2Img})`);
+            } else if (reposeMode) {
+                // Repose: resize main image to avoid API size limits
+                const repBuf = Buffer.from(finalImageBase64, 'base64');
+                const repResized = await sharp(repBuf).resize(768, 768, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                novitaRequest.image_base64 = repResized.toString('base64');
+                console.log('Repose: resized main image to 768px');
             } else {
                 novitaRequest.image_base64 = finalImageBase64;
             }
@@ -1066,30 +1071,14 @@ export async function POST(request: NextRequest) {
                 novitaRequest.inpaint_full_res = 1;
                 novitaRequest.inpaint_full_res_padding = 48;
                 novitaRequest.sampler_name = 'Euler a';
+
+                // Mode-specific prompts for inpaint
                 novitaRequest.negative_prompt = enforceLimit(
                     `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}, (censor, mosaic, bar:1.5)`
                 );
                 novitaRequest.prompt = enforceLimit(
                     `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.8), (nude:1.8), (detailed genitalia:1.6), (pussy:1.6), (bare skin:1.5), (no clothing:1.6), ${enhancedPrompt}`
                 );
-            } else if (reposeMode) {
-                // ═══ Change Pose: OpenPose ControlNet ═══
-                // strength低め = 元画像の顔・体型を保持
-                novitaRequest.strength = 0.55;
-                novitaRequest.guidance_scale = 7;
-                novitaRequest.steps = 30;
-                novitaRequest.sampler_name = 'DPM++ 2M Karras';
-                novitaRequest.controlnet_units = [
-                    {
-                        model_name: 'control_v11p_sd15_openpose',
-                        image_base64: novitaRequest.image_base64,
-                        strength: 0.85,
-                        preprocessor: 'openpose',
-                        guidance_start: 0.0,
-                        guidance_end: 1.0,
-                    }
-                ];
-                console.log('Change Pose: OpenPose ControlNet applied (strength=0.55)');
             } else if (isPureImg2Img) {
                 if (editAnalysis.region !== 'full') {
                     // ═══ Solution A: Targeted Auto-Inpaint parameters ═══
@@ -1099,16 +1088,24 @@ export async function POST(request: NextRequest) {
                     novitaRequest.mask_blur = 8;
                     novitaRequest.inpaint_full_res = 1;
                     novitaRequest.sampler_name = 'Euler a';
+
+                    // Re-optimize prompt for targeted edit region attributes
                     novitaRequest.prompt = enforceLimit(
                         `${combinedPrompt}, natural skin texture, realistic skin, anatomically correct`
                     );
                     console.log(`Solution A: Applied targeted params for ${editAnalysis.region}`);
-                } else {
-                    // ═══ Global img2img ═══
+                } else if (reposeMode) {
+                // Repose: resize main image to avoid API size limits
+                const repBuf = Buffer.from(finalImageBase64, 'base64');
+                const repResized = await sharp(repBuf).resize(768, 768, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                novitaRequest.image_base64 = repResized.toString('base64');
+                console.log('Repose: resized main image to 768px');
+            } else {
+                    // ═══ Global img2img: Very low strength to preserve identity ═══
                     novitaRequest.strength = 0.25;
                     novitaRequest.steps = 25;
                     novitaRequest.guidance_scale = 4;
-                    console.log('Solution A: Global img2img (Strength: 0.25)');
+                    console.log(`Solution A: Global img2img (Strength: 0.25)`);
                 }
             }
         } else {
