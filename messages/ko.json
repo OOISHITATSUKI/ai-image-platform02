@@ -25,6 +25,13 @@
         "settings": "생성 설정",
         "model": "모델",
         "aspectRatio": "비율",
+        "aspectRatioValues": {
+            "1:1": "정사각형",
+            "4:3": "가로",
+            "3:4": "세로",
+            "16:9": "와이드",
+            "9:16": "전신"
+        },
         "resolution": "해상도",
         "duration": "길이",
         "count": "개수",
@@ -51,7 +58,23 @@
         "img2imgStrengthHigh": "크게 변경",
         "autoDeleteWarning": "⚠️ 생성된 이미지는 1시간 후에 자동 삭제됩니다. 저장하려면 다운로드하세요.",
         "resolutionLocked": "고해상도는 유료 플랜에서 사용 가능합니다.",
-        "resolutionFreeHint": "🔒 무료 플랜: 512만 가능. HD+는 업그레이드"
+        "resolutionFreeHint": "🔒 무료 플랜: 512만 가능. HD+는 업그레이드",
+    "placeholder1": "해변에서 빨간 비키니를 입은 미녀",
+    "placeholder2": "카페에서 미소 짓는 원피스 여성",
+    "placeholder3": "야경을 배경으로 드레스를 입은 미녀",
+    "placeholder4": "beautiful woman in red dress, city night",
+    "welcomeTitle": "첫 번째 이미지를 만들어보세요!",
+    "welcomeOneClick": "원클릭 생성",
+    "welcomeDescription": "버튼만 누르면 AI가 자동으로 생성합니다. 프롬프트 입력이 필요 없습니다.",
+    "welcomeOrTry": "또는 이런 프롬프트를 시도해보세요:",
+    "welcomeSample1": "해변에서 빨간 비키니를 입은 미녀",
+    "welcomeSample2": "카페에서 원피스를 입은 여성",
+    "welcomeSample3": "야경을 배경으로 드레스를 입은 미녀",
+    "settingsSection": "설정",
+    "characterTagsSection": "캐릭터 태그",
+    "estimatedTime": "예상 시간: {min}초 ~ {max}초",
+    "imageEditor": "이미지 에디터",
+    "videoEditor": "비디오 에디터"
     },
     "chat": {
         "newChat": "새 채팅",

@@ -83,17 +83,9 @@ export default function Sidebar() {
         { icon: '📂', labelKey: 'nav.library', href: '/library' },
     ];
 
-    const imageGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '✏️', labelKey: 'create.txt2img', type: 'txt2img' },
-        { icon: '🖼️', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
-        // { icon: '🎨', labelKey: 'create.imgEdit', type: 'img_edit', isPaid: true },  // Hidden: overlaps with img2img.
-    ];
-
-    const videoGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '📝', labelKey: 'create.txt2vid', type: 'txt2vid', isPaid: true },
-        { icon: '🎬', labelKey: 'create.img2vid', type: 'img2vid', isPaid: true },
-        { icon: '👤', labelKey: 'create.ref2vid', type: 'ref2vid', isPaid: true },
-        { icon: '📹', labelKey: 'create.vid2vid', type: 'vid2vid', isPaid: true },
+    const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
+        { icon: '🖼️', labelKey: 'editor.imageEditor', type: 'txt2img' },
+        { icon: '🎬', labelKey: 'editor.videoEditor', type: 'img2vid', isPaid: true },
     ];
 
     const languages: { value: Locale; label: string }[] = [
@@ -161,40 +153,30 @@ export default function Sidebar() {
                     ))}
                 </div>
 
-                {/* Image Generation */}
+                {/* Generation */}
                 <div className="nav-section">
-                    <div className="nav-label">{t('create.imageGen')}</div>
-                    {imageGenItems.map((item) => (
-                        <Link
-                            key={item.type}
-                            href="/editor"
-                            className={`nav-item ${settings.generationType === item.type ? 'active' : ''}`}
-                            onClick={() => handleGenTypeClick(item.type)}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && (
-                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                    {t(item.labelKey)}
-                                    {item.isPaid && <span className="paid-badge">{t('common.paid')}</span>}
-                                </span>
-                            )}
-                        </Link>
-                    ))}
-                </div>
-
-                <div className="nav-section">
-                    <div className="nav-label">{t('create.videoGen')}</div>
-                    {videoGenItems.map((item) => (
-                        <Link
-                            key={item.type}
-                            href="/editor"
-                            className={`nav-item ${settings.generationType === item.type ? 'active' : ''}`}
-                            onClick={() => handleGenTypeClick(item.type)}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && t(item.labelKey)}
-                        </Link>
-                    ))}
+                    <div className="nav-label">GENERATION</div>
+                    {generationItems.map((item) => {
+                        const isImageEditor = item.type === 'txt2img';
+                        const isActive = isImageEditor
+                            ? ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType)
+                            : ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
+                        return (
+                            <Link
+                                key={item.type}
+                                href="/editor"
+                                className={`nav-item ${isActive ? 'active' : ''}`}
+                                onClick={() => handleGenTypeClick(item.type)}
+                            >
+                                <span className="nav-icon">{item.icon}</span>
+                                {!sidebarCollapsed && (
+                                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                        {t(item.labelKey)}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 {/* Chat History */}
