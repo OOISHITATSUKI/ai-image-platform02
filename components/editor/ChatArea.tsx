@@ -925,11 +925,13 @@ export default function ChatArea() {
             {/* Messages */}
             <div className="chat-messages" ref={chatContainerRef}>
                 {!activeChat || filteredMessages.length === 0 ? (
-                    <div className="chat-empty-state">
-                        <div className="empty-icon">🎨</div>
-                        <h3>{t('chat.empty')}</h3>
-                        <p>{t('chat.emptyDesc')}</p>
-                    </div>
+                    settings.generationType !== 'img2vid' && (
+                        <div className="chat-empty-state">
+                            <div className="empty-icon">🎨</div>
+                            <h3>{t('chat.empty')}</h3>
+                            <p>{t('chat.emptyDesc')}</p>
+                        </div>
+                    )
                 ) : (
                     filteredMessages.map((msg) => (
                         <div key={msg.id} className={`message-bubble ${msg.role}`}>
@@ -1036,12 +1038,28 @@ export default function ChatArea() {
                 )}
 
                 {/* Generating Indicator */}
-                {isGenerating && (
+                {isGenerating && settings.generationType !== 'img2vid' && (
                     <div className="generating-indicator">
                         <div className="generating-dots">
                             <span /><span /><span />
                         </div>
                         <span className="generating-text">{t('editor.generating')}</span>
+                    </div>
+                )}
+                {isGenerating && settings.generationType === 'img2vid' && (
+                    <div className="vid-generating-overlay">
+                        <div className="vid-generating-inner">
+                            <div className="vid-generating-spinner">
+                                <div className="vid-spinner-ring" />
+                                <div className="vid-spinner-ring vid-spinner-ring--2" />
+                                <div className="vid-spinner-core">🎬</div>
+                            </div>
+                            <p className="vid-generating-title">動画を生成中...</p>
+                            <p className="vid-generating-sub">AIが動画を作成しています。最大4分かかることがあります</p>
+                            <div className="vid-generating-bar">
+                                <div className="vid-generating-bar-fill" />
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

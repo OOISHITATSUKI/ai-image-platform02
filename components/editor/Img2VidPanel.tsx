@@ -23,7 +23,7 @@ const DURATION_OPTIONS = [
 ];
 
 export default function Img2VidPanel() {
-    const { settings, updateSettings, isGenerating, setIsGenerating, tagSettings, toggleFetishTag, user, setImg2vidImageUrl, img2vidImageUrl } = useAppStore();
+    const { settings, updateSettings, isGenerating, setIsGenerating, tagSettings, toggleFetishTag, user, setImg2vidImageUrl, img2vidImageUrl, addMessage, activeChatId, createChat } = useAppStore();
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -62,6 +62,16 @@ export default function Img2VidPanel() {
                 setErrorMsg(data.error || '生成に失敗しました');
             } else {
                 setVideoUrl(data.videoUrl);
+                const chatId = activeChatId || createChat();
+                addMessage(chatId, {
+                    role: 'assistant',
+                    content: '',
+                    videoUrl: data.videoUrl,
+                    generationType: 'img2vid',
+                    model: settings.model,
+                    isFavorite: false,
+                    settings: { ...settings },
+                });
             }
         } catch (err) {
             setErrorMsg('エラーが発生しました');
@@ -240,12 +250,7 @@ export default function Img2VidPanel() {
                     {!uploadedImageUrl && <p className="vid-hint">↑ 画像をアップロードしてください</p>}
                     {uploadedImageUrl && !selectedAction && <p className="vid-hint vid-hint--warn">↑ アクションを選択してください</p>}
                     {errorMsg && <p className="vid-hint vid-hint--warn">⚠️ {errorMsg}</p>}
-                    {videoUrl && (
-                        <div className="vid-result">
-                            <video src={videoUrl} controls autoPlay loop className="vid-result-video" />
-                            <a href={videoUrl} download className="vid-download-btn">↓ ダウンロード</a>
-                        </div>
-                    )}
+
                 </div>
             </aside>
 

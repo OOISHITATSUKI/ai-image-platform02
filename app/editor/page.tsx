@@ -504,7 +504,17 @@ export default function EditorPage() {
             )}
 
             {isImg2Vid ? (
-                <Img2VidPanel />
+                <>
+                    <Img2VidPanel />
+                    <RightPanel
+                        onOneClickGenerate={handleOneClickGenerate}
+                        onSamplePrompt={handleSamplePrompt}
+                        onActionInpaint={handleActionInpaint}
+                        onActionFaceSwap={handleActionFaceSwap}
+                        onActionRegenerate={handleActionRegenerate}
+                        isGenerating={isGenerating}
+                    />
+                </>
             ) : (
                 <>
                     <LeftPanel
