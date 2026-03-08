@@ -84,7 +84,8 @@ export default function Sidebar() {
     ];
 
     const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '🖼️', labelKey: 'editor.imageEditor', type: 'txt2img' },
+        { icon: '🖼️', labelKey: 'create.txt2img', type: 'txt2img' },
+        { icon: '🔄', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
         { icon: '🎬', labelKey: 'editor.videoEditor', type: 'img2vid', isPaid: true },
     ];
 
@@ -157,9 +158,10 @@ export default function Sidebar() {
                 <div className="nav-section">
                     <div className="nav-label">GENERATION</div>
                     {generationItems.map((item) => {
-                        const isImageEditor = item.type === 'txt2img';
-                        const isActive = isImageEditor
-                            ? ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType)
+                        const isActive = item.type === 'txt2img'
+                            ? settings.generationType === 'txt2img'
+                            : item.type === 'img2img'
+                            ? ['img2img', 'img_edit'].includes(settings.generationType)
                             : ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
                         return (
                             <Link

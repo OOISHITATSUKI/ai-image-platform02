@@ -20,6 +20,7 @@ export async function GET() {
             createdAt: u.createdAt,
             updatedAt: u.updatedAt,
             agreementsCompleted: !!u.agreements?.termsOfService,
+            termsAgreedAt: u.termsAgreedAt || null,
         }));
 
         // Sort by newest first

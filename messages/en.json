@@ -74,7 +74,9 @@
     "characterTagsSection": "Character Tags",
     "estimatedTime": "Estimated: {min}s ~ {max}s",
     "imageEditor": "Image Editor",
-    "videoEditor": "Video Editor"
+    "videoEditor": "Video Editor",
+    "imageExpiresAt": "Auto-deleted at {time}",
+    "imageExpiresIn": "Deleted in {min} min"
   },
   "chat": {
     "newChat": "New Chat",

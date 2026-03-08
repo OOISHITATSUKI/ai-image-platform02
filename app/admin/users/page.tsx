@@ -8,6 +8,7 @@ interface AdminUser {
     username: string;
     status: string;
     plan: string;
+    termsAgreedAt?: string | null;
     credits: number;
     country?: string;
     createdAt: number;
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
-                                {['ユーザー名', 'Email', 'ステータス', 'プラン', 'クレジット', '国', '登録日', 'アクション'].map(h => (
+                                {['ユーザー名', 'Email', 'ステータス', 'プラン', 'クレジット', '国', '同意', '登録日', 'アクション'].map(h => (
                                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>
@@ -86,6 +87,7 @@ export default function AdminUsersPage() {
                                     <td style={{ padding: '9px 14px', color: '#a78bfa' }}>{u.plan}</td>
                                     <td style={{ padding: '9px 14px', color: '#f59e0b' }}>{u.credits}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)' }}>{u.country || '-'}</td>
+                                    <td style={{ padding: '9px 14px' }}>{u.termsAgreedAt ? <span style={{ color: '#10b981' }}>✅</span> : <span style={{ color: '#ef4444' }}>❌</span>}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{new Date(u.createdAt).toLocaleDateString('ja-JP')}</td>
                                     <td style={{ padding: '9px 14px' }}>
                                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>

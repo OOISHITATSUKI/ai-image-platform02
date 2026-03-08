@@ -49,7 +49,6 @@ export default function EditorPage() {
         setInputText('');
         setUploads([]);
         setGenerationError(null);
-        useAppStore.getState().cleanupOldMessages();
     }, [activeChatId]);
 
     // Clear files when switching to text-only mode
@@ -253,6 +252,10 @@ export default function EditorPage() {
                     }),
                 });
 
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error(`API error: ${res.status}`);
+                }
                 const data = await res.json();
                 if (!res.ok || data.error) throw new Error(data.error || `API error: ${res.status}`);
 

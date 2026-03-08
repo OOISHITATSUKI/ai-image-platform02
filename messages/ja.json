@@ -74,7 +74,9 @@
     "characterTagsSection": "キャラクタータグ",
     "estimatedTime": "推定生成時間: {min}秒 〜 {max}秒",
     "imageEditor": "画像エディター",
-    "videoEditor": "動画エディター"
+    "videoEditor": "動画エディター",
+    "imageExpiresAt": "{time}に自動削除",
+    "imageExpiresIn": "{min}分後に削除"
   },
   "chat": {
     "newChat": "新しいチャット",

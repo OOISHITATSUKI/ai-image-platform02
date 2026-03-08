@@ -20,11 +20,6 @@ interface UploadSlot {
 
 const MAX_UPLOADS = 4;
 
-const IMAGE_MODE_TABS: { type: GenerationType; labelKey: string }[] = [
-    { type: 'txt2img', labelKey: 'create.txt2img' },
-    { type: 'img2img', labelKey: 'create.img2img' },
-];
-
 interface LeftPanelProps {
     inputText: string;
     setInputText: (v: string) => void;
@@ -54,6 +49,8 @@ export default function LeftPanel({
     } = useAppStore();
     const { t } = useTranslation();
 
+    const [showFaceSwapModal, setShowFaceSwapModal] = useState(false);
+    const [showInpaintModal2, setShowInpaintModal2] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -209,46 +206,81 @@ export default function LeftPanel({
     return (
         <aside className="editor-left-panel">
             <div className="editor-left-scroll">
-                {/* Mode Tabs */}
-                <div className="editor-mode-tabs" role="tablist">
-                    {IMAGE_MODE_TABS.map((tab) => (
-                        <button
-                            key={tab.type}
-                            role="tab"
-                            aria-selected={settings.generationType === tab.type}
-                            className={`editor-mode-tab ${settings.generationType === tab.type ? 'active' : ''}`}
-                            onClick={() => handleModeTabClick(tab.type)}
-                        >
-                            {t(tab.labelKey)}
-                        </button>
-                    ))}
-                    <button
-                        role="tab"
-                        aria-selected={settings.generationType === 'img2img' && faceSwapMode}
-                        className={`editor-mode-tab ${settings.generationType === 'img2img' && faceSwapMode ? 'active' : ''}`}
-                        onClick={() => {
-                            setGenerationType('img2img');
-                            setFaceSwapMode(true);
-                            setInpaintMode(false);
-                            setReposeMode(false);
-                        }}
-                    >
-                        Face Swap
-                    </button>
-                    <button
-                        role="tab"
-                        aria-selected={settings.generationType === 'img2img' && inpaintMode}
-                        className={`editor-mode-tab ${settings.generationType === 'img2img' && inpaintMode ? 'active' : ''}`}
-                        onClick={() => {
-                            setGenerationType('img2img');
-                            setInpaintMode(true);
-                            setFaceSwapMode(false);
-                            setReposeMode(false);
-                        }}
-                    >
-                        Inpaint
-                    </button>
-                </div>
+
+
+                {/* Face Swap Modal */}
+                {showFaceSwapModal && (
+                    <div className="editor-feature-modal-overlay" onClick={() => setShowFaceSwapModal(false)}>
+                        <div className="editor-feature-modal" onClick={e => e.stopPropagation()}>
+                            <button className="feature-modal-close" onClick={() => setShowFaceSwapModal(false)}>✕</button>
+                            <div className="feature-modal-gif">
+                                <div className="feature-modal-gif-placeholder">
+                                    <span>🔄</span>
+                                    <span>Face Swap Demo</span>
+                                </div>
+                            </div>
+                            <h3 className="feature-modal-title">Face Swap</h3>
+                            <p className="feature-modal-desc">
+                                Upload a body image and a face image.<br />
+                                AI will swap the face seamlessly.
+                            </p>
+                            <ul className="feature-modal-steps">
+                                <li>① Upload body image</li>
+                                <li>② Upload face image</li>
+                                <li>③ Press Generate</li>
+                            </ul>
+                            <button
+                                className="feature-modal-use-btn"
+                                onClick={() => {
+                                    setGenerationType('img2img');
+                                    setFaceSwapMode(true);
+                                    setInpaintMode(false);
+                                    setReposeMode(false);
+                                    setShowFaceSwapModal(false);
+                                }}
+                            >
+                                🔄 Use Face Swap
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Inpaint Modal */}
+                {showInpaintModal2 && (
+                    <div className="editor-feature-modal-overlay" onClick={() => setShowInpaintModal2(false)}>
+                        <div className="editor-feature-modal" onClick={e => e.stopPropagation()}>
+                            <button className="feature-modal-close" onClick={() => setShowInpaintModal2(false)}>✕</button>
+                            <div className="feature-modal-gif">
+                                <div className="feature-modal-gif-placeholder">
+                                    <span>🖌️</span>
+                                    <span>Inpaint Demo</span>
+                                </div>
+                            </div>
+                            <h3 className="feature-modal-title">Inpaint (Nude Mode)</h3>
+                            <p className="feature-modal-desc">
+                                Upload an image and paint over the area<br />
+                                you want AI to regenerate.
+                            </p>
+                            <ul className="feature-modal-steps">
+                                <li>① Upload image</li>
+                                <li>② Paint mask area</li>
+                                <li>③ Press Generate</li>
+                            </ul>
+                            <button
+                                className="feature-modal-use-btn"
+                                onClick={() => {
+                                    setGenerationType('img2img');
+                                    setInpaintMode(true);
+                                    setFaceSwapMode(false);
+                                    setReposeMode(false);
+                                    setShowInpaintModal2(false);
+                                }}
+                            >
+                                🖌️ Use Inpaint
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Input Area - varies by mode */}
                 <div className="editor-input-section">
@@ -377,6 +409,27 @@ export default function LeftPanel({
                         </div>
                     )}
                 </div>
+                {/* FaceSwap / Inpaint Feature Buttons - img2img mode only */}
+                {settings.generationType !== 'txt2img' && (
+                    <div className="editor-feature-btns">
+                        <button
+                            className={`editor-feature-btn ${faceSwapMode ? 'active' : ''}`}
+                            onClick={() => setShowFaceSwapModal(true)}
+                        >
+                            <span className="feature-btn-icon">🔄</span>
+                            <span className="feature-btn-label">Face Swap</span>
+                            {faceSwapMode && <span className="feature-btn-active-dot" />}
+                        </button>
+                        <button
+                            className={`editor-feature-btn ${inpaintMode ? 'active' : ''}`}
+                            onClick={() => setShowInpaintModal2(true)}
+                        >
+                            <span className="feature-btn-icon">🖌️</span>
+                            <span className="feature-btn-label">Inpaint</span>
+                            {inpaintMode && <span className="feature-btn-active-dot" />}
+                        </button>
+                    </div>
+                )}
 
                 {/* Settings Section - Collapsible */}
                 <div className="editor-collapsible-section">

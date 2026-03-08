@@ -192,7 +192,19 @@ export default function RightPanel({
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="result-time">{formatTime(msg.timestamp)}</div>
+                                        <div
+  className="result-time"
+  title={(() => {
+    const exp = new Date(msg.timestamp + 3600000);
+    const minLeft = Math.round((msg.timestamp + 3600000 - Date.now()) / 60000);
+    return minLeft > 0
+      ? t('editor.imageExpiresAt', { time: exp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
+        + ' · ' + t('editor.imageExpiresIn', { min: String(minLeft) })
+      : t('editor.imageExpiresAt', { time: exp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+  })()}
+>
+  {formatTime(msg.timestamp)}
+</div>
                                     </div>
                                 )}
                                 {msg.videoUrl && (
