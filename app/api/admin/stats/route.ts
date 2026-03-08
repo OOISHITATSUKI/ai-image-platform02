@@ -57,6 +57,20 @@ export async function GET(req: NextRequest) {
         todayGenerations = gens.filter(g => g.createdAt >= msToday).length;
     }
 
+    // Demo Stats
+    const DEMO_STATS_FILE = path.join(process.cwd(), 'data', 'demo_stats.json');
+    let demoGenerationsTotal = 0;
+    let demoGenerationsToday = 0;
+    let demoLimitReachedTotal = 0;
+    let demoLimitReachedToday = 0;
+    if (fs.existsSync(DEMO_STATS_FILE)) {
+        const demoEvents = JSON.parse(fs.readFileSync(DEMO_STATS_FILE, 'utf8')) as { event: string; createdAt: number }[];
+        demoGenerationsTotal = demoEvents.filter(e => e.event === 'generated').length;
+        demoGenerationsToday = demoEvents.filter(e => e.event === 'generated' && e.createdAt >= msToday).length;
+        demoLimitReachedTotal = demoEvents.filter(e => e.event === 'limit_reached').length;
+        demoLimitReachedToday = demoEvents.filter(e => e.event === 'limit_reached' && e.createdAt >= msToday).length;
+    }
+
     // Revenue
     const TRANSACTIONS_FILE = path.join(process.cwd(), 'data', 'transactions.json');
     let totalRevenue = 0;
@@ -75,5 +89,9 @@ export async function GET(req: NextRequest) {
         todayBlocks,
         todayGenerations,
         totalRevenue,
+        demoGenerationsTotal,
+        demoGenerationsToday,
+        demoLimitReachedTotal,
+        demoLimitReachedToday,
     });
 }

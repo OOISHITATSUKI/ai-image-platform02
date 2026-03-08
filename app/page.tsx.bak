@@ -1,0 +1,333 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useAppStore } from '@/lib/store';
+import { useTranslation } from '@/lib/useTranslation';
+import ShowcaseFlipCard from '@/components/ui/ShowcaseFlipCard';
+
+const baseShowcaseImages = [
+  { before: '/images/showcase/card1-before.webp', after: '/images/showcase/card1-after.webp', alt: 'Demonstration 1' },
+  { before: '/images/showcase/card2-before.webp', after: '/images/showcase/card2-after.webp', alt: 'Demonstration 2' },
+  { before: '/images/showcase/card3-before.webp', after: '/images/showcase/card3-after.webp', alt: 'Demonstration 3' },
+  { before: '/images/showcase/card4-before.webp', after: '/images/showcase/card4-after.webp', alt: 'Demonstration 4' },
+  { before: '/images/showcase/card5-before.webp', after: '/images/showcase/card5-after.webp', alt: 'Demonstration 5' },
+  { before: '/images/showcase/card6-before.webp', after: '/images/showcase/card6-after.webp', alt: 'Demonstration 6' },
+];
+
+const sampleCreations = [
+  { src: '/images/showcase/card1-after.webp', alt: 'AI Generated 1' },
+  { src: '/images/showcase/card2-after.webp', alt: 'AI Generated 2' },
+  { src: '/images/showcase/card3-after.webp', alt: 'AI Generated 3' },
+  { src: '/images/showcase/card4-after.webp', alt: 'AI Generated 4' },
+  { src: '/images/showcase/card5-after.webp', alt: 'AI Generated 5' },
+  { src: '/images/showcase/card6-after.webp', alt: 'AI Generated 6' },
+];
+
+const STATS = [
+  { value: '50K+', label: 'Images Created' },
+  { value: '4.8', label: 'User Rating' },
+  { value: '<10s', label: 'Generation Time' },
+  { value: '100%', label: 'Private & Secure' },
+];
+
+const REVIEWS = [
+  { name: 'Alex K.', rating: 5, text: "Incredible quality. Better than any other AI generator I've tried.", avatar: 'A' },
+  { name: 'Miku T.', rating: 5, text: 'The anime style is absolutely stunning. Love the tag system.', avatar: 'M' },
+  { name: 'Carlos R.', rating: 4, text: 'Fast generation, great results. Video feature is a game changer.', avatar: 'C' },
+  { name: 'Sarah L.', rating: 5, text: 'So easy to use. Created exactly what I imagined in seconds.', avatar: 'S' },
+];
+
+const FEATURES = [
+  { icon: '✏️', title: 'Text to Image', desc: 'Generate photorealistic images from any text description in seconds.' },
+  { icon: '🔄', title: 'Face Swap', desc: 'Seamlessly swap faces between images with AI precision.' },
+  { icon: '🖌️', title: 'Inpaint', desc: 'Edit specific parts of any image while keeping the rest intact.' },
+  { icon: '🎬', title: 'Image to Video', desc: 'Animate your static images into smooth, dynamic videos.' },
+  { icon: '🖼️', title: 'Image to Image', desc: 'Transform existing photos with AI — style, mood, and more.' },
+  { icon: '⚡', title: 'Fast Generation', desc: 'Results in under 10 seconds. No waiting, no queues.' },
+];
+
+function StarRating({ count }: { count: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 2 }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span key={i} style={{ color: i < count ? '#f59e0b' : '#333', fontSize: 14 }}>★</span>
+      ))}
+    </div>
+  );
+}
+
+function TryItNowSection() {
+  const [demoState, setDemoState] = useState<'idle' | 'uploaded' | 'processing' | 'result'>('idle');
+  const [dragOver, setDragOver] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  const handleFile = (file: File | undefined) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setUploadedImage(e.target?.result as string);
+      setDemoState('uploaded');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFile(e.dataTransfer.files[0]);
+  };
+
+  const handleGenerate = () => {
+    setDemoState('processing');
+    setProgress(0);
+    const interval = setInterval(() => {
+      setProgress(p => {
+        if (p >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setDemoState('result'), 300);
+          return 100;
+        }
+        return Math.min(p + Math.random() * 15 + 5, 100);
+      });
+    }, 200);
+  };
+
+  const handleReset = () => {
+    setDemoState('idle');
+    setUploadedImage(null);
+    setProgress(0);
+  };
+
+  return (
+    <section className="try-section">
+      <div className="try-section-glow" />
+      <div className="try-section-inner">
+        <div className="try-section-header">
+          <div className="try-live-badge">
+            <span className="try-live-dot">●</span>
+            Live Demo — No Sign Up Required
+          </div>
+          <h2 className="try-section-title">
+            See the Magic <span className="try-title-highlight">Yourself</span>
+          </h2>
+          <p className="try-section-desc">Upload any photo. Watch AI transform it instantly. No account needed.</p>
+        </div>
+
+        <div className="try-demo-card">
+          {demoState === 'idle' && (
+            <div
+              className={`try-upload-zone ${dragOver ? 'drag-over' : ''}`}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={(e) => handleFile(e.target.files?.[0])} />
+              <div className="try-upload-icon-wrap">📸</div>
+              <h3 className="try-upload-title">Drop your image here</h3>
+              <p className="try-upload-hint">or click to browse — PNG, JPG up to 10MB</p>
+              <div className="try-upload-badges">
+                <span>🔒 Not stored on our servers</span>
+                <span>⚡ Results in ~8 seconds</span>
+              </div>
+            </div>
+          )}
+
+          {demoState === 'uploaded' && uploadedImage && (
+            <div className="try-uploaded-state">
+              <div className="try-preview-wrap">
+                <img src={uploadedImage} alt="Uploaded" className="try-preview-img" />
+                <div className="try-preview-badge">Original</div>
+              </div>
+              <div className="try-arrow">→</div>
+              <div className="try-preview-wrap try-result-placeholder">
+                <div className="try-result-lock">
+                  <span style={{ fontSize: 32 }}>✨</span>
+                  <span>AI Result</span>
+                </div>
+              </div>
+              <div className="try-action-row">
+                <button className="try-generate-btn" onClick={handleGenerate}>
+                  ✨ Generate Now — Free
+                </button>
+                <button className="try-reset-btn" onClick={handleReset}>✕ Reset</button>
+              </div>
+            </div>
+          )}
+
+          {demoState === 'processing' && (
+            <div className="try-processing-state">
+              <div className="try-processing-icon">⚡</div>
+              <h3 className="try-processing-title">AI is working its magic...</h3>
+              <div className="try-progress-bar">
+                <div className="try-progress-fill" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="try-progress-pct">{Math.round(progress)}%</p>
+            </div>
+          )}
+
+          {demoState === 'result' && uploadedImage && (
+            <div className="try-result-state">
+              <div className="try-compare-row">
+                <div className="try-compare-item">
+                  <img src={uploadedImage} alt="Before" className="try-compare-img" />
+                  <span className="try-compare-label">Before</span>
+                </div>
+                <div className="try-compare-item try-compare-after">
+                  <img src={uploadedImage} alt="After" className="try-compare-img try-watermark" />
+                  <span className="try-compare-label after">After ✨</span>
+                  <div className="try-watermark-overlay">imagenude.com</div>
+                </div>
+              </div>
+              <div className="try-result-cta">
+                <p className="try-result-cta-text">🔓 Sign up free to download without watermark</p>
+                <Link href="/auth/signup" className="try-signup-btn">
+                  Create Free Account →
+                </Link>
+                <button className="try-reset-btn" onClick={handleReset} style={{ marginTop: 8 }}>Try another photo</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
+  const { createChat, setGenerationType, chats } = useAppStore();
+  const { t } = useTranslation();
+  const [activeFeature, setActiveFeature] = useState(0);
+
+  const handleToolClick = (type: 'txt2img' | 'img2img' | 'img_edit' | 'txt2vid' | 'img2vid' | 'ref2vid' | 'vid2vid') => {
+    setGenerationType(type);
+    if (chats.length === 0) createChat();
+  };
+
+  return (
+    <div className="home-view">
+
+      {/* ── Hero ── */}
+      <section className="hero-section">
+        <h1 className="hero-headline">{t('home.headline')}</h1>
+        <p className="hero-subheadline">{t('home.subheadline')}</p>
+        <div className="carousel-container">
+          <div className="carousel-track">
+            {[...baseShowcaseImages, ...baseShowcaseImages].map((img, i) => (
+              <ShowcaseFlipCard
+                key={i}
+                beforeSrc={img.before}
+                afterSrc={img.after}
+                imgAlt={img.alt}
+                autoFlip={true}
+                flipDelayMs={(i % baseShowcaseImages.length) * 1000}
+                priority={i < 4}
+              />
+            ))}
+          </div>
+        </div>
+        <br />
+        <Link href="/editor" className="hero-cta-btn" onClick={() => handleToolClick('txt2img')}>
+          {t('home.ctaButton')}
+          <span className="hero-cta-sub">{t('home.ctaSub')}</span>
+        </Link>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="stats-section">
+        {STATS.map((s, i) => (
+          <div key={i} className="stat-item">
+            <div className="stat-value">{s.value}</div>
+            <div className="stat-label">{s.label}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* ── Try It Now ── */}
+      <TryItNowSection />
+
+      {/* ── Features ── */}
+      <section className="features-section">
+        <div className="features-inner">
+          <div className="section-label-badge">Powerful Tools</div>
+          <h2 className="features-title">Everything You <span className="highlight-red">Need</span></h2>
+          <p className="features-desc">From text prompts to video generation — all in one platform.</p>
+          <div className="features-grid">
+            {FEATURES.map((feat, i) => (
+              <div
+                key={i}
+                className={`feature-card-home ${activeFeature === i ? 'active' : ''}`}
+                onClick={() => setActiveFeature(i)}
+              >
+                <div className="feature-card-icon">{feat.icon}</div>
+                <h3 className="feature-card-title">{feat.title}</h3>
+                <p className="feature-card-desc">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Recent Creations ── */}
+      <div className="section-header">
+        <h3>{t('home.recentCreations')}</h3>
+        <Link href="/library" className="view-all-link">{t('home.viewAll')}</Link>
+      </div>
+      <div className="recent-creations-grid">
+        {sampleCreations.map((img, i) => (
+          <div key={i} className="recent-creation-item">
+            <Image src={img.src} alt={img.alt} width={300} height={400}
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+            <div className="recent-creation-overlay">
+              <Link href="/editor" className="recent-creation-try" onClick={() => handleToolClick('txt2img')}>
+                {t('home.tryThis')}
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Reviews ── */}
+      <section className="reviews-section">
+        <div className="reviews-inner">
+          <div className="section-label-badge">Testimonials</div>
+          <h2 className="reviews-title">Loved by <span className="highlight-red">Creators</span></h2>
+          <div className="reviews-grid">
+            {REVIEWS.map((review, i) => (
+              <div key={i} className="review-card-home">
+                <div className="review-card-header">
+                  <div className={`review-avatar review-avatar-${i}`}>{review.avatar}</div>
+                  <div>
+                    <div className="review-name">{review.name}</div>
+                    <StarRating count={review.rating} />
+                  </div>
+                </div>
+                <p className="review-text">"{review.text}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="final-cta-section">
+        <div className="final-cta-glow" />
+        <h2 className="final-cta-title">
+          Ready to Create<br />
+          <span className="highlight-red">Something Amazing</span>?
+        </h2>
+        <p className="final-cta-desc">Join thousands of creators. Start generating for free.</p>
+        <Link href="/editor" className="hero-cta-btn" onClick={() => handleToolClick('txt2img')}>
+          Get Started — Free
+          <span className="hero-cta-sub">No credit card required</span>
+        </Link>
+      </section>
+
+    </div>
+  );
+}

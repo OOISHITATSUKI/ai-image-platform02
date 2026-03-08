@@ -147,7 +147,12 @@
     "ctaButton": "Try Free Now →",
     "ctaSub": "No card needed",
     "recentCreations": "Recent Creations",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "tryTitle": "Try It Free — No Sign Up",
+    "tryDesc": "Upload a photo and see the magic. 1 free generation, no account needed.",
+    "tryUpload": "Drop your photo here",
+    "tryCtaFull": "🚀 Try Full Editor →",
+    "tryThis": "Try this style →"
   },
   "pricing": {
     "title": "Choose Your Plan",

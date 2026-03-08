@@ -147,7 +147,12 @@
     "ctaButton": "無料で生成してみる →",
     "ctaSub": "カード不要",
     "recentCreations": "最近の作品",
-    "viewAll": "すべて表示"
+    "viewAll": "すべて表示",
+    "tryTitle": "無料で試す — 登録不要",
+    "tryDesc": "写真をアップロードしてAIの魔法を体験。登録なしで1枚無料生成。",
+    "tryUpload": "ここに写真をドロップ",
+    "tryCtaFull": "🚀 フル機能を試す →",
+    "tryThis": "このスタイルで試す →"
   },
   "pricing": {
     "title": "プランを選択",

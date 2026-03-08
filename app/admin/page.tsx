@@ -10,6 +10,10 @@ interface Stats {
     todayBlocks: number;
     todayGenerations: number;
     totalRevenue: number;
+    demoGenerationsTotal: number;
+    demoGenerationsToday: number;
+    demoLimitReachedTotal: number;
+    demoLimitReachedToday: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -67,6 +71,15 @@ export default function AdminDashboardPage() {
         { label: '総売上 (USD)', value: `$${stats.totalRevenue.toFixed(2)}`, color: '#10b981' },
     ];
 
+    const demoCards = [
+        { label: 'デモ生成数 (累計)', value: stats.demoGenerationsTotal?.toLocaleString() ?? '0', color: '#f87171' },
+        { label: 'デモ生成数 (本日)', value: stats.demoGenerationsToday?.toLocaleString() ?? '0', color: '#f87171' },
+        { label: '上限到達 (累計)', value: stats.demoLimitReachedTotal?.toLocaleString() ?? '0', color: '#fb923c' },
+        { label: '上限到達 (本日)', value: stats.demoLimitReachedToday?.toLocaleString() ?? '0', color: '#fb923c' },
+    ];
+    const _dummy = [
+    ];
+
     return (
         <div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '28px' }}>
@@ -81,6 +94,19 @@ export default function AdminDashboardPage() {
                         <div style={valueStyle(card.color)}>{card.value}</div>
                     </div>
                 ))}
+            </div>
+
+            {/* Demo Stats */}
+            <div style={{ background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, padding: '24px 28px', marginBottom: 24 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f87171', marginBottom: 16 }}>🎯 Homepage Demo Stats</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                    {demoCards.map(card => (
+                        <div key={card.label}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 4 }}>{card.label}</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 700, color: card.color }}>{card.value}</div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* 7-Day Trend Note */}

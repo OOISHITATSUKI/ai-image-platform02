@@ -22,8 +22,8 @@ const FETISH_TAG_MAP: Record<FetishTag, string> = {
 };
 
 async function pollVideoResult(taskId: string): Promise<{ success: boolean; videoUrl?: string; error?: string }> {
-    const maxAttempts = 60;
-    const pollInterval = 2000;
+    const maxAttempts = 150;
+    const pollInterval = 3000;
     for (let i = 0; i < maxAttempts; i++) {
         await new Promise(r => setTimeout(r, pollInterval));
         const res = await fetch(NOVITA_BASE + '/async/task-result?task_id=' + taskId, {
@@ -91,21 +91,18 @@ export async function POST(req: NextRequest) {
 
         console.log('Video generation: duration=' + duration + 's prompt=' + finalPrompt.slice(0, 80));
 
-        const submitRes = await fetch(NOVITA_BASE + '/async/wan-i2v', {
+        const submitRes = await fetch(NOVITA_BASE + '/async/kling-v2.1-i2v-master', {
             method: 'POST',
             headers: {
                 Authorization: 'Bearer ' + NOVITA_API_KEY,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                image_url: dataUrl,
+                image: dataUrl,
                 prompt: finalPrompt,
                 negative_prompt: negativePrompt,
-                width: 832,
-                height: 480,
-                steps: 30,
-                seed: -1,
-                enable_safety_checker: false,
+                duration: String(duration),
+                guidance_scale: 0.5,
             }),
         });
 
