@@ -5,6 +5,7 @@
     "nav": {
         "home": "Home",
         "library": "Library",
+        "history": "History",
         "pricing": "Pricing",
         "settings": "Settings",
         "inspiration": "Inspiration",
@@ -300,8 +301,29 @@
     "history": {
         "title": "Generation History",
         "empty": "No generations yet",
+        "emptyDesc": "Generated images will appear here.",
         "deleteConfirm": "Delete this record?",
         "expired": "Expired",
-        "expiredDesc": "Auto-deleted after 1 hour"
+        "expiredDesc": "Auto-deleted after 1 hour",
+        "expiryNotice": "Generated images are automatically deleted after 1 hour.",
+        "generationTab": "Generation History",
+        "billingTab": "Billing History",
+        "filterAll": "All",
+        "filterFavorites": "Favorites",
+        "noFavorites": "No favorites yet",
+        "noFavoritesDesc": "Click the heart icon on images to add them to favorites.",
+        "showAll": "Show All",
+        "loading": "Loading...",
+        "loadMore": "Load More",
+        "retry": "Retry",
+        "back": "Back",
+        "items": "items",
+        "loginRequired": "Login Required",
+        "loginRequiredDesc": "Please log in to view your generation history.",
+        "prompt": "Prompt",
+        "model": "Model",
+        "size": "Size",
+        "credits": "Credits",
+        "favorited": "Favorited"
     }
 }

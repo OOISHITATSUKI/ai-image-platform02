@@ -5,6 +5,7 @@
     "nav": {
         "home": "ホーム",
         "library": "ライブラリ",
+        "history": "履歴",
         "pricing": "料金",
         "settings": "設定",
         "inspiration": "インスピレーション",
@@ -295,8 +296,29 @@
     "history": {
         "title": "生成履歴",
         "empty": "履歴はありません",
+        "emptyDesc": "画像を生成すると、ここに履歴が表示されます。",
         "deleteConfirm": "この画像を削除しますか？",
         "expired": "期限切れ",
-        "expiredDesc": "1時間経過したため自動削除されました"
+        "expiredDesc": "1時間経過したため自動削除されました",
+        "expiryNotice": "生成された画像は1時間後に自動削除されます。",
+        "generationTab": "生成履歴",
+        "billingTab": "課金履歴",
+        "filterAll": "すべて",
+        "filterFavorites": "お気に入り",
+        "noFavorites": "お気に入りはまだありません",
+        "noFavoritesDesc": "画像のハートをクリックしてお気に入りに追加しましょう。",
+        "showAll": "すべて表示",
+        "loading": "読み込み中...",
+        "loadMore": "もっと見る",
+        "retry": "再試行",
+        "back": "戻る",
+        "items": "件",
+        "loginRequired": "ログインが必要です",
+        "loginRequiredDesc": "生成履歴を見るにはログインしてください。",
+        "prompt": "プロンプト",
+        "model": "モデル",
+        "size": "サイズ",
+        "credits": "クレジット",
+        "favorited": "お気に入り済み"
     }
 }

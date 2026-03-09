@@ -80,7 +80,7 @@ export default function Sidebar() {
 
     const navItems = [
         { icon: '🏠', labelKey: 'nav.home', href: '/' },
-        { icon: '📂', labelKey: 'nav.library', href: '/library' },
+        { icon: '📂', labelKey: 'nav.history', href: '/library' },
     ];
 
     const imageGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
