@@ -9,13 +9,14 @@ import FirstGenModal from '@/components/ui/FirstGenModal';
 import { useAppStore } from '@/lib/store';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const { theme, toggleSidebar, toggleSettingsPanel, isAuthenticated } = useAppStore();
+    const { theme, toggleSidebar, toggleSettingsPanel, isAuthenticated, settingsPanelVisible, user } = useAppStore();
     const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
 
     // Pages that don't use the sidebar layout
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isPublicPage = pathname === '/terms' || pathname === '/privacy' || pathname === '/content-policy' || pathname === '/dmca' || pathname === '/2257' || pathname === '/help';
+    const isLandingPage = pathname === '/undress-ai' || pathname === '/face-swap' || pathname?.startsWith('/blog/');
     const isAdminPage = pathname?.startsWith('/admin');
 
     // Prevent hydration mismatch and handle mobile initial state
@@ -102,6 +103,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         );
     }
 
+    // Landing pages and blog articles render standalone (no sidebar, no footer)
+    if (isLandingPage) {
+        return <>{children}</>;
+    }
+
     // Admin pages have their own layout
     if (isAdminPage) {
         return <>{children}</>;
@@ -120,17 +126,26 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     ☰
                 </button>
                 <div className="mobile-logo">
-                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '36px' }} />
-                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '36px' }} />
+                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '28px' }} />
+                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '28px' }} />
                 </div>
-                <button
-                    className="mobile-settings-btn"
-                    onClick={toggleSettingsPanel}
-                    style={{ marginLeft: 'auto' }}
-                >
-                    ⚙️
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+                    {user && (
+                        <span className={`mobile-credit-badge ${user.credits <= 10 ? 'low' : ''}`}>
+                            ✨ {user.credits}
+                        </span>
+                    )}
+                    <button className="mobile-settings-btn" onClick={toggleSettingsPanel}>
+                        ⚙️
+                    </button>
+                </div>
             </div>
+
+            {/* Settings bottom sheet overlay (mobile only) */}
+            <div
+                className={`settings-overlay ${settingsPanelVisible ? 'visible' : ''}`}
+                onClick={toggleSettingsPanel}
+            />
 
             <div className="app-shell">
                 <Sidebar />

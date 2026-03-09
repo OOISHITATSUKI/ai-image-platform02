@@ -103,7 +103,7 @@ function TryItNowSection() {
     const bustIndex = bustOptions.findIndex(o => o.value === bustSize);
 
     return (
-        <section className="hp-section" style={{ padding: '100px 40px' }}>
+        <section className="hp-section hp-section-pad">
             <div className="hp-glow" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 500, background: 'radial-gradient(circle, rgba(220,38,38,0.06), transparent 70%)' }} />
             <div style={{ maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: 48 }}>
@@ -239,6 +239,14 @@ export default function HomePage() {
                         <div className="hp-label"><span className="hp-pulse">●</span> AI-Powered Generation</div>
                         <h1 className="hp-title">Your Imagination,<br /><span className="hp-accent-text">Now Real.</span></h1>
                         <p className="hp-subtitle">Describe what you imagine. Our AI creates stunning, photorealistic images instantly. No experience needed.</p>
+                        <div className="hp-mobile-preview">
+                            {[0, 1].map(i => (
+                                <div key={i} className="hp-mobile-preview-card">
+                                    <img src={heroImages[i]} alt="AI Generated" />
+                                    <div className="hp-mobile-preview-badge">AI Generated</div>
+                                </div>
+                            ))}
+                        </div>
                         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 48 }}>
                             <Link href="/editor" className="hp-btn-primary" onClick={() => handleToolClick('txt2img')}>Create Your First Image — Free <span style={{ fontSize: 18 }}>→</span></Link>
                             <a href="#hp-gallery" className="hp-btn-ghost">View Gallery</a>
@@ -275,11 +283,11 @@ export default function HomePage() {
 
             <TryItNowSection />
 
-            <section className="hp-section" style={{ padding: '100px 40px' }}>
+            <section className="hp-section hp-section-pad">
                 <div style={{ maxWidth: 1000, margin: '0 auto', textAlign: 'center' }}>
                     <div className="hp-label">Simple Process</div>
                     <h2 className="hp-heading" style={{ marginBottom: 60 }}>Three Steps. <span className="hp-accent-text">That's It.</span></h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr auto 1fr', alignItems: 'start' }}>
+                    <div className="hp-steps-grid">
                         {[
                             { num: '01', title: 'Describe', desc: 'Type what you want to create, or select from style presets and tags.' },
                             null,
@@ -299,15 +307,15 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section id="hp-gallery" className="hp-section" style={{ padding: '80px 0' }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
+            <section id="hp-gallery" className="hp-section hp-section-pad">
+                <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }} className="hp-gallery-wrap">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 40 }}>
                         <div>
                             <div className="hp-label">Showcase</div>
                             <h2 className="hp-heading">See What's <span className="hp-accent-text">Possible</span></h2>
                         </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                    <div className="hp-gallery-grid">
                         {SAMPLE_IMAGES.map((img, i) => (
                             <div key={i} className="hp-gallery-card">
                                 <img src={heroImages[i % heroImages.length]} alt={img.style} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }} />
@@ -327,12 +335,12 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="hp-section" style={{ padding: '100px 40px' }}>
+            <section className="hp-section hp-section-pad">
                 <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
                     <div className="hp-label">Powerful Tools</div>
                     <h2 className="hp-heading" style={{ marginBottom: 12 }}>Everything You <span className="hp-accent-text">Need</span></h2>
                     <p className="hp-subtext" style={{ marginBottom: 48 }}>From text prompts to video generation — all in one platform.</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+                    <div className="hp-features-grid">
                         {FEATURES.map((f, i) => (
                             <div key={i} className={`hp-feature-card ${activeFeature === i ? 'active' : ''}`} onClick={() => setActiveFeature(i)}>
                                 <div style={{ fontSize: 32, marginBottom: 16, color: '#f87171' }}>{f.icon}</div>
@@ -349,13 +357,13 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="hp-section" style={{ padding: '80px 40px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <section className="hp-section hp-section-pad" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
                 <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: 48 }}>
                         <div className="hp-label">Testimonials</div>
                         <h2 className="hp-heading">Loved by <span className="hp-accent-text">Creators</span></h2>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                    <div className="hp-reviews-grid">
                         {REVIEWS.map((r, i) => (
                             <div key={i} className="hp-review-card">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
@@ -372,10 +380,10 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="hp-section" style={{ padding: '120px 40px', textAlign: 'center' }}>
+            <section className="hp-section hp-section-pad-lg" style={{ textAlign: 'center' }}>
                 <div className="hp-glow" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, #dc2626, transparent)', opacity: 0.08, width: 800, height: 400 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <h2 style={{ fontSize: 52, fontWeight: 900, letterSpacing: -2, marginBottom: 20, lineHeight: 1.1 }}>
+                    <h2 className="hp-cta-heading">
                         Ready to Create<br /><span className="hp-accent-text">Something Amazing</span>?
                     </h2>
                     <p className="hp-subtext" style={{ maxWidth: 400, margin: '0 auto 40px' }}>Join thousands of creators. Start generating for free. No credit card needed.</p>
@@ -390,8 +398,8 @@ export default function HomePage() {
                     <div className="hp-footer-logo">N</div>
                     <span style={{ fontSize: 15, fontWeight: 700, color: '#555' }}>ImageNude</span>
                 </div>
-                <div style={{ display: 'flex', gap: 24 }}>
-                    {[{ label: 'Terms', href: '/terms' }, { label: 'Privacy', href: '/privacy' }, { label: 'Content Policy', href: '/content-policy' }, { label: 'DMCA', href: '/dmca' }, { label: '2257', href: '/2257' }].map(l => (
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                    {[{ label: 'AI Undress', href: '/undress-ai' }, { label: 'Face Swap', href: '/face-swap' }, { label: 'NSFW AI Guide', href: '/blog/how-to-generate-nsfw-ai-images' }, { label: 'Best Undress Tools', href: '/blog/best-ai-undress-tools' }, { label: 'Face Swap Guide', href: '/blog/ai-face-swap-adults' }, { label: 'Terms', href: '/terms' }, { label: 'Privacy', href: '/privacy' }, { label: 'Content Policy', href: '/content-policy' }, { label: 'DMCA', href: '/dmca' }, { label: '2257', href: '/2257' }].map(l => (
                         <Link key={l.label} href={l.href} style={{ color: '#444', textDecoration: 'none', fontSize: 13 }}>{l.label}</Link>
                     ))}
                 </div>
