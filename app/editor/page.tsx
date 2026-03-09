@@ -41,8 +41,7 @@ export default function EditorPage() {
     const [termsChecks, setTermsChecks] = useState({ terms: false, content: false, age: false });
 
     // Consent state for img2img
-    const [img2imgConsent, setImg2imgConsent] = useState<boolean[]>([false, false, false, false, false]);
-    const allConsentChecked = img2imgConsent.every(Boolean);
+    // Consent moved to modal
 
     // Reset on chat switch
     useEffect(() => {

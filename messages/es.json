@@ -375,5 +375,16 @@
     "complianceCheck": "I have read and acknowledged the above.",
     "prohibitedCheck": "I reiterate that I will not generate prohibited content (minors, real people, etc.).",
     "startButton": "Start Generating"
-  }
+  },
+  "chat.imageLimit.title": "Imágenes antiguas movidas",
+  "chat.imageLimit.message": "Solo se muestran las 10 imágenes más recientes en el chat. Las imágenes anteriores están disponibles en tu Historial de Generación durante 1 hora.",
+  "chat.imageLimit.button": "Ver historial",
+  "chat.imageLimit.close": "Entendido",
+  "img2imgConsent.modal.title": "Acuerdo de carga de imagen",
+  "img2imgConsent.modal.subtitle": "Por favor confirme antes de generar",
+  "img2imgConsent.modal.check0": "Tengo 18+ años y cumplo con los Términos de Servicio y las leyes aplicables.",
+  "img2imgConsent.modal.check1": "Tengo derecho a usar esta imagen. No contiene menores ni infringe derechos de terceros.",
+  "img2imgConsent.modal.check2": "No compartiré ni publicaré el contenido generado a terceros.",
+  "img2imgConsent.modal.cancel": "Cancelar",
+  "img2imgConsent.modal.confirm": "Aceptar y generar"
 }

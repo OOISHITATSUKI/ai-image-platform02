@@ -113,7 +113,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             {isAuthenticated && <AgeGate />}
 
             {/* First generation confirmation modal */}
-            {isAuthenticated && <FirstGenModal />}
+            {/* FirstGenModal disabled - terms now handled at registration */}
 
             <div className="mobile-header">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>

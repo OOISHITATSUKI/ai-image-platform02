@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /settings/
+Disallow: /editor/
+Disallow: /history/
+
+Sitemap: https://imagenude.com/sitemap.xml

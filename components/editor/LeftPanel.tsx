@@ -97,8 +97,6 @@ export default function LeftPanel({
     }, [inputText]);
 
     // Consent state for img2img
-    const [img2imgConsent, setImg2imgConsent] = useState<boolean[]>([false, false, false, false, false]);
-    const allConsentChecked = img2imgConsent.every(Boolean);
 
     const isImageMode = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
     const isVideoMode = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
@@ -370,25 +368,7 @@ export default function LeftPanel({
                         </div>
                     )}
 
-                    {/* Consent checkboxes for img2img modes */}
-                    {showAttach && uploads.length > 0 && (
-                        <div className="editor-consent-area">
-                            {[0, 1, 2, 3, 4].map((i) => (
-                                <label key={i} className="editor-consent-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={img2imgConsent[i]}
-                                        onChange={(e) => {
-                                            const next = [...img2imgConsent];
-                                            next[i] = e.target.checked;
-                                            setImg2imgConsent(next);
-                                        }}
-                                    />
-                                    <span>{t(`img2imgConsent.term${i}`)}</span>
-                                </label>
-                            ))}
-                        </div>
-                    )}
+                    {/* Consent moved to modal in ChatArea */}
 
                     {/* Prompt textarea */}
                     {!(faceSwapMode && settings.generationType === 'img2img') && (

@@ -42,6 +42,7 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [devOtp, setDevOtp] = useState('');
+    const [termsAgreed, setTermsAgreed] = useState(false);
     const [cooldown, setCooldown] = useState(0);
     const [fingerprintHash, setFingerprintHash] = useState('');
 
@@ -160,9 +161,29 @@ export default function RegisterPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
+            // Save agreements
+            try {
+                await fetch('/api/auth/agree-terms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + data.token },
+                    body: JSON.stringify({
+                        email,
+                        agreements: {
+                            termsOfService: true,
+                            contentPolicy: true,
+                            privacyPolicy: true,
+                            ageConfirmation: true,
+                            minorContentBan: true,
+                            statement2257: true,
+                        }
+                    }),
+                });
+            } catch (_) {}
+
             // Save token and go straight to editor
             localStorage.setItem('auth_token', data.token);
-            setUser(data.user);
+            const userWithTerms = { ...data.user, termsAgreedAt: new Date().toISOString() };
+            setUser(userWithTerms);
             useAppStore.setState({ isAuthenticated: true, ageVerified: true });
             setTimeout(() => router.push('/editor'), 100);
             return;
@@ -287,10 +308,38 @@ export default function RegisterPage() {
                             />
                         </div>
 
+
+                        <label
+                            style={{
+                                display: 'flex', gap: 10, alignItems: 'flex-start',
+                                cursor: 'pointer', fontSize: '0.82rem', color: '#b0b0c0',
+                                lineHeight: 1.55, marginTop: 4, marginBottom: 2,
+                                padding: '10px 14px', borderRadius: 10,
+                                background: 'rgba(124,92,252,0.05)',
+                                border: '1px solid rgba(124,92,252,0.12)',
+                                transition: 'all 0.2s',
+                            }}
+                            onClick={() => setTermsAgreed(!termsAgreed)}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={termsAgreed}
+                                readOnly
+                                style={{ marginTop: 2, accentColor: '#7c5cfc', width: 16, height: 16, flexShrink: 0 }}
+                            />
+                            <span>
+                                I am 18+ and agree to the{' '}
+                                <a href="/terms" target="_blank" style={{ color: '#7c5cfc' }} onClick={e => e.stopPropagation()}>Terms</a>,{' '}
+                                <a href="/privacy" target="_blank" style={{ color: '#7c5cfc' }} onClick={e => e.stopPropagation()}>Privacy Policy</a>,{' '}
+                                <a href="/content-policy" target="_blank" style={{ color: '#7c5cfc' }} onClick={e => e.stopPropagation()}>Content Policy</a>, and{' '}
+                                <a href="/2257" target="_blank" style={{ color: '#7c5cfc' }} onClick={e => e.stopPropagation()}>2257 Statement</a>.
+                            </span>
+                        </label>
+
                         <button
                             className="auth-btn-primary"
                             onClick={() => handleEmailSubmit()}
-                            disabled={loading || !email}
+                            disabled={loading || !email || !termsAgreed}
                         >
                             {loading ? 'Sending...' : 'Next →'}
                         </button>

@@ -405,5 +405,16 @@
     "deleteConfirm": "この画像を削除しますか？",
     "expired": "期限切れ",
     "expiredDesc": "1時間経過したため自動削除されました"
-  }
+  },
+  "chat.imageLimit.title": "古い画像は移動しました",
+  "chat.imageLimit.message": "チャットには直近10枚の画像のみ表示されます。それ以前の画像は生成履歴で最大1時間ご覧いただけます。",
+  "chat.imageLimit.button": "生成履歴を見る",
+  "chat.imageLimit.close": "了解",
+  "img2imgConsent.modal.title": "画像アップロード同意",
+  "img2imgConsent.modal.subtitle": "生成前にご確認ください",
+  "img2imgConsent.modal.check0": "18歳以上であり、利用規約および関連法令を遵守します。",
+  "img2imgConsent.modal.check1": "この画像の使用権を持っています。未成年者を含まず、第三者の権利を侵害しません。",
+  "img2imgConsent.modal.check2": "生成されたコンテンツを第三者に共有・公開しません。",
+  "img2imgConsent.modal.cancel": "キャンセル",
+  "img2imgConsent.modal.confirm": "同意して生成"
 }

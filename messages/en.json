@@ -410,5 +410,16 @@
     "deleteConfirm": "Delete this record?",
     "expired": "Expired",
     "expiredDesc": "Auto-deleted after 1 hour"
-  }
+  },
+  "chat.imageLimit.title": "Older images moved",
+  "chat.imageLimit.message": "Only the 10 most recent images are shown in chat. Older images are available in your Generation History for up to 1 hour.",
+  "chat.imageLimit.button": "View Generation History",
+  "chat.imageLimit.close": "Got it",
+  "img2imgConsent.modal.title": "Image Upload Agreement",
+  "img2imgConsent.modal.subtitle": "Please confirm before generating",
+  "img2imgConsent.modal.check0": "I am 18+ and comply with the Terms of Service and all applicable laws.",
+  "img2imgConsent.modal.check1": "I have the right to use this image. It does not contain minors or infringe on any third party's rights.",
+  "img2imgConsent.modal.check2": "I will not share or publish the generated content to third parties.",
+  "img2imgConsent.modal.cancel": "Cancel",
+  "img2imgConsent.modal.confirm": "Agree & Generate"
 }

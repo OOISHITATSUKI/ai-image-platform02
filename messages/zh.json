@@ -369,5 +369,16 @@
     "complianceCheck": "I have read and acknowledged the above.",
     "prohibitedCheck": "I reiterate that I will not generate prohibited content (minors, real people, etc.).",
     "startButton": "Start Generating"
-  }
+  },
+  "chat.imageLimit.title": "旧图片已移动",
+  "chat.imageLimit.message": "聊天中仅显示最近10张图片。更早的图片可在生成历史中查看，保留时间为1小时。",
+  "chat.imageLimit.button": "查看生成历史",
+  "chat.imageLimit.close": "知道了",
+  "img2imgConsent.modal.title": "图片上传协议",
+  "img2imgConsent.modal.subtitle": "生成前请确认",
+  "img2imgConsent.modal.check0": "我已满18岁，并遵守服务条款及相关法律。",
+  "img2imgConsent.modal.check1": "我拥有此图片的使用权。图片不包含未成年人，也不侵犯任何第三方权利。",
+  "img2imgConsent.modal.check2": "我不会将生成的内容分享或发布给第三方。",
+  "img2imgConsent.modal.cancel": "取消",
+  "img2imgConsent.modal.confirm": "同意并生成"
 }
