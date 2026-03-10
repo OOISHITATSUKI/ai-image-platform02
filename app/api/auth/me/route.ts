@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { firstGenerationConfirmed, username } = await req.json();
+        const { firstGenerationConfirmed, username, locale, theme } = await req.json();
 
         let updated = false;
 
@@ -108,6 +108,14 @@ export async function POST(req: NextRequest) {
 
         if (username !== undefined && typeof username === 'string' && username.trim().length > 0) {
             user.username = username.trim();
+            updated = true;
+        }
+        if (locale !== undefined && typeof locale === 'string') {
+            user.locale = locale;
+            updated = true;
+        }
+        if (theme !== undefined && typeof theme === 'string') {
+            user.theme = theme;
             updated = true;
         }
 

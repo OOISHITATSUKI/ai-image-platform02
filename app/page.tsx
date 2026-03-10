@@ -164,15 +164,20 @@ function TryItNowSection() {
                     )}
                     {demoState === 'result' && resultImage && (
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(220,38,38,0.2)', boxShadow: '0 0 40px rgba(220,38,38,0.1)', maxWidth: 360, margin: '0 auto 24px' }}>
-                                <img src={resultImage} alt="Generated" style={{ width: '100%', display: 'block' }} />
+                            <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(220,38,38,0.2)', boxShadow: '0 0 40px rgba(220,38,38,0.1)', maxWidth: 360, margin: '0 auto 24px', position: 'relative' }}>
+                                <img src={resultImage} alt="Generated" style={{ width: '100%', display: 'block', pointerEvents: 'none', userSelect: 'none' }} draggable={false} onContextMenu={e => e.preventDefault()} />
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent' }} onContextMenu={e => e.preventDefault()} />
+                                <div style={{ position: 'absolute', bottom: 12, right: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.6)', fontSize: 10, color: '#888', fontWeight: 600, letterSpacing: '0.5px' }}>PREVIEW · 512px</div>
                             </div>
                             <div className="hp-signup-banner">
                                 <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Want more? Sign up free!</div>
-                                    <div style={{ fontSize: 13, color: '#888' }}>Get 20 free credits · HD quality · Unlimited styles</div>
+                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🔥 Like what you see? Get HD quality!</div>
+                                    <div style={{ fontSize: 13, color: '#888' }}>Sign up free → 20 credits · HD 1024px · Download · Unlimited styles</div>
                                 </div>
                                 <Link href="/register" className="hp-btn-primary" style={{ whiteSpace: 'nowrap' }}>Sign Up Free →</Link>
+                            </div>
+                            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+                                <Link href="/register" style={{ fontSize: 14, color: '#e5342a', fontWeight: 600, textDecoration: 'none' }}>Create Account for HD Download →</Link>
                             </div>
                             <button onClick={handleReset} className="hp-btn-text">↺ Generate another</button>
                         </div>
@@ -237,8 +242,8 @@ export default function HomePage() {
                 <div className="hp-hero-inner">
                     <div>
                         <div className="hp-label"><span className="hp-pulse">●</span> AI-Powered Generation</div>
-                        <h1 className="hp-title">Your Imagination,<br /><span className="hp-accent-text">Now Real.</span></h1>
-                        <p className="hp-subtitle">Describe what you imagine. Our AI creates stunning, photorealistic images instantly. No experience needed.</p>
+                        <h1 className="hp-title">AI Undress Tool.<br /><span className="hp-accent-text">Upload a photo. Remove clothing.</span><br />Done in 8 seconds.</h1>
+                        <p className="hp-subtitle">Upload any photo and our AI removes clothing instantly. Photorealistic results. No experience needed. Free to start.</p>
                         <div className="hp-mobile-preview">
                             {[0, 1].map(i => (
                                 <div key={i} className="hp-mobile-preview-card">
@@ -248,11 +253,11 @@ export default function HomePage() {
                             ))}
                         </div>
                         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 48 }}>
-                            <Link href="/editor" className="hp-btn-primary" onClick={() => handleToolClick('txt2img')}>Create Your First Image — Free <span style={{ fontSize: 18 }}>→</span></Link>
+                            <Link href="/register" className="hp-btn-primary">Try Undress AI — Free <span style={{ fontSize: 18 }}>→</span></Link>
                             <a href="#hp-gallery" className="hp-btn-ghost">View Gallery</a>
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {['Realistic', 'Anime', 'Digital Art', 'Fantasy', 'Portrait'].map(tag => (
+                            {['Undress AI', 'Face Swap', 'Nude Mode', 'Inpaint', 'Free Trial'].map(tag => (
                                 <span key={tag} className="hp-tag">{tag}</span>
                             ))}
                         </div>

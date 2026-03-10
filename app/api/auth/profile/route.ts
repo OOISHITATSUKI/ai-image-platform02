@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
     findUserByEmail,
     findUserByUsername,
-    readUsers,
     saveUser,
     signToken,
 } from '@/lib/auth';
-import { checkAndNotifyUserMilestone } from '@/lib/email';
 
 // POST: STEP 6 — Profile setup (username, date of birth, country)
 export async function POST(req: NextRequest) {
@@ -74,11 +72,6 @@ export async function POST(req: NextRequest) {
         user.country = country;
         user.status = 'active';
         saveUser(user);
-
-        // Check user milestone (100 active users)
-        const allUsers = readUsers();
-        const activeCount = Object.values(allUsers).filter(u => u.status === 'active').length;
-        checkAndNotifyUserMilestone(activeCount).catch(console.error);
 
         // Generate JWT token
         const token = signToken(user.id, user.email);

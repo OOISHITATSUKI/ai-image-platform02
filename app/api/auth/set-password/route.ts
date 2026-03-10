@@ -4,9 +4,10 @@ import {
     saveUser,
     hashPassword,
     validatePasswordStrength,
+    signToken,
 } from '@/lib/auth';
 
-// POST: STEP 3 — Password creation
+// POST: STEP 3 — Password creation + immediate activation
 export async function POST(req: NextRequest) {
     try {
         const { email, password, confirmPassword } = await req.json();
@@ -34,14 +35,31 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid registration step' }, { status: 400 });
         }
 
-        // Hash and save password
+        // Hash and save password, activate account immediately
         user.passwordHash = await hashPassword(password);
-        user.status = 'pending_agreements';
+        user.status = 'active';
+        user.username = user.email.split('@')[0];
         saveUser(user);
+
+        // Generate JWT token
+        const token = signToken(user.id, user.email);
 
         return NextResponse.json({
             success: true,
-            message: 'Password set successfully',
+            message: 'Account created successfully!',
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                plan: user.plan,
+                credits: user.credits,
+                locale: user.locale,
+                theme: user.theme,
+                status: user.status,
+                firstGenerationConfirmed: user.firstGenerationConfirmed,
+                termsAgreedAt: user.termsAgreedAt,
+            },
         });
     } catch (error) {
         console.error('Set password error:', error);
