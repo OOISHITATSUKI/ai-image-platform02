@@ -13,7 +13,7 @@ const getResend = () => {
   }
   return resendInstance;
 };
-const FROM = process.env.RESEND_FROM || 'Image Nude <noreply@send.imagenude.com>';
+const FROM = process.env.RESEND_FROM || 'Image Nude <noreply@imagenude.com>';
 
 export async function sendOTPEmail(to: string, otp: string, type: 'register' | 'login' | 'reset' = 'register') {
   const subjects: Record<string, string> = {
