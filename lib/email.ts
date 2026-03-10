@@ -1,4 +1,6 @@
 import { Resend } from 'resend';
+import fs from 'fs';
+import path from 'path';
 
 let resendInstance: Resend | null = null;
 const getResend = () => {
@@ -64,4 +66,69 @@ export async function sendOTPEmail(to: string, otp: string, type: 'register' | '
     console.error('[Email] Error:', err);
     return false;
   }
+}
+
+// ── Admin Milestone Notification ──────────────────────────────
+const ADMIN_EMAIL = 'ooisidegesu@gmail.com';
+const MILESTONE_FLAG_FILE = path.join(process.cwd(), 'data', 'milestone_100_sent.flag');
+
+export async function checkAndNotifyUserMilestone(activeUserCount: number): Promise<void> {
+    if (activeUserCount < 100) return;
+
+    // Only send once
+    if (fs.existsSync(MILESTONE_FLAG_FILE)) return;
+
+    try {
+        const resend = getResend();
+        if (!resend) {
+            console.error('[Email] Cannot send milestone notification: Resend not initialized.');
+            return;
+        }
+
+        const html = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #0a0a1a; padding: 40px 20px;">
+                <div style="max-width: 520px; margin: auto; background: #1a1a2e; border-radius: 12px; padding: 40px; border: 1px solid #2a2a4a;">
+                    <h1 style="color: #c084fc; font-size: 28px; margin: 0 0 16px; text-align: center;">🎉 Milestone Reached!</h1>
+                    <p style="color: #e0e0ee; font-size: 18px; text-align: center; margin: 0 0 24px;">
+                        登録ユーザー数が <strong style="color: #22c55e; font-size: 24px;">${activeUserCount}人</strong> に達しました！
+                    </p>
+                    <div style="background: #0f0f23; border-radius: 8px; padding: 20px; margin: 0 0 24px;">
+                        <p style="color: #9999ae; font-size: 14px; margin: 0 0 8px;">📊 Next Steps:</p>
+                        <ul style="color: #b0b0c8; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                            <li>Supabaseへのデータ移行を検討</li>
+                            <li>JSONファイルのパフォーマンス監視</li>
+                            <li>スケーリング計画の策定</li>
+                        </ul>
+                    </div>
+                    <p style="color: #6b6b85; font-size: 12px; text-align: center; margin: 0;">
+                        Image Nude AI — Admin Notification
+                    </p>
+                </div>
+            </div>
+        `;
+
+        const { error } = await resend.emails.send({
+            from: FROM,
+            to: ADMIN_EMAIL,
+            subject: '🎉【Image Nude】登録ユーザー100人達成！',
+            html,
+        });
+
+        if (error) {
+            console.error('[Email] Milestone notification failed:', error);
+            return;
+        }
+
+        // Write flag file to prevent duplicate sends
+        const dir = path.dirname(MILESTONE_FLAG_FILE);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(MILESTONE_FLAG_FILE, JSON.stringify({
+            sentAt: new Date().toISOString(),
+            userCount: activeUserCount,
+        }));
+
+        console.log(`[Email] Milestone notification sent! Active users: ${activeUserCount}`);
+    } catch (err) {
+        console.error('[Email] Milestone notification error:', err);
+    }
 }
