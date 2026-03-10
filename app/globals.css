@@ -4476,3 +4476,538 @@ textarea:focus {
     from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
     to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
+
+/* ── Homepage (hp-) Styles ── */
+.hp-root { min-height: 100vh; background: #08080c; color: #e8e6e3; font-family: 'Outfit', system-ui, sans-serif; overflow-x: hidden; }
+.hp-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: 0.15; pointer-events: none; z-index: 0; }
+.hp-section { position: relative; }
+.hp-label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2); border-radius: 100px; font-size: 12px; font-weight: 600; color: #f87171; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 20px; }
+.hp-pulse { font-size: 8px; animation: hpPulse 2s ease infinite; }
+@keyframes hpPulse { 0%,100%{opacity:0.6}50%{opacity:1} }
+.hp-heading { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 0; }
+.hp-accent-text { background: linear-gradient(135deg,#f87171,#dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hp-subtext { font-size: 16px; color: #666; line-height: 1.6; }
+.hp-hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 80px 40px; position: relative; transition: all 0.8s cubic-bezier(0.4,0,0.2,1); }
+.hp-hero-inner { max-width: 1200px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.hp-title { font-size: 56px; font-weight: 900; line-height: 1.08; letter-spacing: -2px; margin-bottom: 24px; }
+.hp-subtitle { font-size: 17px; line-height: 1.7; color: #777; max-width: 420px; margin-bottom: 40px; }
+.hp-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; transform: perspective(1000px) rotateY(-5deg) rotateX(2deg); }
+.hp-btn-primary { display: inline-flex; align-items: center; gap: 10px; padding: 16px 40px; background: linear-gradient(135deg,#dc2626 0%,#b91c1c 50%,#991b1b 100%); color: #fff; border: none; border-radius: 60px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); text-decoration: none; letter-spacing: 0.3px; box-shadow: 0 0 40px rgba(220,38,38,0.3),0 4px 20px rgba(0,0,0,0.4); font-family: inherit; }
+.hp-btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 60px rgba(220,38,38,0.5),0 8px 32px rgba(0,0,0,0.5); }
+.hp-btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: rgba(255,255,255,0.04); color: #ccc; border: 1px solid rgba(255,255,255,0.1); border-radius: 60px; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; text-decoration: none; font-family: inherit; }
+.hp-btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #fff; }
+.hp-btn-text { padding: 10px 20px; background: transparent; border: none; color: #555; font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500; margin-top: 8px; }
+.hp-btn-text:hover { color: #999; }
+.hp-tag { display: inline-block; padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; font-size: 12px; color: #888; font-weight: 500; }
+.hp-gallery-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); background: linear-gradient(145deg,#1a1a24,#12121a); border: 1px solid rgba(255,255,255,0.06); aspect-ratio: 3/4; }
+.hp-gallery-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(220,38,38,0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(220,38,38,0.1); }
+.hp-card-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; opacity: 0.15; }
+.hp-card-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent,rgba(0,0,0,0.85)); opacity: 0; transition: opacity 0.3s ease; }
+.hp-gallery-card:hover .hp-card-overlay { opacity: 1; }
+.hp-stats-bar { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.01); }
+.hp-stats-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+.hp-stat { text-align: center; padding: 20px; }
+.hp-stat-value { font-size: 36px; font-weight: 900; color: #fff; letter-spacing: -1px; margin-bottom: 4px; }
+.hp-stat-label { font-size: 13px; color: #666; font-weight: 500; }
+.hp-step-num { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg,rgba(220,38,38,0.15),rgba(220,38,38,0.05)); border: 1px solid rgba(220,38,38,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #f87171; margin: 0 auto 16px; }
+.hp-step-connector { flex: 1; height: 1px; background: linear-gradient(90deg,rgba(220,38,38,0.3),rgba(220,38,38,0.05)); margin-top: 24px; }
+.hp-feature-card { padding: 32px; border-radius: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.4s ease; text-align: center; }
+.hp-feature-card:hover,.hp-feature-card.active { background: rgba(220,38,38,0.06); border-color: rgba(220,38,38,0.3); transform: translateY(-4px); }
+.hp-review-card { padding: 28px; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s ease; }
+.hp-review-card:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+.hp-footer { padding: 40px; border-top: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+.hp-footer-logo { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg,#dc2626,#991b1b); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #fff; }
+.hp-demo-card { background: linear-gradient(145deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px; backdrop-filter: blur(20px); box-shadow: 0 20px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05); }
+.hp-dropzone { border: 2px dashed rgba(255,255,255,0.1); border-radius: 16px; padding: 64px 40px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+.hp-dropzone:hover,.hp-dropzone.active { border-color: rgba(220,38,38,0.4); background: rgba(220,38,38,0.03); }
+.hp-drop-icon { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg,rgba(220,38,38,0.12),rgba(220,38,38,0.04)); border: 1px solid rgba(220,38,38,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+.hp-trust-row { display: flex; gap: 24px; font-size: 12px; color: #555; }
+.hp-compare-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; }
+.hp-img-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.hp-img-frame { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); aspect-ratio: 3/4; background: #111; }
+.hp-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hp-img-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(145deg,#1a1215,#12101a); border-style: dashed; }
+.hp-arrow-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.hp-arrow-circle { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#dc2626,#991b1b); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 0 30px rgba(220,38,38,0.3); }
+.hp-pulse-glow { animation: hpPulse 1s ease infinite; box-shadow: 0 0 40px rgba(220,38,38,0.4); }
+.hp-progress-track { max-width: 400px; margin: 0 auto; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.hp-progress-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg,#dc2626,#f87171); transition: width 0.3s ease; box-shadow: 0 0 12px rgba(220,38,38,0.5); }
+.hp-preview-badge { position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 100px; background: rgba(0,0,0,0.7); font-size: 10px; font-weight: 600; color: #888; border: 1px solid rgba(255,255,255,0.1); }
+.hp-signup-banner { background: linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02)); border: 1px solid rgba(220,38,38,0.15); border-radius: 16px; padding: 24px 32px; margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.hp-section-pad { padding: 100px 40px; }
+.hp-section-pad-lg { padding: 120px 40px; }
+.hp-steps-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: start; }
+.hp-gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.hp-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.hp-reviews-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.hp-cta-heading { font-size: 52px; font-weight: 900; letter-spacing: -2px; margin-bottom: 20px; line-height: 1.1; }
+/* モバイル専用ヒーロー画像プレビュー — デスクトップでは非表示 */
+.hp-mobile-preview { display: none; }
+.hp-mobile-preview-card { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.hp-mobile-preview-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hp-mobile-preview-badge { position: absolute; bottom: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.7); font-size: 10px; font-weight: 600; color: #f87171; border: 1px solid rgba(220,38,38,0.2); }
+@media (max-width: 900px) { .hp-hero-inner{grid-template-columns:1fr;gap:40px} .hp-hero-grid{display:none} .hp-title{font-size:36px} .hp-stats-inner{grid-template-columns:repeat(2,1fr)} .hp-compare-grid{grid-template-columns:1fr;gap:16px} .hp-arrow-col{flex-direction:row} .hp-footer{flex-direction:column;gap:16px;text-align:center} .hp-mobile-preview{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0 32px} }
+@media (max-width: 768px) {
+  .hp-root { overflow-x: hidden; }
+  .hp-hero { padding: 100px 20px 40px; min-height: auto; }
+  .hp-heading { font-size: 28px; }
+  .hp-title { font-size: 28px; }
+  .hp-subtitle { font-size: 15px; }
+  .hp-subtext { font-size: 14px; }
+  .hp-demo-card { padding: 20px; }
+
+  /* セクションのパディングをモバイル向けに縮小 */
+  .hp-section-pad { padding: 60px 16px; }
+  .hp-section-pad-lg { padding: 80px 16px; }
+
+  /* Hero CTA ボタン: フルワイド */
+  .hp-btn-primary { padding: 14px 28px; font-size: 14px; text-align: center; justify-content: center; width: 100%; box-sizing: border-box; }
+  .hp-btn-ghost { padding: 12px 24px; font-size: 14px; text-align: center; justify-content: center; width: 100%; box-sizing: border-box; }
+
+  /* 3ステップ: 縦並び */
+  .hp-steps-grid { display: flex; flex-direction: column; gap: 32px; }
+  .hp-step-connector { display: none; }
+
+  /* ギャラリー: 2列 */
+  .hp-gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  /* Gallery ラッパーのパディング */
+  .hp-gallery-wrap { padding: 0 16px !important; }
+
+  /* Features: 1列 */
+  .hp-features-grid { grid-template-columns: 1fr; gap: 12px; }
+  .hp-feature-card { padding: 24px 20px; }
+
+  /* レビュー: 1列 */
+  .hp-reviews-grid { grid-template-columns: 1fr; gap: 12px; }
+  .hp-review-card { padding: 20px; }
+
+  /* Stats: 2列 */
+  .hp-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .hp-stat-value { font-size: 28px; }
+
+  /* CTA セクション */
+  .hp-cta-heading { font-size: 28px; letter-spacing: -1px; }
+
+  /* フッター */
+  .hp-footer { padding: 24px 16px; flex-direction: column; gap: 16px; text-align: center; }
+
+  /* Demo signup banner */
+  .hp-signup-banner { padding: 16px; flex-direction: column; text-align: center; }
+
+  /* glow エフェクト: モバイルでは控えめに */
+  .hp-glow { opacity: 0.06 !important; }
+
+  /* tag 行 */
+  .hp-tag { font-size: 11px; padding: 4px 10px; }
+}
+
+/* ── Demo Section Options ── */
+.hp-demo-label { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.hp-demo-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.hp-demo-opt { padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.hp-demo-opt:hover { border-color: rgba(220,38,38,0.4); color: #fff; }
+.hp-demo-opt.active { border-color: #dc2626; background: rgba(220,38,38,0.15); color: #fff; font-weight: 600; }
+.hp-demo-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+.hp-demo-input:focus { border-color: rgba(220,38,38,0.4); }
+.hp-demo-input::placeholder { color: #555; }
+
+/* ── Bust Slider ── */
+.hp-bust-slider-wrap { display: flex; flex-direction: column; gap: 8px; }
+.hp-bust-slider { width: 100%; accent-color: #dc2626; cursor: pointer; height: 4px; }
+.hp-bust-labels { display: flex; justify-content: space-between; font-size: 11px; color: #555; }
+.hp-demo-textarea { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit; outline: none; box-sizing: border-box; transition: border-color 0.2s; resize: none; line-height: 1.6; }
+.hp-demo-textarea:focus { border-color: rgba(220,38,38,0.4); }
+.hp-demo-textarea::placeholder { color: #555; }
+
+
+/* ============================================================
+   IMAGE NUDE — Mobile Optimization Patch
+   対象ファイル: app/globals.css の末尾に追記
+
+   修正内容:
+   1. iOS Safari dvh 対応 (キーボード表示時のレイアウト崩れ)
+   2. Safe Area Inset 対応 (ノッチ/Dynamic Island/ホームインジケーター)
+   3. iOS テキストエリア自動ズーム防止 (font-size: 16px 強制)
+   4. Settings Panel → ボトムシート化 (スマホ UX 改善)
+   5. タッチターゲット 44px 確保 (input-tool-btn, send-btn 等)
+   6. モバイルヘッダーにクレジット残高表示エリア追加
+   7. チャット入力エリアの safe area 対応
+   8. -webkit-tap-highlight-color 除去 (タップ時の青枠消去)
+   ============================================================ */
+
+
+/* ── 1. Global: tap highlight 除去 & touch action ── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+
+/* ── 2. iOS Safari: dvh 対応 ── */
+/* 100vh はiOSでキーボード表示時に崩れる。dvh を使う */
+@supports (height: 100dvh) {
+  .app-shell,
+  body {
+    height: 100dvh;
+  }
+
+  @media (max-width: 768px) {
+    .app-shell {
+      height: 100dvh;
+    }
+
+    .main-content {
+      height: calc(100dvh - var(--header-height));
+    }
+
+    .sidebar {
+      height: 100dvh;
+    }
+  }
+}
+
+
+/* ── 3. Safe Area Inset 対応 (iPhone ノッチ / ホームバー) ── */
+@media (max-width: 768px) {
+
+  /* モバイルヘッダー: 上部 safe area */
+  .mobile-header {
+    padding-top: max(0px, env(safe-area-inset-top));
+    height: calc(var(--header-height) + env(safe-area-inset-top));
+    padding-left: max(16px, calc(16px + env(safe-area-inset-left)));
+    padding-right: max(16px, calc(16px + env(safe-area-inset-right)));
+  }
+
+  /* app-shell: ヘッダー高さ調整 */
+  .app-shell {
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+  }
+
+  /* チャット入力エリア: 下部 safe area (ホームバー) */
+  .chat-input-container {
+    padding-bottom: max(18px, calc(12px + env(safe-area-inset-bottom)));
+  }
+
+  /* サイドバー: safe area 対応 */
+  .sidebar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+
+/* ── 4. iOS テキストエリア・入力フォーム 自動ズーム防止 ── */
+/* iOS Safari は font-size < 16px の input/textarea でページをズームする */
+@media (max-width: 768px) {
+  .chat-textarea,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important; /* ズーム防止の最低ライン */
+  }
+
+  /* テキストエリアの最大高さをモバイル向けに制限 */
+  .chat-textarea {
+    max-height: 120px;
+    padding-right: 52px; /* send-btn のスペース確保 */
+  }
+}
+
+
+/* ── 5. タッチターゲット 44px 確保 ── */
+@media (max-width: 768px) {
+
+  /* ツールボタン (📎 Attach / FaceSwap 等) */
+  .input-tool-btn {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+  }
+
+  /* 送信ボタン */
+  .send-btn {
+    width: 44px;
+    height: 44px;
+    bottom: 6px;
+    right: 6px;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+  }
+
+  /* メッセージアクションボタン */
+  .msg-action-btn {
+    min-height: 40px;
+    padding: 10px 8px;
+    font-size: 0.78rem;
+  }
+
+  /* フィルタータブ */
+  .filter-tab {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* サイドバー内ナビアイテム */
+  .nav-item,
+  .chat-history-item {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
+  /* モバイルヘッダーボタン */
+  .mobile-menu-btn,
+  .mobile-settings-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* pill ボタン (Aspect Ratio 等) */
+  .pill {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  /* サムネイル削除ボタン */
+  .upload-thumb-remove {
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
+  }
+}
+
+
+/* ── 6. Settings Panel → ボトムシート化 ── */
+/* スマホでは上から降りてくる Settings Panel をボトムシートに変更 */
+@media (max-width: 768px) {
+
+  .settings-panel {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 75vh !important;
+    height: auto;
+    border-radius: 20px 20px 0 0 !important;
+    border-top: 2px solid var(--primary) !important;
+    border-bottom: none !important;
+    border-right: none !important;
+    z-index: 3500 !important;
+    transition: transform var(--transition-normal), opacity var(--transition-normal) !important;
+    overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom);
+
+    /* ボトムシートのドラッグハンドル風デコレーション */
+    padding-top: 8px;
+  }
+
+  /* ボトムシート上部のハンドルバー */
+  .settings-panel::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--border-hover);
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+
+  /* 非表示状態: 下にスライドアウト (上ではなく下へ) */
+  .settings-panel.hidden {
+    transform: translateY(100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* 表示状態 */
+  .settings-panel:not(.hidden) {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+
+  /* オーバーレイ: settings panel 表示時に背景を暗くする */
+  .settings-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 3499;
+  }
+
+  .settings-overlay.visible {
+    display: block;
+  }
+
+  /* settings-panel-scroll のパディング調整 */
+  .settings-panel-scroll {
+    padding: 12px 16px 24px;
+  }
+
+  /* ヘッダー */
+  .settings-panel-header {
+    padding: 0 16px 12px;
+  }
+}
+
+
+/* ── 7. モバイルヘッダー: クレジット残高 表示エリア ── */
+@media (max-width: 768px) {
+
+  .mobile-header {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* モバイルロゴを中央寄せ */
+  .mobile-logo {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* クレジット表示バッジ (新規追加 — ClientLayout.tsx で実装) */
+  .mobile-credit-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .mobile-credit-badge.low {
+    color: var(--error);
+    border-color: var(--error);
+    background: rgba(239, 68, 68, 0.08);
+    animation: pulse-red 2s infinite;
+  }
+}
+
+/* PC では非表示 */
+.mobile-credit-badge {
+  display: none;
+}
+
+
+/* ── 8. チャット入力エリア: スクロール時に隠れない対策 ── */
+@media (max-width: 768px) {
+
+  /* chat-area の overflow を正しく設定 */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* メッセージ一覧がスクロール領域を占有 */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOS慣性スクロール */
+    overscroll-behavior-y: contain;   /* 親へのスクロール伝播を防ぐ */
+    padding: 12px 10px;
+  }
+
+  /* 入力エリアは縮まない */
+  .chat-input-container {
+    flex-shrink: 0;
+    position: relative; /* fixed外しで入力欄が隠れる問題を解消 */
+  }
+
+  /* ツールボタン行を折り返し可能に */
+  .chat-input-tools {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+}
+
+
+/* ── 9. ホーム画面のモバイル最適化 ── */
+@media (max-width: 768px) {
+
+  .home-view {
+    padding: 20px 16px;
+  }
+
+  .home-title {
+    font-size: 1.8rem;
+  }
+
+  .home-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .tool-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tool-card {
+    padding: 16px 14px;
+  }
+}
+
+
+/* ── 10. アップロードサムネイル: タップしやすく ── */
+@media (max-width: 768px) {
+
+  .upload-thumb {
+    width: 60px; /* 少し大きく */
+    min-height: 44px;
+  }
+
+  .thumb-img-container {
+    width: 52px;
+    height: 52px;
+  }
+
+  /* ドラッグ&ドロップ説明テキストは非表示 (モバイルでは不要) */
+  .drag-overlay-content .drag-text {
+    font-size: 0.85rem;
+  }
+}
+
+
+/* ── 11. 生成画像: モバイルでフルワイド表示 ── */
+@media (max-width: 768px) {
+  .message-image-wrapper img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: var(--radius-md);
+  }
+
+  /* 画像下のアクションボタンを見やすく */
+  .message-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 8px;
+  }
+}
+
+
+/* ── 12. スクロールバー: モバイルでは非表示 ── */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
