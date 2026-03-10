@@ -9,13 +9,15 @@ import FirstGenModal from '@/components/ui/FirstGenModal';
 import { useAppStore } from '@/lib/store';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const { theme, toggleSidebar, toggleSettingsPanel, isAuthenticated } = useAppStore();
+    const { theme, toggleSidebar, toggleSettingsPanel, isAuthenticated, settingsPanelVisible, user } = useAppStore();
     const [mounted, setMounted] = useState(false);
     const pathname = usePathname();
 
     // Pages that don't use the sidebar layout
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isPublicPage = pathname === '/terms' || pathname === '/privacy' || pathname === '/content-policy' || pathname === '/dmca' || pathname === '/2257' || pathname === '/help';
+    const isHomePage = pathname === '/';
+    const isLandingPage = pathname === '/undress-ai' || pathname === '/face-swap' || pathname === '/blog' || pathname?.startsWith('/blog/');
     const isAdminPage = pathname?.startsWith('/admin');
 
     // Prevent hydration mismatch and handle mobile initial state
@@ -35,6 +37,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     const data = await res.json();
                     // use setUser to trigger the chat loading logic
                     useAppStore.getState().setUser(data.user);
+                    // Ensure termsAgreedAt persists in store
+                    const currentUser = useAppStore.getState().user;
+                    if (currentUser && data.user.termsAgreedAt && !currentUser.termsAgreedAt) {
+                        useAppStore.setState({ user: { ...currentUser, termsAgreedAt: data.user.termsAgreedAt } });
+                    }
                     useAppStore.setState({ ageVerified: true });
                 } else {
                     // Invalid token -> clean up securely using the store logout
@@ -47,11 +54,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
         restoreSession();
 
-        if (window.innerWidth <= 768) {
-            // Force sidebar and settings collapsed on mobile mount
-            useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });
-        }
     }, []);
+
+    // Handle mobile initial state (only if no persisted value exists)
+    useEffect(() => {
+        if (!mounted) return;
+        if (window.innerWidth <= 768) {
+            const stored = localStorage.getItem('videogen-storage-v3');
+            if (!stored) {
+                useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });
+            }
+        }
+    }, [mounted]);
 
     // Apply theme to document
     useEffect(() => {
@@ -90,6 +104,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         );
     }
 
+    // Homepage renders standalone (has its own full design)
+    if (isHomePage) {
+        return (
+            <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
+                {children}
+            </div>
+        );
+    }
+
+    // Landing pages and blog pages render standalone (no sidebar, scrollable)
+    if (isLandingPage) {
+        return (
+            <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
+                {children}
+            </div>
+        );
+    }
+
     // Admin pages have their own layout
     if (isAdminPage) {
         return <>{children}</>;
@@ -101,24 +133,33 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             {isAuthenticated && <AgeGate />}
 
             {/* First generation confirmation modal */}
-            {isAuthenticated && <FirstGenModal />}
+            {/* FirstGenModal disabled - terms now handled at registration */}
 
             <div className="mobile-header">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>
                     ☰
                 </button>
                 <div className="mobile-logo">
-                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '36px' }} />
-                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '36px' }} />
+                    <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: '28px' }} />
+                    <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: '28px' }} />
                 </div>
-                <button
-                    className="mobile-settings-btn"
-                    onClick={toggleSettingsPanel}
-                    style={{ marginLeft: 'auto' }}
-                >
-                    ⚙️
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+                    {user && (
+                        <span className={`mobile-credit-badge ${user.credits <= 10 ? 'low' : ''}`}>
+                            ✨ {user.credits}
+                        </span>
+                    )}
+                    <button className="mobile-settings-btn" onClick={toggleSettingsPanel}>
+                        ⚙️
+                    </button>
+                </div>
             </div>
+
+            {/* Settings bottom sheet overlay (mobile only) */}
+            <div
+                className={`settings-overlay ${settingsPanelVisible ? 'visible' : ''}`}
+                onClick={toggleSettingsPanel}
+            />
 
             <div className="app-shell">
                 <Sidebar />

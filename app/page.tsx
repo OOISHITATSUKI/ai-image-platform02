@@ -399,7 +399,7 @@ export default function HomePage() {
                     <span style={{ fontSize: 15, fontWeight: 700, color: '#555' }}>ImageNude</span>
                 </div>
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                    {[{ label: 'AI Undress', href: '/undress-ai' }, { label: 'Face Swap', href: '/face-swap' }, { label: 'NSFW AI Guide', href: '/blog/how-to-generate-nsfw-ai-images' }, { label: 'Best Undress Tools', href: '/blog/best-ai-undress-tools' }, { label: 'Face Swap Guide', href: '/blog/ai-face-swap-adults' }, { label: 'Terms', href: '/terms' }, { label: 'Privacy', href: '/privacy' }, { label: 'Content Policy', href: '/content-policy' }, { label: 'DMCA', href: '/dmca' }, { label: '2257', href: '/2257' }].map(l => (
+                    {[{ label: 'AI Undress', href: '/undress-ai' }, { label: 'Face Swap', href: '/face-swap' }, { label: 'Blog', href: '/blog' }, { label: 'NSFW AI Guide', href: '/blog/how-to-generate-nsfw-ai-images' }, { label: 'Best Undress Tools', href: '/blog/best-ai-undress-tools' }, { label: 'Face Swap Guide', href: '/blog/ai-face-swap-adults' }, { label: 'Terms', href: '/terms' }, { label: 'Privacy', href: '/privacy' }, { label: 'Content Policy', href: '/content-policy' }, { label: 'DMCA', href: '/dmca' }, { label: '2257', href: '/2257' }].map(l => (
                         <Link key={l.label} href={l.href} style={{ color: '#444', textDecoration: 'none', fontSize: 13 }}>{l.label}</Link>
                     ))}
                 </div>

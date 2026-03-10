@@ -28,6 +28,8 @@ export default function ChatArea() {
         setMediaFilter,
         isGenerating,
         setIsGenerating,
+        submitTrigger,
+        img2vidImageUrl,
         settings,
         settingsPanelVisible,
         toggleSettingsPanel,
@@ -46,13 +48,18 @@ export default function ChatArea() {
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [showRegisterToast, setShowRegisterToast] = useState(false);
     const [inpaintMode, setInpaintMode] = useState(false);
+    const [reposeMode, setReposeMode] = useState(false);
+    const [poseType, setPoseType] = useState<string>('standing');
     const [showInpaintModal, setShowInpaintModal] = useState(false);
+    const [showImageLimitModal, setShowImageLimitModal] = useState(false);
+    const [showUploadConsentModal, setShowUploadConsentModal] = useState(false);
+    const [uploadConsentChecks, setUploadConsentChecks] = useState([false, false, false]);
+    const [uploadConsentConfirmed, setUploadConsentConfirmed] = useState(false);
+    const [pendingGenerate, setPendingGenerate] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
     // Security: Img2Img Consent
-    const [img2imgConsent, setImg2imgConsent] = useState<boolean[]>([false, false, false, false, false]);
-    const allConsentChecked = img2imgConsent.every(Boolean);
 
     const [isDragging, setIsDragging] = useState(false);
     const [draggedThumbIndex, setDraggedThumbIndex] = useState<number | null>(null);
@@ -330,30 +337,59 @@ export default function ChatArea() {
             }
         }
     }, [user]);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsChecks, setTermsChecks] = useState({ terms: false, content: false, age: false });
+
+    const handleAgreeTerms = async () => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        try {
+            const res = await fetch('/api/auth/agree-terms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            });
+            const data = await res.json();
+            if (res.ok && user) {
+                useAppStore.getState().setUser({ ...user, termsAgreedAt: data.termsAgreedAt });
+                setShowTermsModal(false);
+            }
+        } catch (err) {
+            console.error('Failed to agree terms:', err);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isGenerating) return;
+        // Terms agreement is now handled during registration
+
+        // Check upload consent for img2img/faceswap/inpaint
+        const genType = settings.generationType;
+        if ((genType === 'img2img' || genType === 'img_edit') && !uploadConsentConfirmed) {
+            setShowUploadConsentModal(true);
+            setPendingGenerate(true);
+            return;
+        }
 
         // ★ 追加: モード別バリデーション（UIをバイパスされた場合の防御）
         if (settings.generationType === 'img2img') {
-            if (faceSwapMode) {
+            if (reposeMode) {
+                if (uploads.length === 0) {
+                    setGenerationError(t('chat.reposeNoImage'));
+                    return;
+                }
+            } else if (faceSwapMode) {
                 if (uploads.length < 2) {
                     setGenerationError(t('chat.faceSwapNoImage'));
                     return;
                 }
-                if (!allConsentChecked) {
-                    setGenerationError(t('chat.pleaseCheckConsent'));
-                    return;
-                }
+
             } else if (inpaintMode) {
                 if (uploads.length === 0) {
                     setGenerationError(t('chat.uploadRequiredForInpaint'));
                     return;
                 }
-                if (!allConsentChecked) {
-                    setGenerationError(t('chat.pleaseCheckConsent'));
-                    return;
-                }
+
             } else {
                 // Standard img2img
                 if (uploads.length === 0) {
@@ -364,10 +400,7 @@ export default function ChatArea() {
                     setGenerationError(t('chat.promptRequired'));
                     return;
                 }
-                if (!allConsentChecked) {
-                    setGenerationError(t('chat.pleaseCheckConsent'));
-                    return;
-                }
+
             }
         }
 
@@ -412,7 +445,7 @@ export default function ChatArea() {
         const currentUploads = [...uploads];
         setInputText('');
         setUploads([]);
-        setImg2imgConsent([false, false, false, false, false]); // Reset consent on submit
+        // Consent reset removed - now handled by modal
         if (fileInputRef.current) fileInputRef.current.value = '';
 
         setIsGenerating(true);
@@ -463,8 +496,10 @@ export default function ChatArea() {
                         additionalImages,
                         faceSwapMode,
                         inpaintMode,
+                        reposeMode,
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                         nudeMode: settings.nudeMode ?? true,
+                        tagSettings,
                     }),
                 });
 
@@ -476,6 +511,7 @@ export default function ChatArea() {
 
                 setInpaintMode(false);
                 setFaceSwapMode(false);
+                setReposeMode(false);
 
                 // Add AI response for each generated image
                 const images = data.images || [];
@@ -576,17 +612,91 @@ export default function ChatArea() {
                 }
             }
         } else if (isVideoGeneration) {
-            // Video generation is still mock for now
-            await new Promise((r) => setTimeout(r, 2500 + Math.random() * 2000));
-            addMessage(chatId, {
-                role: 'assistant',
-                content: `Here's your video based on: "${userPrompt || 'uploaded reference'}" (mock — video API not yet connected)`,
-                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                generationType: settings.generationType,
-                model: settings.model,
-                isFavorite: false,
-                settings: { ...settings },
-            });
+            try {
+                const imageBase64 = img2vidImageUrl ?? '';
+                if (!imageBase64) {
+                    addMessage(chatId, { role: 'assistant', content: '画像をアップロードしてください。', generationType: settings.generationType, model: settings.model, isFavorite: false });
+                    setIsGenerating(false);
+                    return;
+                }
+                const actionTag = (tagSettings.fetish || [])
+                    .map((f: string) => ({
+                        fellatio: 'blowjob, oral sex',
+                        cowgirl: 'cowgirl position, riding on top',
+                        insertion: 'penetration, vaginal insertion',
+                        kiss: 'passionate kissing',
+                        missionary: 'missionary position',
+                        doggy: 'doggy style, from behind',
+                        standing: 'standing sex position',
+                        handjob: 'handjob, stroking penis',
+                        paizuri: 'paizuri, titjob',
+                    } as Record<string, string>)[f])
+                    .filter(Boolean)
+                    .join(', ');
+
+                const authToken = localStorage.getItem('auth_token') ?? '';
+                const res = await fetch('/api/video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                    },
+                    body: JSON.stringify({
+                        imageBase64,
+                        prompt: userPrompt,
+                        actionTag,
+                        duration: settings.duration,
+                        model: settings.model,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    const errorMsg = data.error === 'plan_upgrade_required'
+                        ? '動画生成は有料プランが必要です。アップグレードしてください。'
+                        : data.error === 'insufficient_credits'
+                        ? `クレジットが不足しています。必要: ${data.required} / 残り: ${data.current}`
+                        : data.error === 'duration_exceeded'
+                        ? '選択した動画時間は現在のプランでは利用できません。'
+                        : `動画生成に失敗しました: ${data.error}`;
+                    addMessage(chatId, {
+                        role: 'assistant',
+                        content: errorMsg,
+                        generationType: settings.generationType,
+                        model: settings.model,
+                        isFavorite: false,
+                    });
+                } else {
+                    addMessage(chatId, {
+                        role: 'assistant',
+                        content: '',
+                        videoUrl: data.videoUrl,
+                        generationType: settings.generationType,
+                        model: settings.model,
+                        isFavorite: false,
+                        settings: { ...settings },
+                    });
+                }
+            } catch (err) {
+                console.error('Video generation error:', err);
+                addMessage(chatId, {
+                    role: 'assistant',
+                    content: '動画生成中にエラーが発生しました。しばらくしてから再試してください。',
+                    generationType: settings.generationType,
+                    model: settings.model,
+                    isFavorite: false,
+                });
+            }
+        }
+
+        // Check if chat has more than 10 images - show modal
+        const currentChat = chats.find((c) => c.id === chatId);
+        if (currentChat) {
+            const imgCount = currentChat.messages.filter((m) => m.imageUrl).length;
+            if (imgCount > 10) {
+                setShowImageLimitModal(true);
+            }
         }
 
         setIsGenerating(false);
@@ -669,6 +779,14 @@ export default function ChatArea() {
         setDraggedThumbIndex(null);
     };
 
+    useEffect(() => {
+        console.log('submitTrigger changed:', submitTrigger);
+        if (submitTrigger > 0) {
+            console.log('calling handleSubmit from trigger');
+            handleSubmit(new Event('submit') as unknown as React.FormEvent);
+        }
+    }, [submitTrigger]);
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -710,6 +828,175 @@ export default function ChatArea() {
 
     return (
         <section className="chat-area">
+            {/* Upload Consent Modal */}
+            {showUploadConsentModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.75)', zIndex: 9999,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 20, backdropFilter: 'blur(8px)',
+                }} onClick={() => { setShowUploadConsentModal(false); setPendingGenerate(false); }}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, #1a1a2e 0%, #16162a 100%)',
+                        borderRadius: 16, padding: 0, maxWidth: 460, width: '100%',
+                        border: '1px solid rgba(124,92,252,0.2)',
+                        boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 40px rgba(124,92,252,0.1)',
+                        overflow: 'hidden',
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ height: 3, background: 'linear-gradient(90deg, #f59e0b, #7c5cfc, #f59e0b)', backgroundSize: '200% 100%' }} />
+                        <div style={{ padding: '28px 28px 24px' }}>
+                            <div style={{
+                                width: 56, height: 56, borderRadius: 14,
+                                background: 'rgba(245,158,11,0.12)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 16px', fontSize: 28
+                            }}>⚠️</div>
+                            <h2 style={{
+                                fontSize: '1.15rem', fontWeight: 700,
+                                color: '#e8e8f0', textAlign: 'center',
+                                marginBottom: 6, letterSpacing: '-0.01em'
+                            }}>{t('img2imgConsent.modal.title')}</h2>
+                            <p style={{
+                                fontSize: '0.82rem', color: '#8b8ba7',
+                                textAlign: 'center', marginBottom: 20
+                            }}>{t('img2imgConsent.modal.subtitle')}</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
+                                {[0, 1, 2].map((i) => (
+                                    <label key={i} style={{
+                                        display: 'flex', gap: 10, alignItems: 'flex-start',
+                                        cursor: 'pointer', fontSize: '0.84rem', color: '#d0d0e0',
+                                        lineHeight: 1.5, padding: '10px 14px', borderRadius: 10,
+                                        background: uploadConsentChecks[i] ? 'rgba(124,92,252,0.08)' : 'rgba(255,255,255,0.03)',
+                                        border: uploadConsentChecks[i] ? '1px solid rgba(124,92,252,0.25)' : '1px solid rgba(255,255,255,0.06)',
+                                        transition: 'all 0.2s',
+                                    }} onClick={() => {
+                                        const next = [...uploadConsentChecks];
+                                        next[i] = !next[i];
+                                        setUploadConsentChecks(next);
+                                    }}>
+                                        <input type="checkbox" checked={uploadConsentChecks[i]} readOnly
+                                            style={{ marginTop: 2, accentColor: '#7c5cfc', width: 16, height: 16, flexShrink: 0 }} />
+                                        <span>{t(`img2imgConsent.modal.check${i}`)}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button onClick={() => { setShowUploadConsentModal(false); setPendingGenerate(false); }}
+                                    style={{
+                                        flex: 1, padding: '12px 16px', borderRadius: 10,
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        color: '#8b8ba7', cursor: 'pointer',
+                                        fontSize: '0.88rem', fontWeight: 500,
+                                    }}>{t('img2imgConsent.modal.cancel')}</button>
+                                <button
+                                    disabled={!uploadConsentChecks.every(Boolean)}
+                                    onClick={() => {
+                                        setUploadConsentConfirmed(true);
+                                        setShowUploadConsentModal(false);
+                                        setPendingGenerate(false);
+                                        // Auto-submit after confirming
+                                        setTimeout(() => {
+                                            const btn = document.querySelector('.editor-send-btn') as HTMLButtonElement;
+                                            if (btn) btn.click();
+                                        }, 100);
+                                    }}
+                                    style={{
+                                        flex: 1, padding: '12px 16px', borderRadius: 10,
+                                        border: 'none',
+                                        background: uploadConsentChecks.every(Boolean)
+                                            ? 'linear-gradient(135deg, #7c5cfc 0%, #6a4ff0 100%)'
+                                            : '#333',
+                                        color: '#fff',
+                                        cursor: uploadConsentChecks.every(Boolean) ? 'pointer' : 'not-allowed',
+                                        fontSize: '0.88rem', fontWeight: 600,
+                                        boxShadow: uploadConsentChecks.every(Boolean) ? '0 4px 20px rgba(124,92,252,0.35)' : 'none',
+                                    }}>{t('img2imgConsent.modal.confirm')}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Image Limit Modal */}
+            {showImageLimitModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.75)', zIndex: 9999,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 20, backdropFilter: 'blur(8px)',
+                    animation: 'fadeIn 0.2s ease-out'
+                }} onClick={() => setShowImageLimitModal(false)}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, #1a1a2e 0%, #16162a 100%)',
+                        borderRadius: 16, padding: 0, maxWidth: 440, width: '100%',
+                        border: '1px solid rgba(124,92,252,0.2)',
+                        boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 40px rgba(124,92,252,0.1)',
+                        overflow: 'hidden',
+                        animation: 'slideUp 0.3s ease-out'
+                    }} onClick={e => e.stopPropagation()}>
+                        {/* Header gradient bar */}
+                        <div style={{
+                            height: 3,
+                            background: 'linear-gradient(90deg, #7c5cfc, #a78bfa, #7c5cfc)',
+                            backgroundSize: '200% 100%',
+                        }} />
+                        <div style={{ padding: '28px 28px 24px' }}>
+                            {/* Icon */}
+                            <div style={{
+                                width: 56, height: 56, borderRadius: 14,
+                                background: 'rgba(124,92,252,0.12)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 16px', fontSize: 28
+                            }}>🖼️</div>
+                            {/* Title */}
+                            <h2 style={{
+                                fontSize: '1.15rem', fontWeight: 700,
+                                color: '#e8e8f0', textAlign: 'center',
+                                marginBottom: 10, letterSpacing: '-0.01em'
+                            }}>{t('chat.imageLimit.title')}</h2>
+                            {/* Message */}
+                            <p style={{
+                                fontSize: '0.88rem', color: '#8b8ba7',
+                                textAlign: 'center', lineHeight: 1.65,
+                                marginBottom: 24, maxWidth: 340, margin: '0 auto 24px'
+                            }}>{t('chat.imageLimit.message')}</p>
+                            {/* Buttons */}
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button
+                                    onClick={() => setShowImageLimitModal(false)}
+                                    style={{
+                                        flex: 1, padding: '12px 16px', borderRadius: 10,
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        color: '#8b8ba7', cursor: 'pointer',
+                                        fontSize: '0.88rem', fontWeight: 500,
+                                        transition: 'all 0.2s',
+                                    }}
+                                >{t('chat.imageLimit.close')}</button>
+                                <button
+                                    onClick={() => {
+                                        setShowImageLimitModal(false);
+                                        window.location.href = '/history';
+                                    }}
+                                    style={{
+                                        flex: 1, padding: '12px 16px', borderRadius: 10,
+                                        border: 'none',
+                                        background: 'linear-gradient(135deg, #7c5cfc 0%, #6a4ff0 100%)',
+                                        color: '#fff', cursor: 'pointer',
+                                        fontSize: '0.88rem', fontWeight: 600,
+                                        boxShadow: '0 4px 20px rgba(124,92,252,0.35)',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >{t('chat.imageLimit.button')}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Terms Agreement Modal */}
+            {showTermsModal && (<div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}><div style={{background:'#1a1a2e',borderRadius:12,padding:32,maxWidth:480,width:'100%',border:'1px solid #2a2a3e'}}><h2 style={{fontSize:'1.2rem',fontWeight:700,marginBottom:8,color:'#e0e0e8'}}>Before You Start Generating</h2><p style={{fontSize:'0.85rem',color:'#8b8ba7',marginBottom:20}}>Please review and agree to continue.</p><div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:24}}><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.terms} onChange={(e)=>setTermsChecks(p=>({...p,terms:e.target.checked}))} style={{marginTop:3}}/><span>I agree to the <a href="/terms" target="_blank" style={{color:'#7c5cfc'}}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{color:'#7c5cfc'}}>Privacy Policy</a></span></label><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.content} onChange={(e)=>setTermsChecks(p=>({...p,content:e.target.checked}))} style={{marginTop:3}}/><span>I agree to the <a href="/content-policy" target="_blank" style={{color:'#7c5cfc'}}>Content Policy</a></span></label><label style={{display:'flex',gap:10,alignItems:'flex-start',cursor:'pointer',fontSize:'0.85rem',color:'#e0e0e8'}}><input type="checkbox" checked={termsChecks.age} onChange={(e)=>setTermsChecks(p=>({...p,age:e.target.checked}))} style={{marginTop:3}}/><span>I confirm I am 18+ and will not generate prohibited content (minors, real persons)</span></label></div><div style={{display:'flex',gap:10}}><button onClick={()=>setShowTermsModal(false)} style={{flex:1,padding:'10px 16px',borderRadius:8,border:'1px solid #2a2a3e',background:'transparent',color:'#8b8ba7',cursor:'pointer',fontSize:'0.9rem'}}>Cancel</button><button onClick={handleAgreeTerms} disabled={!termsChecks.terms||!termsChecks.content||!termsChecks.age} style={{flex:1,padding:'10px 16px',borderRadius:8,border:'none',background:termsChecks.terms&&termsChecks.content&&termsChecks.age?'linear-gradient(135deg,#7c5cfc,#6a4ff0)':'#333',color:'#fff',cursor:termsChecks.terms&&termsChecks.content&&termsChecks.age?'pointer':'not-allowed',fontSize:'0.9rem',fontWeight:600}}>Agree & Continue</button></div></div></div>)}
             {/* Filter Tabs + Settings Toggle */}
             <div className="chat-filter-tabs">
                 {filters.map((f) => (
@@ -812,11 +1099,13 @@ export default function ChatArea() {
             {/* Messages */}
             <div className="chat-messages" ref={chatContainerRef}>
                 {!activeChat || filteredMessages.length === 0 ? (
-                    <div className="chat-empty-state">
-                        <div className="empty-icon">🎨</div>
-                        <h3>{t('chat.empty')}</h3>
-                        <p>{t('chat.emptyDesc')}</p>
-                    </div>
+                    settings.generationType !== 'img2vid' && (
+                        <div className="chat-empty-state">
+                            <div className="empty-icon">🎨</div>
+                            <h3>{t('chat.empty')}</h3>
+                            <p>{t('chat.emptyDesc')}</p>
+                        </div>
+                    )
                 ) : (
                     filteredMessages.map((msg) => (
                         <div key={msg.id} className={`message-bubble ${msg.role}`}>
@@ -899,6 +1188,21 @@ export default function ChatArea() {
                                             >
                                                 🔄 {t('chat.actionFaceSwap')}
                                             </button>
+                                            <button
+                                                className="msg-action-btn"
+                                                onClick={() => {
+                                                    updateSettings({ generationType: 'img2img' });
+                                                    reUploadImage(msg.imageUrl!).then(ok => {
+                                                        if (ok) {
+                                                            setReposeMode(true);
+                                                            setFaceSwapMode(false);
+                                                            setInpaintMode(false);
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                🎯 Change Pose
+                                            </button>
                                         </>
                                     )}
                                 </div>
@@ -908,7 +1212,7 @@ export default function ChatArea() {
                 )}
 
                 {/* Generating Indicator */}
-                {isGenerating && (
+                {isGenerating && settings.generationType !== 'img2vid' && (
                     <div className="generating-indicator">
                         <div className="generating-dots">
                             <span /><span /><span />
@@ -916,10 +1220,26 @@ export default function ChatArea() {
                         <span className="generating-text">{t('editor.generating')}</span>
                     </div>
                 )}
+                {isGenerating && settings.generationType === 'img2vid' && (
+                    <div className="vid-generating-overlay">
+                        <div className="vid-generating-inner">
+                            <div className="vid-generating-spinner">
+                                <div className="vid-spinner-ring" />
+                                <div className="vid-spinner-ring vid-spinner-ring--2" />
+                                <div className="vid-spinner-core">🎬</div>
+                            </div>
+                            <p className="vid-generating-title">動画を生成中...</p>
+                            <p className="vid-generating-sub">AIが動画を作成しています。最大4分かかることがあります</p>
+                            <div className="vid-generating-bar">
+                                <div className="vid-generating-bar-fill" />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Input */}
-            <div className="chat-input-container">
+            <div className="chat-input-container" style={settings.generationType === 'img2vid' ? { display: 'none' } : {}}>
                 {/* Credit Display */}
                 {user && (
                     <div className={`credit-display ${user.credits <= 10 ? 'credit-low' : ''}`}>
@@ -1008,45 +1328,53 @@ export default function ChatArea() {
                             >
                                 📎 {t('chat.attachFile')} ({uploads.length}/{MAX_UPLOADS})
                             </button>
-                            <button
-                                className={`input-tool-btn face-swap-btn ${faceSwapMode ? 'active' : ''}`}
-                                onClick={() => {
-                                    setFaceSwapMode((v) => !v);
-                                    if (!faceSwapMode) setInpaintMode(false);
-                                }}
-                                disabled={uploads.length === 0}
-                                title={t('chat.faceSwap')}
-                            >
-                                🔄 {t('chat.faceSwap')}
-                                {user?.plan === 'free' && (user.credits <= 20) && (
-                                    <span style={{
-                                        fontSize: '0.6rem',
-                                        background: 'rgba(255,170,0,0.2)',
-                                        color: '#fbbf24',
-                                        padding: '1px 4px',
-                                        borderRadius: '4px',
-                                        marginLeft: '4px',
-                                        border: '1px solid rgba(255,170,0,0.3)'
-                                    }}>
-                                        {t('chat.faceSwapLimitFree')}
-                                    </span>
-                                )}
-                            </button>
-                            <button
-                                className={`input-tool-btn inpaint-btn ${inpaintMode ? 'active' : ''}`}
-                                onClick={() => {
-                                    if (uploads.length === 0) {
-                                        setGenerationError(t('chat.uploadRequiredForInpaint') || 'Please upload or drag & drop an image first to use Inpaint.');
-                                        return;
-                                    }
-                                    setInpaintMode(true);
-                                    setFaceSwapMode(false);
-                                    setShowInpaintModal(true);
-                                }}
-                                title={t('chat.inpaint')}
-                            >
-                                🖌 {t('chat.inpaint')}
-                            </button>
+
+                            {/* Mode Selection — exclusive toggle */}
+                            <div className="img2img-mode-selector">
+                                <button
+                                    className={`mode-btn ${reposeMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setReposeMode((v) => !v);
+                                        setFaceSwapMode(false);
+                                        setInpaintMode(false);
+                                    }}
+                                    disabled={uploads.length === 0}
+                                    title={t('chat.repose')}
+                                >
+                                    🎯 Change Pose
+                                </button>
+                                <button
+                                    className={`mode-btn ${faceSwapMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setFaceSwapMode((v) => !v);
+                                        setReposeMode(false);
+                                        setInpaintMode(false);
+                                    }}
+                                    disabled={uploads.length === 0}
+                                    title={t('chat.faceSwap')}
+                                >
+                                    👤 {t('chat.faceSwap')}
+                                </button>
+                                <button
+                                    className={`mode-btn ${inpaintMode ? 'active' : ''}`}
+                                    onClick={() => {
+                                        if (uploads.length === 0) {
+                                            setGenerationError(t('chat.uploadRequiredForInpaint') || 'Please upload an image first.');
+                                            return;
+                                        }
+                                        setInpaintMode(true);
+                                        setReposeMode(false);
+                                        setFaceSwapMode(false);
+                                        setShowInpaintModal(true);
+                                    }}
+                                    title={t('chat.inpaint')}
+                                >
+                                    ✏️ {t('chat.nudeModeBtn')}
+                                </button>
+                            </div>
+
+
+                            
                             {faceSwapMode && uploads.length >= 2 && (
                                 <button
                                     className="input-tool-btn"
@@ -1077,97 +1405,7 @@ export default function ChatArea() {
                         </div>
                     )}
 
-                    {/* Security: Mandatory Img2Img Consent Checkboxes */}
-                    {(() => {
-                        let shouldShowConsent = false;
-                        if (settings.generationType === 'img2img') {
-                            // img2img/inpaint/faceSwap はすべて同意必須
-                            // 画像のアップロード有無に関わらず、利用者の意思を確認するために表示
-                            if (faceSwapMode) {
-                                // FaceSwap: 画像2枚以上アップ時に表示
-                                shouldShowConsent = uploads.length >= 2;
-                            } else if (inpaintMode) {
-                                // Inpaint: チェックのみでOK（画像はモーダルで選択済み）
-                                shouldShowConsent = uploads.length > 0;
-                            } else {
-                                // Standard img2img: 画像がアップされたら表示
-                                shouldShowConsent = uploads.length > 0;
-                            }
-                        }
-
-                        return shouldShowConsent ? (
-                            <div className="img2img-consent-block" style={{
-                                padding: '16px',
-                                background: 'rgba(255, 170, 0, 0.05)',
-                                border: '1px solid rgba(255, 170, 0, 0.2)',
-                                borderRadius: '12px',
-                                marginBottom: '16px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '12px'
-                            }}>
-                                <div style={{
-                                    fontSize: '0.95rem',
-                                    color: 'var(--accent-primary)',
-                                    fontWeight: 600,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    borderBottom: '1px solid rgba(255,170,0,0.1)',
-                                    paddingBottom: '8px'
-                                }}>
-                                    {t('img2imgConsent.title')}
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-                                    {[
-                                        t('img2imgConsent.term0'),
-                                        t('img2imgConsent.term1'),
-                                        t('img2imgConsent.term2'),
-                                        t('img2imgConsent.term3'),
-                                        t('img2imgConsent.term4')
-                                    ].map((text, idx) => (
-                                        <label key={idx} style={{
-                                            display: 'flex',
-                                            alignItems: 'flex-start',
-                                            gap: '12px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.85rem',
-                                            lineHeight: '1.4',
-                                            padding: '4px 8px',
-                                            borderRadius: '6px',
-                                            transition: 'background 0.2s ease',
-                                        }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={img2imgConsent[idx]}
-                                                onChange={(e) => {
-                                                    const newConsent = [...img2imgConsent];
-                                                    newConsent[idx] = e.target.checked;
-                                                    setImg2imgConsent(newConsent);
-                                                }}
-                                                style={{
-                                                    marginTop: '2px',
-                                                    width: '16px',
-                                                    height: '16px',
-                                                    accentColor: 'var(--accent-primary)',
-                                                    cursor: 'pointer'
-                                                }}
-                                            />
-                                            <span style={{
-                                                color: img2imgConsent[idx] ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                                transition: 'color 0.2s ease'
-                                            }}>
-                                                {text}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : null;
-                    })()}
+                    {/* Consent moved to modal on generate */}
 
                     <div style={{ padding: '8px 16px', fontSize: '0.75rem', color: 'var(--warning)', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
                         {t('editor.autoDeleteWarning')}
@@ -1293,15 +1531,15 @@ export default function ChatArea() {
                                 (settings.generationType === 'txt2img' && !inputText.trim()) ||
                                 // img2img (通常): 画像+プロンプト+同意チェック全て必須
                                 (settings.generationType === 'img2img' && !faceSwapMode && !inpaintMode && (
-                                    uploads.length === 0 || !inputText.trim() || !allConsentChecked
+                                    uploads.length === 0 || !inputText.trim()
                                 )) ||
                                 // inpaint: 画像+同意チェック必須（プロンプトはオプション）
                                 (settings.generationType === 'img2img' && inpaintMode && (
-                                    uploads.length === 0 || !allConsentChecked
+                                    uploads.length === 0
                                 )) ||
                                 // faceSwap: 画像2枚+同意チェック必須（プロンプトはオプション）
                                 (settings.generationType === 'img2img' && faceSwapMode && (
-                                    uploads.length < 2 || !allConsentChecked
+                                    uploads.length < 2
                                 ))
                             }
                             style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '4px', position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', padding: '8px 14px', borderRadius: '8px', fontSize: '0.75rem', lineHeight: '1' }}

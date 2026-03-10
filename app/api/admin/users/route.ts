@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readUsers, saveUser, type UserRecord } from '@/lib/auth';
+import { readUsers, saveUser, deleteUser, type UserRecord } from '@/lib/auth';
 
 // GET: List all users (for admin panel)
 export async function GET() {
@@ -19,6 +19,7 @@ export async function GET() {
             firstGenerationConfirmed: u.firstGenerationConfirmed,
             createdAt: u.createdAt,
             updatedAt: u.updatedAt,
+            termsAgreedAt: u.agreements?.termsOfService ? u.agreements.termsOfService : null,
             agreementsCompleted: !!u.agreements?.termsOfService,
         }));
 
@@ -38,7 +39,7 @@ export async function GET() {
 // POST: Admin actions on users (ban, unban, update credits, change status)
 export async function POST(req: NextRequest) {
     try {
-        const { userId, action, value } = await req.json();
+        const { userId, action, value, strValue } = await req.json();
 
         if (!userId || !action) {
             return NextResponse.json({ error: 'userId and action are required' }, { status: 400 });
@@ -63,11 +64,16 @@ export async function POST(req: NextRequest) {
                     user.credits = value;
                 }
                 break;
-            case 'set_plan':
-                if (['free', 'basic', 'pro', 'ultimate'].includes(value)) {
-                    user.plan = value;
+            case 'set_plan': {
+                const planValue = strValue || value;
+                if (['free', 'basic', 'pro', 'ultimate', 'paid'].includes(planValue)) {
+                    user.plan = planValue;
                 }
                 break;
+            }
+            case 'delete':
+                deleteUser(userId);
+                return NextResponse.json({ success: true, deleted: true });
             case 'set_status':
                 if (['active', 'banned', 'age_restricted'].includes(value)) {
                     user.status = value as UserRecord['status'];

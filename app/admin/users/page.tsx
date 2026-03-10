@@ -8,6 +8,7 @@ interface AdminUser {
     username: string;
     status: string;
     plan: string;
+    termsAgreedAt?: string | null;
     credits: number;
     country?: string;
     createdAt: number;
@@ -32,13 +33,13 @@ export default function AdminUsersPage() {
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-    const doAction = async (userId: string, action: string, value?: number) => {
+    const doAction = async (userId: string, action: string, value?: number, strValue?: string) => {
         const token = localStorage.getItem('auth_token');
         const headers: Record<string, string> = { 'Content-Type': 'application/json', Authorization: token ?? '' };
         await fetch('/api/admin/users', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ userId, action, value }),
+            body: JSON.stringify({ userId, action, value, strValue }),
         });
         fetchUsers();
     };
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
-                                {['ユーザー名', 'Email', 'ステータス', 'プラン', 'クレジット', '国', '登録日', 'アクション'].map(h => (
+                                {['ユーザー名', 'Email', 'ステータス', 'プラン', 'クレジット', '国', '同意', '登録日', 'アクション'].map(h => (
                                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>
@@ -86,6 +87,7 @@ export default function AdminUsersPage() {
                                     <td style={{ padding: '9px 14px', color: '#a78bfa' }}>{u.plan}</td>
                                     <td style={{ padding: '9px 14px', color: '#f59e0b' }}>{u.credits}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)' }}>{u.country || '-'}</td>
+                                    <td style={{ padding: '9px 14px' }}>{u.termsAgreedAt ? <span style={{ color: '#10b981' }}>✅</span> : <span style={{ color: '#ef4444' }}>❌</span>}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{new Date(u.createdAt).toLocaleDateString('ja-JP')}</td>
                                     <td style={{ padding: '9px 14px' }}>
                                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -96,12 +98,14 @@ export default function AdminUsersPage() {
                                                 const c = prompt('新しいクレジット数:', String(u.credits));
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>💰 Credits</button>
+                                            <button onClick={() => { const p = prompt('プランを入力 (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>👑 Plan</button>
+                                            <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>🗑 Delete</button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                             {filteredUsers.length === 0 && (
-                                <tr><td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>ユーザーが見つかりません</td></tr>
+                                <tr><td colSpan={9} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>ユーザーが見つかりません</td></tr>
                             )}
                         </tbody>
                     </table>

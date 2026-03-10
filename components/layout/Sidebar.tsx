@@ -34,8 +34,15 @@ export default function Sidebar() {
     const editInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
+    const closeSidebarOnMobile = () => {
+        if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+            useAppStore.setState({ sidebarCollapsed: true });
+        }
+    };
+
     const handleNewChat = () => {
         createChat();
+        closeSidebarOnMobile();
         router.push('/editor');
     };
 
@@ -55,6 +62,7 @@ export default function Sidebar() {
 
     const handleSelectChat = (id: string) => {
         setActiveChat(id);
+        closeSidebarOnMobile();
         router.push('/editor');
     };
 
@@ -76,24 +84,18 @@ export default function Sidebar() {
         if (chats.length === 0) {
             createChat();
         }
+        closeSidebarOnMobile();
     };
 
     const navItems = [
         { icon: '🏠', labelKey: 'nav.home', href: '/' },
-        { icon: '📂', labelKey: 'nav.history', href: '/library' },
+        { icon: '📂', labelKey: 'nav.library', href: '/library' },
     ];
 
-    const imageGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '✏️', labelKey: 'create.txt2img', type: 'txt2img' },
-        { icon: '🖼️', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
-        // { icon: '🎨', labelKey: 'create.imgEdit', type: 'img_edit', isPaid: true },  // Hidden: overlaps with img2img.
-    ];
-
-    const videoGenItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '📝', labelKey: 'create.txt2vid', type: 'txt2vid', isPaid: true },
-        { icon: '🎬', labelKey: 'create.img2vid', type: 'img2vid', isPaid: true },
-        { icon: '👤', labelKey: 'create.ref2vid', type: 'ref2vid', isPaid: true },
-        { icon: '📹', labelKey: 'create.vid2vid', type: 'vid2vid', isPaid: true },
+    const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
+        { icon: '🖼️', labelKey: 'create.txt2img', type: 'txt2img' },
+        { icon: '🔄', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
+        { icon: '🎬', labelKey: 'editor.videoEditor', type: 'img2vid', isPaid: true },
     ];
 
     const languages: { value: Locale; label: string }[] = [
@@ -154,6 +156,7 @@ export default function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className="nav-item"
+                            onClick={closeSidebarOnMobile}
                         >
                             <span className="nav-icon">{item.icon}</span>
                             {!sidebarCollapsed && t(item.labelKey)}
@@ -161,43 +164,32 @@ export default function Sidebar() {
                     ))}
                 </div>
 
-                {/* Image Generation */}
+                {/* Generation */}
                 <div className="nav-section">
-                    <div className="nav-label">{t('create.imageGen')}</div>
-                    {imageGenItems.map((item) => (
-                        <Link
-                            key={item.type}
-                            href="/editor"
-                            className={`nav-item ${settings.generationType === item.type ? 'active' : ''}`}
-                            onClick={() => handleGenTypeClick(item.type)}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && (
-                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                    {t(item.labelKey)}
-                                    {item.isPaid && <span className="paid-badge">{t('common.paid')}</span>}
-                                </span>
-                            )}
-                        </Link>
-                    ))}
+                    <div className="nav-label">GENERATION</div>
+                    {generationItems.map((item) => {
+                        const isActive = item.type === 'txt2img'
+                            ? settings.generationType === 'txt2img'
+                            : item.type === 'img2img'
+                            ? ['img2img', 'img_edit'].includes(settings.generationType)
+                            : ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
+                        return (
+                            <Link
+                                key={item.type}
+                                href="/editor"
+                                className={`nav-item ${isActive ? 'active' : ''}`}
+                                onClick={() => handleGenTypeClick(item.type)}
+                            >
+                                <span className="nav-icon">{item.icon}</span>
+                                {!sidebarCollapsed && (
+                                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                        {t(item.labelKey)}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
                 </div>
-
-                {/* VIDEO GENERATION — Hidden for now. Uncomment to restore when video features are ready.
-                <div className="nav-section">
-                    <div className="nav-label">{t('create.videoGen')}</div>
-                    {videoGenItems.map((item) => (
-                        <Link
-                            key={item.type}
-                            href="/editor"
-                            className={`nav-item ${settings.generationType === item.type ? 'active' : ''}`}
-                            onClick={() => handleGenTypeClick(item.type)}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && t(item.labelKey)}
-                        </Link>
-                    ))}
-                </div>
-                */}
 
                 {/* Chat History */}
                 <div className="chat-history-section">
@@ -359,6 +351,12 @@ export default function Sidebar() {
                     </div>
                 )}
 
+                {/* Terms Warning */}
+                {!sidebarCollapsed && user && !user.termsAgreedAt && (
+                    <div style={{margin:'0 12px 8px',padding:'8px 12px',background:'#3a2a1a',border:'1px solid #f59e0b44',borderRadius:8,fontSize:'0.75rem',color:'#fbbf24',display:'flex',alignItems:'center',gap:6}}>
+                        <span>⚠</span><span>Terms not yet accepted</span>
+                    </div>
+                )}
                 {/* Credits - Hidden when collapsed */}
                 {!sidebarCollapsed && (
                     <div className="credits-panel" style={{ marginBottom: 12 }}>

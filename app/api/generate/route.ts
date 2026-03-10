@@ -6,7 +6,7 @@ import { validatePrompt } from '@/lib/security';
 import { processViolation, checkBanStatus } from '@/lib/auditLogger';
 import { rateLimit } from '@/lib/rateLimit';
 import { findUserById, verifyToken } from '@/lib/auth';
-import { getGenerationsByUser, purgeExpiredGenerations } from '@/lib/db/generations';
+import { getGenerationsByUser } from '@/lib/db/generations';
 import sharp from 'sharp';
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
@@ -74,133 +74,56 @@ const SDXL_NEGATIVE_PROMPT =
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
 async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean, isXL: boolean): Promise<string> {
     if (!ANTHROPIC_API_KEY) {
-        console.warn('ANTHROPIC_API_KEY not found, using raw prompt');
+        console.warn("ANTHROPIC_API_KEY not found, using raw prompt");
         return prompt;
     }
 
-    console.log(`Optimizing prompt with Claude (isXL: ${isXL}): ${prompt}`);
+    console.log("Optimizing prompt with Claude: " + prompt);
 
-    const sd15SystemPrompt = `You are a prompt engineering expert for Stable Diffusion 1.5 photorealistic models.
-Convert the user's input into a highly effective comma-separated list of English tags for PHOTOREALISTIC image generation.
+    let systemPrompt: string;
 
-CRITICAL RULES:
-1. Translate to English if needed (Japanese, etc.)
-2. ALWAYS prioritize photorealistic quality tags: RAW photo, DSLR, 85mm lens, natural lighting, film grain, detailed skin texture, skin pores, realistic skin
-3. NEVER use anime/illustration/cartoon tags. This is STRICTLY photorealistic generation.
-4. For NSFW content, be EXPLICIT and direct. Use specific anatomical terms: (completely nude:1.5), (bare breasts:1.4), (detailed pussy:1.4), (spreading legs:1.3), (exposed clitoris:1.3), (large nipples:1.3), (penetration:1.4), (cum:1.3).
-5. For sexual positions, describe the action clearly: cowgirl, missionary, doggy style, standing sex, facial, oral sex (fellatio/cunnilingus).
-6. Emphasize camera equipment and lighting: "Fujifilm XT4", "85mm portrait", "soft studio lighting", "natural volumetric light", "bokeh"
-7. Add extreme skin realism tags: "detailed skin texture", "skin pores", "peach fuzz", "goosebumps", "subtle sweat", "anatomically correct"
-
-Output ONLY the comma-separated list of English tags, nothing else. Keep under 120 tags.`;
-
-    const sdxlSystemPrompt = `You are a prompt expert for SDXL photorealistic models.
-Convert input into natural English descriptions (NOT comma-separated tags).
-SDXL responds best to descriptive sentences, not weighted tags.
-Focus on: lighting description, camera angle, atmosphere, skin detail.
-For NSFW content, be explicitly descriptive about the scene, body parts, and sexual actions to ensure high explicitness.
-
-COMPOSITION RULES (CRITICAL):
-- If user mentions 全身/full body → ALWAYS start with: "full body shot, head to toe, wide angle"
-- If user mentions 上半身/waist up → start with: "upper body, waist up"  
-- If user mentions 顔/face → start with: "face closeup, portrait"
-- If no composition specified → default to "upper body shot, waist up, from chest up"
-- NEVER use the word "portrait" unless user explicitly asks for face/顔
-- NEVER add "detailed face", "detailed eyes" tags — these cause extreme face zoom
-- NEVER let quality/detail tags override composition. Composition tags MUST come first in the output string.
-
-BEAUTY (ALWAYS INCLUDE FOR FEMALE SUBJECTS):
-- Always add: "pretty face, cute face, small face, big eyes, double eyelids, 
-  soft skin, glossy lips, slim nose, v-shaped jawline, flawless skin, dewy skin"
-- For Asian women: "korean beauty, japanese idol, ulzzang, aegyo"
-- NEVER use "symmetrical face" (makes face look unnatural)
-- NEVER use "detailed eyes" or "detailed face" (causes extreme zoom)
-
-GENDER RULES (CRITICAL):
-- If user mentions 女性/woman/girl → ALWAYS include "1woman, female"
-- If user does NOT mention gender → DEFAULT to "1woman, female"  
-- NEVER generate male unless user explicitly requests 男性/man/male/boy
-
-STYLE RULES (CRITICAL):
-- ALWAYS enforce photorealistic style
-- NEVER output anime, illustration, cartoon, drawing, sketch style
-
-QUALITY (ALWAYS APPEND AT END):
-- ALWAYS end output with: "photorealistic, RAW photo, 8k uhd, DSLR, natural skin texture, natural lighting"
-- NEVER omit these quality tags
-
-CRITICAL: NEVER drop user-specified attributes.
-If user mentions clothing (水着/bikini), hairstyle (ボブ/bob),
-expression (笑って/smiling), body features (巨乳/large breasts),
-these MUST appear in your output.
-
-Output format: composition tags FIRST, then subject, then scene, then quality.
-Example: "full body shot, head to toe, wide angle, Japanese woman in her 20s, wearing bikini, playful pose, beach, summer sunlight, photorealistic, RAW photo, 8k uhd, DSLR, natural skin texture, natural lighting"
-
-Do NOT use (tag:weight) syntax. Output natural language only.`;
-
-    const img2imgSystemPrompt = `You are a prompt expert for Stable Diffusion img2img.
-The user has uploaded a reference image and wants to MODIFY it, not create a new one.
-
-CRITICAL RULES:
-1. Translate to English if needed
-2. Focus ONLY on what the user wants to CHANGE about the image
-3. Do NOT add descriptive tags about the person's appearance (face, ethnicity, body type) — the reference image already provides this
-4. Do NOT add camera/lighting/quality tags — these override the original image's look
-5. Keep the output SHORT and focused: only the modification tags
-6. If user says "巨乳にしてください" → output: "(large breasts:1.3), (bigger breasts:1.2)"
-   NOT: "beautiful woman, large breasts, photorealistic, RAW photo..."
-
-Output ONLY the modification tags, nothing else. Keep under 30 tags.`;
-
-    const inpaintSystemPrompt = `You are a prompt expert for Stable Diffusion inpainting (Nude Mode).
-Focus EXCLUSIVELY on what should appear in the painted (masked) area.
-
-CRITICAL RULES:
-1. Translate to English if needed
-2. For clothing removal: use "(completely naked:1.6), (bare breasts:1.5), (large nipples:1.4), (detailed pussy:1.5), (exposed clitoris:1.4), bare skin, natural skin texture, uncensored, no clothes, undressed"
-3. Do NOT describe the whole scene, ONLY the masked part
-4. Add realism tags: "detailed skin texture", "skin pores", "peach fuzz"
-
-Output ONLY the tags for the masked area.`;
-
-    let systemPrompt = isXL ? sdxlSystemPrompt : sd15SystemPrompt;
-    if (generationType === 'img2img') {
-        systemPrompt = img2imgSystemPrompt;
-    } else if (generationType === 'img_edit') {
-        systemPrompt = inpaintSystemPrompt;
+    if (generationType === "img_edit" || prompt.includes("[inpaint]")) {
+        systemPrompt = "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. NSFW is allowed: bare skin, nude, nipples, vagina etc. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else.";
+    } else if (generationType === "img2img") {
+        systemPrompt = "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
+    } else {
+        systemPrompt = "You are a Stable Diffusion 1.5 photorealistic prompt expert for an adult platform. Convert input into 20-40 comma-separated English tags. 1. Translate to English if needed. 2. NSFW is fully allowed. Use explicit tags directly, never soften them. Examples: nude, naked, topless, bare breasts, exposed genitalia. 3. Add photorealism tags: RAW photo, 8k uhd, DSLR, sharp focus, film grain, Fujifilm XT4. 4. Add skin realism: detailed skin texture, skin pores, natural skin, subsurface scattering. 5. Add lighting: soft studio lighting, natural light, rim lighting, bokeh background. 6. Do NOT add age, ethnicity, body shape, hair, breast size, or pose/action tags. 7. Output ONLY comma-separated tags, nothing else.";
     }
 
     try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
             headers: {
-                'x-api-key': ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json',
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5-20250929',
-                max_tokens: 1000,
+                model: "claude-sonnet-4-5",
+                max_tokens: 200,
                 system: systemPrompt,
-                messages: [
-                    { role: 'user', content: `Generation Type: ${generationType}, NSFW Mode: ${isNsfw}\nUser Input: ${prompt}` }
-                ],
+                messages: [{ role: "user", content: "Generation Type: " + generationType + ", NSFW: " + isNsfw + ", isXL: " + isXL + "\nUser Input: " + prompt }],
             }),
+            signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
             const err = await res.text();
-            console.error('Claude API Error:', res.status, err);
+            console.error("Claude API Error:", res.status, err);
             return prompt;
         }
 
         const data = await res.json();
         const optimized = data.content[0].text.trim();
-        console.log(`Optimized prompt: ${optimized}`);
+        console.log("Optimized prompt: " + optimized);
         return optimized;
     } catch (err) {
-        console.error('Claude optimization failed:', err);
+        console.error("Claude optimization failed:", err);
         return prompt;
     }
 }
@@ -275,10 +198,10 @@ function getResolutionFromAspectRatio(
             baseSize = 768;  // SD 1.5 optimal high-res
             break;
         case '2K':
-            baseSize = 1024; // Maximum safe for SD 1.5
+            baseSize = 896;  // Higher base for 2K
             break;
         case '4K':
-            baseSize = 1024; // Capped at 1024 for stability
+            baseSize = 1024; // Maximum for best quality
             break;
         default:
             baseSize = 512;
@@ -577,7 +500,7 @@ async function analyzeEditRegion(prompt: string): Promise<{
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5-20250929',
+                model: 'claude-sonnet-4-5',
                 max_tokens: 200,
                 system: `You analyze image editing requests to determine which body region to modify.
 Given a user's edit instruction, output ONLY a JSON object:
@@ -651,6 +574,22 @@ async function generateAutoMask(
     return mask.toString('base64');
 }
 
+
+// ── Safe JSON parser (handles HTML error pages from Novita) ──
+async function safeParseJSON(res: Response, context: string = ''): Promise<any> {
+    const text = await res.text();
+    if (text.startsWith('<') || text.startsWith('<!')) {
+        console.error(`[${context}] Received HTML instead of JSON:`, text.slice(0, 200));
+        throw new Error('API returned an error page. Please try again.');
+    }
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        console.error(`[${context}] JSON parse failed:`, text.slice(0, 200));
+        throw new Error('Invalid response from generation API. Please try again.');
+    }
+}
+
 export async function POST(request: NextRequest) {
     if (!NOVITA_API_KEY) {
         return NextResponse.json(
@@ -671,6 +610,7 @@ export async function POST(request: NextRequest) {
             additionalImages,
             faceSwapMode = false,
             inpaintMode = false,
+            reposeMode = false,
             maskBase64,
             img2imgStrength,
             count = 1,
@@ -804,17 +744,44 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // ── Enforce free user resolution ──
+        const userRecord = userId ? findUserById(userId) : null;
+        const isFreeUser = !userRecord || userRecord.plan === 'free';
+        const finalResolution = (isFreeUser && resolution !== '512') ? '512' : resolution;
+        if (isFreeUser && resolution !== '512') {
+            console.log(`Free user attempted ${resolution}, forcing 512`);
+        }
+
         // Look up model
         const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
 
         // ── Build tag-based prompt fragment ──
         // Force Ultra quality for all requests to ensure maximum output
-        const quality = QUALITY_CONFIGS.ultra;
+        // Resolution-based quality scaling
+        const quality = { ...QUALITY_CONFIGS.ultra };
+        switch (finalResolution) {
+            case '512':
+                quality.steps = 25;
+                quality.guidance = 7;
+                break;
+            case '1024':
+                quality.steps = 35;
+                quality.guidance = 7.5;
+                break;
+            case '2K':
+                quality.steps = 40;
+                quality.guidance = 7.5;
+                break;
+            case '4K':
+                quality.steps = 45;
+                quality.guidance = 8;
+                break;
+        }
 
         let tagPromptFragment = '';
         let tagNegativeFragment = '';
         let actionHint = '';          // ← Action/pose hint sent to Claude
-        /* 
+        
         if (tagSettings) {
             const ts = tagSettings as TagSettings;
             const tagResult = buildTagPromptResult(ts);
@@ -839,12 +806,14 @@ export async function POST(request: NextRequest) {
             console.log('Tag prompt fragment:', tagPromptFragment);
             console.log('Action hint:', actionHint);
         }
-        */
+
 
         // ── Model Selection Logic ──
         // ── Model Selection Logic ──
         let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
 
+
+        console.log(`[DEBUG] reposeMode=${reposeMode} generationType=${generationType} hasImage=${!!imageBase64}`);
         const isImg2ImgValue = (generationType === 'img2img' || inpaintMode) && !!imageBase64;
         const isPureImg2Img = generationType === 'img2img' && !!imageBase64;
 
@@ -861,7 +830,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Inpaint Model Mapping ──
-        if (inpaintMode || (isPureImg2Img && editAnalysis.region !== 'full')) {
+        if (!reposeMode && (inpaintMode || (isPureImg2Img && editAnalysis.region !== 'full'))) {
             novitaModelName = 'realisticVisionV51_v51VAE-inpainting_94324.safetensors';
             console.log(`${inpaintMode ? 'Inpaint' : 'Auto-inpaint (' + editAnalysis.region + ')'} detected. Model: ${novitaModelName}`);
         }
@@ -886,7 +855,7 @@ export async function POST(request: NextRequest) {
         // Action/pose context was already given to Claude above; no need to front-load raw SD tags.
         let combinedPrompt: string;
         combinedPrompt = tagPromptFragment
-            ? `${optimizedPrompt}, ${tagPromptFragment}`
+            ? `${tagPromptFragment}, ${optimizedPrompt}`
             : optimizedPrompt;
 
         // ── Novita API hard cap: max 1024 runes. Trim from the END. ──
@@ -933,9 +902,10 @@ export async function POST(request: NextRequest) {
 
         // Use dedicated inpainting endpoint if mask is provided
         // Use dedicated inpainting endpoint if mask is provided OR auto-inpaint is triggered
-        const endpoint = ((inpaintMode && maskBase64) || (isPureImg2Img && editAnalysis.region !== 'full'))
+        // Decide endpoint
+        const endpoint = ((inpaintMode && maskBase64) || (isPureImg2Img && !reposeMode && editAnalysis.region !== 'full'))
             ? `${NOVITA_BASE}/inpainting`
-            : isPureImg2Img
+            : (isPureImg2Img || reposeMode)
                 ? `${NOVITA_BASE}/img2img`
                 : `${NOVITA_BASE}/txt2img`;
 
@@ -966,6 +936,10 @@ export async function POST(request: NextRequest) {
             return truncated;
         };
 
+
+        // ── Repose Mode: img2img with prompt-driven pose change ──
+
+        
         // Build request body
         const novitaRequest: Record<string, unknown> = {
             model_name: novitaModelName,
@@ -1030,7 +1004,7 @@ export async function POST(request: NextRequest) {
                 // Calculate target dimensions (preserve aspect ratio, cap at MAX)
                 const imgAspect = imgW / imgH;
                 const round64 = (n: number) => Math.round(n / 64) * 64;
-                let targetW: number, targetH: number;
+                let targetW: number = 512, targetH: number = 512;
                 if (imgW >= imgH) {
                     targetW = Math.min(imgW, MAX_INPAINT_PX);
                     targetH = round64(targetW / imgAspect);
@@ -1047,26 +1021,38 @@ export async function POST(request: NextRequest) {
                 finalImageBase64 = resizedImg.toString('base64');
 
                 // Generate automatic mask if needed (Solution A)
-                let finalMaskRaw: string;
+                let finalMaskRaw: string = '';
                 if (isPureImg2Img && editAnalysis.region !== 'full') {
                     finalMaskRaw = await generateAutoMask(finalImageBase64, editAnalysis.maskBox);
-                } else {
-                    finalMaskRaw = maskBase64!.replace(/^data:image\/\w+;base64,/, '');
+                } else if (maskBase64) {
+                    finalMaskRaw = maskBase64.replace(/^data:image\/\w+;base64,/, '');
                 }
 
-                // Resize mask to exact same dimensions
-                const maskBuf = Buffer.from(finalMaskRaw, 'base64');
-                const resizedMask = await sharp(maskBuf)
-                    .resize(targetW, targetH, { fit: 'fill' })
-                    .png()
+                if (finalMaskRaw) {
+                    // Resize mask to exact same dimensions
+                    const maskBuf = Buffer.from(finalMaskRaw, 'base64');
+                    const resizedMask = await sharp(maskBuf)
+                        .resize(targetW, targetH, { fit: 'fill' })
+                        .png()
+                        .toBuffer();
+
+                    novitaRequest.width = targetW;
+                    novitaRequest.height = targetH;
+                    novitaRequest.image_base64 = finalImageBase64;
+                    novitaRequest.mask_image_base64 = resizedMask.toString('base64');
+                    console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH} (Auto: ${isPureImg2Img})`);
+                } else {
+                    novitaRequest.image_base64 = finalImageBase64;
+                }
+            } else if (reposeMode) {
+                // ═══ Change Pose: OpenPose ControlNet ═══
+                const repBuf = Buffer.from(finalImageBase64, 'base64');
+                const repResized = await sharp(repBuf)
+                    .resize(768, 768, { fit: 'inside', withoutEnlargement: true })
+                    .jpeg({ quality: 85 })
                     .toBuffer();
-
-                novitaRequest.width = targetW;
-                novitaRequest.height = targetH;
-                novitaRequest.image_base64 = finalImageBase64;
-                novitaRequest.mask_image_base64 = resizedMask.toString('base64');
-
-                console.log(`Inpaint resize: original ${imgW}x${imgH} → API ${targetW}x${targetH} (Auto: ${isPureImg2Img})`);
+                novitaRequest.image_base64 = repResized.toString('base64');
+                console.log('Change Pose: image resized to 768px');
             } else {
                 novitaRequest.image_base64 = finalImageBase64;
             }
@@ -1080,14 +1066,30 @@ export async function POST(request: NextRequest) {
                 novitaRequest.inpaint_full_res = 1;
                 novitaRequest.inpaint_full_res_padding = 48;
                 novitaRequest.sampler_name = 'Euler a';
-
-                // Mode-specific prompts for inpaint
                 novitaRequest.negative_prompt = enforceLimit(
                     `${INPAINT_NEGATIVE_PROMPT}${tagNegativeFragment ? ', ' + tagNegativeFragment : ''}, (censor, mosaic, bar:1.5)`
                 );
                 novitaRequest.prompt = enforceLimit(
                     `${INPAINT_POSITIVE_MODIFIERS}, (completely naked:1.8), (nude:1.8), (detailed genitalia:1.6), (pussy:1.6), (bare skin:1.5), (no clothing:1.6), ${enhancedPrompt}`
                 );
+            } else if (reposeMode) {
+                // ═══ Change Pose: OpenPose ControlNet ═══
+                // strength低め = 元画像の顔・体型を保持
+                novitaRequest.strength = 0.55;
+                novitaRequest.guidance_scale = 7;
+                novitaRequest.steps = 30;
+                novitaRequest.sampler_name = 'DPM++ 2M Karras';
+                novitaRequest.controlnet_units = [
+                    {
+                        model_name: 'control_v11p_sd15_openpose',
+                        image_base64: novitaRequest.image_base64,
+                        strength: 0.85,
+                        preprocessor: 'openpose',
+                        guidance_start: 0.0,
+                        guidance_end: 1.0,
+                    }
+                ];
+                console.log('Change Pose: OpenPose ControlNet applied (strength=0.55)');
             } else if (isPureImg2Img) {
                 if (editAnalysis.region !== 'full') {
                     // ═══ Solution A: Targeted Auto-Inpaint parameters ═══
@@ -1097,18 +1099,16 @@ export async function POST(request: NextRequest) {
                     novitaRequest.mask_blur = 8;
                     novitaRequest.inpaint_full_res = 1;
                     novitaRequest.sampler_name = 'Euler a';
-
-                    // Re-optimize prompt for targeted edit region attributes
                     novitaRequest.prompt = enforceLimit(
                         `${combinedPrompt}, natural skin texture, realistic skin, anatomically correct`
                     );
                     console.log(`Solution A: Applied targeted params for ${editAnalysis.region}`);
                 } else {
-                    // ═══ Global img2img: Very low strength to preserve identity ═══
+                    // ═══ Global img2img ═══
                     novitaRequest.strength = 0.25;
                     novitaRequest.steps = 25;
                     novitaRequest.guidance_scale = 4;
-                    console.log(`Solution A: Global img2img (Strength: 0.25)`);
+                    console.log('Solution A: Global img2img (Strength: 0.25)');
                 }
             }
         } else {
@@ -1194,9 +1194,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Run cleanup asynchronously (files + DB records)
+        // Run cleanup asynchronously
         cleanupOldFiles().catch(console.error);
-        purgeExpiredGenerations();
 
         return NextResponse.json({
             images: result.images,

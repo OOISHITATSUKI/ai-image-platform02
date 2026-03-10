@@ -23,6 +23,7 @@
         "vid2vid": "動画→動画"
     },
     "editor": {
+        "videoEditor": "動画エディタ",
         "settings": "生成設定",
         "model": "モデル",
         "aspectRatio": "アスペクト比",

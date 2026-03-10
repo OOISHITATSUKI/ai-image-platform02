@@ -1,0 +1,298 @@
+/* === Best AI Undress Tools Blog — Brand Colors === */
+
+.but-root {
+  background: #0a0a0a;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* NAV */
+.but-nav {
+  border-bottom: 1px solid #2a1515;
+  padding: 16px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #111111;
+}
+.but-logo {
+  font-weight: 700; font-size: 18px; color: #e5342a;
+  text-decoration: none;
+}
+.but-nav-back {
+  font-size: 14px; color: #888888; text-decoration: none;
+}
+.but-nav-back:hover { color: #fff; }
+
+/* LAYOUT */
+.but-wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding: 60px 32px;
+  display: grid; grid-template-columns: 1fr 280px; gap: 60px;
+  align-items: start;
+}
+
+.but-article { max-width: 760px; }
+
+/* HEADER */
+.but-meta {
+  display: flex; gap: 16px; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.but-cat-tag {
+  background: rgba(229, 52, 42, 0.12);
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  color: #e5342a;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.but-meta-date, .but-meta-read {
+  font-size: 13px; color: #444444;
+}
+
+.but-h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700; line-height: 1.2;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.but-intro-box {
+  background: #111111;
+  border-left: 4px solid #e5342a;
+  border-radius: 0 12px 12px 0;
+  padding: 20px 24px; margin-bottom: 40px;
+  font-size: 16px; color: #888888;
+  line-height: 1.7;
+}
+
+/* BODY TYPOGRAPHY */
+.but-article h2 {
+  font-size: 26px; font-weight: 700;
+  margin: 48px 0 16px;
+  color: #ffffff;
+}
+.but-article h3 {
+  font-size: 20px; font-weight: 600;
+  margin: 32px 0 12px; color: #ffffff;
+}
+.but-article p {
+  margin-bottom: 20px; color: #888888;
+}
+.but-article a { color: #e5342a; text-decoration: none; }
+.but-article a:hover { text-decoration: underline; }
+.but-article ul, .but-article ol {
+  margin: 0 0 20px 24px; color: #888888;
+}
+.but-article li { margin-bottom: 8px; }
+
+/* TOOL CARDS */
+.but-tool-card {
+  background: #111111;
+  border: 1px solid #2a1515;
+  border-radius: 16px; padding: 28px;
+  margin: 32px 0;
+  position: relative;
+}
+.but-tool-rank {
+  position: absolute; top: -14px; left: 20px;
+  background: #e5342a;
+  color: white; font-size: 11px; font-weight: 700;
+  padding: 3px 12px; border-radius: 100px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.but-tool-rank-winner {
+  background: #ffd166; color: #000;
+}
+.but-tool-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; flex-wrap: wrap;
+}
+.but-tool-name { font-size: 22px; font-weight: 700; color: #ffffff; }
+.but-tool-tagline { font-size: 15px; color: #888888; margin: 8px 0 16px; font-style: italic; }
+.but-tool-score { display: flex; flex-direction: column; align-items: flex-end; }
+.but-score-num { font-size: 36px; font-weight: 700; color: #e5342a; line-height: 1; }
+.but-score-label { font-size: 12px; color: #444444; }
+
+/* RATING BARS */
+.but-rating-bars { margin: 16px 0; }
+.but-rating-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.but-rating-label { width: 120px; font-size: 13px; color: #888888; flex-shrink: 0; }
+.but-rating-bar {
+  flex: 1; height: 6px; border-radius: 100px;
+  background: #2a1515; position: relative; overflow: hidden;
+}
+.but-rating-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit;
+  background: linear-gradient(90deg, #e5342a, #ff6b4a);
+}
+.but-rating-val { width: 32px; font-size: 12px; color: #888888; text-align: right; }
+
+/* PROS / CONS */
+.but-pros-cons {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;
+}
+.but-pros-box, .but-cons-box {
+  border-radius: 10px; padding: 14px 16px; font-size: 14px;
+}
+.but-pros-box {
+  background: rgba(99,235,139,0.06); border: 1px solid rgba(99,235,139,0.2);
+}
+.but-cons-box {
+  background: rgba(255,107,107,0.06); border: 1px solid rgba(255,107,107,0.2);
+}
+.but-pros-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #63eb8b; }
+.but-cons-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #ff6b6b; }
+.but-pros-box ul, .but-cons-box ul {
+  margin: 0; padding: 0; list-style: none;
+}
+.but-pros-box li, .but-cons-box li {
+  margin-bottom: 4px; padding-left: 16px; position: relative; color: #888888; font-size: 14px;
+}
+.but-pros-box li::before { content: '+'; position: absolute; left: 0; color: #63eb8b; font-weight: 700; }
+.but-cons-box li::before { content: '\2212'; position: absolute; left: 0; color: #ff6b6b; font-weight: 700; }
+
+/* TOOL VERDICT */
+.but-tool-verdict {
+  margin-top: 16px; padding: 12px 16px;
+  background: rgba(229, 52, 42, 0.12);
+  border-radius: 8px;
+  font-size: 14px; color: #ffffff;
+}
+.but-tool-verdict strong { color: #e5342a; }
+
+/* CTA */
+.but-cta-inline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #e5342a;
+  color: white; font-size: 14px; font-weight: 600;
+  padding: 10px 20px; border-radius: 8px;
+  text-decoration: none; margin-top: 12px;
+  transition: background 0.2s;
+}
+.but-cta-inline:hover { background: #c62920; text-decoration: none; }
+.but-cta-large {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #e5342a;
+  color: white; font-size: 16px; font-weight: 600;
+  padding: 14px 28px; border-radius: 8px;
+  text-decoration: none; margin-top: 12px;
+  transition: background 0.2s;
+}
+.but-cta-large:hover { background: #c62920; text-decoration: none; }
+
+/* COMPARISON TABLE */
+.but-compare-wrap { overflow-x: auto; margin: 32px 0; }
+.but-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.but-table th {
+  background: #111111; padding: 12px 16px; text-align: left;
+  font-weight: 600; border-bottom: 2px solid #2a1515; white-space: nowrap; color: #ffffff;
+}
+.but-table td {
+  padding: 11px 16px; border-bottom: 1px solid #2a1515; color: #888888;
+}
+.but-table tr:last-child td { border-bottom: none; }
+.but-table tr:hover td { background: rgba(229, 52, 42, 0.03); }
+.but-row-winner { background: rgba(229, 52, 42, 0.12); }
+.but-row-winner td { color: #ffffff; }
+.but-check { color: #63eb8b; font-weight: 700; }
+.but-cross { color: #444444; }
+
+/* CALLOUT */
+.but-callout {
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  background: rgba(229, 52, 42, 0.12);
+  border-radius: 12px; padding: 24px;
+  margin: 32px 0;
+}
+.but-callout h4 { font-size: 18px; margin-bottom: 8px; color: #ffffff; }
+.but-callout p { font-size: 15px; color: #888888; margin: 0; }
+
+/* FAQ */
+.but-faq-block { margin: 32px 0; }
+.but-faq-q { font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #ffffff; }
+.but-faq-a { font-size: 16px; color: #888888; margin-bottom: 28px; }
+
+/* SIDEBAR */
+.but-sidebar { position: sticky; top: 32px; }
+.but-toc {
+  background: #111111;
+  border: 1px solid #2a1515;
+  border-radius: 14px; padding: 24px;
+  margin-bottom: 24px;
+}
+.but-toc h4 {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #888888; margin-bottom: 16px;
+}
+.but-toc ol { margin: 0; padding-left: 16px; }
+.but-toc li { margin-bottom: 10px; font-size: 14px; }
+.but-toc a { color: #888888; text-decoration: none; }
+.but-toc a:hover { color: #e5342a; }
+
+.but-sidebar-cta {
+  background: linear-gradient(135deg, rgba(229, 52, 42, 0.15), #111111);
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  border-radius: 14px; padding: 24px; text-align: center;
+}
+.but-sidebar-cta h4 { font-size: 18px; margin-bottom: 10px; color: #ffffff; }
+.but-sidebar-cta p { font-size: 14px; color: #888888; margin-bottom: 16px; }
+.but-sidebar-cta-link {
+  display: block; background: #e5342a; color: white;
+  padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px;
+  text-decoration: none; transition: background 0.2s;
+}
+.but-sidebar-cta-link:hover { background: #c62920; }
+.but-sidebar-note { font-size: 12px; color: #444444; margin-top: 8px; }
+
+/* FOOTER */
+.but-footer {
+  border-top: 1px solid #2a1515;
+  padding: 32px;
+  text-align: center;
+  font-size: 13px; color: #444444;
+}
+.but-footer a { color: #444444; text-decoration: none; }
+.but-footer a:hover { color: #888888; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .but-wrap { grid-template-columns: 1fr; padding: 40px 20px; }
+  .but-sidebar { display: none; }
+  .but-pros-cons { grid-template-columns: 1fr; }
+  .but-article { max-width: 100%; }
+}
+
+@media (max-width: 768px) {
+  .but-root { font-size: 15px; line-height: 1.7; }
+  .but-nav { padding: 12px 16px; }
+  .but-wrap { padding: 24px 16px; }
+  .but-h1 { font-size: clamp(22px, 5vw, 32px); margin-bottom: 16px; }
+  .but-intro-box { padding: 16px 18px; font-size: 14px; margin-bottom: 28px; }
+  .but-article h2 { font-size: 20px; margin: 32px 0 12px; }
+  .but-article h3 { font-size: 17px; }
+  .but-article p { font-size: 14px; margin-bottom: 16px; }
+  .but-article ul, .but-article ol { font-size: 14px; margin-left: 16px; }
+  .but-tool-card { padding: 20px 16px; margin: 24px 0; border-radius: 12px; }
+  .but-tool-name { font-size: 18px; }
+  .but-tool-tagline { font-size: 13px; }
+  .but-score-num { font-size: 28px; }
+  .but-rating-label { width: 90px; font-size: 12px; }
+  .but-rating-val { font-size: 11px; }
+  .but-pros-box, .but-cons-box { padding: 12px; font-size: 13px; }
+  .but-tool-verdict { font-size: 13px; padding: 10px 14px; }
+  .but-cta-inline { display: flex; justify-content: center; width: 100%; box-sizing: border-box; padding: 12px; font-size: 14px; }
+  .but-cta-large { display: flex; justify-content: center; width: 100%; box-sizing: border-box; padding: 14px; font-size: 15px; }
+  .but-compare-wrap { margin: 20px -16px; padding: 0 16px; }
+  .but-table { font-size: 12px; }
+  .but-table th, .but-table td { padding: 8px 10px; }
+  .but-callout { padding: 16px; border-radius: 10px; }
+  .but-callout h4 { font-size: 16px; }
+  .but-callout p { font-size: 14px; }
+  .but-faq-q { font-size: 16px; }
+  .but-faq-a { font-size: 14px; margin-bottom: 20px; }
+  .but-footer { padding: 24px 16px; }
+}

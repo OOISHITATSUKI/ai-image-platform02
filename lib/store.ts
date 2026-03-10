@@ -61,27 +61,52 @@ async function saveChatsToSupabase(userId: string, chats: Chat[]): Promise<void>
 
 async function loadChatsFromSupabase(userId: string): Promise<Chat[]> {
     try {
+        // Step 1: Load chats with messages (without heavy image_url)
         const { data: chats, error } = await supabase
             .from('chats')
             .select(`
                 *,
-                messages (*)
+                messages (id, role, content, video_url, thumbnail_url, is_favorite, created_at)
             `)
             .eq('user_id', userId)
-            .order('updated_at', { ascending: false });
+            .order('updated_at', { ascending: false })
+            .limit(20);
 
         if (error) throw error;
 
         console.log('Raw chats data from Supabase:', chats);
 
-        return (chats || []).map(chat => ({
+        // Step 2: Load recent 10 image_urls separately (only from last 1 hour)
+        const oneHourAgo = new Date(Date.now() - 3600_000).toISOString();
+        const chatIds = (chats || []).map((c: any) => c.id);
+        const imageMap = new Map<string, string>();
+
+        if (chatIds.length > 0) {
+            const { data: recentImages, error: imgError } = await supabase
+                .from('messages')
+                .select('id, image_url')
+                .in('chat_id', chatIds)
+                .not('image_url', 'is', null)
+                .gte('created_at', oneHourAgo)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (!imgError && recentImages) {
+                console.log(`Loaded ${recentImages.length} recent images from Supabase`);
+                for (const img of recentImages) {
+                    imageMap.set(img.id, img.image_url);
+                }
+            }
+        }
+
+        return (chats || []).map((chat: any) => ({
             id: chat.id,
             name: chat.name,
             messages: (chat.messages || []).map((msg: any) => ({
                 id: msg.id,
                 role: msg.role,
                 content: msg.content,
-                imageUrl: msg.image_url,
+                imageUrl: imageMap.get(msg.id) || undefined,
                 videoUrl: msg.video_url,
                 thumbnailUrl: msg.thumbnail_url,
                 isFavorite: msg.is_favorite,
@@ -154,6 +179,10 @@ interface AppState {
     // ----- Generating -----
     isGenerating: boolean;
     setIsGenerating: (generating: boolean) => void;
+    submitTrigger: number;
+    triggerSubmit: () => void;
+    img2vidImageUrl: string | null;
+    setImg2vidImageUrl: (url: string | null) => void;
 
     // ----- Tag Settings -----
     tagSettings: TagSettings;
@@ -477,6 +506,10 @@ export const useAppStore = create<AppState>()(
             // ----- Generating -----
             isGenerating: false,
             setIsGenerating: (generating) => set({ isGenerating: generating }),
+            submitTrigger: 0,
+            triggerSubmit: () => set((state) => ({ submitTrigger: state.submitTrigger + 1 })),
+            img2vidImageUrl: null,
+            setImg2vidImageUrl: (url) => set({ img2vidImageUrl: url }),
 
             // ----- Tag Settings -----
             tagSettings: DEFAULT_TAG_SETTINGS,

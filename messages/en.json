@@ -23,6 +23,7 @@
         "vid2vid": "Video to Video"
     },
     "editor": {
+        "videoEditor": "Video Editor",
         "settings": "Generation Settings",
         "model": "Model",
         "aspectRatio": "Aspect Ratio",

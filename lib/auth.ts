@@ -135,6 +135,14 @@ export function saveUser(user: UserRecord): void {
     writeUsers(users);
 }
 
+export function deleteUser(userId: string): void {
+    const users = readUsers();
+    if (users[userId]) {
+        delete users[userId];
+        writeUsers(users);
+    }
+}
+
 // ----- Password -----
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS);
