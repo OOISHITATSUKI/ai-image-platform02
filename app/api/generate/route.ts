@@ -6,7 +6,7 @@ import { validatePrompt } from '@/lib/security';
 import { processViolation, checkBanStatus } from '@/lib/auditLogger';
 import { rateLimit } from '@/lib/rateLimit';
 import { findUserById, verifyToken } from '@/lib/auth';
-import { getGenerationsByUser } from '@/lib/db/generations';
+import { getGenerationsByUser, purgeExpiredGenerations } from '@/lib/db/generations';
 import sharp from 'sharp';
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
@@ -1194,8 +1194,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Run cleanup asynchronously
+        // Run cleanup asynchronously (files + DB records)
         cleanupOldFiles().catch(console.error);
+        purgeExpiredGenerations();
 
         return NextResponse.json({
             images: result.images,

@@ -94,6 +94,26 @@ export function deleteGeneration(id: string): boolean {
     return true;
 }
 
+// Purge expired generations (older than 1 hour)
+const EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+
+export function purgeExpiredGenerations(): number {
+    const generations = readGenerations();
+    const now = Date.now();
+    let purged = 0;
+    for (const [id, gen] of Object.entries(generations)) {
+        if (now - gen.createdAt > EXPIRY_MS) {
+            delete generations[id];
+            purged++;
+        }
+    }
+    if (purged > 0) {
+        writeGenerations(generations);
+        console.log(`Purged ${purged} expired generation records`);
+    }
+    return purged;
+}
+
 // Storage usage estimate: count per user
 export function getUserStorageCount(userId: string): { images: number; videos: number; total: number } {
     const generations = readGenerations();

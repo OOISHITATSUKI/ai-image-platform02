@@ -4,6 +4,7 @@ import {
     saveGeneration,
     getGenerationsByUser,
     countGenerationsByUser,
+    purgeExpiredGenerations,
     type GenerationRecord,
 } from '@/lib/db/generations';
 
@@ -19,6 +20,9 @@ export async function GET(req: NextRequest) {
     if (!decoded) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Purge expired generation records (older than 1 hour)
+    purgeExpiredGenerations();
 
     const { searchParams } = new URL(req.url);
     const offset = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10));
