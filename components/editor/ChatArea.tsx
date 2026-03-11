@@ -6,6 +6,7 @@ import { useTranslation } from '@/lib/useTranslation';
 import { AVAILABLE_MODELS } from '@/lib/types';
 import type { MediaFilter, AspectRatio } from '@/lib/types';
 import InpaintModal from './InpaintModal';
+import MyFaces from './MyFaces';
 
 // ── Uploaded image slot ──
 interface UploadSlot {
@@ -38,6 +39,8 @@ export default function ChatArea() {
         addCredits,
         updateSettings,
         tagSettings,
+        selectedFaceId,
+        savedFaces,
     } = useAppStore();
 
     const { t } = useTranslation();
@@ -315,6 +318,9 @@ export default function ChatArea() {
         if (raw.includes('INVALID_IMAGE_FORMAT')) {
             return '❌ この画像形式には対応していません。\n対応形式：JPG、PNG\n対処法：画像をJPGまたはPNGに変換してから再度アップロードしてください。';
         }
+        if (raw.includes('prompt_required')) {
+            return t('chat.promptRequired');
+        }
         if (raw.includes('Account temporarily suspended for repeated violations (24h).')) {
             return t('chat.error_temp_ban');
         }
@@ -500,6 +506,9 @@ export default function ChatArea() {
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                         nudeMode: settings.nudeMode ?? true,
                         tagSettings,
+                        selectedFaceImageUrl: selectedFaceId
+                            ? savedFaces.find(f => f.id === selectedFaceId)?.image_url
+                            : undefined,
                     }),
                 });
 
@@ -1081,21 +1090,6 @@ export default function ChatArea() {
                     </div>
                 </div>
             )}
-            {/* Error Banner */}
-            {generationError && (
-                <div className="chat-error-banner">
-                    <div className="chat-error-content">
-                        {generationError}
-                    </div>
-                    <button
-                        className="chat-error-close"
-                        onClick={() => setGenerationError(null)}
-                    >
-                        ✕
-                    </button>
-                </div>
-            )}
-
             {/* Messages */}
             <div className="chat-messages" ref={chatContainerRef}>
                 {!activeChat || filteredMessages.length === 0 ? (
@@ -1503,6 +1497,23 @@ export default function ChatArea() {
                         </div>
                     </div>
 
+                    {/* My Faces — above the input area */}
+                    <MyFaces />
+
+                    {/* Error Banner — directly above textarea */}
+                    {generationError && (
+                        <div className="chat-error-banner" style={{ margin: '0 0 8px 0' }}>
+                            <div className="chat-error-content">
+                                {generationError}
+                            </div>
+                            <button
+                                className="chat-error-close"
+                                onClick={() => setGenerationError(null)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
                         <textarea
                             ref={textareaRef}

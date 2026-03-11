@@ -22,6 +22,7 @@ export default function EditorPage() {
         img2vidImageUrl, settings, user,
         deductCredits, addCredits, updateSettings,
         tagSettings, setGenerationType,
+        selectedFaceId, savedFaces,
     } = useAppStore();
     const { t } = useTranslation();
 
@@ -248,6 +249,9 @@ export default function EditorPage() {
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                         nudeMode: settings.nudeMode ?? true,
                         tagSettings,
+                        selectedFaceImageUrl: selectedFaceId
+                            ? savedFaces.find(f => f.id === selectedFaceId)?.image_url
+                            : undefined,
                     }),
                 });
 
@@ -390,7 +394,7 @@ export default function EditorPage() {
     const handleOneClickGenerate = () => {
         const preset = {
             prompt: 'beautiful woman, beach, golden hour, bikini, wind in hair, photorealistic',
-            model: 'novita-realistic-vision-6',
+            model: 'novita-helloworld-xl',
             aspectRatio: '9:16' as AspectRatio,
             resolution: '512' as const,
             nudeMode: true,
@@ -494,14 +498,6 @@ export default function EditorPage() {
                 </div>
             )}
 
-            {/* Error Banner */}
-            {generationError && (
-                <div className="editor-error-banner">
-                    <div className="chat-error-content">{generationError}</div>
-                    <button className="chat-error-close" onClick={() => setGenerationError(null)}>✕</button>
-                </div>
-            )}
-
             {isImg2Vid ? (
                 <>
                     <Img2VidPanel />
@@ -531,6 +527,8 @@ export default function EditorPage() {
                         setShowInpaintModal={setShowInpaintModal}
                         onSubmit={handleSubmit}
                         isGenerating={isGenerating}
+                        generationError={generationError}
+                        setGenerationError={setGenerationError}
                     />
                     <RightPanel
                         onOneClickGenerate={handleOneClickGenerate}

@@ -10,6 +10,7 @@ import type {
     GenerationType,
 } from '@/lib/types';
 import InpaintModal from './InpaintModal';
+import MyFaces from './MyFaces';
 
 interface UploadSlot {
     file: File;
@@ -35,13 +36,15 @@ interface LeftPanelProps {
     setShowInpaintModal: (v: boolean) => void;
     onSubmit: (e: React.FormEvent) => void;
     isGenerating: boolean;
+    generationError?: string | null;
+    setGenerationError?: (v: string | null) => void;
 }
 
 export default function LeftPanel({
     inputText, setInputText, uploads, setUploads,
     faceSwapMode, setFaceSwapMode, inpaintMode, setInpaintMode,
     reposeMode, setReposeMode, showInpaintModal, setShowInpaintModal,
-    onSubmit, isGenerating,
+    onSubmit, isGenerating, generationError, setGenerationError,
 }: LeftPanelProps) {
     const {
         settings, updateSettings, tagSettings, updateTagSettings,
@@ -368,7 +371,16 @@ export default function LeftPanel({
                         </div>
                     )}
 
-                    {/* Consent moved to modal in ChatArea */}
+                    {/* My Faces — above the input area */}
+                    <MyFaces />
+
+                    {/* Error Banner — directly above prompt */}
+                    {generationError && (
+                        <div className="editor-error-banner">
+                            <div className="chat-error-content">{generationError}</div>
+                            <button className="chat-error-close" onClick={() => setGenerationError?.(null)}>✕</button>
+                        </div>
+                    )}
 
                     {/* Prompt textarea */}
                     {!(faceSwapMode && settings.generationType === 'img2img') && (
@@ -684,18 +696,6 @@ export default function LeftPanel({
                                     </div>
                                 </div>
 
-                                {/* Action / Pose */}
-                                <div className="control-group">
-                                    <label>{t('tags.fetish')}</label>
-                                    <div className="pill-grid">
-                                        {(['fellatio', 'cowgirl', 'insertion', 'kiss', 'missionary', 'doggy', 'standing', 'handjob', 'paizuri'] as FetishTag[]).map((f) => (
-                                            <button key={f} className={`pill ${tagSettings.fetish.includes(f) ? 'active' : ''}`}
-                                                onClick={() => toggleFetishTag(f)}>
-                                                {t(`tags.fet${f.charAt(0).toUpperCase() + f.slice(1)}`)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         )}
                     </div>

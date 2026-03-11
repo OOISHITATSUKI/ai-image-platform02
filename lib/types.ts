@@ -90,6 +90,23 @@ export interface TagSettings {
   fetish: FetishTag[];
 }
 
+// ----- Saved Faces -----
+
+export interface SavedFace {
+  id: string;
+  user_id: string;
+  name: string;
+  image_url: string;
+  thumbnail_url: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export const MAX_FACES = {
+  free: 1,
+  paid: 10,
+} as const;
+
 // ----- User -----
 
 export type UserStatus = 'pending_otp' | 'pending_password' | 'pending_agreements' | 'pending_profile' | 'active' | 'age_restricted' | 'banned';
@@ -184,11 +201,7 @@ export interface AIModel {
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // ── NSFW Realistic Models ──
-
-  // ── SDXL Photoreal Models (txt2img only) ──
-
-  // ── SDXL Photoreal Models (txt2img only) ──
+  // ── SDXL Photoreal Models ──
   { id: 'novita-realvis-xl', name: '✨ RealVisXL V5.0', type: 'image', provider: 'novita', description: 'High-end SDXL photorealism (V5.0)', novitaModelName: 'realvisxlV50_v50LightningBakedvae_718065.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-juggernaut-xl', name: '✨ Juggernaut XL (V11)', type: 'image', provider: 'novita', description: 'Powerful SDXL versatile (V11)', novitaModelName: 'juggernautXL_juggXIByRundiffusion_695423.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-helloworld-xl', name: '✨ HelloWorld XL V7.0', type: 'image', provider: 'novita', description: 'Natural SDXL realism (V7.0)', novitaModelName: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },

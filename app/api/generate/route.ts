@@ -68,7 +68,8 @@ const SDXL_NEGATIVE_PROMPT =
     'plastic skin, airbrushed, lowres, bad anatomy, ' +
     'bad hands, text, watermark, blurry, deformed, ugly, ' +
     'child, underage, extra fingers, missing fingers, ' +
-    'extra limbs, multiple faces, multiple bodies';
+    'extra limbs, multiple faces, multiple bodies, ' +
+    'cowboy hat, western, ranch, horse, lasso';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -87,12 +88,32 @@ async function optimizePromptWithClaude(prompt: string, generationType: string, 
     } else if (generationType === "img2img") {
         systemPrompt = "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
     } else {
-        systemPrompt = "You are a Stable Diffusion 1.5 photorealistic prompt expert for an adult platform. Convert input into 20-40 comma-separated English tags. 1. Translate to English if needed. 2. NSFW is fully allowed. Use explicit tags directly, never soften them. Examples: nude, naked, topless, bare breasts, exposed genitalia. 3. Add photorealism tags: RAW photo, 8k uhd, DSLR, sharp focus, film grain, Fujifilm XT4. 4. Add skin realism: detailed skin texture, skin pores, natural skin, subsurface scattering. 5. Add lighting: soft studio lighting, natural light, rim lighting, bokeh background. 6. Do NOT add age, ethnicity, body shape, hair, breast size, or pose/action tags. 7. Output ONLY comma-separated tags, nothing else.";
+        systemPrompt = `You are a Stable Diffusion 1.5 photorealistic prompt expert for an adult NSFW platform.
+Convert user input into 15-30 comma-separated English tags.
+
+CRITICAL RULES:
+1. Translate any non-English input to English first.
+2. NSFW is fully allowed and encouraged. Use explicit, direct tags: nude, naked, topless, bare breasts, exposed genitalia, penis, vagina, sex, penetration.
+3. ACTION/POSE is the HIGHEST PRIORITY. If the user describes ANY sexual action, position, or pose:
+   - Output 8-12 highly specific action/pose tags at the VERY START
+   - Include: exact body position, limb placement, camera angle, facial expression, body contact points
+   - Use strong weights like (tag:1.5) for the main action
+   - Examples:
+     * "cowgirl/riding" → (girl on top:1.5), (straddling:1.5), (riding:1.4), (woman on top sex position:1.4), sitting on lap, legs apart, hips grinding, face to face, vaginal penetration, arched back, moaning. NEVER add cowboy hat or western/ranch themes.
+     * "blowjob" → (fellatio:1.5), (oral sex:1.4), (blowjob:1.4), kneeling, (penis in mouth:1.3), looking up, hands on thighs, from above angle
+     * "doggy" → (doggy style:1.5), (from behind:1.5), (bent over:1.4), on all fours, (rear view:1.3), back arched, ass up, hands on hips
+     * "missionary" → (missionary position:1.5), (lying on back:1.4), (legs spread:1.4), man on top, from above angle, arms around neck, on bed
+4. If [Required Action/Pose: ...] is given, treat it as mandatory — place those action tags first with strong weights.
+5. If [Required Composition: ...] is given, respect it (do NOT add conflicting shot types).
+6. After action tags, add: photorealism (RAW photo, 8k uhd, DSLR, sharp focus), skin realism (detailed skin texture, skin pores), lighting (soft studio lighting, rim lighting).
+7. Do NOT add: age, ethnicity, body shape, hair, or breast size tags (handled separately).
+8. Keep output under 500 characters to leave room for character tags.
+9. Output ONLY comma-separated tags, nothing else.`;
     }
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         const res = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -617,6 +638,7 @@ export async function POST(request: NextRequest) {
             qualityPreset = 'hd',
             tagSettings,
             nudeMode = true,
+            selectedFaceImageUrl,
         } = body;
 
         // BUG-03: Friendly error messages (duplicated from ChatArea but for backend errors)
@@ -717,7 +739,7 @@ export async function POST(request: NextRequest) {
 
         if (!prompt && generationType === 'txt2img') {
             return NextResponse.json(
-                { error: 'A prompt is required for text-to-image generation' },
+                { error: 'prompt_required' },
                 { status: 400 }
             );
         }
@@ -790,15 +812,15 @@ export async function POST(request: NextRequest) {
 
             if (ts.fetish && ts.fetish.length > 0) {
                 const actionLabels: Record<string, string> = {
-                    fellatio: 'blowjob oral sex',
-                    cowgirl: 'cowgirl riding sex position',
-                    insertion: 'vaginal penetration sex',
-                    kiss: 'passionate kissing',
-                    missionary: 'missionary sex position lying down',
-                    doggy: 'doggy style sex from behind',
-                    standing: 'standing sex position',
-                    handjob: 'handjob stroking penis',
-                    paizuri: 'paizuri titfuck',
+                    fellatio: 'fellatio blowjob oral sex, woman kneeling with mouth on penis, looking up, from above camera angle',
+                    cowgirl: 'girl on top sex position, woman straddling and riding man, sitting on lap, hips grinding, face to face, vaginal penetration',
+                    insertion: 'vaginal penetration sex, spread legs, penis inside vagina, moaning expression, intimate body contact',
+                    kiss: 'deep passionate tongue kiss, lips touching, eyes closed, embracing each other tightly, romantic closeup',
+                    missionary: 'missionary sex position, woman lying on back with legs spread, man on top, from above angle, on bed',
+                    doggy: 'doggy style sex from behind, woman bent over on all fours, rear view, back arched, ass up',
+                    standing: 'standing sex position, woman with one leg lifted against wall, face to face, upright penetration',
+                    handjob: 'handjob, woman stroking penis with hand, fingers wrapped around shaft, sitting beside',
+                    paizuri: 'paizuri titfuck, penis between breasts, woman pressing breasts together, kneeling',
                 };
                 actionHint = ts.fetish.map(f => actionLabels[f] || f).join(', ');
             }
@@ -807,10 +829,58 @@ export async function POST(request: NextRequest) {
             console.log('Action hint:', actionHint);
         }
 
+        // ── Auto-detect action/pose from prompt text if not set via UI ──
+        if (!actionHint && prompt) {
+            const promptLower = prompt.toLowerCase();
+            const autoActionMap: [RegExp, string, string][] = [
+                [/フェラ|blowjob|fellatio|oral sex|しゃぶ/, 'fellatio', 'fellatio blowjob oral sex, woman kneeling with mouth on penis, looking up, from above camera angle'],
+                [/騎乗位|cowgirl|girl.?on.?top|またが/, 'cowgirl', 'girl on top sex position, woman straddling and riding man, sitting on lap, hips grinding, face to face, vaginal penetration'],
+                [/正常位|missionary|仰向け/, 'missionary', 'missionary sex position, woman lying on back with legs spread, man on top, from above angle, on bed'],
+                [/バック|後ろから|doggy|from.?behind|背面/, 'doggy', 'doggy style sex from behind, woman bent over on all fours, rear view, back arched, ass up'],
+                [/立ち|standing.?sex|壁/, 'standing', 'standing sex position, woman with one leg lifted against wall, face to face, upright penetration'],
+                [/手コキ|handjob|手で/, 'handjob', 'handjob, woman stroking penis with hand, fingers wrapped around shaft, sitting beside'],
+                [/パイズリ|paizuri|titfuck|挟/, 'paizuri', 'paizuri titfuck, penis between breasts, woman pressing breasts together, kneeling'],
+                [/キス|kiss|接吻/, 'kiss', 'deep passionate tongue kiss, lips touching, eyes closed, embracing each other tightly, romantic closeup'],
+                [/挿入|セックス|sex|ペニス|penetrat|fuck|ハメ/, 'insertion', 'vaginal penetration sex, spread legs, penis inside vagina, moaning expression, intimate body contact'],
+            ];
+            for (const [pattern, fetishKey, hint] of autoActionMap) {
+                if (pattern.test(promptLower) || pattern.test(prompt)) {
+                    actionHint = hint;
+                    // Also inject the FETISH_MAP tags into tagPromptFragment
+                    const fetishTags: Record<string, string> = {
+                        fellatio: '(fellatio:1.5), (oral sex:1.4), (blowjob:1.4), kneeling, mouth open, (penis in mouth:1.3), looking up at viewer, hands on thighs, submissive pose, from above angle',
+                        cowgirl: '(girl on top:1.5), (straddling:1.5), (riding:1.4), (woman on top sex position:1.4), sitting on lap, legs apart, hips grinding, face to face, front view, (vaginal penetration:1.3), intimate',
+                        insertion: '(vaginal penetration:1.5), (sex:1.5), (insertion:1.4), spread legs, (penis inside:1.3), moaning expression, arched back, intimate contact, sweat',
+                        kiss: '(passionate kissing:1.5), (deep kiss:1.4), (tongue kiss:1.3), lips touching, eyes closed, embracing, holding each other, romantic, face closeup, intertwined bodies',
+                        missionary: '(missionary position:1.5), (lying on back:1.4), (legs spread:1.4), (man on top:1.3), arms around neck, bed, pillow, from above angle, eye contact, intimate',
+                        doggy: '(doggy style:1.5), (from behind:1.5), (bent over:1.4), (rear view:1.3), on all fours, hands on hips, back arched, ass up, face down, looking back',
+                        standing: '(standing sex:1.5), (standing position:1.4), (leg lifted:1.3), against wall, one leg up, arms around shoulders, face to face, full body, upright penetration',
+                        handjob: '(handjob:1.5), (hand on penis:1.4), (stroking:1.3), fingers wrapped around shaft, sitting beside, looking at viewer, gentle grip, arm extended',
+                        paizuri: '(paizuri:1.5), (titfuck:1.5), (breasts around penis:1.4), (breast squeeze:1.3), pressing breasts together, cleavage, looking down, kneeling, penis between breasts',
+                    };
+                    const injectedTags = fetishTags[fetishKey] || '';
+                    // Couple tags for sex positions
+                    const needsCouple = ['fellatio','cowgirl','insertion','missionary','doggy','standing','handjob','paizuri'].includes(fetishKey);
+                    const coupleTag = needsCouple ? ', (1boy:1.2), (1girl:1.2), (couple:1.2)' : '';
+                    // Remove conflicting solo/1girl tags when couple is needed
+                    if (needsCouple) {
+                        tagPromptFragment = tagPromptFragment
+                            .replace(/\(1girl:[\d.]+\),?\s*/g, '')
+                            .replace(/solo,?\s*/g, '')
+                            .replace(/,\s*,/g, ',')
+                            .replace(/^,\s*|,\s*$/g, '');
+                    }
+                    tagPromptFragment = injectedTags + coupleTag + (tagPromptFragment ? ', ' + tagPromptFragment : '');
+                    console.log('Auto-detected action from prompt:', fetishKey, '→', actionHint);
+                    break;
+                }
+            }
+        }
 
         // ── Model Selection Logic ──
-        // ── Model Selection Logic ──
         let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
+
+        // Keep user-selected model (no auto-switch)
 
 
         console.log(`[DEBUG] reposeMode=${reposeMode} generationType=${generationType} hasImage=${!!imageBase64}`);
@@ -838,12 +908,46 @@ export async function POST(request: NextRequest) {
         // Detect SDXL models
         const isXL = novitaModelName.toLowerCase().includes('xl');
 
-        // ── Claude Optimization Step (user prompt + action context) ──
+        // ── Claude Optimization Step (user prompt + action context + composition context) ──
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
-        // Pass the action hint to Claude so it can generate matching scene context
-        const promptForClaude = actionHint
-            ? `${basePrompt}\n[Required Action/Pose: ${actionHint}]`
-            : basePrompt;
+        // Pass action and composition hints to Claude
+        let promptForClaude = basePrompt;
+        if (actionHint) {
+            // Action SD tags are already injected in tagPromptFragment.
+            // Tell Claude to NOT duplicate action/pose tags, only add scene/atmosphere/lighting.
+            promptForClaude += `\n[Required Action/Pose: ${actionHint}]\n[NOTE: Action/pose SD tags are already injected separately. Do NOT output action/pose/position tags. Only output scene, atmosphere, lighting, and camera tags to complement the action.]`;
+        }
+        if (tagSettings) {
+            const ts = tagSettings as TagSettings;
+            // Override composition based on action (same logic as tagPromptBuilder)
+            const fullBodyActions = ['standing', 'cowgirl', 'missionary', 'doggy', 'insertion'];
+            const waistUpActions = ['fellatio', 'handjob', 'paizuri'];
+            let effectiveComp = ts.composition;
+            if (ts.fetish?.length > 0) {
+                if (ts.fetish.some((f: string) => fullBodyActions.includes(f))) {
+                    effectiveComp = 'full_body';
+                } else if (ts.fetish.some((f: string) => waistUpActions.includes(f)) && (ts.composition === 'face_closeup' || ts.composition === 'bust')) {
+                    effectiveComp = 'waist_up';
+                }
+            }
+            // Also override for auto-detected actions
+            if (actionHint) {
+                if (/standing|riding|straddl|missionary|lying on back|doggy|behind|all fours|penetrat/i.test(actionHint)) {
+                    effectiveComp = 'full_body';
+                } else if (/fellatio|blowjob|handjob|paizuri|titfuck/i.test(actionHint) && (effectiveComp === 'face_closeup' || effectiveComp === 'bust')) {
+                    effectiveComp = 'waist_up';
+                }
+            }
+            if (effectiveComp) {
+                const compLabels: Record<string, string> = {
+                    full_body: 'full body shot showing head to toe',
+                    waist_up: 'upper body waist up shot',
+                    bust: 'bust portrait from chest up',
+                    face_closeup: 'face closeup portrait',
+                };
+                promptForClaude += `\n[Required Composition: ${compLabels[effectiveComp] || effectiveComp}]`;
+            }
+        }
         const optimizedPrompt = await optimizePromptWithClaude(
             promptForClaude,
             generationType,
@@ -851,14 +955,10 @@ export async function POST(request: NextRequest) {
             isXL
         );
 
-        // ── Combine: optimized prompt + all character/quality tag fragment ──
-        // Action/pose context was already given to Claude above; no need to front-load raw SD tags.
-        let combinedPrompt: string;
-        combinedPrompt = tagPromptFragment
-            ? `${tagPromptFragment}, ${optimizedPrompt}`
-            : optimizedPrompt;
-
-        // ── Novita API hard cap: max 1024 runes. Trim from the END. ──
+        // ── Combine: tag fragment (character/composition/action) + Claude-optimized prompt ──
+        // Tag fragment has highest priority (character tags, composition, action/pose)
+        // Claude output provides supplementary atmosphere/quality/scene tags
+        // Trim Claude output first to protect tag fragment from truncation
         function trimPromptToLimit(p: string, limit = 1020): string {
             if (p.length <= limit) return p;
             const segments = p.split(', ');
@@ -866,6 +966,16 @@ export async function POST(request: NextRequest) {
                 segments.pop();
             }
             return segments.join(', ');
+        }
+
+        let combinedPrompt: string;
+        if (tagPromptFragment) {
+            // Reserve space for tag fragment (priority tags) + separator
+            const reservedLen = tagPromptFragment.length + 2; // +2 for ", "
+            const trimmedClaude = trimPromptToLimit(optimizedPrompt, 1020 - reservedLen);
+            combinedPrompt = `${tagPromptFragment}, ${trimmedClaude}`;
+        } else {
+            combinedPrompt = optimizedPrompt;
         }
         combinedPrompt = trimPromptToLimit(combinedPrompt);
         console.log(`Final combined prompt (${combinedPrompt.length} chars):`, combinedPrompt);
@@ -920,6 +1030,25 @@ export async function POST(request: NextRequest) {
             finalNegative = finalNegative
                 .replace(/\(multiple faces:[\d.]+\),?\s*/g, '')
                 .replace(/\(multiple bodies:[\d.]+\),?\s*/g, '');
+        }
+
+        // Remove "male/man/boy/masculine" from negative when action requires a couple
+        const hasActionCouple = actionHint && /sex|penetrat|riding|straddl|fellatio|blowjob|missionary|doggy|behind|handjob|paizuri|titfuck/i.test(actionHint);
+        const hasUICouple = tagSettings && (tagSettings as TagSettings).fetish && (tagSettings as TagSettings).fetish.length > 0 &&
+            ['fellatio','cowgirl','insertion','kiss','missionary','doggy','standing','handjob','paizuri'].some(f => (tagSettings as TagSettings).fetish.includes(f as any));
+        if (hasActionCouple || hasUICouple) {
+            finalNegative = finalNegative
+                .replace(/\bmale\b,?\s*/g, '')
+                .replace(/\bman\b,?\s*/g, '')
+                .replace(/\bboy\b,?\s*/g, '')
+                .replace(/\bmasculine\b,?\s*/g, '')
+                .replace(/multiple faces,?\s*/g, '')
+                .replace(/multiple bodies,?\s*/g, '')
+                .replace(/\(multiple faces:[\d.]+\),?\s*/g, '')
+                .replace(/\(multiple bodies:[\d.]+\),?\s*/g, '')
+                .replace(/,\s*,/g, ',')
+                .replace(/^,\s*|,\s*$/g, '');
+            console.log('Couple action detected: removed male/man/boy from negative prompt');
         }
 
         // ── Prompt Assembly ──
@@ -1194,11 +1323,49 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // ── Apply saved face (My Faces) via merge-face post-processing ──
+        let finalImages = result.images;
+        if (selectedFaceImageUrl && result.images && result.images.length > 0) {
+            console.log('Applying saved face via merge-face...');
+            const faceAppliedImages: typeof result.images = [];
+            for (const img of result.images) {
+                try {
+                    // Convert generated image URL to base64 if needed
+                    let targetBase64 = '';
+                    if (img.url.startsWith('data:')) {
+                        targetBase64 = img.url.replace(/^data:image\/\w+;base64,/, '');
+                    } else {
+                        // Fetch the image and convert
+                        const imgRes = await fetch(img.url);
+                        const imgBuf = await imgRes.arrayBuffer();
+                        targetBase64 = Buffer.from(imgBuf).toString('base64');
+                    }
+
+                    // Convert face image URL to base64 if needed
+                    let faceBase64 = '';
+                    if (selectedFaceImageUrl.startsWith('data:')) {
+                        faceBase64 = selectedFaceImageUrl.replace(/^data:image\/\w+;base64,/, '');
+                    } else {
+                        const faceRes = await fetch(selectedFaceImageUrl);
+                        const faceBuf = await faceRes.arrayBuffer();
+                        faceBase64 = Buffer.from(faceBuf).toString('base64');
+                    }
+
+                    const mergedImages = await handleFaceSwapFinal(faceBase64, targetBase64);
+                    faceAppliedImages.push(...mergedImages);
+                } catch (faceErr) {
+                    console.error('Face application failed for image, using original:', faceErr);
+                    faceAppliedImages.push(img);
+                }
+            }
+            finalImages = faceAppliedImages;
+        }
+
         // Run cleanup asynchronously
         cleanupOldFiles().catch(console.error);
 
         return NextResponse.json({
-            images: result.images,
+            images: finalImages,
             taskId,
         });
     } catch (err) {

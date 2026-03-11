@@ -17,6 +17,7 @@ import type {
     Resolution,
     TagSettings,
     FetishTag,
+    SavedFace,
 } from './types';
 
 // ============================================================
@@ -194,6 +195,16 @@ interface AppState {
     deductCredits: (amount: number) => void;
     addCredits: (amount: number) => void;
 
+    // ----- Saved Faces -----
+    savedFaces: SavedFace[];
+    selectedFaceId: string | null;
+    isFacesLoading: boolean;
+    setSavedFaces: (faces: SavedFace[]) => void;
+    addSavedFace: (face: SavedFace) => void;
+    removeSavedFace: (faceId: string) => void;
+    setSelectedFaceId: (faceId: string | null) => void;
+    setIsFacesLoading: (loading: boolean) => void;
+
     // ----- Chat Cleanup -----
     cleanupOldMessages: () => void;
 }
@@ -206,7 +217,7 @@ const DEFAULT_TAG_SETTINGS: TagSettings = {
 
 const DEFAULT_SETTINGS: GenerationSettings = {
     generationType: 'txt2img',
-    model: 'novita-realistic-vision-6',
+    model: 'novita-helloworld-xl',
     aspectRatio: '9:16',
     resolution: '1024',
     count: 1,
@@ -314,6 +325,8 @@ export const useAppStore = create<AppState>()(
                     ageVerified: false,
                     chats: [],
                     activeChatId: null,
+                    savedFaces: [],
+                    selectedFaceId: null,
                 });
             },
 
@@ -519,9 +532,8 @@ export const useAppStore = create<AppState>()(
                 set((s) => ({
                     tagSettings: {
                         ...s.tagSettings,
-                        fetish: s.tagSettings.fetish.includes(tag)
-                            ? s.tagSettings.fetish.filter((t) => t !== tag)
-                            : [...s.tagSettings.fetish, tag],
+                        // Single selection: toggle off if already selected, otherwise replace
+                        fetish: s.tagSettings.fetish.includes(tag) ? [] : [tag],
                     },
                 })),
             resetTagSettings: () => set({ tagSettings: DEFAULT_TAG_SETTINGS }),
@@ -535,6 +547,19 @@ export const useAppStore = create<AppState>()(
                 set((s) => ({
                     user: s.user ? { ...s.user, credits: (s.user?.credits ?? 0) + amount } : null,
                 })),
+
+            // ----- Saved Faces -----
+            savedFaces: [],
+            selectedFaceId: null,
+            isFacesLoading: false,
+            setSavedFaces: (faces) => set({ savedFaces: faces }),
+            addSavedFace: (face) => set((s) => ({ savedFaces: [...s.savedFaces, face] })),
+            removeSavedFace: (faceId) => set((s) => ({
+                savedFaces: s.savedFaces.filter((f) => f.id !== faceId),
+                selectedFaceId: s.selectedFaceId === faceId ? null : s.selectedFaceId,
+            })),
+            setSelectedFaceId: (faceId) => set({ selectedFaceId: faceId }),
+            setIsFacesLoading: (loading) => set({ isFacesLoading: loading }),
         }),
         {
             name: 'videogen-storage-v3', // Bumped version for auth system
@@ -567,6 +592,8 @@ export const useAppStore = create<AppState>()(
                     ageVerified: state.ageVerified,
                     sidebarCollapsed: state.sidebarCollapsed,
                     settingsPanelVisible: state.settingsPanelVisible,
+                    savedFaces: state.savedFaces,
+                    selectedFaceId: state.selectedFaceId,
                 };
             },
         }
