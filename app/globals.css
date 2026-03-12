@@ -1105,6 +1105,41 @@ video {
   background: rgba(239, 68, 68, 0.3);
 }
 
+/* Mobile: show action buttons as a bar below the image instead of hover overlay */
+@media (max-width: 768px) {
+  .result-overlay {
+    position: relative;
+    top: auto; left: auto; right: auto; bottom: auto;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    padding: 6px 8px;
+    justify-content: center;
+  }
+
+  .result-image-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .result-image-wrapper > img {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .result-actions {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .result-action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
 .result-time {
   position: absolute;
   top: 6px;
@@ -3056,6 +3091,51 @@ textarea:focus {
 
 .lightbox-close:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10001;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+}
+
+.lightbox-back-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .lightbox-back-btn {
+    top: 12px;
+    left: 12px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .lightbox-actions {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 10px;
+  }
+
+  .lightbox-btn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
 }
 
 /* ── Account Menu Overlay ── */
@@ -7578,18 +7658,117 @@ button, a, [role="button"] {
 }
 
 @media (max-width: 768px) {
-  .face-modal-grid {
-    grid-template-columns: repeat(4, 1fr);
+  /* ── My Faces list: larger tap targets ── */
+  .my-faces-list {
+    gap: 12px;
+    padding: 4px 0 8px;
   }
 
   .my-faces-thumb-wrap {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .my-faces-check {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+
+  .my-faces-name {
+    font-size: 0.7rem;
+    max-width: 56px;
   }
 
   .my-faces-add-btn,
   .my-faces-upgrade-btn {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  /* Delete button always visible on mobile (no hover) */
+  .my-faces-delete-btn {
+    display: flex;
+    width: 22px;
+    height: 22px;
+    font-size: 13px;
+    top: -6px;
+    right: -6px;
+  }
+
+  .my-faces-empty-btn {
+    padding: 14px;
+    font-size: 0.85rem;
+  }
+
+  /* ── Confirm dialog: bigger buttons ── */
+  .my-faces-confirm-cancel,
+  .my-faces-confirm-delete {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  /* ── Guide dialog: bigger OK button ── */
+  .my-faces-guide-ok {
+    padding: 12px 36px;
+    font-size: 0.95rem;
+  }
+
+  /* ── Face Registration Modal ── */
+  .face-modal {
+    max-height: 90vh;
+  }
+
+  .face-modal-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .face-modal-grid-item {
+    border-radius: 10px;
+    border-width: 3px;
+  }
+
+  .face-modal-grid-check {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+
+  .face-modal-close {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .face-modal-tab {
+    padding: 12px;
+    font-size: 0.88rem;
+  }
+
+  .face-modal-name-input input {
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+
+  .face-modal-footer {
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .face-modal-cancel {
+    padding: 12px 20px;
+    font-size: 0.88rem;
+  }
+
+  .face-modal-submit {
+    padding: 12px 28px;
+    font-size: 0.88rem;
+  }
+
+  .face-modal-dropzone {
+    min-height: 140px;
+    padding: 28px;
   }
 }

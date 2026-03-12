@@ -132,3 +132,104 @@ export async function checkAndNotifyUserMilestone(activeUserCount: number): Prom
         console.error('[Email] Milestone notification error:', err);
     }
 }
+
+// ── Weekly Backup Report Email ──────────────────────────────
+export async function sendWeeklyBackupReport(report: {
+    totalUsers: number;
+    activeUsers: number;
+    bannedUsers: number;
+    totalTransactions: number;
+    totalRevenue: number;
+    totalCreditsUsed: number;
+    backupFiles: string[];
+    backupTotalSize: string;
+    dataFiles: { name: string; size: string }[];
+}): Promise<boolean> {
+    try {
+        const resend = getResend();
+        if (!resend) {
+            console.error('[Email] Cannot send backup report: Resend not initialized.');
+            return false;
+        }
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const dataFileRows = report.dataFiles
+            .map(f => `<tr><td style="padding:6px 12px;color:#b0b0c8;border-bottom:1px solid #2a2a4a;">${f.name}</td><td style="padding:6px 12px;color:#b0b0c8;border-bottom:1px solid #2a2a4a;text-align:right;">${f.size}</td></tr>`)
+            .join('');
+
+        const html = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #0a0a1a; padding: 40px 20px;">
+                <div style="max-width: 560px; margin: auto; background: #1a1a2e; border-radius: 12px; padding: 40px; border: 1px solid #2a2a4a;">
+                    <h1 style="color: #c084fc; font-size: 22px; margin: 0 0 6px; text-align: center;">📦 Weekly Backup Report</h1>
+                    <p style="color: #6b6b85; font-size: 13px; text-align: center; margin: 0 0 28px;">${dateStr} — Image Nude</p>
+
+                    <h2 style="color: #e0e0ee; font-size: 15px; margin: 0 0 12px;">👥 Users</h2>
+                    <div style="background: #0f0f23; border-radius: 8px; padding: 16px; margin: 0 0 20px; display: flex; justify-content: space-around;">
+                        <div style="text-align: center;">
+                            <div style="color: #22c55e; font-size: 24px; font-weight: bold;">${report.totalUsers}</div>
+                            <div style="color: #6b6b85; font-size: 12px;">Total</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #3b82f6; font-size: 24px; font-weight: bold;">${report.activeUsers}</div>
+                            <div style="color: #6b6b85; font-size: 12px;">Active</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #ef4444; font-size: 24px; font-weight: bold;">${report.bannedUsers}</div>
+                            <div style="color: #6b6b85; font-size: 12px;">Banned</div>
+                        </div>
+                    </div>
+
+                    <h2 style="color: #e0e0ee; font-size: 15px; margin: 0 0 12px;">💰 Billing</h2>
+                    <div style="background: #0f0f23; border-radius: 8px; padding: 16px; margin: 0 0 20px;">
+                        <p style="color: #b0b0c8; font-size: 14px; margin: 0 0 6px;">Transactions: <strong style="color:#fff;">${report.totalTransactions}</strong></p>
+                        <p style="color: #b0b0c8; font-size: 14px; margin: 0 0 6px;">Total Revenue: <strong style="color:#22c55e;">$${report.totalRevenue.toFixed(2)}</strong></p>
+                        <p style="color: #b0b0c8; font-size: 14px; margin: 0;">Credits Used: <strong style="color:#fff;">${report.totalCreditsUsed}</strong></p>
+                    </div>
+
+                    <h2 style="color: #e0e0ee; font-size: 15px; margin: 0 0 12px;">💾 Data Files</h2>
+                    <table style="width: 100%; border-collapse: collapse; background: #0f0f23; border-radius: 8px; overflow: hidden; margin: 0 0 20px;">
+                        <thead><tr>
+                            <th style="padding:8px 12px; color:#6b6b85; text-align:left; font-size:12px; border-bottom:1px solid #2a2a4a;">File</th>
+                            <th style="padding:8px 12px; color:#6b6b85; text-align:right; font-size:12px; border-bottom:1px solid #2a2a4a;">Size</th>
+                        </tr></thead>
+                        <tbody>${dataFileRows}</tbody>
+                    </table>
+
+                    <h2 style="color: #e0e0ee; font-size: 15px; margin: 0 0 12px;">🗂 Backups</h2>
+                    <div style="background: #0f0f23; border-radius: 8px; padding: 16px; margin: 0 0 20px;">
+                        <p style="color: #b0b0c8; font-size: 14px; margin: 0 0 6px;">Backup files this week: <strong style="color:#fff;">${report.backupFiles.length}</strong></p>
+                        <p style="color: #b0b0c8; font-size: 14px; margin: 0;">Total size: <strong style="color:#fff;">${report.backupTotalSize}</strong></p>
+                    </div>
+
+                    <div style="background: #0d2818; border: 1px solid #16a34a44; border-radius: 8px; padding: 12px 16px; text-align: center;">
+                        <p style="color: #4ade80; font-size: 14px; margin: 0;">✅ All user data is backed up and secure.</p>
+                    </div>
+
+                    <p style="color: #6b6b85; font-size: 11px; text-align: center; margin: 20px 0 0;">
+                        Image Nude AI — Automated Backup Report
+                    </p>
+                </div>
+            </div>
+        `;
+
+        const { error } = await resend.emails.send({
+            from: FROM,
+            to: ADMIN_EMAIL,
+            subject: `📦【Image Nude】週次バックアップレポート (${dateStr})`,
+            html,
+        });
+
+        if (error) {
+            console.error('[Email] Weekly backup report failed:', error);
+            return false;
+        }
+
+        console.log('[Email] Weekly backup report sent successfully.');
+        return true;
+    } catch (err) {
+        console.error('[Email] Weekly backup report error:', err);
+        return false;
+    }
+}

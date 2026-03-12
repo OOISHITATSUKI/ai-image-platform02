@@ -11,6 +11,8 @@
     },
     "create": {
         "imageGen": "Geração de imagem",
+        "faceSwap": "Troca de Rosto",
+        "undress": "Despir (AI)",
         "videoGen": "Geração de vídeo",
         "txt2img": "Texto para imagem",
         "img2img": "Imagem para imagem",

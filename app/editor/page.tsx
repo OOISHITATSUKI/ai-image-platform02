@@ -31,8 +31,11 @@ export default function EditorPage() {
     // Shared state between Left and Right panels
     const [inputText, setInputText] = useState('');
     const [uploads, setUploads] = useState<UploadSlot[]>([]);
-    const [faceSwapMode, setFaceSwapMode] = useState(false);
-    const [inpaintMode, setInpaintMode] = useState(false);
+    // Derive face swap / inpaint mode from generationType (no longer separate state)
+    const faceSwapMode = settings.generationType === 'face_swap';
+    const inpaintMode = settings.generationType === 'inpaint';
+    const setFaceSwapMode = (v: boolean) => setGenerationType(v ? 'face_swap' : 'txt2img');
+    const setInpaintMode = (v: boolean) => setGenerationType(v ? 'inpaint' : 'txt2img');
     const [reposeMode, setReposeMode] = useState(false);
     const [showInpaintModal, setShowInpaintModal] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
@@ -156,26 +159,27 @@ export default function EditorPage() {
         }
 
         // Mode validations
-        if (settings.generationType === 'img2img') {
-            if (reposeMode && uploads.length === 0) { setGenerationError(t('chat.reposeNoImage')); return; }
-            else if (faceSwapMode) {
-                if (uploads.length < 2) { setGenerationError(t('chat.faceSwapNoImage')); return; }
-            } else if (inpaintMode) {
-                if (uploads.length === 0) { setGenerationError(t('chat.uploadRequiredForInpaint')); return; }
-            } else {
-                if (uploads.length === 0) { setGenerationError(t('chat.img2imgNoImage')); return; }
-                if (!inputText.trim()) { setGenerationError(t('chat.promptRequired')); return; }
+        if (faceSwapMode) {
+            const hasSavedFace = !!selectedFaceId;
+            if (uploads.length < 2 && !(uploads.length >= 1 && hasSavedFace)) {
+                setGenerationError(t('chat.faceSwapNoImage'));
+                return;
             }
+        } else if (inpaintMode) {
+            if (uploads.length === 0) { setGenerationError(t('chat.uploadRequiredForInpaint')); return; }
+        } else if (settings.generationType === 'img2img') {
+            if (reposeMode && uploads.length === 0) { setGenerationError(t('chat.reposeNoImage')); return; }
+            else if (uploads.length === 0) { setGenerationError(t('chat.img2imgNoImage')); return; }
+            else if (!inputText.trim()) { setGenerationError(t('chat.promptRequired')); return; }
         }
 
-        const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+        const isImageGeneration = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
 
         let creditCost = settings.count * 1;
         if (isVideoGeneration) creditCost = settings.count * 5;
         else if (faceSwapMode) creditCost = settings.count * 5;
         else if (inpaintMode) creditCost = settings.count * 3;
-        else if (settings.generationType === 'img2img') creditCost = settings.count * 2;
 
         if (!user || !user.email) { setShowRegisterModal(true); return; }
         const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
@@ -236,7 +240,7 @@ export default function EditorPage() {
                     body: JSON.stringify({
                         prompt: userPrompt,
                         modelId: settings.model,
-                        generationType: settings.generationType,
+                        generationType: ['face_swap', 'inpaint'].includes(settings.generationType) ? 'img2img' : settings.generationType,
                         aspectRatio: settings.aspectRatio,
                         resolution: settings.resolution,
                         count: settings.count,
@@ -415,22 +419,16 @@ export default function EditorPage() {
     };
 
     const handleActionInpaint = async (imgUrl: string) => {
-        setGenerationType('img2img');
+        setGenerationType('inpaint');
         const success = await reUploadImage(imgUrl);
         if (success) {
-            setInpaintMode(true);
-            setFaceSwapMode(false);
             setShowInpaintModal(true);
         }
     };
 
     const handleActionFaceSwap = async (imgUrl: string) => {
-        setGenerationType('img2img');
-        const success = await reUploadImage(imgUrl);
-        if (success) {
-            setFaceSwapMode(true);
-            setInpaintMode(false);
-        }
+        setGenerationType('face_swap');
+        await reUploadImage(imgUrl);
     };
 
     const handleActionRegenerate = async (imgUrl: string, originalPrompt: string) => {

@@ -108,14 +108,17 @@ function TryItNowSection() {
             <div style={{ maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: 48 }}>
                     <div className="hp-label"><span className="hp-pulse">●</span> Live Demo — No Sign Up Required</div>
-                    <h2 className="hp-heading">See the Magic <span className="hp-accent-text">Yourself</span></h2>
-                    <p className="hp-subtext" style={{ maxWidth: 500, margin: '0 auto' }}>Choose your preferences and generate instantly. No account needed.</p>
+                    <h2 className="hp-heading">Try It <span className="hp-accent-text">Free</span></h2>
+                    <p className="hp-subtext" style={{ maxWidth: 520, margin: '0 auto' }}>3 simple steps. No account needed. Results in ~10 seconds.</p>
                 </div>
                 <div className="hp-demo-card">
                     {demoState === 'idle' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                             <div>
-                                <div className="hp-demo-label">Ethnicity</div>
+                                <div className="hp-demo-step-header">
+                                    <span className="hp-demo-step-num">1</span>
+                                    <span className="hp-demo-step-title">Choose Ethnicity</span>
+                                </div>
                                 <div className="hp-demo-options">
                                     {ethnicityOptions.map(o => (
                                         <button key={o.value} className={`hp-demo-opt ${ethnicity === o.value ? 'active' : ''}`} onClick={() => setEthnicity(o.value)}>{o.label}</button>
@@ -123,34 +126,43 @@ function TryItNowSection() {
                                 </div>
                             </div>
                             <div>
-                                <div className="hp-demo-label">Bust Size — <span style={{ color: '#f87171' }}>{bustOptions[bustIndex]?.label}</span></div>
+                                <div className="hp-demo-step-header">
+                                    <span className="hp-demo-step-num">2</span>
+                                    <span className="hp-demo-step-title">Select Body Type</span>
+                                </div>
                                 <div className="hp-bust-slider-wrap">
+                                    <div className="hp-bust-labels" style={{ marginBottom: 4 }}>
+                                        {bustOptions.map(o => (
+                                            <button key={o.value} onClick={() => setBustSize(o.value)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: o.value === bustSize ? '#f87171' : '#555', fontWeight: o.value === bustSize ? 700 : 400, fontSize: 12, padding: '4px 0', fontFamily: 'inherit', transition: 'all 0.2s' }}>{o.label}</button>
+                                        ))}
+                                    </div>
                                     <input type="range" min={0} max={3} step={1} value={bustIndex}
                                         onChange={e => setBustSize(bustOptions[Number(e.target.value)].value)}
                                         className="hp-bust-slider" />
-                                    <div className="hp-bust-labels">
-                                        {bustOptions.map(o => <span key={o.value}>{o.label}</span>)}
-                                    </div>
                                 </div>
                             </div>
                             <div>
-                                <div className="hp-demo-label">Describe the scene <span style={{ color: '#555', fontWeight: 400 }}>(optional)</span></div>
+                                <div className="hp-demo-step-header">
+                                    <span className="hp-demo-step-num">3</span>
+                                    <span className="hp-demo-step-title">Describe the Scene</span>
+                                    <span style={{ color: '#555', fontSize: 12, fontWeight: 400, marginLeft: 8 }}>optional</span>
+                                </div>
                                 <textarea
                                     className="hp-demo-textarea"
                                     value={prompt}
                                     onChange={e => setPrompt(e.target.value)}
-                                    placeholder="e.g. on the beach, sunset lighting, looking at camera, outdoor..."
+                                    placeholder="e.g. on the beach, sunset lighting, looking at camera..."
                                     maxLength={200}
-                                    rows={3}
+                                    rows={2}
                                 />
                             </div>
-                            <button className="hp-btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 16, padding: '18px' }} onClick={handleGenerate}>
-                                ✨ Generate — Free
+                            <button className="hp-btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 16, padding: '18px', gap: 8 }} onClick={handleGenerate}>
+                                Generate Now — It&apos;s Free
                             </button>
                             <div className="hp-trust-row" style={{ justifyContent: 'center', fontSize: 12, color: '#444' }}>
-                                <span>🚫 No sign up needed</span>
-                                <span>⚡ ~10 seconds</span>
-                                <span>🔒 Private</span>
+                                <span>No sign up</span>
+                                <span>~10 seconds</span>
+                                <span>100% private</span>
                             </div>
                         </div>
                     )}

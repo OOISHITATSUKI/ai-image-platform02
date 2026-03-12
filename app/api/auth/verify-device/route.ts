@@ -138,6 +138,8 @@ export async function POST(req: NextRequest) {
                 country: user.country,
                 firstGenerationConfirmed: user.firstGenerationConfirmed,
                 lastLoginAt: user.lastLoginAt,
+                termsAgreedAt: user.termsAgreedAt,
+                termsVersion: user.termsVersion,
             },
         };
 

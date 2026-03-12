@@ -93,9 +93,10 @@ export default function Sidebar() {
     ];
 
     const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '🖼️', labelKey: 'create.txt2img', type: 'txt2img' },
-        { icon: '🔄', labelKey: 'create.img2img', type: 'img2img', isPaid: true },
-        { icon: '🎬', labelKey: 'editor.videoEditor', type: 'img2vid', isPaid: true },
+        { icon: '🖼️', labelKey: 'create.imageGen', type: 'txt2img' },
+        { icon: '🔄', labelKey: 'create.faceSwap', type: 'face_swap', isPaid: true },
+        { icon: '🖌️', labelKey: 'create.undress', type: 'inpaint', isPaid: true },
+        { icon: '🎬', labelKey: 'create.videoGen', type: 'img2vid', isPaid: true },
     ];
 
     const languages: { value: Locale; label: string }[] = [
@@ -166,13 +167,11 @@ export default function Sidebar() {
 
                 {/* Generation */}
                 <div className="nav-section">
-                    <div className="nav-label">GENERATION</div>
+                    <div className="nav-label">{t('nav.create')}</div>
                     {generationItems.map((item) => {
-                        const isActive = item.type === 'txt2img'
-                            ? settings.generationType === 'txt2img'
-                            : item.type === 'img2img'
-                            ? ['img2img', 'img_edit'].includes(settings.generationType)
-                            : ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
+                        const isActive = item.type === 'img2vid'
+                            ? ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType)
+                            : settings.generationType === item.type;
                         return (
                             <Link
                                 key={item.type}

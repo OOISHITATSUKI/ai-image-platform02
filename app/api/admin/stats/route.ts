@@ -67,6 +67,21 @@ export async function GET(req: NextRequest) {
             .reduce((sum, t) => sum + (t.amountUsd || 0), 0);
     }
 
+    // Demo Stats
+    const DEMO_STATS_FILE = path.join(process.cwd(), 'data', 'demo_stats.json');
+    let totalDemoTrials = 0;
+    let todayDemoTrials = 0;
+    let uniqueDemoUsers = 0;
+    let todayUniqueDemoUsers = 0;
+    if (fs.existsSync(DEMO_STATS_FILE)) {
+        const demoEvents = JSON.parse(fs.readFileSync(DEMO_STATS_FILE, 'utf8')) as { event: string; ip: string; createdAt: number }[];
+        const generated = demoEvents.filter(e => e.event === 'generated');
+        totalDemoTrials = generated.length;
+        todayDemoTrials = generated.filter(e => e.createdAt >= msToday).length;
+        uniqueDemoUsers = new Set(generated.map(e => e.ip)).size;
+        todayUniqueDemoUsers = new Set(generated.filter(e => e.createdAt >= msToday).map(e => e.ip)).size;
+    }
+
     return NextResponse.json({
         totalUsers,
         newUsersToday,
@@ -75,5 +90,9 @@ export async function GET(req: NextRequest) {
         todayBlocks,
         todayGenerations,
         totalRevenue,
+        totalDemoTrials,
+        todayDemoTrials,
+        uniqueDemoUsers,
+        todayUniqueDemoUsers,
     });
 }

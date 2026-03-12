@@ -47,10 +47,13 @@ export default function ChatArea() {
     const [inputText, setInputText] = useState('');
     // BUG-02: multi-image support
     const [uploads, setUploads] = useState<UploadSlot[]>([]);
-    const [faceSwapMode, setFaceSwapMode] = useState(false);
+    // Derive face swap / inpaint mode from generationType
+    const faceSwapMode = settings.generationType === 'face_swap';
+    const inpaintMode = settings.generationType === 'inpaint';
+    const setFaceSwapMode = (v: boolean) => useAppStore.getState().setGenerationType(v ? 'face_swap' : 'txt2img');
+    const setInpaintMode = (v: boolean) => useAppStore.getState().setGenerationType(v ? 'inpaint' : 'txt2img');
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [showRegisterToast, setShowRegisterToast] = useState(false);
-    const [inpaintMode, setInpaintMode] = useState(false);
     const [reposeMode, setReposeMode] = useState(false);
     const [poseType, setPoseType] = useState<string>('standing');
     const [showInpaintModal, setShowInpaintModal] = useState(false);
@@ -385,7 +388,8 @@ export default function ChatArea() {
                     return;
                 }
             } else if (faceSwapMode) {
-                if (uploads.length < 2) {
+                const hasSavedFace = !!selectedFaceId;
+                if (uploads.length < 2 && !(uploads.length >= 1 && hasSavedFace)) {
                     setGenerationError(t('chat.faceSwapNoImage'));
                     return;
                 }
@@ -410,7 +414,7 @@ export default function ChatArea() {
             }
         }
 
-        const isImageGeneration = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+        const isImageGeneration = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
         const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
 
         let creditCost = settings.count * 1; // txt2img
@@ -493,7 +497,7 @@ export default function ChatArea() {
                     body: JSON.stringify({
                         prompt: userPrompt,
                         modelId: settings.model,
-                        generationType: settings.generationType,
+                        generationType: ['face_swap', 'inpaint'].includes(settings.generationType) ? 'img2img' : settings.generationType,
                         aspectRatio: settings.aspectRatio,
                         resolution: settings.resolution,
                         count: settings.count,
@@ -1340,9 +1344,8 @@ export default function ChatArea() {
                                 <button
                                     className={`mode-btn ${faceSwapMode ? 'active' : ''}`}
                                     onClick={() => {
-                                        setFaceSwapMode((v) => !v);
+                                        setFaceSwapMode(!faceSwapMode);
                                         setReposeMode(false);
-                                        setInpaintMode(false);
                                     }}
                                     disabled={uploads.length === 0}
                                     title={t('chat.faceSwap')}
@@ -1544,14 +1547,10 @@ export default function ChatArea() {
                                 (settings.generationType === 'img2img' && !faceSwapMode && !inpaintMode && (
                                     uploads.length === 0 || !inputText.trim()
                                 )) ||
-                                // inpaint: 画像+同意チェック必須（プロンプトはオプション）
-                                (settings.generationType === 'img2img' && inpaintMode && (
-                                    uploads.length === 0
-                                )) ||
-                                // faceSwap: 画像2枚+同意チェック必須（プロンプトはオプション）
-                                (settings.generationType === 'img2img' && faceSwapMode && (
-                                    uploads.length < 2
-                                ))
+                                // inpaint: 画像必須（プロンプトはオプション）
+                                (inpaintMode && uploads.length === 0) ||
+                                // faceSwap: 画像2枚 or 画像1枚+保存顔（プロンプトはオプション）
+                                (faceSwapMode && uploads.length < 2 && !(uploads.length >= 1 && !!selectedFaceId))
                             }
                             style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '4px', position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', padding: '8px 14px', borderRadius: '8px', fontSize: '0.75rem', lineHeight: '1' }}
                         >

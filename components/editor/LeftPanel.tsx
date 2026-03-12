@@ -49,11 +49,10 @@ export default function LeftPanel({
     const {
         settings, updateSettings, tagSettings, updateTagSettings,
         toggleFetishTag, user, setGenerationType,
+        selectedFaceId, savedFaces, setSelectedFaceId,
     } = useAppStore();
     const { t } = useTranslation();
 
-    const [showFaceSwapModal, setShowFaceSwapModal] = useState(false);
-    const [showInpaintModal2, setShowInpaintModal2] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,7 +100,7 @@ export default function LeftPanel({
 
     // Consent state for img2img
 
-    const isImageMode = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+    const isImageMode = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
     const isVideoMode = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
 
     const filteredModels = AVAILABLE_MODELS.filter((m) =>
@@ -199,8 +198,6 @@ export default function LeftPanel({
 
     const handleModeTabClick = (type: GenerationType) => {
         setGenerationType(type);
-        setFaceSwapMode(false);
-        setInpaintMode(false);
         setReposeMode(false);
     };
 
@@ -209,86 +206,12 @@ export default function LeftPanel({
             <div className="editor-left-scroll">
 
 
-                {/* Face Swap Modal */}
-                {showFaceSwapModal && (
-                    <div className="editor-feature-modal-overlay" onClick={() => setShowFaceSwapModal(false)}>
-                        <div className="editor-feature-modal" onClick={e => e.stopPropagation()}>
-                            <button className="feature-modal-close" onClick={() => setShowFaceSwapModal(false)}>✕</button>
-                            <div className="feature-modal-gif">
-                                <div className="feature-modal-gif-placeholder">
-                                    <span>🔄</span>
-                                    <span>Face Swap Demo</span>
-                                </div>
-                            </div>
-                            <h3 className="feature-modal-title">Face Swap</h3>
-                            <p className="feature-modal-desc">
-                                Upload a body image and a face image.<br />
-                                AI will swap the face seamlessly.
-                            </p>
-                            <ul className="feature-modal-steps">
-                                <li>① Upload body image</li>
-                                <li>② Upload face image</li>
-                                <li>③ Press Generate</li>
-                            </ul>
-                            <button
-                                className="feature-modal-use-btn"
-                                onClick={() => {
-                                    setGenerationType('img2img');
-                                    setFaceSwapMode(true);
-                                    setInpaintMode(false);
-                                    setReposeMode(false);
-                                    setShowFaceSwapModal(false);
-                                }}
-                            >
-                                🔄 Use Face Swap
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Inpaint Modal */}
-                {showInpaintModal2 && (
-                    <div className="editor-feature-modal-overlay" onClick={() => setShowInpaintModal2(false)}>
-                        <div className="editor-feature-modal" onClick={e => e.stopPropagation()}>
-                            <button className="feature-modal-close" onClick={() => setShowInpaintModal2(false)}>✕</button>
-                            <div className="feature-modal-gif">
-                                <div className="feature-modal-gif-placeholder">
-                                    <span>🖌️</span>
-                                    <span>Inpaint Demo</span>
-                                </div>
-                            </div>
-                            <h3 className="feature-modal-title">Inpaint (Nude Mode)</h3>
-                            <p className="feature-modal-desc">
-                                Upload an image and paint over the area<br />
-                                you want AI to regenerate.
-                            </p>
-                            <ul className="feature-modal-steps">
-                                <li>① Upload image</li>
-                                <li>② Paint mask area</li>
-                                <li>③ Press Generate</li>
-                            </ul>
-                            <button
-                                className="feature-modal-use-btn"
-                                onClick={() => {
-                                    setGenerationType('img2img');
-                                    setInpaintMode(true);
-                                    setFaceSwapMode(false);
-                                    setReposeMode(false);
-                                    setShowInpaintModal2(false);
-                                }}
-                            >
-                                🖌️ Use Inpaint
-                            </button>
-                        </div>
-                    </div>
-                )}
-
                 {/* Input Area - varies by mode */}
                 <div className="editor-input-section">
                     {/* Image upload for img2img / faceswap / inpaint */}
                     {showAttach && (
                         <div className="editor-upload-area">
-                            {settings.generationType === 'img2img' && faceSwapMode ? (
+                            {faceSwapMode ? (
                                 <>
                                     <div
                                         className={`editor-upload-zone ${uploads.length > 0 ? 'has-image' : ''}`}
@@ -307,23 +230,36 @@ export default function LeftPanel({
                                             </div>
                                         )}
                                     </div>
-                                    <div
-                                        className={`editor-upload-zone ${uploads.length > 1 ? 'has-image' : ''}`}
-                                        onClick={() => !uploads[1] && fileInputRef.current?.click()}
-                                    >
-                                        {uploads[1] ? (
-                                            <div className="editor-upload-preview">
-                                                <img src={uploads[1].previewUrl} alt="Face" />
-                                                <span className="editor-upload-badge">{t('chat.faceSwapFace')}</span>
-                                                <button className="editor-upload-remove" onClick={(e) => { e.stopPropagation(); handleRemoveUpload(1); }}>✕</button>
+                                    {(() => {
+                                        const selectedFace = selectedFaceId ? savedFaces.find(f => f.id === selectedFaceId) : null;
+                                        return selectedFace && !uploads[1] ? (
+                                            <div className="editor-upload-zone has-image">
+                                                <div className="editor-upload-preview">
+                                                    <img src={selectedFace.thumbnail_url || selectedFace.image_url} alt={selectedFace.name} />
+                                                    <span className="editor-upload-badge">{t('chat.faceSwapFace')} (My Faces)</span>
+                                                    <button className="editor-upload-remove" onClick={() => setSelectedFaceId(null)}>✕</button>
+                                                </div>
                                             </div>
                                         ) : (
-                                            <div className="editor-upload-empty">
-                                                <span>⬆</span>
-                                                <span>{t('chat.faceSwapFace')}</span>
+                                            <div
+                                                className={`editor-upload-zone ${uploads.length > 1 ? 'has-image' : ''}`}
+                                                onClick={() => !uploads[1] && fileInputRef.current?.click()}
+                                            >
+                                                {uploads[1] ? (
+                                                    <div className="editor-upload-preview">
+                                                        <img src={uploads[1].previewUrl} alt="Face" />
+                                                        <span className="editor-upload-badge">{t('chat.faceSwapFace')}</span>
+                                                        <button className="editor-upload-remove" onClick={(e) => { e.stopPropagation(); handleRemoveUpload(1); }}>✕</button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="editor-upload-empty">
+                                                        <span>⬆</span>
+                                                        <span>{t('chat.faceSwapFace')}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
+                                        );
+                                    })()}
                                     {uploads.length >= 2 && (
                                         <button className="editor-swap-btn" onClick={handleSwapUploads}>
                                             🔄 {t('chat.swapImages')}
@@ -371,8 +307,8 @@ export default function LeftPanel({
                         </div>
                     )}
 
-                    {/* My Faces — above the input area */}
-                    <MyFaces />
+                    {/* My Faces — hide during Inpaint mode, show during Face Swap */}
+                    {!inpaintMode && <MyFaces />}
 
                     {/* Error Banner — directly above prompt */}
                     {generationError && (
@@ -383,7 +319,7 @@ export default function LeftPanel({
                     )}
 
                     {/* Prompt textarea */}
-                    {!(faceSwapMode && settings.generationType === 'img2img') && (
+                    {!faceSwapMode && (
                         <div className="editor-prompt-area">
                             <textarea
                                 ref={textareaRef}
@@ -401,27 +337,7 @@ export default function LeftPanel({
                         </div>
                     )}
                 </div>
-                {/* FaceSwap / Inpaint Feature Buttons - img2img mode only */}
-                {settings.generationType !== 'txt2img' && (
-                    <div className="editor-feature-btns">
-                        <button
-                            className={`editor-feature-btn ${faceSwapMode ? 'active' : ''}`}
-                            onClick={() => setShowFaceSwapModal(true)}
-                        >
-                            <span className="feature-btn-icon">🔄</span>
-                            <span className="feature-btn-label">Face Swap</span>
-                            {faceSwapMode && <span className="feature-btn-active-dot" />}
-                        </button>
-                        <button
-                            className={`editor-feature-btn ${inpaintMode ? 'active' : ''}`}
-                            onClick={() => setShowInpaintModal2(true)}
-                        >
-                            <span className="feature-btn-icon">🖌️</span>
-                            <span className="feature-btn-label">Inpaint</span>
-                            {inpaintMode && <span className="feature-btn-active-dot" />}
-                        </button>
-                    </div>
-                )}
+                {/* Feature buttons removed — Face Swap and Inpaint are now top-level sidebar items */}
 
                 {/* Settings Section - Collapsible */}
                 <div className="editor-collapsible-section">

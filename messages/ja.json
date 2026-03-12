@@ -14,6 +14,8 @@
     },
     "create": {
         "imageGen": "画像生成",
+        "faceSwap": "顔入れ替え",
+        "undress": "脱衣 (AI)",
         "videoGen": "動画生成",
         "txt2img": "テキスト→画像",
         "img2img": "画像→画像",
@@ -133,7 +135,8 @@
         "favorite": "お気に入り",
         "download": "ダウンロード",
         "delete": "削除",
-        "rename": "名前変更"
+        "rename": "名前変更",
+        "back": "戻る"
     },
     "home": {
         "title": "AIで素晴らしいコンテンツを作成",

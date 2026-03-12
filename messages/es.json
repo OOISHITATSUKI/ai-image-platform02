@@ -11,6 +11,8 @@
     },
     "create": {
         "imageGen": "Generación de imagen",
+        "faceSwap": "Cambio de Cara",
+        "undress": "Desnudar (AI)",
         "videoGen": "Generación de video",
         "txt2img": "Texto a imagen",
         "img2img": "Imagen a imagen",

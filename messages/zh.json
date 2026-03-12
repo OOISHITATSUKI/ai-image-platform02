@@ -11,6 +11,8 @@
     },
     "create": {
         "imageGen": "图像生成",
+        "faceSwap": "换脸",
+        "undress": "脱衣 (AI)",
         "videoGen": "视频生成",
         "txt2img": "文字转图像",
         "img2img": "图像转图像",

@@ -179,6 +179,12 @@ export async function POST(req: NextRequest) {
         const token = signToken(user.id, user.email);
         user.lastLoginAt = now;
         user.lastKnownCountry = country;
+        // Auto-recover termsAgreedAt for users who have agreements but missing timestamp
+        if (!user.termsAgreedAt && user.agreements && Object.keys(user.agreements).length > 0) {
+            const firstAgreement = Object.values(user.agreements as Record<string, { agreedAt?: number }>)[0];
+            user.termsAgreedAt = firstAgreement?.agreedAt || now;
+            user.termsVersion = user.termsVersion || '1.0';
+        }
         saveUser(user);
         logLoginAttempt({ userId: user.id, email: user.email, success: true, ipAddress: ip, userAgent: ua });
 

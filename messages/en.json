@@ -14,6 +14,8 @@
     },
     "create": {
         "imageGen": "Image Generation",
+        "faceSwap": "Face Swap",
+        "undress": "Undress (AI)",
         "videoGen": "Video Generation",
         "txt2img": "Text to Image",
         "img2img": "Image to Image",
@@ -133,7 +135,8 @@
         "favorite": "Favorite",
         "download": "Download",
         "delete": "Delete",
-        "rename": "Rename"
+        "rename": "Rename",
+        "back": "Back"
     },
     "home": {
         "title": "Create stunning AI content",

@@ -1,65 +1,39 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function PricingPage() {
+    const { t } = useTranslation();
+
     const plans = [
         {
-            name: 'お試し',
-            packType: 'starter',
-            price: '$4.99',
-            credits: 500,
-            perCredit: '~$0.010',
-            featured: false,
-            features: [
-                { text: '500 クレジット', available: true },
-                { text: 'Text → Image', available: true },
-                { text: '標準解像度', available: true },
-                { text: 'Face Swap / Inpaint', available: false },
-            ],
-        },
-        {
-            name: 'ライト',
-            packType: 'light',
-            price: '$9.99',
-            credits: 1200,
-            perCredit: '~$0.008',
-            featured: false,
-            features: [
-                { text: '1,200 クレジット', available: true },
-                { text: '全生成モード', available: true },
-                { text: 'HD解像度', available: true },
-                { text: 'Face Swap / Inpaint', available: true },
-            ],
-        },
-        {
-            name: 'スタンダード',
+            nameKey: 'pricing.standard',
             packType: 'standard',
-            price: '$24.99',
-            credits: 4000,
-            perCredit: '~$0.006',
-            featured: true,
-            features: [
-                { text: '4,000 クレジット', available: true },
-                { text: '全生成モード', available: true },
-                { text: 'Ultra HD解像度', available: true },
-                { text: 'Face Swap / Inpaint 無制限', available: true },
-                { text: '優先生成', available: true },
+            price: '$14.99',
+            credits: 200,
+            perCredit: '~$0.075',
+            featured: false,
+            featureKeys: [
+                'pricing.feat.credits200',
+                'pricing.feat.allModes',
+                'pricing.feat.standardRes',
+                'pricing.feat.faceSwapInpaint',
             ],
         },
         {
-            name: 'プレミアム',
+            nameKey: 'pricing.premium',
             packType: 'premium',
-            price: '$49.99',
-            credits: 10000,
-            perCredit: '~$0.005',
-            featured: false,
-            features: [
-                { text: '10,000 クレジット', available: true },
-                { text: '全生成モード', available: true },
-                { text: '最高品質', available: true },
-                { text: 'Face Swap / Inpaint 無制限', available: true },
-                { text: '優先生成 + 優先サポート', available: true },
+            price: '$39.99',
+            credits: 600,
+            perCredit: '~$0.067',
+            featured: true,
+            featureKeys: [
+                'pricing.feat.credits600',
+                'pricing.feat.allModes',
+                'pricing.feat.hdRes',
+                'pricing.feat.faceSwapUnlimited',
+                'pricing.feat.priority',
             ],
         },
     ];
@@ -73,7 +47,7 @@ export default function PricingPage() {
         try {
             const token = localStorage.getItem('auth_token');
             if (!token) {
-                setError('ログインが必要です');
+                setError(t('pricing.loginRequired'));
                 setLoadingPack(null);
                 return;
             }
@@ -90,19 +64,19 @@ export default function PricingPage() {
             if (res.ok && data.invoice_url) {
                 window.location.href = data.invoice_url;
             } else {
-                setError(data.error || '決済の初期化に失敗しました');
+                setError(data.error || t('pricing.paymentError'));
                 setLoadingPack(null);
             }
         } catch (e) {
-            setError('ネットワークエラーが発生しました');
+            setError(t('pricing.networkError'));
             setLoadingPack(null);
         }
     };
 
     return (
         <div className="pricing-view">
-            <h1 className="pricing-title">Choose Your Plan</h1>
-            <p className="pricing-subtitle">Unlock the full power of AI generation</p>
+            <h1 className="pricing-title">{t('pricing.title')}</h1>
+            <p className="pricing-subtitle">{t('pricing.subtitle')}</p>
 
             {error && (
                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#f87171', padding: '12px', borderRadius: '8px', margin: '0 auto 24px auto', maxWidth: '600px', textAlign: 'center' }}>
@@ -113,20 +87,18 @@ export default function PricingPage() {
             <div className="pricing-grid">
                 {plans.map((plan) => (
                     <div
-                        key={plan.name}
+                        key={plan.packType}
                         className={`pricing-card ${plan.featured ? 'featured' : ''}`}
                     >
-                        <div className="pricing-card-name">{plan.name}</div>
+                        <div className="pricing-card-name">{t(plan.nameKey)}</div>
                         <div className="pricing-card-price">
                             {plan.price}
                         </div>
                         <ul className="pricing-feature-list">
-                            {plan.features.map((f, i) => (
+                            {plan.featureKeys.map((key, i) => (
                                 <li key={i}>
-                                    <span className={f.available ? 'check' : 'cross'}>
-                                        {f.available ? '✓' : '✕'}
-                                    </span>
-                                    {f.text}
+                                    <span className="check">✓</span>
+                                    {t(key)}
                                 </li>
                             ))}
                         </ul>
@@ -136,8 +108,8 @@ export default function PricingPage() {
                             onClick={() => handleCheckout(plan.packType)}
                         >
                             {loadingPack === plan.packType
-                                ? '処理中...'
-                                : `仮想通貨で購入 (${plan.price})`
+                                ? t('pricing.processing')
+                                : `${t('pricing.buyWithCrypto')} (${plan.price})`
                             }
                         </button>
                     </div>

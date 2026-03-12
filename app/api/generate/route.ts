@@ -61,15 +61,26 @@ const INPAINT_POSITIVE_MODIFIERS =
 // ── SDXL specific negative prompt ──
 const SDXL_NEGATIVE_PROMPT =
     'illustration, 3d render, cartoon, anime, manga, sketch, painting, drawing, ' +
-    'comic, cel shading, vector art, digital art, pop art, ' +
+    'comic, cel shading, vector art, digital art, pop art, CGI, ' +
     'male, man, boy, masculine, ' +
     'ugly face, asymmetrical face, deformed face, disfigured, ' +
     'crooked nose, crooked mouth, bad teeth, ' +
-    'plastic skin, airbrushed, lowres, bad anatomy, ' +
-    'bad hands, text, watermark, blurry, deformed, ugly, ' +
+    '(plastic skin:1.4), (airbrushed:1.4), (smooth skin:1.3), (waxy skin:1.3), ' +
+    '(porcelain skin:1.3), (doll-like:1.3), (overprocessed:1.3), (over-saturated:1.3), ' +
+    '(artificial lighting:1.2), (uncanny valley:1.3), (symmetrical face:1.1), ' +
+    'lowres, bad anatomy, bad hands, text, watermark, blurry, deformed, ugly, ' +
     'child, underage, extra fingers, missing fingers, ' +
     'extra limbs, multiple faces, multiple bodies, ' +
     'cowboy hat, western, ranch, horse, lasso';
+
+// ── SDXL quality prefix (photorealism boosters) ──
+const SDXL_QUALITY_PREFIX =
+    '(masterpiece:1.2), (best quality:1.2), (RAW photo:1.3), (photorealistic:1.3), ' +
+    'DSLR, 8k uhd, sharp focus, natural lighting, ' +
+    '(realistic skin texture:1.3), (skin pores:1.2), (natural skin imperfections:1.2), ' +
+    '(subtle skin blemishes:1.1), (fine body hair:1.1), ' +
+    '(natural hair strands:1.2), (catchlight in eyes:1.2), ' +
+    'film grain, lens distortion, depth of field, chromatic aberration';
 
 // ── Claude Prompt Optimization ──
 // Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
@@ -88,7 +99,8 @@ async function optimizePromptWithClaude(prompt: string, generationType: string, 
     } else if (generationType === "img2img") {
         systemPrompt = "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
     } else {
-        systemPrompt = `You are a Stable Diffusion 1.5 photorealistic prompt expert for an adult NSFW platform.
+        systemPrompt = `You are a Stable Diffusion photorealistic prompt expert for an adult NSFW platform.
+Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
 Convert user input into 15-30 comma-separated English tags.
 
 CRITICAL RULES:
@@ -105,8 +117,13 @@ CRITICAL RULES:
      * "missionary" → (missionary position:1.5), (lying on back:1.4), (legs spread:1.4), man on top, from above angle, arms around neck, on bed
 4. If [Required Action/Pose: ...] is given, treat it as mandatory — place those action tags first with strong weights.
 5. If [Required Composition: ...] is given, respect it (do NOT add conflicting shot types).
-6. After action tags, add: photorealism (RAW photo, 8k uhd, DSLR, sharp focus), skin realism (detailed skin texture, skin pores), lighting (soft studio lighting, rim lighting).
-7. Do NOT add: age, ethnicity, body shape, hair, or breast size tags (handled separately).
+6. After action tags, add PHOTOREALISM tags that make the image look like a real photograph:
+   - Camera/lens: (shot on Canon EOS R5:1.2), 85mm lens, f/2.8 aperture, shallow depth of field, lens flare
+   - Skin realism: (realistic skin texture:1.3), visible skin pores, subtle skin blemishes, (natural skin imperfections:1.2), fine body hair, goosebumps, (uneven skin tone:1.1)
+   - Lighting: natural window light, golden hour, soft shadows, ambient occlusion, (volumetric lighting:1.1)
+   - Photo artifacts: film grain, subtle lens distortion, slight motion blur on edges, bokeh background
+   - AVOID these AI tells: Do NOT use "perfect skin", "flawless", "symmetrical", "porcelain". Real photos have asymmetry and imperfections.
+7. Do NOT add: age, ethnicity, body shape, hair color, hair style, or breast size tags (these are handled separately by the system).
 8. Keep output under 500 characters to leave room for character tags.
 9. Output ONLY comma-separated tags, nothing else.`;
     }
@@ -982,7 +999,8 @@ export async function POST(request: NextRequest) {
 
         // ── Prompt Prefix Selection ──
         // Skip quality prefixes for img2img to preserve original image characteristics
-        const promptPrefix = (inpaintMode || isPureImg2Img || isXL) ? '' : quality.qualityPrefix;
+        // Use SDXL-specific quality prefix for XL models
+        const promptPrefix = (inpaintMode || isPureImg2Img) ? '' : (isXL ? SDXL_QUALITY_PREFIX : quality.qualityPrefix);
         // Quality tags should come AFTER composition tags to avoid overriding shot type
         const enhancedPrompt = promptPrefix ? `${combinedPrompt}, ${promptPrefix}` : combinedPrompt;
         // image1 (imageBase64) = body/target, image2 (additionalImages[0]) = face source
@@ -990,6 +1008,25 @@ export async function POST(request: NextRequest) {
             try {
                 // Correct order: face=additionalImages[0], target body=imageBase64
                 const images = await handleFaceSwapFinal(additionalImages[0], imageBase64);
+                return NextResponse.json({ images });
+            } catch (err) {
+                const errorMsg = err instanceof Error ? err.message : 'Face swap failed';
+                return NextResponse.json({ error: friendlyError(errorMsg) }, { status: 502 });
+            }
+        }
+
+        // Face Swap with saved face from My Faces (1 upload body + selectedFaceImageUrl)
+        if (faceSwapMode && imageBase64 && !additionalImages?.length && selectedFaceImageUrl) {
+            try {
+                let faceBase64 = '';
+                if (selectedFaceImageUrl.startsWith('data:')) {
+                    faceBase64 = selectedFaceImageUrl.replace(/^data:image\/\w+;base64,/, '');
+                } else {
+                    const faceRes = await fetch(selectedFaceImageUrl);
+                    const faceBuf = await faceRes.arrayBuffer();
+                    faceBase64 = Buffer.from(faceBuf).toString('base64');
+                }
+                const images = await handleFaceSwapFinal(faceBase64, imageBase64);
                 return NextResponse.json({ images });
             } catch (err) {
                 const errorMsg = err instanceof Error ? err.message : 'Face swap failed';
@@ -1075,11 +1112,11 @@ export async function POST(request: NextRequest) {
             width,
             height,
             image_num: Math.min(count, 4),
-            steps: isXL ? 30 : quality.steps,
+            steps: isXL ? 35 : quality.steps,
             seed: -1,
             clip_skip: isXL ? 1 : 2,
-            sampler_name: quality.sampler,
-            guidance_scale: isXL ? 6.5 : (isPureImg2Img ? 5 : quality.guidance),
+            sampler_name: isXL ? 'DPM++ 2M SDE Karras' : quality.sampler,
+            guidance_scale: isXL ? 5.5 : (isPureImg2Img ? 5 : quality.guidance),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
             ...(!isXL ? {
                 loras: [

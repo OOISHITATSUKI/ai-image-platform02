@@ -2,7 +2,7 @@
 // Core Types for the NSFW AI Generation Platform
 // ============================================================
 
-export type GenerationType = 'txt2img' | 'img2img' | 'img_edit' | 'txt2vid' | 'img2vid' | 'ref2vid' | 'vid2vid';
+export type GenerationType = 'txt2img' | 'img2img' | 'img_edit' | 'face_swap' | 'inpaint' | 'txt2vid' | 'img2vid' | 'ref2vid' | 'vid2vid';
 
 export type PlanTier = 'free' | 'basic' | 'pro' | 'ultimate';
 

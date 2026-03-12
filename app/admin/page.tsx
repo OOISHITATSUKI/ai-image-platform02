@@ -10,6 +10,10 @@ interface Stats {
     todayBlocks: number;
     todayGenerations: number;
     totalRevenue: number;
+    totalDemoTrials: number;
+    todayDemoTrials: number;
+    uniqueDemoUsers: number;
+    todayUniqueDemoUsers: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -67,6 +71,13 @@ export default function AdminDashboardPage() {
         { label: '総売上 (USD)', value: `$${stats.totalRevenue.toFixed(2)}`, color: '#10b981' },
     ];
 
+    const demoCards = [
+        { label: 'デモ総生成数', value: stats.totalDemoTrials.toLocaleString(), color: '#f472b6' },
+        { label: '本日のデモ生成', value: stats.todayDemoTrials.toLocaleString(), color: '#fb923c' },
+        { label: 'デモ利用ユニークIP', value: stats.uniqueDemoUsers.toLocaleString(), color: '#a78bfa' },
+        { label: '本日のユニークIP', value: stats.todayUniqueDemoUsers.toLocaleString(), color: '#38bdf8' },
+    ];
+
     return (
         <div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '28px' }}>
@@ -76,6 +87,19 @@ export default function AdminDashboardPage() {
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
                 {cards.map(card => (
+                    <div key={card.label} style={cardStyle}>
+                        <div style={labelStyle}>{card.label}</div>
+                        <div style={valueStyle(card.color)}>{card.value}</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Demo Stats */}
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
+                🎯 お試しデモ（ホームページ）
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
+                {demoCards.map(card => (
                     <div key={card.label} style={cardStyle}>
                         <div style={labelStyle}>{card.label}</div>
                         <div style={valueStyle(card.color)}>{card.value}</div>

@@ -10,7 +10,7 @@ export default function SettingsPanel() {
     const { settings, updateSettings, isGenerating, settingsPanelVisible, toggleSettingsPanel, tagSettings, updateTagSettings, toggleFetishTag, user } = useAppStore();
     const { t } = useTranslation();
 
-    const isImageMode = ['txt2img', 'img2img', 'img_edit'].includes(settings.generationType);
+    const isImageMode = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
     const isVideoMode = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
 
     const filteredModels = AVAILABLE_MODELS.filter((m) =>
@@ -25,6 +25,8 @@ export default function SettingsPanel() {
         txt2img: t('create.txt2img'),
         img2img: `${t('create.img2img')} [${t('common.paid')}]`,
         img_edit: `${t('create.imgEdit')} [${t('common.paid')}]`,
+        face_swap: `${t('create.faceSwap')} [${t('common.paid')}]`,
+        inpaint: `${t('create.undress')} [${t('common.paid')}]`,
         txt2vid: t('create.txt2vid'),
         img2vid: t('create.img2vid'),
         ref2vid: t('create.ref2vid'),
@@ -354,18 +356,6 @@ export default function SettingsPanel() {
                             </div>
                         </div>
 
-                        {/* Action / Pose (multi-select) */}
-                        <div className="control-group">
-                            <label>{t('tags.fetish')}</label>
-                            <div className="pill-grid">
-                                {(['fellatio', 'cowgirl', 'insertion', 'kiss', 'missionary', 'doggy', 'standing', 'handjob', 'paizuri'] as FetishTag[]).map((f) => (
-                                    <button key={f} className={`pill ${tagSettings.fetish.includes(f) ? 'active' : ''}`}
-                                        onClick={() => toggleFetishTag(f)}>
-                                        {t(`tags.fet${f.charAt(0).toUpperCase() + f.slice(1)}`)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
                     </>
                 )}
 

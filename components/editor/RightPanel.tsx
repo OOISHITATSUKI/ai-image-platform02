@@ -151,10 +151,18 @@ export default function RightPanel({
                                         <img
                                             src={msg.imageUrl}
                                             alt="Generated"
+                                            style={{ cursor: 'pointer' }}
                                             onClick={() => setLightboxUrl(msg.imageUrl!)}
                                         />
-                                        <div className="result-overlay">
-                                            <div className="result-actions">
+                                        <div className="result-overlay" onClick={() => setLightboxUrl(msg.imageUrl!)}>
+                                            <div className="result-actions" onClick={(e) => e.stopPropagation()}>
+                                                <button
+                                                    className="result-action-btn"
+                                                    onClick={() => setLightboxUrl(msg.imageUrl!)}
+                                                    title={t('actions.expand') || 'Expand'}
+                                                >
+                                                    🔍
+                                                </button>
                                                 <button
                                                     className={`result-action-btn ${msg.isFavorite ? 'favorite-active' : ''}`}
                                                     onClick={() => activeChatId && toggleFavorite(activeChatId, msg.id)}
@@ -232,18 +240,30 @@ export default function RightPanel({
 
             {/* Lightbox */}
             {lightboxUrl && (
-                <div
-                    className="lightbox-overlay"
-                    onClick={() => setLightboxUrl(null)}
-                >
-                    <img src={lightboxUrl} alt="Full size" className="lightbox-image" />
-                    <button className="lightbox-close" onClick={() => setLightboxUrl(null)}>✕</button>
+                <div className="lightbox-overlay" onClick={() => setLightboxUrl(null)}>
                     <button
-                        className="lightbox-download"
-                        onClick={(e) => { e.stopPropagation(); handleDownload(lightboxUrl); }}
+                        className="lightbox-back-btn"
+                        onClick={() => setLightboxUrl(null)}
                     >
-                        ⬇ {t('actions.download')}
+                        ← {t('actions.back') || 'Back'}
                     </button>
+                    <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+                        <img src={lightboxUrl} alt="Full size" />
+                        <div className="lightbox-actions">
+                            <button
+                                className="lightbox-btn lightbox-download"
+                                onClick={() => handleDownload(lightboxUrl)}
+                            >
+                                ⬇ {t('actions.download')}
+                            </button>
+                            <button
+                                className="lightbox-btn lightbox-close"
+                                onClick={() => setLightboxUrl(null)}
+                            >
+                                ✕ {t('auth.closeModal')}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </section>
