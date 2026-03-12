@@ -33,6 +33,30 @@ const ARTICLES = [
     date: 'March 2025',
     readTime: '7 min read',
   },
+  {
+    slug: 'how-to-create-consistent-ai-character',
+    title: 'How to Create a Consistent AI Character: Same Face, Unlimited Scenes (2025)',
+    description: 'Learn how to create a consistent AI character and generate the same face across unlimited scenes. Step-by-step guide using face-saving technology.',
+    tag: 'Guide',
+    date: 'March 2025',
+    readTime: '7 min read',
+  },
+  {
+    slug: 'ai-face-swap-vs-deepfake',
+    title: 'AI Face Swap vs Deepfake: What\'s the Difference? (2025 Guide)',
+    description: 'AI face swap and deepfake are not the same thing. Clear breakdown of the differences, how each works, and which one is right for your use case.',
+    tag: 'Explainer',
+    date: 'March 2025',
+    readTime: '8 min read',
+  },
+  {
+    slug: 'how-to-use-ai-face-swap-adults',
+    title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide',
+    description: 'Step-by-step guide to using AI face swap for adult content. Tips for realistic results, best practices, and how to get started for free.',
+    tag: 'How-To',
+    date: 'March 2025',
+    readTime: '9 min read',
+  },
 ];
 
 export default function BlogIndexPage() {
