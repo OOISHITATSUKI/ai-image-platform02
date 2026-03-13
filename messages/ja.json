@@ -180,7 +180,27 @@
         "registerMessage": "画像を生成するにはアカウント登録が必要です。登録は無料で、20クレジットをプレゼント！",
         "registerFree": "無料で登録する",
         "closeModal": "閉じる",
-        "toastMessage": "🎁 無料登録で20クレジットプレゼント！今すぐ始めよう"
+        "toastMessage": "🎁 無料登録で20クレジットプレゼント！今すぐ始めよう",
+        "createAccount": "アカウント作成",
+        "creatingAccount": "アカウント作成中...",
+        "startGenerating": "数秒で生成を開始できます",
+        "passwordLabel": "パスワード",
+        "passwordPlaceholder": "8文字以上",
+        "passwordMinLength": "パスワードは8文字以上必要です",
+        "agreeTerms": "18歳以上であり、以下に同意します",
+        "alreadyHaveAccount": "既にアカウントをお持ちですか？",
+        "tooManyAccounts": "アカウント作成数が上限に達しました。しばらくしてから再度お試しください。"
+    },
+    "verification": {
+        "title": "メール認証が必要です",
+        "description": "クレジット購入にはメール認証が必要です。",
+        "codeSent": "認証コード送信先:",
+        "codeLabel": "認証コード",
+        "verifyAndContinue": "認証して続行",
+        "resend": "コードを再送信",
+        "codeNotReceived": "コードが届きませんか？",
+        "sending": "送信中...",
+        "verifying": "認証中..."
     },
     "errors": {
         "error_rate_limit": "生成制限に達しました。1分待ってから再度お試しください。",

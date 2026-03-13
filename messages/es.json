@@ -162,7 +162,27 @@
         "registerMessage": "Necesitas registrar una cuenta para generar imágenes. ¡El registro es gratuito y recibirás 20 créditos de bienvenida!",
         "registerFree": "Registrarse gratis",
         "closeModal": "Cerrar",
-        "toastMessage": "🎁 ¡Regístrate gratis y obtén 20 créditos! Comienza a crear ahora"
+        "toastMessage": "🎁 ¡Regístrate gratis y obtén 20 créditos! Comienza a crear ahora",
+        "createAccount": "Crear cuenta",
+        "creatingAccount": "Creando cuenta...",
+        "startGenerating": "Empieza a generar en segundos",
+        "passwordLabel": "Contraseña",
+        "passwordPlaceholder": "Mínimo 8 caracteres",
+        "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+        "agreeTerms": "Soy mayor de 18 y acepto los",
+        "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+        "tooManyAccounts": "Demasiadas cuentas creadas. Inténtalo más tarde."
+    },
+    "verification": {
+        "title": "Verificación de correo requerida",
+        "description": "Se requiere verificación de correo para comprar créditos.",
+        "codeSent": "Código de verificación enviado a:",
+        "codeLabel": "Código de verificación",
+        "verifyAndContinue": "Verificar y continuar",
+        "resend": "Reenviar código",
+        "codeNotReceived": "¿No recibiste el código?",
+        "sending": "Enviando...",
+        "verifying": "Verificando..."
     },
     "ageGate": {
         "title": "年齢確認 / Age Verification",

@@ -56,6 +56,7 @@ export interface UserRecord {
 
     // Anti-Abuse Tracking
     fingerprintHash?: string;
+    registrationIp?: string;
     freeCreditsExpireAt?: number;
 
     // Account timeline

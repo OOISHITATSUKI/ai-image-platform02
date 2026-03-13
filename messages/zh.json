@@ -155,7 +155,27 @@
         "registerMessage": "生成图片需要注册账户。注册免费，还能获得20积分欢迎礼！",
         "registerFree": "免费注册",
         "closeModal": "关闭",
-        "toastMessage": "🎁 免费注册即送20积分！立即开始创作"
+        "toastMessage": "🎁 免费注册即送20积分！立即开始创作",
+        "createAccount": "创建账户",
+        "creatingAccount": "正在创建账户...",
+        "startGenerating": "几秒钟即可开始生成",
+        "passwordLabel": "密码",
+        "passwordPlaceholder": "至少8个字符",
+        "passwordMinLength": "密码至少需要8个字符",
+        "agreeTerms": "我已年满18岁并同意",
+        "alreadyHaveAccount": "已有账户？",
+        "tooManyAccounts": "创建账户次数过多。请稍后再试。"
+    },
+    "verification": {
+        "title": "需要邮箱验证",
+        "description": "购买积分需要邮箱验证。",
+        "codeSent": "验证码已发送至：",
+        "codeLabel": "验证码",
+        "verifyAndContinue": "验证并继续",
+        "resend": "重新发送",
+        "codeNotReceived": "没有收到验证码？",
+        "sending": "发送中...",
+        "verifying": "验证中..."
     },
     "ageGate": {
         "title": "年齢確認 / Age Verification",

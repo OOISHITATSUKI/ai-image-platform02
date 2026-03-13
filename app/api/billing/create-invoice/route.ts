@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Require email verification for paid plans
+    if (!user.emailVerified) {
+        return NextResponse.json(
+            { error: 'Email verification required', requiresVerification: true },
+            { status: 403 }
+        );
+    }
+
     try {
         const body = await req.json();
         const packType = body.packType as PackType;

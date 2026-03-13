@@ -180,7 +180,27 @@
         "registerMessage": "You need to register an account to generate images. Registration is free and you'll receive 20 credits as a welcome gift!",
         "registerFree": "Register for Free",
         "closeModal": "Close",
-        "toastMessage": "🎁 Register for free and get 20 credits! Start creating now"
+        "toastMessage": "🎁 Register for free and get 20 credits! Start creating now",
+        "createAccount": "Create Account",
+        "creatingAccount": "Creating account...",
+        "startGenerating": "Start generating in seconds",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Minimum 8 characters",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "agreeTerms": "I am 18+ and agree to the",
+        "alreadyHaveAccount": "Already have an account?",
+        "tooManyAccounts": "Too many accounts created. Please try again later."
+    },
+    "verification": {
+        "title": "Email Verification Required",
+        "description": "Email verification is required to purchase credits.",
+        "codeSent": "Verification code sent to:",
+        "codeLabel": "Verification Code",
+        "verifyAndContinue": "Verify & Continue",
+        "resend": "Resend code",
+        "codeNotReceived": "Didn't receive the code?",
+        "sending": "Sending...",
+        "verifying": "Verifying..."
     },
     "errors": {
         "error_rate_limit": "Rate limit exceeded. Please wait a minute before generating again.",
