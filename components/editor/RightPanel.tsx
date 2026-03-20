@@ -52,14 +52,6 @@ export default function RightPanel({
 
     const hasResults = resultMessages.length > 0;
 
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({
-                top: chatContainerRef.current.scrollHeight,
-                behavior: 'smooth',
-            });
-        }
-    }, [resultMessages.length, isGenerating]);
 
     const handleDownload = (url: string) => {
         const isDataUri = url.startsWith('data:');

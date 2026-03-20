@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
-import type { AspectRatio } from '@/lib/types';
+import type { AspectRatio, GenerationType } from '@/lib/types';
 import LeftPanel from '@/components/editor/LeftPanel';
 import RightPanel from '@/components/editor/RightPanel';
 import Img2VidPanel from '@/components/editor/Img2VidPanel';
@@ -27,6 +27,7 @@ export default function EditorPage() {
     const { t } = useTranslation();
 
     const isImg2Vid = settings.generationType === 'img2vid';
+    const pollAbortRef = useRef<(() => void) | null>(null);
 
     // Shared state between Left and Right panels
     const [inputText, setInputText] = useState('');
@@ -97,12 +98,15 @@ export default function EditorPage() {
             // Expire after 3 minutes
             if (Date.now() - startedAt > 3 * 60 * 1000) {
                 localStorage.removeItem('pending_generation');
+                setIsGenerating(false);
                 return;
             }
             const statusRes = await fetch(`/api/generate/status?taskId=${taskId}`);
             const statusData = await statusRes.json();
             if (statusData.status === 'SUCCEED' && statusData.images?.length > 0) {
                 localStorage.removeItem('pending_generation');
+                // Cancel any existing poll
+                if (pollAbortRef.current) { pollAbortRef.current(); pollAbortRef.current = null; }
                 for (const img of statusData.images) {
                     addMessage(pendingChatId, {
                         role: 'assistant',
@@ -135,13 +139,93 @@ export default function EditorPage() {
                 setIsGenerating(false);
             } else if (statusData.status === 'FAILED') {
                 localStorage.removeItem('pending_generation');
+                if (pollAbortRef.current) { pollAbortRef.current(); pollAbortRef.current = null; }
                 setGenerationError(statusData.error || 'Generation failed');
                 setIsGenerating(false);
+            } else if (statusData.status === 'PROCESSING') {
+                // Still processing — restart polling if no active poll running
+                if (!pollAbortRef.current) {
+                    setIsGenerating(true);
+                    startPolling(taskId, pendingChatId, pendingPrompt, pendingGenType as GenerationType, pendingModel, pendingCreditCost, startedAt);
+                }
             }
-            // PROCESSING: still waiting, don't clear — normal poll will handle it
         } catch {
             localStorage.removeItem('pending_generation');
+            setIsGenerating(false);
         }
+    };
+
+    // Reusable polling function (abortable)
+    const startPolling = (taskId: string, chatId: string, prompt: string, genType: GenerationType, model: string, creditCost: number, startedAt: number) => {
+        // Cancel any existing poll first
+        if (pollAbortRef.current) { pollAbortRef.current(); }
+        let cancelled = false;
+        pollAbortRef.current = () => { cancelled = true; };
+
+        const poll = async () => {
+            if (cancelled) return;
+            // Timeout after 3 minutes from original start
+            if (Date.now() - startedAt > 180_000) {
+                localStorage.removeItem('pending_generation');
+                pollAbortRef.current = null;
+                setGenerationError('Generation timed out');
+                setIsGenerating(false);
+                return;
+            }
+            try {
+                const statusRes = await fetch(`/api/generate/status?taskId=${taskId}`);
+                if (cancelled) return;
+                const statusData = await statusRes.json();
+                if (statusData.status === 'SUCCEED' && statusData.images?.length > 0) {
+                    localStorage.removeItem('pending_generation');
+                    pollAbortRef.current = null;
+                    for (const img of statusData.images) {
+                        addMessage(chatId, {
+                            role: 'assistant',
+                            content: `Generated from: "${prompt || 'uploaded reference'}"`,
+                            imageUrl: img.url,
+                            generationType: genType,
+                            model,
+                            isFavorite: false,
+                        });
+                        try {
+                            const saveToken = localStorage.getItem('auth_token');
+                            if (saveToken) {
+                                fetch('/api/generations', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${saveToken}` },
+                                    body: JSON.stringify({
+                                        prompt: prompt || 'uploaded reference',
+                                        modelName: model,
+                                        fileUrl: img.url,
+                                        fileType: 'image',
+                                        generationType: genType,
+                                        creditsUsed: creditCost,
+                                        status: 'success',
+                                        params: {},
+                                    }),
+                                }).catch(() => {});
+                            }
+                        } catch {}
+                    }
+                    setIsGenerating(false);
+                    return;
+                } else if (statusData.status === 'FAILED') {
+                    localStorage.removeItem('pending_generation');
+                    pollAbortRef.current = null;
+                    setGenerationError(statusData.error || 'Generation failed');
+                    setIsGenerating(false);
+                    return;
+                }
+            } catch (err) {
+                console.error('Poll error:', err);
+            }
+            // Schedule next poll
+            if (!cancelled) {
+                setTimeout(poll, 3000);
+            }
+        };
+        setTimeout(poll, 3000);
     };
 
     // On mount + visibility change: try to recover
@@ -373,6 +457,7 @@ export default function EditorPage() {
                 // Handle async polling if taskId returned (non-face-swap)
                 let images: { url: string; type: string }[] = [];
                 if (data.taskId && !data.images) {
+                    const pollStartedAt = Date.now();
                     // Save taskId to localStorage for recovery after screen-off
                     localStorage.setItem('pending_generation', JSON.stringify({
                         taskId: data.taskId,
@@ -381,38 +466,14 @@ export default function EditorPage() {
                         generationType: settings.generationType,
                         model: settings.model,
                         creditCost,
-                        startedAt: Date.now(),
+                        startedAt: pollStartedAt,
                     }));
-                    // Poll /api/generate/status every 5 seconds
-                    images = await new Promise<{ url: string; type: string }[]>((resolve, reject) => {
-                        const startTime = Date.now();
-                        const pollTimer = setInterval(async () => {
-                            try {
-                                // Timeout after 120 seconds
-                                if (Date.now() - startTime > 120_000) {
-                                    clearInterval(pollTimer);
-                                    reject(new Error('Generation timed out (120s)'));
-                                    return;
-                                }
-                                const statusRes = await fetch(`/api/generate/status?taskId=${data.taskId}`);
-                                const statusData = await statusRes.json();
-
-                                if (statusData.status === 'SUCCEED') {
-                                    clearInterval(pollTimer);
-                                    localStorage.removeItem('pending_generation');
-                                    resolve(statusData.images || []);
-                                } else if (statusData.status === 'FAILED') {
-                                    clearInterval(pollTimer);
-                                    localStorage.removeItem('pending_generation');
-                                    reject(new Error(statusData.error || 'Generation failed'));
-                                }
-                                // PROCESSING → keep polling
-                            } catch (pollErr) {
-                                // Network error during poll — keep trying
-                                console.error('Poll error:', pollErr);
-                            }
-                        }, 5000);
-                    });
+                    // Delegate to abortable polling — handles completion, sets isGenerating(false)
+                    startPolling(data.taskId, chatId, userPrompt, settings.generationType, settings.model, creditCost, pollStartedAt);
+                    setInpaintMode(false);
+                    setFaceSwapMode(false);
+                    setReposeMode(false);
+                    return; // Don't setIsGenerating(false) here — polling handles it
                 } else {
                     // Face swap returned images directly
                     images = data.images || [];
@@ -681,7 +742,7 @@ export default function EditorPage() {
                         generationError={generationError}
                         setGenerationError={setGenerationError}
                     />
-                    <div ref={rightPanelRef}>
+                    <div ref={rightPanelRef} className="editor-right-wrapper">
                         <RightPanel
                             onOneClickGenerate={handleOneClickGenerate}
                             onSamplePrompt={handleSamplePrompt}

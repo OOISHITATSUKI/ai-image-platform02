@@ -941,8 +941,17 @@ video {
 }
 
 /* ── Right Panel ── */
+.editor-right-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .editor-right-panel {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--bg-base);
@@ -951,6 +960,7 @@ video {
 
 .editor-results {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 20px;
 }
@@ -5579,8 +5589,20 @@ textarea:focus {
     border-top: 1px solid var(--border);
   }
 
+  .editor-right-wrapper {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
   .editor-right-panel {
     min-height: 400px;
+    overflow: visible;
+  }
+
+  .editor-results {
+    overflow-y: visible;
+    min-height: auto;
   }
 
   .editor-results-grid {

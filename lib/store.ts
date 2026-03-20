@@ -581,9 +581,12 @@ export const useAppStore = create<AppState>()(
                 const isLargeUrl = (url?: string) =>
                     !!url && (url.startsWith('data:') || url.startsWith('blob:'));
 
-                const sanitizedChats = state.chats.map((chat) => ({
+                // Only persist the most recent 10 chats with max 20 messages each
+                // to avoid exceeding the ~5 MB localStorage quota.
+                const recentChats = state.chats.slice(0, 10);
+                const sanitizedChats = recentChats.map((chat) => ({
                     ...chat,
-                    messages: chat.messages.map((msg) => ({
+                    messages: chat.messages.slice(-20).map((msg) => ({
                         ...msg,
                         imageUrl: isLargeUrl(msg.imageUrl) ? undefined : msg.imageUrl,
                         videoUrl: isLargeUrl(msg.videoUrl) ? undefined : msg.videoUrl,
@@ -606,6 +609,27 @@ export const useAppStore = create<AppState>()(
                     savedFaces: state.savedFaces,
                     selectedFaceId: state.selectedFaceId,
                 };
+            },
+            storage: {
+                getItem: (name) => {
+                    const str = localStorage.getItem(name);
+                    return str ? JSON.parse(str) : null;
+                },
+                setItem: (name, value) => {
+                    try {
+                        localStorage.setItem(name, JSON.stringify(value));
+                    } catch (e) {
+                        // Quota exceeded — clear old data and retry once
+                        console.warn('localStorage quota exceeded, clearing and retrying');
+                        try {
+                            localStorage.removeItem(name);
+                            localStorage.setItem(name, JSON.stringify(value));
+                        } catch {
+                            console.error('localStorage write failed even after clearing');
+                        }
+                    }
+                },
+                removeItem: (name) => localStorage.removeItem(name),
             },
         }
     )

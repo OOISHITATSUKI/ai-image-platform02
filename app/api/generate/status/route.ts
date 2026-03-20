@@ -52,63 +52,20 @@ export async function GET(request: NextRequest) {
         if (status === 'TASK_STATUS_SUCCEED') {
             const rawImages = data.images || [];
 
-            // Fetch each image URL and convert to base64 with compression
-            const sharp = (await import('sharp')).default;
-            const images = await Promise.all(
-                rawImages.map(async (img: { image_url: string; image_type: string }) => {
-                    try {
-                        const imgRes = await fetch(img.image_url);
-                        if (!imgRes.ok) {
-                            return { url: img.image_url, type: img.image_type };
-                        }
-                        const rawBuffer = await imgRes.arrayBuffer();
-                        const buffer = Buffer.from(rawBuffer);
-                        const compressedBuffer = await sharp(buffer)
-                            .jpeg({ quality: 80, progressive: true })
-                            .toBuffer();
-                        const base64 = compressedBuffer.toString('base64');
-                        return { url: `data:image/jpeg;base64,${base64}`, type: 'jpeg' };
-                    } catch (err) {
-                        console.error('Image fetch/convert error:', err);
-                        return { url: img.image_url, type: img.image_type || 'jpeg' };
-                    }
-                })
-            );
+            // Use original URLs directly (not base64) so they survive localStorage persistence.
+            // base64 data URIs are stripped by the client store's partialize to avoid exceeding
+            // the ~5 MB localStorage quota, which causes images to disappear on mobile reload.
+            const images = rawImages.map((img: { image_url: string; image_type: string }) => ({
+                url: img.image_url,
+                type: img.image_type || 'jpeg',
+            }));
 
-            // Apply saved face if metadata exists
+            // Skip face merge in status endpoint — it blocks the poll response for 30+ seconds.
+            // Face merge is already handled in the main generate route for face_swap mode.
             let finalImages = images;
             const metadata = taskMetadataStore.get(taskId);
-            if (metadata?.selectedFaceImageUrl && images.length > 0) {
-                console.log('Status endpoint: Applying saved face via merge-face...');
-                const faceAppliedImages: typeof images = [];
-                for (const img of images) {
-                    try {
-                        let targetBase64 = '';
-                        if (img.url.startsWith('data:')) {
-                            targetBase64 = img.url.replace(/^data:image\/\w+;base64,/, '');
-                        } else {
-                            const imgRes = await fetch(img.url);
-                            const imgBuf = await imgRes.arrayBuffer();
-                            targetBase64 = Buffer.from(imgBuf).toString('base64');
-                        }
-
-                        let faceBase64 = '';
-                        if (metadata.selectedFaceImageUrl.startsWith('data:')) {
-                            faceBase64 = metadata.selectedFaceImageUrl.replace(/^data:image\/\w+;base64,/, '');
-                        } else {
-                            const faceRes = await fetch(metadata.selectedFaceImageUrl);
-                            const faceBuf = await faceRes.arrayBuffer();
-                            faceBase64 = Buffer.from(faceBuf).toString('base64');
-                        }
-
-                        const mergedImages = await handleFaceSwapFinal(faceBase64, targetBase64);
-                        faceAppliedImages.push(...mergedImages);
-                    } catch (faceErr) {
-                        console.error('Face application failed, using original:', faceErr);
-                        faceAppliedImages.push(img);
-                    }
-                }
-                finalImages = faceAppliedImages;
+            if (metadata?.selectedFaceImageUrl) {
+                console.log('Status endpoint: Skipping face merge (handled by generate route). Returning original images.');
             }
 
             // Clean up metadata
@@ -117,6 +74,7 @@ export async function GET(request: NextRequest) {
             // Cache result so mobile users can recover after screen-off
             resultCache.set(taskId, { images: finalImages, createdAt: Date.now() });
             setTimeout(() => resultCache.delete(taskId), CACHE_TTL_MS);
+
 
             return NextResponse.json({
                 status: 'SUCCEED',
