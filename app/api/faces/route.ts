@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const faces = getFacesByUser(decoded.userId);
+    const faces = await getFacesByUser(decoded.userId);
 
     // Map to frontend format
     const mapped = faces.map((f) => ({
@@ -53,12 +53,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user plan
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     const paid = user ? isPaidUser(user.plan) : false;
     const limit = paid ? MAX_FACES.paid : MAX_FACES.free;
 
     // Count existing faces
-    const currentCount = countFacesByUser(decoded.userId);
+    const currentCount = await countFacesByUser(decoded.userId);
 
     if (currentCount >= limit) {
         return NextResponse.json({
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         }, { status: 403 });
     }
 
-    const record = createFace({
+    const record = await createFace({
         userId: decoded.userId,
         name: name.slice(0, 50),
         imageUrl: image_url,
@@ -108,7 +108,7 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Face ID is required' }, { status: 400 });
     }
 
-    const deleted = deleteFace(faceId, decoded.userId);
+    const deleted = await deleteFace(faceId, decoded.userId);
     if (!deleted) {
         return NextResponse.json({ error: 'Face not found' }, { status: 404 });
     }

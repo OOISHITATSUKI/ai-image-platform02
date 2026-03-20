@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { AspectRatio } from '@/lib/types';
@@ -43,6 +43,30 @@ export default function EditorPage() {
     const [showRegisterToast, setShowRegisterToast] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsChecks, setTermsChecks] = useState({ terms: false, content: false, age: false });
+    const rightPanelRef = useRef<HTMLDivElement>(null);
+    const inputTextRef = useRef(inputText);
+    const uploadsRef = useRef(uploads);
+    inputTextRef.current = inputText;
+    uploadsRef.current = uploads;
+
+    // When generating starts: close keyboard + scroll to generating card on mobile
+    useEffect(() => {
+        if (isGenerating) {
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
+            if (window.innerWidth < 1024) {
+                setTimeout(() => {
+                    const container = document.querySelector('.editor-layout-v2');
+                    const genCard = document.querySelector('.editor-generate-sticky');
+                    if (container && genCard) {
+                        const cardTop = (genCard as HTMLElement).offsetTop;
+                        container.scrollTo({ top: cardTop - 20, behavior: 'smooth' });
+                    }
+                }, 400);
+            }
+        }
+    }, [isGenerating]);
 
     // Consent state for img2img
     // Consent moved to modal
@@ -62,6 +86,75 @@ export default function EditorPage() {
             setUploads([]);
         }
     }, [settings.generationType]);
+
+    // Recover pending generation results after mobile screen-off / tab restore
+    const recoverPendingGeneration = async () => {
+        const pendingJson = localStorage.getItem('pending_generation');
+        if (!pendingJson) return;
+        try {
+            const pending = JSON.parse(pendingJson);
+            const { taskId, chatId: pendingChatId, prompt: pendingPrompt, generationType: pendingGenType, model: pendingModel, creditCost: pendingCreditCost, startedAt } = pending;
+            // Expire after 3 minutes
+            if (Date.now() - startedAt > 3 * 60 * 1000) {
+                localStorage.removeItem('pending_generation');
+                return;
+            }
+            const statusRes = await fetch(`/api/generate/status?taskId=${taskId}`);
+            const statusData = await statusRes.json();
+            if (statusData.status === 'SUCCEED' && statusData.images?.length > 0) {
+                localStorage.removeItem('pending_generation');
+                for (const img of statusData.images) {
+                    addMessage(pendingChatId, {
+                        role: 'assistant',
+                        content: `Generated from: "${pendingPrompt || 'uploaded reference'}"`,
+                        imageUrl: img.url,
+                        generationType: pendingGenType,
+                        model: pendingModel,
+                        isFavorite: false,
+                    });
+                    try {
+                        const saveToken = localStorage.getItem('auth_token');
+                        if (saveToken) {
+                            fetch('/api/generations', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${saveToken}` },
+                                body: JSON.stringify({
+                                    prompt: pendingPrompt || 'uploaded reference',
+                                    modelName: pendingModel,
+                                    fileUrl: img.url,
+                                    fileType: 'image',
+                                    generationType: pendingGenType,
+                                    creditsUsed: pendingCreditCost,
+                                    status: 'success',
+                                    params: {},
+                                }),
+                            }).catch(() => {});
+                        }
+                    } catch {}
+                }
+                setIsGenerating(false);
+            } else if (statusData.status === 'FAILED') {
+                localStorage.removeItem('pending_generation');
+                setGenerationError(statusData.error || 'Generation failed');
+                setIsGenerating(false);
+            }
+            // PROCESSING: still waiting, don't clear — normal poll will handle it
+        } catch {
+            localStorage.removeItem('pending_generation');
+        }
+    };
+
+    // On mount + visibility change: try to recover
+    useEffect(() => {
+        recoverPendingGeneration();
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                recoverPendingGeneration();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => document.removeEventListener('visibilitychange', handleVisibility);
+    }, []);
 
     // Toast for unregistered users
     useEffect(() => {
@@ -149,28 +242,34 @@ export default function EditorPage() {
     };
 
     // Main submit handler
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isGenerating) return;
+    const handleSubmit = async (e?: React.FormEvent, skipGuard?: boolean) => {
+        try { e?.preventDefault(); } catch (_) {}
+        if (!skipGuard && isGenerating) return;
+
+        // Always read latest values from refs (avoids stale closure on iOS touch)
+        const currentInputText = inputTextRef.current;
+        const currentUploadsList = uploadsRef.current;
 
         if (user && !user.termsAgreedAt) {
             setShowTermsModal(true);
+            if (skipGuard) setIsGenerating(false);
             return;
         }
 
         // Mode validations
         if (faceSwapMode) {
             const hasSavedFace = !!selectedFaceId;
-            if (uploads.length < 2 && !(uploads.length >= 1 && hasSavedFace)) {
+            if (currentUploadsList.length < 2 && !(currentUploadsList.length >= 1 && hasSavedFace)) {
                 setGenerationError(t('chat.faceSwapNoImage'));
+                if (skipGuard) setIsGenerating(false);
                 return;
             }
         } else if (inpaintMode) {
-            if (uploads.length === 0) { setGenerationError(t('chat.uploadRequiredForInpaint')); return; }
+            if (currentUploadsList.length === 0) { setGenerationError(t('chat.uploadRequiredForInpaint')); if (skipGuard) setIsGenerating(false); return; }
         } else if (settings.generationType === 'img2img') {
-            if (reposeMode && uploads.length === 0) { setGenerationError(t('chat.reposeNoImage')); return; }
-            else if (uploads.length === 0) { setGenerationError(t('chat.img2imgNoImage')); return; }
-            else if (!inputText.trim()) { setGenerationError(t('chat.promptRequired')); return; }
+            if (reposeMode && currentUploadsList.length === 0) { setGenerationError(t('chat.reposeNoImage')); if (skipGuard) setIsGenerating(false); return; }
+            else if (currentUploadsList.length === 0) { setGenerationError(t('chat.img2imgNoImage')); if (skipGuard) setIsGenerating(false); return; }
+            else if (!currentInputText.trim()) { setGenerationError(t('chat.promptRequired')); if (skipGuard) setIsGenerating(false); return; }
         }
 
         const isImageGeneration = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
@@ -181,10 +280,11 @@ export default function EditorPage() {
         else if (faceSwapMode) creditCost = settings.count * 5;
         else if (inpaintMode) creditCost = settings.count * 3;
 
-        if (!user || !user.email) { setShowRegisterModal(true); return; }
+        if (!user || !user.email) { setShowRegisterModal(true); if (skipGuard) setIsGenerating(false); return; }
         const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
         if (!isTestAccount && user.credits < creditCost) {
             setGenerationError(`❌ クレジットが不足しています。（必要: ${creditCost}, 保有: ${user.credits}）`);
+            if (skipGuard) setIsGenerating(false);
             return;
         }
 
@@ -195,17 +295,21 @@ export default function EditorPage() {
 
         addMessage(chatId, {
             role: 'user',
-            content: inputText.trim(),
-            imageUrl: uploads[0]?.previewUrl ?? undefined,
+            content: currentInputText.trim(),
+            imageUrl: currentUploadsList[0]?.previewUrl ?? undefined,
             isFavorite: false,
         });
 
-        const userPrompt = inputText.trim();
-        const currentUploads = [...uploads];
-        setInputText('');
-        setUploads([]);
+        const userPrompt = currentInputText.trim();
+        const currentUploads = [...currentUploadsList];
 
         setIsGenerating(true);
+
+        // Delay clearing input to prevent layout shift that hides generating card on mobile
+        setTimeout(() => {
+            setInputText('');
+            setUploads([]);
+        }, 500);
         if (!isTestAccount) {
             deductCredits(creditCost);
             const token = window.localStorage.getItem('auth_token');
@@ -266,11 +370,58 @@ export default function EditorPage() {
                 const data = await res.json();
                 if (!res.ok || data.error) throw new Error(data.error || `API error: ${res.status}`);
 
+                // Handle async polling if taskId returned (non-face-swap)
+                let images: { url: string; type: string }[] = [];
+                if (data.taskId && !data.images) {
+                    // Save taskId to localStorage for recovery after screen-off
+                    localStorage.setItem('pending_generation', JSON.stringify({
+                        taskId: data.taskId,
+                        chatId,
+                        prompt: userPrompt,
+                        generationType: settings.generationType,
+                        model: settings.model,
+                        creditCost,
+                        startedAt: Date.now(),
+                    }));
+                    // Poll /api/generate/status every 5 seconds
+                    images = await new Promise<{ url: string; type: string }[]>((resolve, reject) => {
+                        const startTime = Date.now();
+                        const pollTimer = setInterval(async () => {
+                            try {
+                                // Timeout after 120 seconds
+                                if (Date.now() - startTime > 120_000) {
+                                    clearInterval(pollTimer);
+                                    reject(new Error('Generation timed out (120s)'));
+                                    return;
+                                }
+                                const statusRes = await fetch(`/api/generate/status?taskId=${data.taskId}`);
+                                const statusData = await statusRes.json();
+
+                                if (statusData.status === 'SUCCEED') {
+                                    clearInterval(pollTimer);
+                                    localStorage.removeItem('pending_generation');
+                                    resolve(statusData.images || []);
+                                } else if (statusData.status === 'FAILED') {
+                                    clearInterval(pollTimer);
+                                    localStorage.removeItem('pending_generation');
+                                    reject(new Error(statusData.error || 'Generation failed'));
+                                }
+                                // PROCESSING → keep polling
+                            } catch (pollErr) {
+                                // Network error during poll — keep trying
+                                console.error('Poll error:', pollErr);
+                            }
+                        }, 5000);
+                    });
+                } else {
+                    // Face swap returned images directly
+                    images = data.images || [];
+                }
+
                 setInpaintMode(false);
                 setFaceSwapMode(false);
                 setReposeMode(false);
 
-                const images = data.images || [];
                 if (images.length === 0) throw new Error('No images returned from API');
 
                 for (const img of images) {
@@ -379,10 +530,12 @@ export default function EditorPage() {
     // Auto-submit flag for one-click generate
     const [autoSubmitPending, setAutoSubmitPending] = useState(false);
 
-    // Submit trigger from store
+    // Submit trigger from store (used by mobile touch)
     useEffect(() => {
         if (submitTrigger > 0) {
-            handleSubmit(new Event('submit') as unknown as React.FormEvent);
+            // isGenerating was already set to true by the touch handler,
+            // so call handleSubmit with skipGuard=true
+            handleSubmit(undefined, true);
         }
     }, [submitTrigger]);
 
@@ -528,14 +681,16 @@ export default function EditorPage() {
                         generationError={generationError}
                         setGenerationError={setGenerationError}
                     />
-                    <RightPanel
-                        onOneClickGenerate={handleOneClickGenerate}
-                        onSamplePrompt={handleSamplePrompt}
-                        onActionInpaint={handleActionInpaint}
-                        onActionFaceSwap={handleActionFaceSwap}
-                        onActionRegenerate={handleActionRegenerate}
-                        isGenerating={isGenerating}
-                    />
+                    <div ref={rightPanelRef}>
+                        <RightPanel
+                            onOneClickGenerate={handleOneClickGenerate}
+                            onSamplePrompt={handleSamplePrompt}
+                            onActionInpaint={handleActionInpaint}
+                            onActionFaceSwap={handleActionFaceSwap}
+                            onActionRegenerate={handleActionRegenerate}
+                            isGenerating={isGenerating}
+                        />
+                    </div>
                 </>
             )}
         </div>

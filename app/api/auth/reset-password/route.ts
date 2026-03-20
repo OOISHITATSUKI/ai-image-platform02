@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
-        const user = findUserByEmail(normalizedEmail);
+        const user = await findUserByEmail(normalizedEmail);
 
         if (!user) {
             return NextResponse.json({ error: 'Invalid email or OTP' }, { status: 401 });
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         user.loginFailCount = 0;
         user.loginFailResetAt = undefined;
 
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({ success: true, message: 'Password updated successfully' });
 

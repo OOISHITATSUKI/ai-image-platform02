@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Session expired. Please log in again.' }, { status: 401 });
         }
 
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -90,13 +90,13 @@ export async function POST(req: NextRequest) {
             if ((user.deviceOtpAttempts ?? 0) >= MFA_OTP_ATTEMPTS_MAX) {
                 user.deviceOtpLockedUntil = now + MFA_LOCK_MS;
                 user.deviceOtpCode = undefined;
-                saveUser(user);
+                await saveUser(user);
                 return NextResponse.json(
                     { error: 'Too many failed attempts. Account locked for 30 minutes.' },
                     { status: 429 }
                 );
             }
-            saveUser(user);
+            await saveUser(user);
             const remaining = MFA_OTP_ATTEMPTS_MAX - (user.deviceOtpAttempts ?? 0);
             return NextResponse.json(
                 { error: `Invalid verification code. ${remaining} attempt(s) remaining.` },
@@ -116,8 +116,8 @@ export async function POST(req: NextRequest) {
         const country = getCountry(req);
         const ua = getUa(req);
         user.lastKnownCountry = country;
-        saveUser(user);
-        logLoginAttempt({ userId: user.id, email: user.email, success: true, ipAddress: ip, userAgent: ua });
+        await saveUser(user);
+        await logLoginAttempt({ userId: user.id, email: user.email, success: true, ipAddress: ip, userAgent: ua });
 
         // Issue full auth JWT
         const token = signToken(user.id, user.email);
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         // Optionally trust this device (90-day device_token cookie)
         if (trustDevice) {
             const deviceToken = generateDeviceToken();
-            saveDevice({
+            await saveDevice({
                 userId: user.id,
                 deviceToken,
                 deviceName: getDeviceName(ua),

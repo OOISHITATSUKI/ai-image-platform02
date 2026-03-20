@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import {
     findUserByEmail,
     saveUser,
-    generateOTP,
     isDisposableEmail,
     isValidEmail,
-    canResendOTP,
-    OTP_EXPIRY_MS,
     type UserRecord,
 } from '@/lib/auth';
 
 import { logRegistrationAttempt, countRecentAttemptsByIp } from '@/lib/db/registration_attempts';
 import { rateLimit } from '@/lib/rateLimit';
-import { sendOTPEmail } from '@/lib/email';
+import { supabaseAdmin } from '@/lib/supabase-server';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'videogen-jwt-secret-change-in-production';
+const SALT_ROUNDS = 10;
 
 // 24 hours in MS
 const REGISTRATION_WINDOW_MS = 24 * 60 * 60 * 1000;
-const MAX_ACCOUNTS_PER_IP = 999;
+const MAX_ATTEMPTS_PER_IP = 10;
+const MAX_ACCOUNTS_PER_IP = 3;
 
 function getIp(req: NextRequest): string {
     return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -25,13 +28,13 @@ function getIp(req: NextRequest): string {
         ?? '0.0.0.0';
 }
 
-// POST: STEP 1 — Email submission + OTP generation
+// POST: Direct account creation (email + password)
 export async function POST(req: NextRequest) {
     try {
         const ip = getIp(req);
 
-        // ── 1. General Rate Limit (3 attempts per IP per 24h) ──
-        const rl = rateLimit(`${ip}:register`, 999, REGISTRATION_WINDOW_MS);
+        // ── 1. General Rate Limit ──
+        const rl = rateLimit(`${ip}:register`, MAX_ATTEMPTS_PER_IP, REGISTRATION_WINDOW_MS);
         if (!rl.allowed) {
             return NextResponse.json(
                 { error: 'Too many registration attempts. Please try again later.' },
@@ -39,144 +42,125 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const reqBody = await req.json();
-        const { email, resend } = reqBody;
+        const { email, password, fingerprintHash } = await req.json();
 
         if (!email || !isValidEmail(email)) {
             return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
         }
+        if (!password || password.length < 8) {
+            return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+        }
 
         const normalizedEmail = email.toLowerCase().trim();
 
-        // ── 2. Email OTP Rate Limit (5 per hour) ──
-        const emailRl = rateLimit(`${normalizedEmail}:send-code`, 5, 60 * 60 * 1000);
-        if (!emailRl.allowed) {
-            return NextResponse.json(
-                { error: 'Too many verification codes requested. Please try again later.' },
-                { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': emailRl.resetAt.toString() } }
-            );
-        }
-
-        // ── 3. IP Registration Limit (max 2 successful accounts per IP/24h) ──
-        const recentAccounts = countRecentAttemptsByIp(ip, REGISTRATION_WINDOW_MS);
+        // ── 2. IP Registration Limit ──
+        const recentAccounts = await countRecentAttemptsByIp(ip, REGISTRATION_WINDOW_MS);
         if (recentAccounts >= MAX_ACCOUNTS_PER_IP) {
-            logRegistrationAttempt(ip, normalizedEmail, false);
+            await logRegistrationAttempt(ip, normalizedEmail, false);
             return NextResponse.json(
-                { error: 'Registration is currently unavailable. Please try again later.' },
+                { error: 'Too many accounts created from this network. Please try again later.' },
                 { status: 429 }
             );
         }
 
         // Block disposable emails
         if (isDisposableEmail(normalizedEmail)) {
-            logRegistrationAttempt(ip, normalizedEmail, false);
+            await logRegistrationAttempt(ip, normalizedEmail, false);
             return NextResponse.json({ error: 'This email domain is not allowed (Disposable Email)' }, { status: 400 });
         }
 
-        const existingUser = findUserByEmail(normalizedEmail);
-
-        // Resend OTP for existing pending user
-        if (resend && existingUser) {
-            if (existingUser.status !== 'pending_otp' && existingUser.status !== 'pending_password') {
-                return NextResponse.json({ error: 'This email is already registered' }, { status: 409 });
-            }
-            if (!canResendOTP(existingUser)) {
-                return NextResponse.json({ error: 'Please wait 60 seconds before requesting a new code' }, { status: 429 });
-            }
-
-            const otp = generateOTP();
-            existingUser.otpCode = otp;
-            existingUser.otpExpiresAt = Date.now() + OTP_EXPIRY_MS;
-            existingUser.otpAttempts = 0;
-            existingUser.otpLockedUntil = undefined;
-            existingUser.otpLastSentAt = Date.now();
-            saveUser(existingUser);
-
-            if (process.env.NODE_ENV === 'production') {
-                await sendOTPEmail(normalizedEmail, otp, 'register');
-            }
-
-            return NextResponse.json(
-                {
-                    success: true,
-                    message: 'Verification code sent',
-                    ...(process.env.NODE_ENV !== 'production' ? { devOtp: otp } : {}),
-                },
-                { headers: { 'X-RateLimit-Remaining': rl.remaining.toString(), 'X-RateLimit-Reset': rl.resetAt.toString() } }
-            );
-        }
-
-        // Check if already registered (active account)
+        // Check if already registered
+        const existingUser = await findUserByEmail(normalizedEmail);
         if (existingUser && existingUser.status !== 'pending_otp' && existingUser.status !== 'pending_password') {
             return NextResponse.json({ error: 'This email is already registered' }, { status: 409 });
         }
 
-        // Generate OTP
-        const otp = generateOTP();
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
         const now = Date.now();
         const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-        if (existingUser && (existingUser.status === 'pending_otp' || existingUser.status === 'pending_password')) {
-            // Reset status to pending_otp for re-registration
-            existingUser.status = 'pending_otp';
-            // Update existing pending user
-            if (!canResendOTP(existingUser)) {
-                return NextResponse.json({ error: 'Please wait 60 seconds before requesting a new code' }, { status: 429 });
-            }
-            existingUser.otpCode = otp;
-            existingUser.otpExpiresAt = now + OTP_EXPIRY_MS;
-            existingUser.otpAttempts = 0;
-            existingUser.otpLockedUntil = undefined;
-            existingUser.otpLastSentAt = now;
-            // Update fingerprint if provided on resend
-            if (reqBody.fingerprintHash) existingUser.fingerprintHash = reqBody.fingerprintHash;
-            saveUser(existingUser);
-        } else {
-            // Check fingerprint limits across all users (3 max per device)
-            if (reqBody.fingerprintHash) {
-                // Let's rely on IP limits and just save the fingerprint for later admin review as planned.
-            }
-
-            // Create new pending user
-            const newUser: UserRecord = {
-                id: uuidv4(),
-                email: normalizedEmail,
-                passwordHash: '',
-                username: '',
-                status: 'pending_otp',
-                emailVerified: false,
-                plan: 'free',
-                credits: 20, // Free 20 credits upon signup
-                locale: 'en',
-                theme: 'dark',
-                otpCode: otp,
-                otpExpiresAt: now + OTP_EXPIRY_MS,
-                otpAttempts: 0,
-                otpLastSentAt: now,
-                firstGenerationConfirmed: false,
-                fingerprintHash: reqBody.fingerprintHash,
-                freeCreditsExpireAt: now + SEVEN_DAYS_MS,
-                createdAt: now,
-                updatedAt: now,
-            };
-            saveUser(newUser);
-
-            // Log successful new registration initiation
-            logRegistrationAttempt(ip, normalizedEmail, true);
-        }
-
-        if (process.env.NODE_ENV === 'production') {
-            await sendOTPEmail(normalizedEmail, otp, 'register');
-        }
-
-        return NextResponse.json(
-            {
-                success: true,
-                message: 'Verification code sent to your email',
-                ...(process.env.NODE_ENV !== 'production' ? { devOtp: otp } : {}),
+        // Create or update user as active
+        const userId = existingUser?.id || uuidv4();
+        const newUser: UserRecord = {
+            ...(existingUser || {}),
+            id: userId,
+            email: normalizedEmail,
+            passwordHash,
+            username: normalizedEmail.split('@')[0].slice(0, 20),
+            status: 'active',
+            emailVerified: false,
+            plan: 'free',
+            credits: existingUser?.credits ?? 20,
+            locale: 'en',
+            theme: 'dark',
+            firstGenerationConfirmed: true,
+            fingerprintHash: fingerprintHash || existingUser?.fingerprintHash,
+            freeCreditsExpireAt: existingUser?.freeCreditsExpireAt ?? (now + SEVEN_DAYS_MS),
+            registrationIp: ip,
+            termsAgreedAt: now,
+            termsVersion: '2025-01-01',
+            agreements: {
+                termsOfService: { agreedAt: now, version: '2025-01-01', ip },
+                contentPolicy: { agreedAt: now, version: '2025-01-01', ip },
+                privacyPolicy: { agreedAt: now, version: '2025-01-01', ip },
+                ageConfirmation: { agreedAt: now, version: '2025-01-01', ip },
+                minorContentBan: { agreedAt: now, version: '2025-01-01', ip },
+                noRefund: { agreedAt: now, version: '2025-01-01', ip },
+                personalUseOnly: { agreedAt: now, version: '2025-01-01', ip },
             },
-            { headers: { 'X-RateLimit-Remaining': rl.remaining.toString(), 'X-RateLimit-Reset': rl.resetAt.toString() } }
-        );
+            createdAt: existingUser?.createdAt ?? now,
+            updatedAt: now,
+        };
+
+        await saveUser(newUser);
+        await logRegistrationAttempt(ip, normalizedEmail, true);
+
+        // Enqueue step email sequences triggered by registration
+        try {
+            const { data: sequences } = await supabaseAdmin
+                .from('step_email_sequences')
+                .select('id, steps')
+                .eq('trigger', 'on_register')
+                .eq('is_active', true);
+            if (sequences && sequences.length > 0) {
+                const queueRows = sequences.map((seq: any) => {
+                    const firstStep = seq.steps?.[0];
+                    const delayMs = (firstStep?.delayHours ?? 24) * 60 * 60 * 1000;
+                    return {
+                        user_id: newUser.id,
+                        sequence_id: seq.id,
+                        current_step: 0,
+                        next_send_at: now + delayMs,
+                        status: 'pending',
+                        created_at: now,
+                    };
+                });
+                await supabaseAdmin.from('step_email_queue').insert(queueRows);
+            }
+        } catch (e) {
+            console.error('[Register] Step email enqueue error:', e);
+        }
+
+        // Generate JWT
+        const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '30d' });
+
+        return NextResponse.json({
+            success: true,
+            token,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                username: newUser.username,
+                plan: newUser.plan,
+                credits: newUser.credits,
+                locale: newUser.locale,
+                theme: newUser.theme,
+                firstGenerationConfirmed: true,
+                termsAgreedAt: newUser.termsAgreedAt,
+                emailVerified: false,
+            },
+        });
     } catch (error) {
         console.error('Register error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

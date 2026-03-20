@@ -15,17 +15,19 @@ const getResend = () => {
 };
 const FROM = process.env.RESEND_FROM || 'Image Nude <noreply@imagenude.com>';
 
-export async function sendOTPEmail(to: string, otp: string, type: 'register' | 'login' | 'reset' = 'register') {
+export async function sendOTPEmail(to: string, otp: string, type: 'register' | 'login' | 'reset' | 'verify' = 'register') {
   const subjects: Record<string, string> = {
     register: '【Image Nude】メール認証コード',
     login: '【Image Nude】ログイン認証コード',
     reset: '【Image Nude】パスワードリセット認証コード',
+    verify: '【Image Nude】メール認証コード',
   };
 
   const descriptions: Record<string, string> = {
     register: 'アカウント登録のための認証コードです。',
     login: '新しいデバイスからのログインが検出されました。',
     reset: 'パスワードの再設定がリクエストされました。',
+    verify: 'メールアドレスの認証コードです。',
   };
 
   const html = `
@@ -230,6 +232,50 @@ export async function sendWeeklyBackupReport(report: {
         return true;
     } catch (err) {
         console.error('[Email] Weekly backup report error:', err);
+        return false;
+    }
+}
+
+// ── Admin → User Custom Email ──────────────────────────────
+export async function sendCustomEmail(to: string, subject: string, body: string): Promise<boolean> {
+    try {
+        const resend = getResend();
+        if (!resend) {
+            console.error('[Email] Cannot send custom email: Resend not initialized.');
+            return false;
+        }
+
+        const html = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #0a0a1a; padding: 40px 20px;">
+                <div style="max-width: 520px; margin: auto; background: #1a1a2e; border-radius: 12px; padding: 40px; border: 1px solid #2a2a4a;">
+                    <h1 style="color: #c084fc; font-size: 22px; margin: 0 0 20px; text-align: center;">Image Nude</h1>
+                    <div style="color: #e0e0ee; font-size: 15px; line-height: 1.7;">
+                        ${body}
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #2a2a4a; margin: 30px 0;" />
+                    <p style="color: #6b6b85; font-size: 12px; text-align: center; margin: 0;">
+                        Image Nude AI — Support
+                    </p>
+                </div>
+            </div>
+        `;
+
+        const { data, error } = await resend.emails.send({
+            from: FROM,
+            to,
+            subject,
+            html,
+        });
+
+        if (error) {
+            console.error('[Email] Custom email send failed:', error);
+            return false;
+        }
+
+        console.log(`[Email] Custom email sent to ${to} (id: ${data?.id})`);
+        return true;
+    } catch (err) {
+        console.error('[Email] Custom email error:', err);
         return false;
     }
 }

@@ -16,6 +16,21 @@ const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 import fs from 'fs';
 import path from 'path';
 
+// ── Task Metadata Store (for async polling) ──
+export const taskMetadataStore = new Map<string, {
+    selectedFaceImageUrl?: string;
+    createdAt: number;
+}>();
+
+function cleanupTaskMetadata() {
+    const now = Date.now();
+    for (const [key, val] of taskMetadataStore) {
+        if (now - val.createdAt > 300_000) { // 5 min
+            taskMetadataStore.delete(key);
+        }
+    }
+}
+
 // ── Image Deletion Policy ──
 const DELETION_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'outputs');
@@ -260,7 +275,7 @@ function getResolutionFromAspectRatio(
 
 
 // Poll task result until complete
-async function pollTaskResult(taskId: string): Promise<{
+export async function pollTaskResult(taskId: string): Promise<{
     success: boolean;
     images?: { url: string; type: string }[];
     error?: string;
@@ -353,12 +368,14 @@ async function resizeBase64IfNeeded(base64: string, maxDim = MAX_FACE_SWAP_DIM):
     const w = meta.width ?? 0;
     const h = meta.height ?? 0;
 
-    if (w <= maxDim && h <= maxDim) {
-        // already within limits – return the raw base64 (no data-URI)
+    const isJpegOrPng = meta.format === 'jpeg' || meta.format === 'png';
+
+    if (w <= maxDim && h <= maxDim && isJpegOrPng) {
+        // already within limits and supported format – return the raw base64 (no data-URI)
         return raw;
     }
 
-    // Resize keeping aspect ratio, fitting inside maxDim × maxDim
+    // Resize (if needed) and always convert to JPEG for API compatibility
     const resized = await image
         .resize({ width: maxDim, height: maxDim, fit: 'inside', withoutEnlargement: true })
         .jpeg({ quality: 90 })
@@ -497,7 +514,7 @@ async function handleMergeFace(
 }
 
 // ── Wrapper to match expected return type ──
-async function handleFaceSwapFinal(
+export async function handleFaceSwapFinal(
     faceImageBase64: string,
     targetImageBase64: string,
 ) {
@@ -661,7 +678,7 @@ export async function POST(request: NextRequest) {
         // BUG-03: Friendly error messages (duplicated from ChatArea but for backend errors)
         const friendlyError = (raw: string): string => {
             if (raw.includes('INVALID_IMAGE_FORMAT')) {
-                return '❌ この画像形式には対応していません。JPGまたはPNGを試してください。';
+                return '❌ この画像形式には対応していません。JPG、PNG、またはWebPを試してください。';
             }
             return raw;
         };
@@ -671,7 +688,7 @@ export async function POST(request: NextRequest) {
         // ── Extract Auth Token & User ──
         const authHeader = request.headers.get('authorization');
         let userId = 'guest';
-        let user: ReturnType<typeof findUserById> = null;
+        let user: Awaited<ReturnType<typeof findUserById>> = null;
         let decodedEmail = '';
 
         if (authHeader) {
@@ -681,7 +698,7 @@ export async function POST(request: NextRequest) {
                 if (decoded) {
                     userId = decoded.userId;
                     decodedEmail = decoded.email;
-                    user = findUserById(userId);
+                    user = await findUserById(userId);
                 }
             }
         }
@@ -784,7 +801,7 @@ export async function POST(request: NextRequest) {
         }
 
         // ── Enforce free user resolution ──
-        const userRecord = userId ? findUserById(userId) : null;
+        const userRecord = userId ? await findUserById(userId) : null;
         const isFreeUser = !userRecord || userRecord.plan === 'free';
         const finalResolution = (isFreeUser && resolution !== '512') ? '512' : resolution;
         if (isFreeUser && resolution !== '512') {
@@ -1342,68 +1359,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log(`Starting polling for task: ${taskId}`);
-        // Poll for the result
-        let result;
-        try {
-            result = await pollTaskResult(taskId);
-        } catch (pollErr) {
-            console.error(`Poll task error for ${taskId}:`, pollErr);
-            throw pollErr;
-        }
-        console.log(`Polling finished for task: ${taskId}, success: ${result.success}`);
-
-        if (!result.success) {
-            return NextResponse.json(
-                { error: result.error || 'Generation failed' },
-                { status: 500 }
-            );
-        }
-
-        // ── Apply saved face (My Faces) via merge-face post-processing ──
-        let finalImages = result.images;
-        if (selectedFaceImageUrl && result.images && result.images.length > 0) {
-            console.log('Applying saved face via merge-face...');
-            const faceAppliedImages: typeof result.images = [];
-            for (const img of result.images) {
-                try {
-                    // Convert generated image URL to base64 if needed
-                    let targetBase64 = '';
-                    if (img.url.startsWith('data:')) {
-                        targetBase64 = img.url.replace(/^data:image\/\w+;base64,/, '');
-                    } else {
-                        // Fetch the image and convert
-                        const imgRes = await fetch(img.url);
-                        const imgBuf = await imgRes.arrayBuffer();
-                        targetBase64 = Buffer.from(imgBuf).toString('base64');
-                    }
-
-                    // Convert face image URL to base64 if needed
-                    let faceBase64 = '';
-                    if (selectedFaceImageUrl.startsWith('data:')) {
-                        faceBase64 = selectedFaceImageUrl.replace(/^data:image\/\w+;base64,/, '');
-                    } else {
-                        const faceRes = await fetch(selectedFaceImageUrl);
-                        const faceBuf = await faceRes.arrayBuffer();
-                        faceBase64 = Buffer.from(faceBuf).toString('base64');
-                    }
-
-                    const mergedImages = await handleFaceSwapFinal(faceBase64, targetBase64);
-                    faceAppliedImages.push(...mergedImages);
-                } catch (faceErr) {
-                    console.error('Face application failed for image, using original:', faceErr);
-                    faceAppliedImages.push(img);
-                }
-            }
-            finalImages = faceAppliedImages;
-        }
+        // ── Store task metadata for status endpoint ──
+        taskMetadataStore.set(taskId, {
+            selectedFaceImageUrl: selectedFaceImageUrl || undefined,
+            createdAt: Date.now(),
+        });
+        cleanupTaskMetadata();
 
         // Run cleanup asynchronously
         cleanupOldFiles().catch(console.error);
 
+        // Return taskId immediately (no polling — client will poll /api/generate/status)
+        console.log(`Task submitted: ${taskId}, returning immediately`);
         return NextResponse.json({
-            images: finalImages,
             taskId,
+            status: 'PENDING',
         });
     } catch (err) {
         console.error('Generate API error:', err);

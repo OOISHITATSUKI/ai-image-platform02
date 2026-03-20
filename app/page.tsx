@@ -183,13 +183,13 @@ function TryItNowSection() {
                             </div>
                             <div className="hp-signup-banner">
                                 <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🔥 Like what you see? Get HD quality!</div>
-                                    <div style={{ fontSize: 13, color: '#888' }}>Sign up free → 20 credits · HD 1024px · Download · Unlimited styles</div>
+                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🔥 Like what you see? Try the full editor!</div>
+                                    <div style={{ fontSize: 13, color: '#888' }}>Upload your photo · Undress AI · Face Swap · HD 1024px · More styles</div>
                                 </div>
-                                <Link href="/register" className="hp-btn-primary" style={{ whiteSpace: 'nowrap' }}>Sign Up Free →</Link>
+                                <Link href="/editor" className="hp-btn-primary" style={{ whiteSpace: 'nowrap' }}>Open Editor →</Link>
                             </div>
                             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-                                <Link href="/register" style={{ fontSize: 14, color: '#e5342a', fontWeight: 600, textDecoration: 'none' }}>Create Account for HD Download →</Link>
+                                <Link href="/editor" style={{ fontSize: 14, color: '#e5342a', fontWeight: 600, textDecoration: 'none' }}>Open Full Editor — Upload & Undress →</Link>
                             </div>
                             <button onClick={handleReset} className="hp-btn-text">↺ Generate another</button>
                         </div>
@@ -206,13 +206,84 @@ function TryItNowSection() {
                         <div style={{ textAlign: 'center', padding: '40px 0' }}>
                             <div style={{ fontSize: 48, marginBottom: 16 }}>🔥</div>
                             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>You liked it!</h3>
-                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Free demo limit reached. Sign up to unlock unlimited generations + HD quality.</p>
+                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Free demo limit reached. Sign up to unlock unlimited generations + HD quality + Undress AI.</p>
                             <Link href="/register" className="hp-btn-primary">Sign Up Free — Get 20 Credits</Link>
+                            <div style={{ marginTop: 12 }}><Link href="/editor" style={{ fontSize: 13, color: '#888', textDecoration: 'underline' }}>or try the full editor →</Link></div>
                         </div>
                     )}
                 </div>
             </div>
         </section>
+    );
+}
+
+function BeforeAfterSlider() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const beforeRef = useRef<HTMLDivElement>(null);
+    const beforeImgRef = useRef<HTMLImageElement>(null);
+    const lineRef = useRef<HTMLDivElement>(null);
+    const handleRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
+
+    useEffect(() => {
+        const c = containerRef.current;
+        if (!c) return;
+        // Set before image width to match container
+        const setImgWidth = () => {
+            if (beforeImgRef.current) beforeImgRef.current.style.width = `${c.offsetWidth}px`;
+        };
+        setImgWidth();
+        const ro = new ResizeObserver(setImgWidth);
+        ro.observe(c);
+
+        let raf = 0;
+        const apply = (pct: number) => {
+            if (beforeRef.current) beforeRef.current.style.width = `${pct}%`;
+            if (lineRef.current) lineRef.current.style.left = `${pct}%`;
+            if (handleRef.current) handleRef.current.style.left = `${pct}%`;
+        };
+        const update = (cx: number) => {
+            const r = c.getBoundingClientRect();
+            const pct = Math.max(2, Math.min(98, ((cx - r.left) / r.width) * 100));
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => apply(pct));
+        };
+        const down = (e: PointerEvent) => { isDragging.current = true; c.setPointerCapture(e.pointerId); update(e.clientX); };
+        const move = (e: PointerEvent) => { if (!isDragging.current) return; e.preventDefault(); update(e.clientX); };
+        const up = () => { isDragging.current = false; };
+        c.addEventListener('pointerdown', down, { passive: false });
+        c.addEventListener('pointermove', move, { passive: false });
+        c.addEventListener('pointerup', up);
+        c.addEventListener('pointercancel', up);
+        return () => { ro.disconnect(); c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up); };
+    }, []);
+
+    return (
+        <div
+            ref={containerRef}
+            style={{
+                position: 'relative', width: '100%', maxWidth: 480, aspectRatio: '3/4',
+                borderRadius: 20, overflow: 'hidden', cursor: 'col-resize', userSelect: 'none',
+                touchAction: 'none', WebkitUserSelect: 'none',
+                border: '2px solid rgba(220,38,38,0.3)', boxShadow: '0 0 60px rgba(220,38,38,0.15)',
+            }}
+        >
+            <img src="/hero/mihon_after.webp" alt="After" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
+            <div ref={beforeRef} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%', overflow: 'hidden', willChange: 'width', contain: 'layout style paint' }}>
+                <img ref={beforeImgRef} src="/hero/mihon_before.webp" alt="Before" loading="eager" decoding="async" style={{ position: 'absolute', top: 0, left: 0, height: '100%', objectFit: 'cover', maxWidth: 'none' }} draggable={false} />
+            </div>
+            <div ref={lineRef} style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 3, background: '#fff', transform: 'translateX(-50%)', zIndex: 2, boxShadow: '0 0 8px rgba(0,0,0,0.5)' }} />
+            <div ref={handleRef} style={{
+                position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 3,
+                width: 44, height: 44, borderRadius: '50%', background: 'rgba(220,38,38,0.9)', border: '3px solid #fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#fff',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+            }}>
+                ⟷
+            </div>
+            <div style={{ position: 'absolute', top: 12, left: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.6)', fontSize: 11, color: '#ccc', fontWeight: 600, zIndex: 1 }}>BEFORE</div>
+            <div style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(220,38,38,0.7)', fontSize: 11, color: '#fff', fontWeight: 600, zIndex: 1 }}>AFTER</div>
+        </div>
     );
 }
 
@@ -256,16 +327,8 @@ export default function HomePage() {
                         <div className="hp-label"><span className="hp-pulse">●</span> AI-Powered Generation</div>
                         <h1 className="hp-title">AI Undress Tool.<br /><span className="hp-accent-text">Upload a photo. Remove clothing.</span><br />Done in 8 seconds.</h1>
                         <p className="hp-subtitle">Upload any photo and our AI removes clothing instantly. Photorealistic results. No experience needed. Free to start.</p>
-                        <div className="hp-mobile-preview">
-                            {[0, 1].map(i => (
-                                <div key={i} className="hp-mobile-preview-card">
-                                    <img src={heroImages[i]} alt="AI Generated" />
-                                    <div className="hp-mobile-preview-badge">AI Generated</div>
-                                </div>
-                            ))}
-                        </div>
                         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 48 }}>
-                            <Link href="/register" className="hp-btn-primary">Try Undress AI — Free <span style={{ fontSize: 18 }}>→</span></Link>
+                            <Link href="/editor" className="hp-btn-primary">Try It Free <span style={{ fontSize: 18 }}>→</span></Link>
                             <a href="#hp-gallery" className="hp-btn-ghost">View Gallery</a>
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -274,18 +337,13 @@ export default function HomePage() {
                             ))}
                         </div>
                     </div>
-                    <div className="hp-hero-grid">
-                        {[0, 1, 2, 3].map(i => (
-                            <div key={i} className="hp-gallery-card" style={{ marginTop: i % 2 === 1 ? 32 : 0 }}>
-                                <img src={heroImages[i]} alt="AI Generated" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }} />
-                                <div className="hp-card-overlay">
-                                    <div style={{ fontSize: 11, color: '#f87171', fontWeight: 600, marginBottom: 2 }}>AI Generated</div>
-                                </div>
-                            </div>
-                        ))}
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <BeforeAfterSlider />
                     </div>
                 </div>
             </section>
+
+            <TryItNowSection />
 
             <section className="hp-stats-bar">
                 <div className="hp-stats-inner">
@@ -297,8 +355,6 @@ export default function HomePage() {
                     ))}
                 </div>
             </section>
-
-            <TryItNowSection />
 
             <section className="hp-section hp-section-pad">
                 <div style={{ maxWidth: 1000, margin: '0 auto', textAlign: 'center' }}>

@@ -24,10 +24,12 @@ export default function MyFaces() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
     const [collapsed, setCollapsed] = useState(false);
     const [showGuide, setShowGuide] = useState(false);
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+    const isLoggedIn = !!user;
     const isPaid = user ? user.plan !== 'free' : false;
     const limit = isPaid ? MAX_FACES.paid : MAX_FACES.free;
-    const canAdd = savedFaces.length < limit;
+    const canAdd = isLoggedIn ? savedFaces.length < limit : true;
 
     // Load faces from API on mount
     const loadFaces = useCallback(async () => {
@@ -80,12 +82,13 @@ export default function MyFaces() {
     };
 
     const handleAddClick = () => {
+        if (!isLoggedIn) {
+            setShowLoginPrompt(true);
+            return;
+        }
         if (!canAdd) return;
         setShowRegisterModal(true);
     };
-
-    // Always show for logged-in users
-    if (!user) return null;
 
     return (
         <>
@@ -102,14 +105,24 @@ export default function MyFaces() {
                             {collapsed ? '▸' : '▾'}
                         </span>
                     </span>
-                    <span className="my-faces-count">
-                        {savedFaces.length} / {limit}
-                    </span>
+                    {isLoggedIn && (
+                        <span className="my-faces-count">
+                            {savedFaces.length} / {limit}
+                        </span>
+                    )}
                 </div>
 
                 {!collapsed && (
                     <>
-                        {isFacesLoading ? (
+                        {!isLoggedIn ? (
+                            /* Guest view: show empty state with register prompt */
+                            <button
+                                className="my-faces-empty-btn"
+                                onClick={handleAddClick}
+                            >
+                                + {t('faces.emptyHint')}
+                            </button>
+                        ) : isFacesLoading ? (
                             <div className="my-faces-loading">
                                 <div className="my-faces-spinner" />
                             </div>
@@ -189,6 +202,38 @@ export default function MyFaces() {
                 )}
             </div>
 
+            {/* Login Prompt Modal for guests */}
+            {showLoginPrompt && (
+                <div className="my-faces-overlay" onClick={() => setShowLoginPrompt(false)}>
+                    <div className="my-faces-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+                        <p style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>
+                            {t('faces.title')}
+                        </p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
+                            {t('faces.loginToRegister')}
+                        </p>
+                        <div className="my-faces-confirm-actions">
+                            <button
+                                className="my-faces-confirm-cancel"
+                                onClick={() => setShowLoginPrompt(false)}
+                            >
+                                {t('faces.cancel')}
+                            </button>
+                            <button
+                                className="my-faces-guide-ok"
+                                onClick={() => { window.location.href = '/register'; }}
+                            >
+                                {t('faces.signUp')}
+                            </button>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '10px', textAlign: 'center' }}>
+                            {t('faces.alreadyHaveAccount')}{' '}
+                            <a href="/login" style={{ color: '#7c5cfc' }}>{t('faces.logIn')}</a>
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Guide Modal — shown after first registration */}
             {showGuide && (
                 <div className="my-faces-overlay" onClick={() => setShowGuide(false)}>
@@ -225,6 +270,7 @@ export default function MyFaces() {
                 <div className="my-faces-overlay" onClick={() => setShowDeleteConfirm(null)}>
                     <div className="my-faces-confirm-dialog" onClick={(e) => e.stopPropagation()}>
                         <p>{t('faces.deleteConfirm')}</p>
+                        <p style={{ fontSize: '0.8rem', color: '#ef4444', marginTop: '8px', lineHeight: 1.5 }}>{t('faces.deleteWarning')}</p>
                         <div className="my-faces-confirm-actions">
                             <button
                                 className="my-faces-confirm-cancel"

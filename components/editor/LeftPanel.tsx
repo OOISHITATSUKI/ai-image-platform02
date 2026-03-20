@@ -6,7 +6,7 @@ import { useTranslation } from '@/lib/useTranslation';
 import { AVAILABLE_MODELS } from '@/lib/types';
 import type {
     AspectRatio, Resolution, AgeTag, PeopleCountTag, EthnicityTag,
-    StylePresetTag, HairColorTag, HairStyleTag, CompositionTag, FetishTag,
+    StylePresetTag, HairColorTag, HairStyleTag, CompositionTag, SituationTag, FetishTag,
     GenerationType,
 } from '@/lib/types';
 import InpaintModal from './InpaintModal';
@@ -34,7 +34,7 @@ interface LeftPanelProps {
     setReposeMode: (v: boolean) => void;
     showInpaintModal: boolean;
     setShowInpaintModal: (v: boolean) => void;
-    onSubmit: (e: React.FormEvent) => void;
+    onSubmit: (e?: React.FormEvent, skipGuard?: boolean) => void;
     isGenerating: boolean;
     generationError?: string | null;
     setGenerationError?: (v: string | null) => void;
@@ -46,6 +46,19 @@ export default function LeftPanel({
     reposeMode, setReposeMode, showInpaintModal, setShowInpaintModal,
     onSubmit, isGenerating, generationError, setGenerationError,
 }: LeftPanelProps) {
+    const [showDone, setShowDone] = useState(false);
+    const prevGenerating = useRef(false);
+    const submitCalledRef = useRef(false);
+
+    useEffect(() => {
+        if (prevGenerating.current && !isGenerating) {
+            setShowDone(true);
+            const timer = setTimeout(() => setShowDone(false), 2500);
+            return () => clearTimeout(timer);
+        }
+        prevGenerating.current = isGenerating;
+    }, [isGenerating]);
+
     const {
         settings, updateSettings, tagSettings, updateTagSettings,
         toggleFetishTag, user, setGenerationType,
@@ -200,6 +213,51 @@ export default function LeftPanel({
         setGenerationType(type);
         setReposeMode(false);
     };
+
+    // During generation, replace entire panel with generating card
+    // Read directly from store to avoid stale prop
+    const storeIsGenerating = useAppStore((s) => s.isGenerating);
+    if (storeIsGenerating) {
+        return (
+            <aside className="editor-left-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', padding: '24px' }}>
+                <div style={{
+                    background: 'linear-gradient(135deg, #1a1030, #1a1a2e)',
+                    border: '2px solid #7c5cfc',
+                    borderRadius: '16px',
+                    padding: '40px 24px',
+                    textAlign: 'center',
+                    boxShadow: '0 0 30px rgba(124,92,252,0.3)',
+                    animation: 'pulse-border 2s ease-in-out infinite',
+                    width: '100%',
+                    maxWidth: '360px',
+                }}>
+                    <div style={{
+                        width: 56, height: 56, margin: '0 auto 20px',
+                        border: '4px solid rgba(124,92,252,0.2)',
+                        borderTopColor: '#7c5cfc',
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite',
+                    }} />
+                    <p style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px' }}>
+                        ⏳ Generating...
+                    </p>
+                    <p style={{ color: '#a78bfa', fontSize: '0.9rem', margin: '0 0 16px' }}>
+                        AI is creating your image
+                    </p>
+                    <div style={{
+                        background: 'rgba(124,92,252,0.15)',
+                        borderRadius: '8px',
+                        padding: '10px 20px',
+                        display: 'inline-block',
+                    }}>
+                        <span style={{ color: '#c4b5fd', fontSize: '0.82rem' }}>
+                            ⏱ Estimated: 15–40 seconds
+                        </span>
+                    </div>
+                </div>
+            </aside>
+        );
+    }
 
     return (
         <aside className="editor-left-panel">
@@ -612,25 +670,94 @@ export default function LeftPanel({
                                     </div>
                                 </div>
 
+                                {/* Situation */}
+                                <div className="control-group">
+                                    <label>{t('tags.situation')}</label>
+                                    <div className="pill-grid">
+                                        {(['bedroom', 'shower', 'pool', 'beach', 'office', 'gym', 'onsen', 'outdoor', 'studio'] as SituationTag[]).map((sit) => {
+                                            const labelMap: Record<string, string> = { bedroom: 'Bedroom', shower: 'Shower', pool: 'Pool', beach: 'Beach', office: 'Office', gym: 'Gym', onsen: 'Onsen', outdoor: 'Outdoor', studio: 'Studio' };
+                                            return (
+                                                <button key={sit} className={`pill ${tagSettings.situation === sit ? 'active' : ''}`}
+                                                    onClick={() => updateTagSettings({ situation: tagSettings.situation === sit ? undefined : sit })}>
+                                                    {t(`tags.sit${labelMap[sit]}`)}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Sticky Generate Button */}
+            {/* Generate Button */}
             <div className="editor-generate-sticky">
-                <button
-                    className={`generate-btn ${isGenerating ? 'generating' : ''}`}
-                    onClick={onSubmit}
-                    disabled={isGenerating}
-                >
-                    {isGenerating ? t('editor.generating') : `✨ ${t('editor.generate')}`}
-                    <span className="credit-cost">⚡ {creditCost} credits</span>
-                </button>
-                <div className="editor-estimate-time">
-                    {t('editor.estimatedTime', { min: '10', max: '41' })}
-                </div>
+                {isGenerating ? (
+                    <div style={{
+                        background: 'linear-gradient(135deg, #1a1030, #1a1a2e)',
+                        border: '2px solid #7c5cfc',
+                        borderRadius: '16px',
+                        padding: '32px 24px',
+                        textAlign: 'center',
+                        boxShadow: '0 0 30px rgba(124,92,252,0.3)',
+                        animation: 'pulse-border 2s ease-in-out infinite',
+                    }}>
+                        <div style={{
+                            width: 48, height: 48, margin: '0 auto 16px',
+                            border: '4px solid rgba(124,92,252,0.2)',
+                            borderTopColor: '#7c5cfc',
+                            borderRadius: '50%',
+                            animation: 'spin 0.8s linear infinite',
+                        }} />
+                        <p style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 700, margin: '0 0 6px' }}>
+                            ⏳ Generating...
+                        </p>
+                        <p style={{ color: '#a78bfa', fontSize: '0.85rem', margin: '0 0 12px' }}>
+                            AI is creating your image
+                        </p>
+                        <div style={{
+                            background: 'rgba(124,92,252,0.15)',
+                            borderRadius: '8px',
+                            padding: '8px 16px',
+                            display: 'inline-block',
+                        }}>
+                            <span style={{ color: '#c4b5fd', fontSize: '0.78rem' }}>
+                                ⏱ Estimated: 15–40 seconds
+                            </span>
+                        </div>
+                    </div>
+                ) : showDone ? (
+                    <button
+                        className="generate-btn"
+                        style={{ background: '#16a34a', cursor: 'default' }}
+                        disabled
+                    >
+                        ✅ Done! Scroll down ↓
+                    </button>
+                ) : (
+                    <button
+                        className="generate-btn"
+                        onTouchEnd={(e) => {
+                            e.preventDefault();
+                            if (submitCalledRef.current || useAppStore.getState().isGenerating) return;
+                            submitCalledRef.current = true;
+                            useAppStore.getState().setIsGenerating(true);
+                            setTimeout(() => {
+                                onSubmit(undefined, true);
+                                submitCalledRef.current = false;
+                            }, 0);
+                        }}
+                        onClick={() => {
+                            if (submitCalledRef.current) return;
+                            onSubmit();
+                        }}
+                    >
+                        ✨ {t('editor.generate')}
+                        <span className="credit-cost">⚡ {creditCost} credits</span>
+                    </button>
+                )}
             </div>
 
             {/* Inpaint Modal */}

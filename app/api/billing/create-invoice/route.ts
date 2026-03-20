@@ -21,9 +21,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Check email verification before allowing purchase
+    if (!user.emailVerified) {
+        return NextResponse.json(
+            { error: 'Email verification required', requiresVerification: true },
+            { status: 403 }
+        );
     }
 
     try {
@@ -37,7 +45,7 @@ export async function POST(req: NextRequest) {
         const pack = PACK_PRICES[packType];
 
         // 1. Create a pending transaction in our local DB
-        const transaction = createTransaction({
+        const transaction = await createTransaction({
             userId: user.id,
             packType,
             creditsGranted: pack.credits,

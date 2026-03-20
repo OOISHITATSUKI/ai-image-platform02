@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Email and code are required' }, { status: 400 });
         }
 
-        const user = findUserByEmail(email.toLowerCase().trim());
+        const user = await findUserByEmail(email.toLowerCase().trim());
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -34,13 +34,13 @@ export async function POST(req: NextRequest) {
             // Lock after max attempts
             if (user.otpAttempts >= OTP_MAX_ATTEMPTS) {
                 user.otpLockedUntil = Date.now() + OTP_LOCK_MS;
-                saveUser(user);
+                await saveUser(user);
                 return NextResponse.json({
                     error: 'Too many failed attempts. Locked for 30 minutes.',
                 }, { status: 429 });
             }
 
-            saveUser(user);
+            await saveUser(user);
             return NextResponse.json({
                 error: 'Incorrect code',
                 attemptsRemaining: OTP_MAX_ATTEMPTS - user.otpAttempts,
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         user.otpExpiresAt = undefined;
         user.otpAttempts = 0;
         user.otpLockedUntil = undefined;
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({
             success: true,

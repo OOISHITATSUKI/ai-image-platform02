@@ -26,10 +26,10 @@ export async function GET(req: NextRequest) {
     const result: Record<string, unknown> = {};
 
     if (type === 'all' || type === 'transactions') {
-        result.transactions = getTransactionsByUser(decoded.userId);
+        result.transactions = await getTransactionsByUser(decoded.userId);
     }
     if (type === 'all' || type === 'credits') {
-        result.creditLog = getCreditLogByUser(decoded.userId);
+        result.creditLog = await getCreditLogByUser(decoded.userId);
     }
 
     return NextResponse.json(result);
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -83,9 +83,9 @@ export async function POST(req: NextRequest) {
 
         const newBalance = user.credits - amount;
         user.credits = newBalance;
-        saveUser(user);
+        await saveUser(user);
 
-        const log = recordCreditChange({
+        const log = await recordCreditChange({
             userId: decoded.userId,
             changeType: 'use',
             delta: -amount,
@@ -115,9 +115,9 @@ export async function POST(req: NextRequest) {
 
         const newBalance = user.credits + amount;
         user.credits = newBalance;
-        saveUser(user);
+        await saveUser(user);
 
-        const log = recordCreditChange({
+        const log = await recordCreditChange({
             userId: decoded.userId,
             changeType: 'refund',
             delta: amount,
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required transaction fields' }, { status: 400 });
         }
 
-        const transaction = createTransaction({
+        const transaction = await createTransaction({
             userId: decoded.userId,
             nowpaymentsId,
             packType,
@@ -162,16 +162,16 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing transactionId' }, { status: 400 });
         }
 
-        const updated = updateTransactionStatus(transactionId, 'completed');
+        const updated = await updateTransactionStatus(transactionId, 'completed');
         if (!updated || updated.userId !== decoded.userId) {
             return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
         }
 
         const newBalance = user.credits + updated.creditsGranted;
         user.credits = newBalance;
-        saveUser(user);
+        await saveUser(user);
 
-        const log = recordCreditChange({
+        const log = await recordCreditChange({
             userId: decoded.userId,
             changeType: 'charge',
             delta: +updated.creditsGranted,

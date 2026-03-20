@@ -225,13 +225,25 @@ export default function RightPanel({
 
                         {/* Generating Indicator */}
                         {isGenerating && (
-                            <div className="editor-result-item generating-placeholder">
-                                <div className="generating-indicator">
-                                    <div className="generating-dots">
-                                        <span /><span /><span />
-                                    </div>
-                                    <span className="generating-text">{t('editor.generating')}</span>
-                                </div>
+                            <div style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                minHeight: '300px', gap: '16px', padding: '40px 20px',
+                                background: 'var(--bg-card, #1a1a2e)', borderRadius: '16px',
+                                border: '1px solid rgba(124,92,252,0.3)',
+                            }}>
+                                <div style={{
+                                    width: 56, height: 56,
+                                    border: '4px solid rgba(124,92,252,0.2)',
+                                    borderTopColor: '#7c5cfc',
+                                    borderRadius: '50%',
+                                    animation: 'spin 0.8s linear infinite',
+                                }} />
+                                <p style={{ color: '#e0e0e8', fontSize: '1.1rem', fontWeight: 700, margin: 0, textAlign: 'center' }}>
+                                    {t('editor.generating')}
+                                </p>
+                                <p style={{ color: '#8b8ba7', fontSize: '0.82rem', margin: 0, textAlign: 'center' }}>
+                                    AI is creating your image... (~15-40 sec)
+                                </p>
                             </div>
                         )}
                     </div>

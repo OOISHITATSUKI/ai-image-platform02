@@ -2,12 +2,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
+import { supabaseAdmin } from './supabase-server';
 
 // ============================================================
 // Auth Library — Password, JWT, OTP, User DB helpers
 // ============================================================
 
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'videogen-jwt-secret-change-in-production';
 const SALT_ROUNDS = 10;
 const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
@@ -57,6 +57,7 @@ export interface UserRecord {
     // Anti-Abuse Tracking
     fingerprintHash?: string;
     freeCreditsExpireAt?: number;
+    registrationIp?: string;
 
     // Account timeline
     createdAt: number;
@@ -99,47 +100,173 @@ export interface UserRecord {
     passwordResetLockedUntil?: number;
 }
 
-export function readUsers(): Record<string, UserRecord> {
-    if (!fs.existsSync(USERS_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-    } catch {
+// ============================================================
+// camelCase ↔ snake_case mapping helpers
+// ============================================================
+
+function dbRowToUserRecord(row: any): UserRecord {
+    return {
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash ?? '',
+        username: row.username ?? '',
+        status: row.status ?? 'active',
+        emailVerified: row.email_verified ?? false,
+        dateOfBirth: row.date_of_birth ?? undefined,
+        country: row.country ?? undefined,
+        plan: row.plan ?? 'free',
+        credits: row.credits ?? 0,
+        locale: row.locale ?? 'en',
+        theme: row.theme ?? 'dark',
+        otpCode: row.otp_code ?? undefined,
+        otpExpiresAt: row.otp_expires_at ?? undefined,
+        otpAttempts: row.otp_attempts ?? 0,
+        otpLockedUntil: row.otp_locked_until ?? undefined,
+        otpLastSentAt: row.otp_last_sent_at ?? undefined,
+        agreements: row.agreements ?? undefined,
+        firstGenerationConfirmed: row.first_generation_confirmed ?? false,
+        fingerprintHash: row.fingerprint_hash ?? undefined,
+        freeCreditsExpireAt: row.free_credits_expire_at ?? undefined,
+        registrationIp: row.registration_ip ?? undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        lastLoginAt: row.last_login_at ?? undefined,
+        termsAgreedAt: row.terms_agreed_at ?? undefined,
+        termsVersion: row.terms_version ?? undefined,
+        settings: row.settings ?? undefined,
+        deviceOtpCode: row.device_otp_code ?? undefined,
+        deviceOtpExpiresAt: row.device_otp_expires_at ?? undefined,
+        deviceOtpAttempts: row.device_otp_attempts ?? 0,
+        deviceOtpLockedUntil: row.device_otp_locked_until ?? undefined,
+        lastKnownCountry: row.last_known_country ?? undefined,
+        loginFailCount: row.login_fail_count ?? 0,
+        loginFailResetAt: row.login_fail_reset_at ?? undefined,
+        passwordResetOtp: row.password_reset_otp ?? undefined,
+        passwordResetExpiresAt: row.password_reset_expires_at ?? undefined,
+        passwordResetAttempts: row.password_reset_attempts ?? 0,
+        passwordResetLockedUntil: row.password_reset_locked_until ?? undefined,
+    };
+}
+
+function userRecordToDbRow(user: UserRecord): Record<string, any> {
+    return {
+        id: user.id,
+        email: user.email,
+        password_hash: user.passwordHash,
+        username: user.username,
+        status: user.status,
+        email_verified: user.emailVerified,
+        date_of_birth: user.dateOfBirth ?? null,
+        country: user.country ?? null,
+        plan: user.plan,
+        credits: user.credits,
+        locale: user.locale,
+        theme: user.theme,
+        otp_code: user.otpCode ?? null,
+        otp_expires_at: user.otpExpiresAt ?? null,
+        otp_attempts: user.otpAttempts ?? 0,
+        otp_locked_until: user.otpLockedUntil ?? null,
+        otp_last_sent_at: user.otpLastSentAt ?? null,
+        agreements: user.agreements ?? null,
+        first_generation_confirmed: user.firstGenerationConfirmed,
+        fingerprint_hash: user.fingerprintHash ?? null,
+        free_credits_expire_at: user.freeCreditsExpireAt ?? null,
+        registration_ip: user.registrationIp ?? null,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+        last_login_at: user.lastLoginAt ?? null,
+        terms_agreed_at: user.termsAgreedAt ?? null,
+        terms_version: user.termsVersion ?? null,
+        settings: user.settings ?? null,
+        device_otp_code: user.deviceOtpCode ?? null,
+        device_otp_expires_at: user.deviceOtpExpiresAt ?? null,
+        device_otp_attempts: user.deviceOtpAttempts ?? 0,
+        device_otp_locked_until: user.deviceOtpLockedUntil ?? null,
+        last_known_country: user.lastKnownCountry ?? null,
+        login_fail_count: user.loginFailCount ?? 0,
+        login_fail_reset_at: user.loginFailResetAt ?? null,
+        password_reset_otp: user.passwordResetOtp ?? null,
+        password_reset_expires_at: user.passwordResetExpiresAt ?? null,
+        password_reset_attempts: user.passwordResetAttempts ?? 0,
+        password_reset_locked_until: user.passwordResetLockedUntil ?? null,
+    };
+}
+
+// ============================================================
+// Supabase-backed User CRUD
+// ============================================================
+
+export async function readUsers(): Promise<Record<string, UserRecord>> {
+    const { data, error } = await supabaseAdmin.from('users').select('*');
+    if (error) {
+        console.error('[auth] readUsers error:', error.message);
         return {};
+    }
+    const result: Record<string, UserRecord> = {};
+    for (const row of data ?? []) {
+        result[row.id] = dbRowToUserRecord(row);
+    }
+    return result;
+}
+
+export async function findUserByEmail(email: string): Promise<UserRecord | null> {
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .limit(1)
+        .maybeSingle();
+    if (error) {
+        console.error('[auth] findUserByEmail error:', error.message);
+        return null;
+    }
+    return data ? dbRowToUserRecord(data) : null;
+}
+
+export async function findUserById(id: string): Promise<UserRecord | null> {
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) {
+        console.error('[auth] findUserById error:', error.message);
+        return null;
+    }
+    return data ? dbRowToUserRecord(data) : null;
+}
+
+export async function findUserByUsername(username: string): Promise<UserRecord | null> {
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .ilike('username', username)
+        .limit(1)
+        .maybeSingle();
+    if (error) {
+        console.error('[auth] findUserByUsername error:', error.message);
+        return null;
+    }
+    return data ? dbRowToUserRecord(data) : null;
+}
+
+export async function saveUser(user: UserRecord): Promise<void> {
+    const row = userRecordToDbRow({ ...user, updatedAt: Date.now() });
+    const { error } = await supabaseAdmin
+        .from('users')
+        .upsert(row, { onConflict: 'id' });
+    if (error) {
+        console.error('[auth] saveUser error:', error.message);
     }
 }
 
-export function writeUsers(data: Record<string, UserRecord>): void {
-    const dir = path.dirname(USERS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
-}
-
-export function findUserByEmail(email: string): UserRecord | null {
-    const users = readUsers();
-    return Object.values(users).find(u => u.email === email.toLowerCase()) || null;
-}
-
-export function findUserById(id: string): UserRecord | null {
-    const users = readUsers();
-    return users[id] || null;
-}
-
-export function findUserByUsername(username: string): UserRecord | null {
-    const users = readUsers();
-    return Object.values(users).find(u => u.username?.toLowerCase() === username.toLowerCase()) || null;
-}
-
-export function saveUser(user: UserRecord): void {
-    const users = readUsers();
-    users[user.id] = { ...user, updatedAt: Date.now() };
-    writeUsers(users);
-}
-
-export function deleteUser(userId: string): void {
-    const users = readUsers();
-    if (users[userId]) {
-        delete users[userId];
-        writeUsers(users);
+export async function deleteUser(userId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', userId);
+    if (error) {
+        console.error('[auth] deleteUser error:', error.message);
     }
 }
 

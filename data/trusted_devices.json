@@ -20,5 +20,27 @@
     "expiresAt": 1779570947116,
     "lastUsedAt": 1771827652169,
     "createdAt": 1771794947119
+  },
+  "e6c1a0a4-0f2e-483d-9699-b0db4e3e748e": {
+    "id": "e6c1a0a4-0f2e-483d-9699-b0db4e3e748e",
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "deviceToken": "5cfc7b66-8cb8-4ba7-8230-861ab3dd698b",
+    "deviceName": "Safari / Mac",
+    "ipAddress": "1.75.66.199",
+    "countryCode": "XX",
+    "expiresAt": 1781214885171,
+    "lastUsedAt": 1773442297997,
+    "createdAt": 1773438885173
+  },
+  "e94aa48b-e8f0-4dee-8978-b5a2586adb56": {
+    "id": "e94aa48b-e8f0-4dee-8978-b5a2586adb56",
+    "userId": "d7d3fd6b-14e4-40ee-a42d-f462f052c053",
+    "deviceToken": "e25119ac-d2d9-42ac-a2fc-a0e78cd736ee",
+    "deviceName": "Chrome / Mac",
+    "ipAddress": "1.75.66.199",
+    "countryCode": "XX",
+    "expiresAt": 1781215658013,
+    "lastUsedAt": 1773440089850,
+    "createdAt": 1773439658019
   }
 }

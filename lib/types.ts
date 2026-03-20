@@ -74,6 +74,7 @@ export type EthnicityTag = 'asian' | 'european' | 'american' | 'southeast_asian'
 export type PhotorealismTag = 'photorealistic' | 'realistic';
 export type CompositionTag = 'full_body' | 'waist_up' | 'bust' | 'face_closeup';
 export type BreastPositionTag = 'cleavage' | 'asymmetric' | 'natural' | 'pushed_together';
+export type SituationTag = 'bedroom' | 'shower' | 'pool' | 'beach' | 'office' | 'gym' | 'onsen' | 'outdoor' | 'studio';
 export type FetishTag = 'fellatio' | 'cowgirl' | 'insertion' | 'kiss' | 'missionary' | 'doggy' | 'standing' | 'handjob' | 'paizuri';
 
 export interface TagSettings {
@@ -87,6 +88,7 @@ export interface TagSettings {
   breastPosition?: BreastPositionTag;
   photorealism?: PhotorealismTag;
   composition?: CompositionTag;
+  situation?: SituationTag;
   fetish: FetishTag[];
 }
 

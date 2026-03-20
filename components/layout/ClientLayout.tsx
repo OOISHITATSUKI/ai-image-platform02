@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import AgeGate from '@/components/ui/AgeGate';
-import FirstGenModal from '@/components/ui/FirstGenModal';
+import WelcomeModal from '@/components/ui/WelcomeModal';
 import { useAppStore } from '@/lib/store';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -56,7 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     }, []);
 
-    // Handle mobile initial state (only if no persisted value exists)
+    // Handle responsive sidebar state
     useEffect(() => {
         if (!mounted) return;
         if (window.innerWidth <= 768) {
@@ -64,6 +64,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             if (!stored) {
                 useAppStore.setState({ sidebarCollapsed: true, settingsPanelVisible: false });
             }
+        } else {
+            // On desktop, always expand sidebar
+            useAppStore.setState({ sidebarCollapsed: false });
         }
     }, [mounted]);
 
@@ -132,8 +135,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             {/* AgeGate only for authenticated users (registration includes age confirmation) */}
             {isAuthenticated && <AgeGate />}
 
-            {/* First generation confirmation modal */}
-            {/* FirstGenModal disabled - terms now handled at registration */}
+            {/* Welcome modal — shows 20 credits gift for new users */}
+            {isAuthenticated && <WelcomeModal />}
 
             <div className="mobile-header">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>

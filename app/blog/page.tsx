@@ -57,6 +57,14 @@ const ARTICLES = [
     date: 'March 2025',
     readTime: '9 min read',
   },
+  {
+    slug: 'ai-portrait-generator-realistic-faces',
+    title: 'Best AI Portrait Generator for Realistic Faces (2025)',
+    description: 'Compare the top AI portrait generators for creating realistic faces. Detailed reviews, quality comparisons, and tips for photorealistic results.',
+    tag: 'Review',
+    date: 'March 2025',
+    readTime: '8 min read',
+  },
 ];
 
 export default function BlogIndexPage() {

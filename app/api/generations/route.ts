@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user || user.status !== 'active') {
         return NextResponse.json({ error: 'Account not active' }, { status: 403 });
     }

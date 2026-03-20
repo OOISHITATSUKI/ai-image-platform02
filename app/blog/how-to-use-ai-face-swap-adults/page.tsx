@@ -50,18 +50,18 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             <h1 className={styles.h1}>How to Use AI Face Swap for Adults: Complete 2025 Guide</h1>
 
             <p className={styles.lede}>
-              AI face swap for adult content has never been easier &mdash; or more realistic. This guide covers everything from your first generation to advanced techniques for professional-quality results.
+              AI face swap tools got good fast. The outputs now look realistic enough to fool a casual observer &mdash; and you don&apos;t need any editing skills to pull it off. This guide walks you through everything from your first swap to advanced techniques.
             </p>
 
             {/* What You Need */}
             <h2 id="what-you-need">What You Need to Get Started</h2>
-            <p>You need three things to do an AI face swap for adult content:</p>
+            <p>Three things. That&apos;s all it takes to run an AI face swap for adult content:</p>
             <ul>
               <li><strong>A platform that supports NSFW content</strong> &mdash; standard tools like FaceApp block adult material</li>
               <li><strong>A body image (target)</strong> &mdash; the image with the body you want to use</li>
               <li><strong>A face image (source)</strong> &mdash; a clear photo of the face you want to apply</li>
             </ul>
-            <p>That&apos;s it. No technical knowledge, no software to install, no editing skills required. The AI handles everything else &mdash; lighting correction, skin tone matching, angle adjustment, and seamless blending.</p>
+            <p>No technical knowledge, no software to install, no editing chops. The AI takes care of lighting correction, skin tone matching, angle adjustment, and blending the face in.</p>
 
             {/* Step-by-Step */}
             <h2 id="step-by-step">Step-by-Step: Your First Face Swap</h2>
@@ -69,42 +69,42 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>1</div>
               <h3>Create Your Free Account</h3>
-              <p>Go to <Link href="/register">imagenude.com/register</Link>. Sign up with an email address &mdash; no credit card required. You&apos;ll receive 20 free credits instantly. Each face swap uses 3 credits, giving you 6 free swaps to start.</p>
+              <p>Head to <Link href="/register">imagenude.com/register</Link>. Sign up with an email &mdash; no credit card needed. You get 20 free credits right away. Each face swap costs 3 credits, so that&apos;s 6 free swaps to start with.</p>
             </div>
 
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>2</div>
               <h3>Open Face Swap Mode</h3>
-              <p>From the main interface, click the <strong>Face Swap</strong> button in the toolbar. The editor will switch to Face Swap mode, showing two upload slots side by side.</p>
+              <p>Click <strong>Face Swap</strong> in the toolbar. The editor switches to Face Swap mode with two upload slots side by side.</p>
             </div>
 
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>3</div>
               <h3>Upload the Body Image (Target)</h3>
-              <p>Upload your body image to <strong>Slot 1</strong> (labeled &ldquo;Body&rdquo; or &ldquo;Target&rdquo;). This is the image whose body will be used in the final result. For best results, use a clear image with good lighting and a single subject.</p>
+              <p>Drop your body image into <strong>Slot 1</strong> (labeled &ldquo;Body&rdquo; or &ldquo;Target&rdquo;). This is the image whose body shows up in the final result. Clear lighting and a single subject work best.</p>
             </div>
 
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>4</div>
               <h3>Upload the Face Image (Source)</h3>
-              <p>Upload your face image to <strong>Slot 2</strong> (labeled &ldquo;Face&rdquo; or &ldquo;Source&rdquo;). This is the face that will be applied to the body. A front-facing, well-lit photo produces the most accurate swap.</p>
+              <p>Drop your face image into <strong>Slot 2</strong> (labeled &ldquo;Face&rdquo; or &ldquo;Source&rdquo;). This face gets applied to the body. Front-facing shots with even lighting give the most accurate results.</p>
             </div>
 
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>5</div>
               <h3>Generate and Download</h3>
-              <p>Click <strong>Generate</strong>. The AI analyzes both images, matches skin tone and lighting, and produces your result in approximately 8 seconds. Download immediately &mdash; your image will be automatically deleted from the server within 1 hour.</p>
+              <p>Hit <strong>Generate</strong>. The AI reads both images, matches skin tone and lighting, and hands you a finished result in about 8 seconds. Grab the download right away &mdash; images get wiped from the server within 1 hour.</p>
             </div>
 
             <div className={styles.tip}>
-              <p><strong>Privacy tip:</strong> Image Nude automatically deletes all images within 1 hour. For maximum privacy, download your result immediately after generation and close the browser tab when done.</p>
+              <p><strong>Privacy tip:</strong> Image Nude wipes all images within 1 hour automatically. For maximum privacy, download your result as soon as it&apos;s done and close the tab.</p>
             </div>
 
             {/* Best Practices */}
             <h2 id="best-practices">Best Practices for Realistic Results</h2>
 
             <h3>Choosing the Right Face Image</h3>
-            <p>The quality of your face source image directly determines the quality of your swap result. Here&apos;s what works best:</p>
+            <p>Your face source image makes or breaks the swap. Here&apos;s what works:</p>
 
             <div className={styles.compareWrap}>
               <table>
@@ -114,7 +114,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
                 <tbody>
                   <tr><td className={styles.tdH}>Front-facing, good lighting</td><td><span className={styles.ok}>Excellent</span></td><td>Best possible results</td></tr>
                   <tr><td className={styles.tdH}>Slight angle (15-30&deg;)</td><td><span className={styles.ok}>Very Good</span></td><td>AI corrects angle automatically</td></tr>
-                  <tr><td className={styles.tdH}>Profile / side view</td><td><span className={styles.mid}>Fair</span></td><td>Accuracy reduced</td></tr>
+                  <tr><td className={styles.tdH}>Profile / side view</td><td><span className={styles.mid}>Fair</span></td><td>Accuracy drops</td></tr>
                   <tr><td className={styles.tdH}>Blurry or low resolution</td><td><span className={styles.mid}>Poor</span></td><td>Artifacts more likely</td></tr>
                   <tr><td className={styles.tdH}>Sunglasses or mask</td><td><span className={styles.no}>Very Poor</span></td><td>Face landmarks blocked</td></tr>
                   <tr><td className={styles.tdH}>Extreme shadows</td><td><span className={styles.no}>Poor</span></td><td>Skin tone mismatch likely</td></tr>
@@ -124,15 +124,15 @@ export default function HowToUseAiFaceSwapAdultsPage() {
 
             <h3>Choosing the Right Body Image</h3>
             <ul>
-              <li><strong>AI-generated bodies produce the best results.</strong> AI imagery has consistent lighting and skin rendering that makes face blending more seamless than real photos.</li>
-              <li>A body image where the face is roughly front-facing will blend more naturally than extreme angles.</li>
-              <li>Good lighting on the body image helps the AI match the skin tone accurately.</li>
-              <li>Higher resolution images produce sharper, more detailed results.</li>
+              <li><strong>AI-generated bodies give the cleanest results.</strong> Consistent lighting and skin rendering make face blending far smoother than with real photos.</li>
+              <li>A roughly front-facing body blends more naturally than extreme angles.</li>
+              <li>Even lighting on the body helps the AI nail the skin tone match.</li>
+              <li>Higher resolution = sharper, more detailed output.</li>
             </ul>
 
             {/* Advanced Workflow */}
             <h2 id="advanced-workflow">Advanced Workflow: Undress + Face Swap</h2>
-            <p>Image Nude&apos;s most powerful feature is the ability to combine Undress mode and Face Swap in one workflow. This gives you complete control over both the body and the face.</p>
+            <p>The real power move is chaining Undress mode and Face Swap together. This way you control both the body and the face in a single workflow.</p>
 
             <div className={styles.workflow}>
               <h3>The Two-Step Workflow</h3>
@@ -141,21 +141,21 @@ export default function HowToUseAiFaceSwapAdultsPage() {
                   <div className={styles.wfNum}>1</div>
                   <div className={styles.wfText}>
                     <h4>Generate or upload your body image</h4>
-                    <p>Use txt2img to generate a body, or upload a photo. Use Nude Mode (inpaint) to remove clothing if needed.</p>
+                    <p>Use txt2img to generate a body, or upload a photo. Run Nude Mode (inpaint) to remove clothing if needed.</p>
                   </div>
                 </div>
                 <div className={styles.wfStep}>
                   <div className={styles.wfNum}>2</div>
                   <div className={styles.wfText}>
                     <h4>Apply your face with Face Swap</h4>
-                    <p>Take the result from step 1 as your body image, then apply your chosen face. Final result has exactly the body and face you want.</p>
+                    <p>Feed the step-1 result as your body image, then layer on your chosen face. You end up with exactly the body and face you want.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className={styles.tip}>
-              <p><strong>Save your favorite faces:</strong> Use Image Nude&apos;s face-saving feature to register faces you want to reuse. Free users can save 1 face; paid users can save up to 10. Saved faces appear in the &ldquo;My Faces&rdquo; panel for one-click selection.</p>
+              <p><strong>Save your favorite faces:</strong> Register faces you plan to reuse with Image Nude&apos;s face-saving feature. Free users get 1 slot; paid users get up to 10. Saved faces show up in the &ldquo;My Faces&rdquo; panel for one-click selection.</p>
             </div>
 
             {/* Common Mistakes */}
@@ -165,35 +165,35 @@ export default function HowToUseAiFaceSwapAdultsPage() {
               <div className={styles.mistakeIcon}>&#9888;&#65039;</div>
               <div>
                 <h4>Using a low-quality face source</h4>
-                <p>A blurry or dark face image will produce blurry, inaccurate results no matter how good the body image is. Always use the clearest face photo available.</p>
+                <p>A blurry or dark face photo will tank your results no matter how sharp the body image is. Always pick the clearest face photo you have.</p>
               </div>
             </div>
             <div className={styles.mistakeItem}>
               <div className={styles.mistakeIcon}>&#9888;&#65039;</div>
               <div>
                 <h4>Mismatched lighting</h4>
-                <p>If the body image has bright daylight lighting and the face image was taken in a dark room, the blend will look unnatural. Match the lighting conditions when possible.</p>
+                <p>Bright daylight on the body + a dark-room face shot = an obvious fake. Try to match the lighting conditions between your two source images.</p>
               </div>
             </div>
             <div className={styles.mistakeItem}>
               <div className={styles.mistakeIcon}>&#9888;&#65039;</div>
               <div>
-                <h4>Only generating once</h4>
-                <p>AI generation has randomness built in. If your first result isn&apos;t perfect, generate again with the same images &mdash; results vary each time and you&apos;ll often get a significantly better output on the second or third try.</p>
+                <h4>Stopping after one try</h4>
+                <p>Every generation has some randomness baked in. If the first result isn&apos;t perfect, hit Generate again with the same images. The second or third attempt often nails it.</p>
               </div>
             </div>
             <div className={styles.mistakeItem}>
               <div className={styles.mistakeIcon}>&#9888;&#65039;</div>
               <div>
                 <h4>Using group photos as face source</h4>
-                <p>If your face source image contains multiple people, the AI may pick the wrong face. Always use a photo where your intended face is the only or main subject.</p>
+                <p>Multiple faces in the source image? The AI might grab the wrong one. Crop down to a single face before uploading.</p>
               </div>
             </div>
 
             {/* Payment */}
             <h2 id="payment">Paying Anonymously</h2>
-            <p>Image Nude accepts over 50 cryptocurrencies including Bitcoin, Ethereum, and USDT via NowPayments. Cryptocurrency transactions don&apos;t appear on bank or credit card statements, making this the most private payment option available.</p>
-            <p>For users who prefer anonymous purchases, cryptocurrency is the recommended payment method. The Basic plan ($14.99 / 100 credits) provides enough credits for approximately 33 face swaps.</p>
+            <p>Image Nude takes over 50 cryptocurrencies &mdash; Bitcoin, Ethereum, USDT, and more &mdash; through NowPayments. Crypto transactions don&apos;t show up on bank or credit card statements, so nothing traces back to you.</p>
+            <p>The Basic plan ($14.99 / 100 credits) covers roughly 33 face swaps. If privacy matters, crypto is the way to go.</p>
 
             {/* CTA */}
             <div className={styles.ctaBlock}>

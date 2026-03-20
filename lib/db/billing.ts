@@ -1,13 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import { randomUUID } from 'crypto';
+import { supabaseAdmin } from '../supabase-server';
 
 // ============================================================
-// Billing / Credit Records — Data Layer
+// Billing / Credit Records — Data Layer (Supabase)
 // ============================================================
-
-const TRANSACTIONS_FILE = path.join(process.cwd(), 'data', 'transactions.json');
-const CREDIT_LOG_FILE = path.join(process.cwd(), 'data', 'credit_log.json');
 
 // ----- Transaction Record (one per payment) -----
 
@@ -43,108 +38,159 @@ export interface CreditLogRecord {
 }
 
 // ============================================================
-// Transactions: File Helpers & CRUD
+// DB row ↔ TypeScript mapping
 // ============================================================
 
-function readTransactions(): Record<string, TransactionRecord> {
-    if (!fs.existsSync(TRANSACTIONS_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(TRANSACTIONS_FILE, 'utf8'));
-    } catch {
-        return {};
-    }
-}
-
-function writeTransactions(data: Record<string, TransactionRecord>): void {
-    const dir = path.dirname(TRANSACTIONS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(data, null, 2));
-}
-
-export function createTransaction(
-    record: Omit<TransactionRecord, 'id' | 'createdAt'>
-): TransactionRecord {
-    const transactions = readTransactions();
-    const newRecord: TransactionRecord = {
-        ...record,
-        id: randomUUID(),
-        createdAt: Date.now(),
+function rowToTransaction(row: any): TransactionRecord {
+    return {
+        id: row.id,
+        userId: row.user_id,
+        nowpaymentsId: row.nowpayments_id ?? undefined,
+        packType: row.pack_type,
+        creditsGranted: row.credits_granted,
+        amountUsd: Number(row.amount_usd),
+        currency: row.currency,
+        status: row.status,
+        createdAt: row.created_at,
+        completedAt: row.completed_at ?? undefined,
     };
-    transactions[newRecord.id] = newRecord;
-    writeTransactions(transactions);
-    return newRecord;
 }
 
-export function updateTransactionStatus(
+function rowToCreditLog(row: any): CreditLogRecord {
+    return {
+        id: row.id,
+        userId: row.user_id,
+        changeType: row.change_type,
+        delta: row.delta,
+        balanceAfter: row.balance_after,
+        relatedId: row.related_id ?? undefined,
+        note: row.note ?? undefined,
+        createdAt: row.created_at,
+    };
+}
+
+// ============================================================
+// Transactions: CRUD
+// ============================================================
+
+export async function createTransaction(
+    record: Omit<TransactionRecord, 'id' | 'createdAt'>
+): Promise<TransactionRecord> {
+    const row = {
+        user_id: record.userId,
+        nowpayments_id: record.nowpaymentsId ?? null,
+        pack_type: record.packType,
+        credits_granted: record.creditsGranted,
+        amount_usd: record.amountUsd,
+        currency: record.currency,
+        status: record.status,
+        created_at: Date.now(),
+        completed_at: record.completedAt ?? null,
+    };
+    const { data, error } = await supabaseAdmin
+        .from('transactions')
+        .insert(row)
+        .select()
+        .single();
+    if (error) {
+        console.error('[billing] createTransaction error:', error.message);
+        throw error;
+    }
+    return rowToTransaction(data);
+}
+
+export async function updateTransactionStatus(
     id: string,
     status: TransactionStatus
-): TransactionRecord | null {
-    const transactions = readTransactions();
-    if (!transactions[id]) return null;
-    transactions[id].status = status;
-    if (status === 'completed') transactions[id].completedAt = Date.now();
-    writeTransactions(transactions);
-    return transactions[id];
-}
-
-export function getTransactionsByUser(
-    userId: string,
-    options: { limit?: number; offset?: number } = {}
-): TransactionRecord[] {
-    const { limit = 50, offset = 0 } = options;
-    const transactions = readTransactions();
-    return Object.values(transactions)
-        .filter(t => t.userId === userId)
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .slice(offset, offset + limit);
-}
-
-export function getTransactionById(id: string): TransactionRecord | null {
-    const transactions = readTransactions();
-    return transactions[id] ?? null;
-}
-
-// ============================================================
-// Credit Log: File Helpers & CRUD
-// ============================================================
-
-function readCreditLog(): Record<string, CreditLogRecord> {
-    if (!fs.existsSync(CREDIT_LOG_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(CREDIT_LOG_FILE, 'utf8'));
-    } catch {
-        return {};
+): Promise<TransactionRecord | null> {
+    const updates: any = { status };
+    if (status === 'completed') updates.completed_at = Date.now();
+    const { data, error } = await supabaseAdmin
+        .from('transactions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+    if (error) {
+        console.error('[billing] updateTransactionStatus error:', error.message);
+        return null;
     }
+    return data ? rowToTransaction(data) : null;
 }
 
-function writeCreditLog(data: Record<string, CreditLogRecord>): void {
-    const dir = path.dirname(CREDIT_LOG_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(CREDIT_LOG_FILE, JSON.stringify(data, null, 2));
-}
-
-export function recordCreditChange(
-    record: Omit<CreditLogRecord, 'id' | 'createdAt'>
-): CreditLogRecord {
-    const log = readCreditLog();
-    const newRecord: CreditLogRecord = {
-        ...record,
-        id: randomUUID(),
-        createdAt: Date.now(),
-    };
-    log[newRecord.id] = newRecord;
-    writeCreditLog(log);
-    return newRecord;
-}
-
-export function getCreditLogByUser(
+export async function getTransactionsByUser(
     userId: string,
     options: { limit?: number; offset?: number } = {}
-): CreditLogRecord[] {
+): Promise<TransactionRecord[]> {
+    const { limit = 50, offset = 0 } = options;
+    const { data, error } = await supabaseAdmin
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+    if (error) {
+        console.error('[billing] getTransactionsByUser error:', error.message);
+        return [];
+    }
+    return (data ?? []).map(rowToTransaction);
+}
+
+export async function getTransactionById(id: string): Promise<TransactionRecord | null> {
+    const { data, error } = await supabaseAdmin
+        .from('transactions')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) {
+        console.error('[billing] getTransactionById error:', error.message);
+        return null;
+    }
+    return data ? rowToTransaction(data) : null;
+}
+
+// ============================================================
+// Credit Log: CRUD
+// ============================================================
+
+export async function recordCreditChange(
+    record: Omit<CreditLogRecord, 'id' | 'createdAt'>
+): Promise<CreditLogRecord> {
+    const row = {
+        user_id: record.userId,
+        change_type: record.changeType,
+        delta: record.delta,
+        balance_after: record.balanceAfter,
+        related_id: record.relatedId ?? null,
+        note: record.note ?? null,
+        created_at: Date.now(),
+    };
+    const { data, error } = await supabaseAdmin
+        .from('credit_log')
+        .insert(row)
+        .select()
+        .single();
+    if (error) {
+        console.error('[billing] recordCreditChange error:', error.message);
+        throw error;
+    }
+    return rowToCreditLog(data);
+}
+
+export async function getCreditLogByUser(
+    userId: string,
+    options: { limit?: number; offset?: number } = {}
+): Promise<CreditLogRecord[]> {
     const { limit = 100, offset = 0 } = options;
-    const log = readCreditLog();
-    return Object.values(log)
-        .filter(l => l.userId === userId)
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .slice(offset, offset + limit);
+    const { data, error } = await supabaseAdmin
+        .from('credit_log')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+    if (error) {
+        console.error('[billing] getCreditLogByUser error:', error.message);
+        return [];
+    }
+    return (data ?? []).map(rowToCreditLog);
 }

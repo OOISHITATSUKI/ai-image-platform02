@@ -13,7 +13,7 @@ export async function checkAdmin() {
     const decoded = verifyToken(token);
     if (!decoded) return null;
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) return null;
 
     const adminEmailsConfig = process.env.ADMIN_EMAILS || '';
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     const msToday = today.getTime();
 
     // Users
-    const users = Object.values(readUsers());
+    const users = Object.values(await readUsers());
     const totalUsers = users.length;
     const newUsersToday = users.filter(u => u.createdAt >= msToday).length;
     const bannedUsers = users.filter(u => u.status === 'banned').length;

@@ -11,6 +11,7 @@ export default function AdminSidebar() {
         { path: '/admin/users', label: '👤 ユーザー管理 (Users)' },
         { path: '/admin/blocks', label: '🚫 ブロックログ (Blocks)' },
         { path: '/admin/payments', label: '💰 決済管理 (Payments)' },
+        { path: '/admin/email', label: '✉️ メール管理 (Email)' },
         { path: '/admin/filters', label: '🔧 フィルター管理 (Filters)' },
         { path: '/admin/content', label: '🖼️ コンテンツ管理 (Content)' },
         { path: '/admin/terms', label: '📄 規約管理 (Terms)' },

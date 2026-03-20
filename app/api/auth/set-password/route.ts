@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: strength.error }, { status: 400 });
         }
 
-        const user = findUserByEmail(email.toLowerCase().trim());
+        const user = await findUserByEmail(email.toLowerCase().trim());
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         (user.agreements as Record<string, unknown>).privacyPolicy = agreementRecord;
         (user.agreements as Record<string, unknown>).ageConfirmation = agreementRecord;
         (user.agreements as Record<string, unknown>).minorContentBan = agreementRecord;
-        saveUser(user);
+        await saveUser(user);
 
         // Generate JWT token
         const token = signToken(user.id, user.email);

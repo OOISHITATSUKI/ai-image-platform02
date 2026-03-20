@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
         }
 
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -38,17 +38,27 @@ export async function GET(req: NextRequest) {
                     console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits}) [Supabase is higher]`);
                     // Update Local to match Supabase
                     user.credits = sbUser.credits;
-                    saveUser(user);
+                    await saveUser(user);
                 }
             } else if (!sbUser) {
                 // User doesn't exist in Supabase yet, create them with current credits
                 console.log(`Creating user ${user.id} in Supabase with ${user.credits} credits`);
+                const now = Date.now();
                 await supabase.from('users').upsert({
                     id: user.id,
                     email: user.email,
-                    username: user.username,
-                    credits: user.credits
-                });
+                    username: user.username || '',
+                    password_hash: user.passwordHash || '',
+                    status: user.status || 'active',
+                    email_verified: true,
+                    plan: user.plan || 'free',
+                    credits: user.credits ?? 20,
+                    locale: user.settings?.locale || 'en',
+                    theme: user.settings?.theme || 'dark',
+                    first_generation_confirmed: user.firstGenerationConfirmed || false,
+                    created_at: user.createdAt || now,
+                    updated_at: user.updatedAt || now
+                }, { ignoreDuplicates: true });
             }
         } catch (syncErr) {
             console.error('Failed to sync credits from Supabase:', syncErr);
@@ -92,7 +102,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
         }
 
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -120,7 +130,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (updated) {
-            saveUser(user);
+            await saveUser(user);
         }
 
         return NextResponse.json({ success: true });
@@ -143,7 +153,7 @@ export async function PATCH(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
         }
 
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -165,7 +175,7 @@ export async function PATCH(req: NextRequest) {
             };
         }
 
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({
             success: true,

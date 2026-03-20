@@ -14,7 +14,7 @@ async function checkAdmin() {
     const decoded = verifyToken(token);
     if (!decoded) return null;
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) return null;
 
     const adminEmailsConfig = process.env.ADMIN_EMAILS || '';

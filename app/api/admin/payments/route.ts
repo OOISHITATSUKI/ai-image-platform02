@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { checkAdmin } from '../stats/route';
+import { findUserById, saveUser } from '@/lib/auth';
+import { recordCreditChange } from '@/lib/db/billing';
 
 const TRANSACTIONS_FILE = path.join(process.cwd(), 'data', 'transactions.json');
 
@@ -34,17 +36,14 @@ export async function GET(req: NextRequest) {
     });
 
     // Augment payments with user info
-    const { findUserById, saveUser } = require('@/lib/auth');
-    const { recordCreditChange } = require('@/lib/db/billing');
-
-    const augmentedPayments = payments.map((p: any) => {
-        const user = findUserById(p.userId);
+    const augmentedPayments = await Promise.all(payments.map(async (p: any) => {
+        const user = await findUserById(p.userId);
         return {
             ...p,
             userEmail: user?.email ?? 'Unknown',
             username: user?.username ?? 'Unknown',
         };
-    });
+    }));
 
     return NextResponse.json({
         payments: augmentedPayments,
@@ -61,15 +60,12 @@ export async function POST(req: NextRequest) {
     const admin = await checkAdmin();
     if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { findUserById, saveUser } = require('@/lib/auth');
-    const { recordCreditChange } = require('@/lib/db/billing');
-
     const { userId, credits, note } = await req.json();
     if (!userId || !credits || credits <= 0) {
         return NextResponse.json({ error: 'Invalid userId or credits' }, { status: 400 });
     }
 
-    const user = findUserById(userId);
+    const user = await findUserById(userId);
     if (!user) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -77,9 +73,9 @@ export async function POST(req: NextRequest) {
     const newBalance = user.credits + credits;
     user.credits = newBalance;
     if (user.plan === 'free') user.plan = 'basic';
-    saveUser(user);
+    await saveUser(user);
 
-    recordCreditChange({
+    await recordCreditChange({
         userId,
         changeType: 'admin',
         delta: credits,

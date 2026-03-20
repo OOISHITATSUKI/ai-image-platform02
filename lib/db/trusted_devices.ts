@@ -1,6 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import crypto from 'crypto';
+import { supabaseAdmin } from '../supabase-server';
 
 export interface TrustedDeviceRecord {
     id: string;          // UUID
@@ -14,84 +13,110 @@ export interface TrustedDeviceRecord {
     createdAt: number;   // Unix ms
 }
 
-const TRUSTED_DEVICES_FILE = path.join(process.cwd(), 'data', 'trusted_devices.json');
+function rowToDevice(row: any): TrustedDeviceRecord {
+    return {
+        id: row.id,
+        userId: row.user_id,
+        deviceToken: row.device_token,
+        deviceName: row.device_name ?? undefined,
+        ipAddress: row.ip_address ?? undefined,
+        countryCode: row.country_code ?? undefined,
+        lastUsedAt: row.last_used_at,
+        expiresAt: row.expires_at,
+        createdAt: row.created_at,
+    };
+}
 
-function readDevices(): Record<string, TrustedDeviceRecord> {
-    if (!fs.existsSync(TRUSTED_DEVICES_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(TRUSTED_DEVICES_FILE, 'utf8'));
-    } catch {
-        return {};
+export async function findDeviceByToken(token: string): Promise<TrustedDeviceRecord | null> {
+    const { data, error } = await supabaseAdmin
+        .from('trusted_devices')
+        .select('*')
+        .eq('device_token', token)
+        .maybeSingle();
+    if (error) {
+        console.error('[trusted_devices] findDeviceByToken error:', error.message);
+        return null;
     }
-}
-
-function writeDevices(devices: Record<string, TrustedDeviceRecord>): void {
-    const dir = path.dirname(TRUSTED_DEVICES_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(TRUSTED_DEVICES_FILE, JSON.stringify(devices, null, 2));
-}
-
-export function findDeviceByToken(token: string): TrustedDeviceRecord | null {
-    const devices = readDevices();
-    const device = Object.values(devices).find(d => d.deviceToken === token);
-    if (!device) return null;
+    if (!data) return null;
+    const device = rowToDevice(data);
     // Check expiry
     if (Date.now() > device.expiresAt) {
-        deleteDevice(device.id);
+        await deleteDevice(device.id);
         return null;
     }
     return device;
 }
 
-export function saveDevice(record: Omit<TrustedDeviceRecord, 'id' | 'createdAt' | 'lastUsedAt'>): TrustedDeviceRecord {
-    const devices = readDevices();
-    const newDevice: TrustedDeviceRecord = {
-        id: crypto.randomUUID(),
-        ...record,
-        lastUsedAt: Date.now(),
-        createdAt: Date.now(),
+export async function saveDevice(record: Omit<TrustedDeviceRecord, 'id' | 'createdAt' | 'lastUsedAt'>): Promise<TrustedDeviceRecord> {
+    const now = Date.now();
+    const row = {
+        user_id: record.userId,
+        device_token: record.deviceToken,
+        device_name: record.deviceName ?? null,
+        ip_address: record.ipAddress ?? null,
+        country_code: record.countryCode ?? null,
+        last_used_at: now,
+        expires_at: record.expiresAt,
+        created_at: now,
     };
-    devices[newDevice.id] = newDevice;
-    writeDevices(devices);
-    return newDevice;
+    const { data, error } = await supabaseAdmin
+        .from('trusted_devices')
+        .insert(row)
+        .select()
+        .single();
+    if (error) {
+        console.error('[trusted_devices] saveDevice error:', error.message);
+        throw error;
+    }
+    return rowToDevice(data);
 }
 
-export function touchDevice(id: string, ipAddress?: string, countryCode?: string): void {
-    const devices = readDevices();
-    if (!devices[id]) return;
-    devices[id].lastUsedAt = Date.now();
-    if (ipAddress) devices[id].ipAddress = ipAddress;
-    if (countryCode) devices[id].countryCode = countryCode;
-    writeDevices(devices);
+export async function touchDevice(id: string, ipAddress?: string, countryCode?: string): Promise<void> {
+    const updates: any = { last_used_at: Date.now() };
+    if (ipAddress) updates.ip_address = ipAddress;
+    if (countryCode) updates.country_code = countryCode;
+    const { error } = await supabaseAdmin
+        .from('trusted_devices')
+        .update(updates)
+        .eq('id', id);
+    if (error) {
+        console.error('[trusted_devices] touchDevice error:', error.message);
+    }
 }
 
-export function deleteDevice(id: string): void {
-    const devices = readDevices();
-    delete devices[id];
-    writeDevices(devices);
+export async function deleteDevice(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('trusted_devices')
+        .delete()
+        .eq('id', id);
+    if (error) {
+        console.error('[trusted_devices] deleteDevice error:', error.message);
+    }
 }
 
-export function deleteDevicesForUser(userId: string): void {
-    const devices = readDevices();
-    const filtered = Object.fromEntries(
-        Object.entries(devices).filter(([, d]) => d.userId !== userId)
-    );
-    writeDevices(filtered);
+export async function deleteDevicesForUser(userId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('trusted_devices')
+        .delete()
+        .eq('user_id', userId);
+    if (error) {
+        console.error('[trusted_devices] deleteDevicesForUser error:', error.message);
+    }
 }
 
 /** Removes expired device records (call periodically) */
-export function purgeExpiredDevices(): number {
-    const devices = readDevices();
+export async function purgeExpiredDevices(): Promise<number> {
     const now = Date.now();
-    let count = 0;
-    for (const [id, device] of Object.entries(devices)) {
-        if (now > device.expiresAt) {
-            delete devices[id];
-            count++;
-        }
+    const { data, error } = await supabaseAdmin
+        .from('trusted_devices')
+        .delete()
+        .lt('expires_at', now)
+        .select('id');
+    if (error) {
+        console.error('[trusted_devices] purgeExpiredDevices error:', error.message);
+        return 0;
     }
-    if (count > 0) writeDevices(devices);
-    return count;
+    return data?.length ?? 0;
 }
 
 /** Generate a fresh secure device token (UUID v4) */

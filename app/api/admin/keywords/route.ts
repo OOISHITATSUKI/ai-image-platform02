@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const decoded = verifyToken(token);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const admin = findUserById(decoded.userId);
+    const admin = await findUserById(decoded.userId);
     if (!admin || admin.plan !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     let dynamicKeywords: Record<string, string[]> = { "1": [], "7": [], "9": [] };
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const decoded = verifyToken(token);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const admin = findUserById(decoded.userId);
+    const admin = await findUserById(decoded.userId);
     if (!admin || admin.plan !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { category, keyword } = await req.json();

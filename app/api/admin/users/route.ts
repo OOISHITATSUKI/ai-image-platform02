@@ -4,7 +4,7 @@ import { readUsers, saveUser, deleteUser, type UserRecord } from '@/lib/auth';
 // GET: List all users (for admin panel)
 export async function GET() {
     try {
-        const users = readUsers();
+        const users = await readUsers();
 
         const userList = Object.values(users).map((u: UserRecord) => ({
             id: u.id,
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'userId and action are required' }, { status: 400 });
         }
 
-        const users = readUsers();
+        const users = await readUsers();
         const user = users[userId];
 
         if (!user) {
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
                 break;
             }
             case 'delete':
-                deleteUser(userId);
+                await deleteUser(userId);
                 return NextResponse.json({ success: true, deleted: true });
             case 'set_status':
                 if (['active', 'banned', 'age_restricted'].includes(value)) {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
         }
 
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({ success: true, user: { id: user.id, status: user.status, credits: user.credits, plan: user.plan } });
     } catch (error) {

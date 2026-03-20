@@ -28,7 +28,7 @@ export default async function AdminLayout({
         redirect('/login');
     }
 
-    const user = findUserById(decoded.userId);
+    const user = await findUserById(decoded.userId);
     if (!user) {
         redirect('/login');
     }

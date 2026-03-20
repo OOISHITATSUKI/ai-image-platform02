@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
+import { supabaseAdmin } from '../supabase-server';
 
 // ============================================================
-// Security Logs — Filter Blocks & Login Logs
+// Security Logs — Filter Blocks (file) & Login Logs (Supabase)
 // ============================================================
 
 const FILTER_BLOCKS_FILE = path.join(process.cwd(), 'data', 'filter_blocks.json');
-const LOGIN_LOG_FILE = path.join(process.cwd(), 'data', 'login_log.json');
 
 // Retention policy
 const FILTER_BLOCK_TTL_MS = 90 * 24 * 60 * 60 * 1000;  // 90 days
@@ -42,7 +42,7 @@ export interface LoginLogRecord {
 }
 
 // ============================================================
-// Filter Blocks: File Helpers & CRUD
+// Filter Blocks: File-based (unchanged)
 // ============================================================
 
 function readFilterBlocks(): Record<string, FilterBlockRecord> {
@@ -98,57 +98,72 @@ export function purgeOldFilterBlocks(): number {
 }
 
 // ============================================================
-// Login Log: File Helpers & CRUD
+// Login Log: Supabase-backed
 // ============================================================
 
-function readLoginLog(): Record<string, LoginLogRecord> {
-    if (!fs.existsSync(LOGIN_LOG_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(LOGIN_LOG_FILE, 'utf8'));
-    } catch {
-        return {};
-    }
-}
-
-function writeLoginLog(data: Record<string, LoginLogRecord>): void {
-    const dir = path.dirname(LOGIN_LOG_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(LOGIN_LOG_FILE, JSON.stringify(data, null, 2));
-}
-
-export function logLoginAttempt(
-    record: Omit<LoginLogRecord, 'id' | 'createdAt'>
-): LoginLogRecord {
-    const log = readLoginLog();
-    const newRecord: LoginLogRecord = {
-        ...record,
-        id: randomUUID(),
-        createdAt: Date.now(),
+function rowToLoginLog(row: any): LoginLogRecord {
+    return {
+        id: row.id,
+        userId: row.user_id ?? undefined,
+        email: row.email ?? undefined,
+        ipAddress: row.ip_address ?? undefined,
+        userAgent: row.user_agent ?? undefined,
+        success: row.success,
+        failReason: row.fail_reason ?? undefined,
+        createdAt: row.created_at,
     };
-    log[newRecord.id] = newRecord;
-    writeLoginLog(log);
-    return newRecord;
 }
 
-export function getLoginLogByUser(userId: string, limit = 50): LoginLogRecord[] {
-    const log = readLoginLog();
-    return Object.values(log)
-        .filter(l => l.userId === userId)
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .slice(0, limit);
+export async function logLoginAttempt(
+    record: Omit<LoginLogRecord, 'id' | 'createdAt'>
+): Promise<LoginLogRecord> {
+    const row = {
+        user_id: record.userId ?? null,
+        email: record.email ?? null,
+        ip_address: record.ipAddress ?? null,
+        user_agent: record.userAgent ?? null,
+        success: record.success,
+        fail_reason: record.failReason ?? null,
+        created_at: Date.now(),
+    };
+    const { data, error } = await supabaseAdmin
+        .from('login_log')
+        .insert(row)
+        .select()
+        .single();
+    if (error) {
+        console.error('[security] logLoginAttempt error:', error.message);
+        // Return a fallback record
+        return { ...record, id: randomUUID(), createdAt: Date.now() };
+    }
+    return rowToLoginLog(data);
+}
+
+export async function getLoginLogByUser(userId: string, limit = 50): Promise<LoginLogRecord[]> {
+    const { data, error } = await supabaseAdmin
+        .from('login_log')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+    if (error) {
+        console.error('[security] getLoginLogByUser error:', error.message);
+        return [];
+    }
+    return (data ?? []).map(rowToLoginLog);
 }
 
 /** Purge login logs older than 30 days */
-export function purgeOldLoginLogs(): number {
-    const log = readLoginLog();
+export async function purgeOldLoginLogs(): Promise<number> {
     const cutoff = Date.now() - LOGIN_LOG_TTL_MS;
-    let purged = 0;
-    for (const [id, record] of Object.entries(log)) {
-        if (record.createdAt < cutoff) {
-            delete log[id];
-            purged++;
-        }
+    const { data, error } = await supabaseAdmin
+        .from('login_log')
+        .delete()
+        .lt('created_at', cutoff)
+        .select('id');
+    if (error) {
+        console.error('[security] purgeOldLoginLogs error:', error.message);
+        return 0;
     }
-    if (purged > 0) writeLoginLog(log);
-    return purged;
+    return data?.length ?? 0;
 }

@@ -68,6 +68,18 @@ const BREAST_POSITION_MAP: Record<string, string> = {
     pushed_together: '(breasts pushed together:1.2)',
 };
 
+const SITUATION_MAP: Record<string, string> = {
+    bedroom: 'in bedroom',
+    shower: 'in shower',
+    pool: 'at pool',
+    beach: 'on beach',
+    office: 'in office',
+    gym: 'at gym',
+    onsen: 'in japanese onsen hot spring',
+    outdoor: 'outdoors',
+    studio: 'in photo studio',
+};
+
 const COMPOSITION_MAP: Record<string, string> = {
     full_body: '(full body shot:1.4), (head to toe:1.3), showing feet, wide shot',
     waist_up: '(upper body:1.3), waist up',
@@ -191,6 +203,11 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
     // Breast position
     if (tags.breastPosition && BREAST_POSITION_MAP[tags.breastPosition]) {
         characterParts.push(BREAST_POSITION_MAP[tags.breastPosition]);
+    }
+
+    // Situation / Scene
+    if (tags.situation && SITUATION_MAP[tags.situation]) {
+        characterParts.push(SITUATION_MAP[tags.situation]);
     }
 
     // ── STYLE: Photorealism ──

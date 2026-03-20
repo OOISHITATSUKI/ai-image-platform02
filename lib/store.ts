@@ -271,13 +271,24 @@ export const useAppStore = create<AppState>()(
                         console.log('Supabase sync starting for user:', user.id);
 
                         // 1. Ensure user record exists in Supabase (Upsert)
+                        const now = Date.now();
                         const { data: upsertData, error: upsertErr } = await supabase
                             .from('users')
                             .upsert({
                                 id: user.id,
                                 email: user.email,
-                                username: user.username
-                            }, { onConflict: 'id' })
+                                username: user.username || '',
+                                password_hash: '',
+                                status: 'active',
+                                email_verified: true,
+                                plan: user.plan || 'free',
+                                credits: user.credits ?? 20,
+                                locale: user.locale || 'en',
+                                theme: user.theme || 'dark',
+                                first_generation_confirmed: false,
+                                created_at: now,
+                                updated_at: now
+                            }, { onConflict: 'id', ignoreDuplicates: true })
                             .select();
 
                         if (upsertErr) {

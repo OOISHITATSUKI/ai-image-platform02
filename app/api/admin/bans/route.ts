@@ -1,34 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const BANS_FILE = path.join(process.cwd(), 'data', 'bans.json');
-
-function readBans() {
-    if (!fs.existsSync(BANS_FILE)) return { ips: {}, users: {} };
-    try {
-        return JSON.parse(fs.readFileSync(BANS_FILE, 'utf8'));
-    } catch {
-        return { ips: {}, users: {} };
-    }
-}
-
-function writeBans(data: unknown) {
-    fs.writeFileSync(BANS_FILE, JSON.stringify(data, null, 2));
-}
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 // GET: Return all bans
 export async function GET() {
-    const bans = readBans();
+    const { data, error } = await supabaseAdmin
+        .from('ip_bans')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    const ipList = Object.entries(bans.ips as Record<string, Record<string, unknown>>).map(([ip, data]) => ({
-        id: ip,
+    if (error) {
+        console.error('Failed to read ip_bans:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+
+    const ipList = (data ?? []).map((row) => ({
+        id: row.ip,
         type: 'ip',
-        strikes: data.strikes ?? 0,
-        permanent: data.permanent ?? false,
-        bannedUntil: data.bannedUntil ?? null,
-        email: data.email ?? '',      // ← メールアドレス (optional)
-        note: data.note ?? '',        // ← 備考メモ (optional)
+        strikes: row.strikes ?? 0,
+        permanent: row.permanent ?? false,
+        bannedUntil: row.banned_until ?? null,
+        email: row.email ?? '',
+        note: row.note ?? '',
     }));
 
     return NextResponse.json({ bans: ipList });
@@ -39,29 +31,63 @@ export async function POST(req: NextRequest) {
     const { ip, action, email, note } = await req.json();
     if (!ip || !action) return NextResponse.json({ error: 'Missing ip or action' }, { status: 400 });
 
-    const bans = readBans();
-
-    if (action === 'ban') {
-        if (!bans.ips[ip]) bans.ips[ip] = { strikes: 0 };
-        bans.ips[ip].permanent = true;
-        delete bans.ips[ip].bannedUntil;
-        if (email !== undefined) bans.ips[ip].email = email;
-        if (note !== undefined) bans.ips[ip].note = note;
-    } else if (action === 'unban') {
-        delete bans.ips[ip];
-    } else if (action === 'temp_ban') {
-        if (!bans.ips[ip]) bans.ips[ip] = { strikes: 0 };
-        bans.ips[ip].bannedUntil = Date.now() + (24 * 60 * 60 * 1000);
-        bans.ips[ip].permanent = false;
-        if (email !== undefined) bans.ips[ip].email = email;
-        if (note !== undefined) bans.ips[ip].note = note;
-    } else if (action === 'update_info') {
-        // Update email/note only (no ban status change)
-        if (!bans.ips[ip]) bans.ips[ip] = { strikes: 0 };
-        if (email !== undefined) bans.ips[ip].email = email;
-        if (note !== undefined) bans.ips[ip].note = note;
+    if (action === 'unban') {
+        const { error } = await supabaseAdmin
+            .from('ip_bans')
+            .delete()
+            .eq('ip', ip);
+        if (error) {
+            console.error('Failed to unban IP:', error);
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        }
+        return NextResponse.json({ success: true });
     }
 
-    writeBans(bans);
+    // For ban, temp_ban, update_info — upsert the row
+    const upsertData: Record<string, unknown> = { ip };
+
+    if (action === 'ban') {
+        upsertData.permanent = true;
+        upsertData.banned_until = null;
+    } else if (action === 'temp_ban') {
+        upsertData.permanent = false;
+        upsertData.banned_until = Date.now() + (24 * 60 * 60 * 1000);
+    }
+
+    if (email !== undefined) upsertData.email = email;
+    if (note !== undefined) upsertData.note = note;
+
+    // First check if exists
+    const { data: existing } = await supabaseAdmin
+        .from('ip_bans')
+        .select('ip')
+        .eq('ip', ip)
+        .single();
+
+    if (existing) {
+        // Update existing
+        const updateData = { ...upsertData };
+        delete updateData.ip;
+        const { error } = await supabaseAdmin
+            .from('ip_bans')
+            .update(updateData)
+            .eq('ip', ip);
+        if (error) {
+            console.error('Failed to update ip_bans:', error);
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        }
+    } else {
+        // Insert new
+        if (!upsertData.strikes) upsertData.strikes = 0;
+        if (!upsertData.created_at) upsertData.created_at = Date.now();
+        const { error } = await supabaseAdmin
+            .from('ip_bans')
+            .insert(upsertData);
+        if (error) {
+            console.error('Failed to insert ip_bans:', error);
+            return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        }
+    }
+
     return NextResponse.json({ success: true });
 }

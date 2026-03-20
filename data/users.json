@@ -118,7 +118,7 @@
     "username": "ooisidegesu@gmail.com",
     "status": "active",
     "emailVerified": true,
-    "plan": "free",
+    "plan": "paid",
     "credits": 999999,
     "locale": "en",
     "theme": "dark",
@@ -126,7 +126,7 @@
     "otpLastSentAt": 1771759420211,
     "firstGenerationConfirmed": true,
     "createdAt": 1771757809717,
-    "updatedAt": 1771827652162,
+    "updatedAt": 1773442297996,
     "agreements": {
       "termsOfService": {
         "agreedAt": 1771759458006,
@@ -166,10 +166,71 @@
     },
     "dateOfBirth": "1990-05-05",
     "country": "US",
-    "lastLoginAt": 1771827652136,
+    "lastLoginAt": 1773442297994,
     "loginFailCount": 0,
     "deviceOtpAttempts": 0,
     "lastKnownCountry": "XX",
-    "loginFailResetAt": 1771814575937
+    "loginFailResetAt": 1771814575937,
+    "termsAgreedAt": 1771759458006,
+    "termsVersion": "1.0"
+  },
+  "6457dfa9-0fab-483d-a085-1ece4885bd0c": {
+    "id": "6457dfa9-0fab-483d-a085-1ece4885bd0c",
+    "email": "asobo.link@gmail.com",
+    "passwordHash": "$2b$10$mRAXeb4yBNWzH5zs/q2ZGuv9Kh/449VRG0LoEXYsBTFbjHPTwA.ZO",
+    "username": "asobo.link",
+    "status": "active",
+    "emailVerified": true,
+    "plan": "free",
+    "credits": 20,
+    "locale": "en",
+    "theme": "dark",
+    "firstGenerationConfirmed": true,
+    "fingerprintHash": "068e3466c78b76c502d545b10829f4e0",
+    "freeCreditsExpireAt": 1774043738993,
+    "registrationIp": "1.75.66.199",
+    "termsAgreedAt": 1773438938993,
+    "termsVersion": "2025-01-01",
+    "agreements": {
+      "termsOfService": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "contentPolicy": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "privacyPolicy": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "ageConfirmation": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "minorContentBan": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "noRefund": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      },
+      "personalUseOnly": {
+        "agreedAt": 1773438938993,
+        "version": "2025-01-01",
+        "ip": "1.75.66.199"
+      }
+    },
+    "createdAt": 1773438938993,
+    "updatedAt": 1773438981725,
+    "otpAttempts": 0,
+    "otpLastSentAt": 1773438960631
   }
 }

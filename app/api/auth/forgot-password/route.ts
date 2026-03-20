@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
-        const user = findUserByEmail(normalizedEmail);
+        const user = await findUserByEmail(normalizedEmail);
 
         // Security best practice: don't reveal if user exists, just return success immediately
         // BUT for a better UX (assuming small scale or less strict threat model), we'll return an error if not found.
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
         if (user.passwordResetAttempts >= MAX_RESET_ATTEMPTS) {
             user.passwordResetLockedUntil = now + RESET_LOCKOUT_MS;
-            saveUser(user);
+            await saveUser(user);
             return NextResponse.json(
                 { error: '一時的にロックされています。24時間後にもう一度お試しください。' },
                 { status: 429 }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         user.passwordResetOtp = otpCode;
         user.passwordResetExpiresAt = now + OTP_EXPIRY_MS;
 
-        saveUser(user);
+        await saveUser(user);
 
         // Send email via Resend
         await sendOTPEmail(user.email, otpCode, 'reset');

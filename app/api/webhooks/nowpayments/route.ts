@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         const { payment_status, order_id, payment_id } = body;
 
         // Find our local transaction record
-        const transaction = getTransactionById(order_id);
+        const transaction = await getTransactionById(order_id);
         if (!transaction) {
             console.error('NowPayments IPN: Transaction not found', order_id);
             return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
         // Handle various payment statuses
         if (payment_status === 'finished' || payment_status === 'confirmed') {
-            const user = findUserById(transaction.userId);
+            const user = await findUserById(transaction.userId);
             if (!user) {
                 console.error('NowPayments IPN: User not found for transaction', transaction.userId);
                 return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -59,13 +59,13 @@ export async function POST(req: NextRequest) {
             }
             delete user.freeCreditsExpireAt;
             user.credits = newBalance;
-            saveUser(user);
+            await saveUser(user);
 
             // Mark transaction as completed
-            updateTransactionStatus(transaction.id, 'completed');
+            await updateTransactionStatus(transaction.id, 'completed');
 
             // Log the credit change
-            recordCreditChange({
+            await recordCreditChange({
                 userId: user.id,
                 changeType: 'charge',
                 delta: transaction.creditsGranted,
@@ -77,10 +77,10 @@ export async function POST(req: NextRequest) {
             console.log(`Credit granted to ${user.email} -> +${transaction.creditsGranted}`);
 
         } else if (payment_status === 'failed' || payment_status === 'expired') {
-            updateTransactionStatus(transaction.id, payment_status);
+            await updateTransactionStatus(transaction.id, payment_status);
         } else if (payment_status === 'confirming' || payment_status === 'sending') {
             // Can optionally update status to confirming
-            updateTransactionStatus(transaction.id, 'confirming');
+            await updateTransactionStatus(transaction.id, 'confirming');
         }
 
         return NextResponse.json({ status: 'OK' });

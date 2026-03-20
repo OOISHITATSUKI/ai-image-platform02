@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Email and agreements are required' }, { status: 400 });
         }
 
-        const user = findUserByEmail(email.toLowerCase().trim());
+        const user = await findUserByEmail(email.toLowerCase().trim());
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
         // Activate account → move to profile step
         user.status = 'pending_profile';
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({
             success: true,

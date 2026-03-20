@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         const decoded = verifyToken(token);
         if (!decoded) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-        const user = findUserById(decoded.userId);
+        const user = await findUserById(decoded.userId);
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
         const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         (user.agreements as Record<string, unknown>).ageConfirmation = agreementRecord;
         (user.agreements as Record<string, unknown>).minorContentBan = agreementRecord;
 
-        saveUser(user);
+        await saveUser(user);
 
         return NextResponse.json({ success: true, termsAgreedAt: now });
     } catch (error) {

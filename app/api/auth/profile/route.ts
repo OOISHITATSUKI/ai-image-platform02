@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
         }
 
-        const user = findUserByEmail(email.toLowerCase().trim());
+        const user = await findUserByEmail(email.toLowerCase().trim());
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check username uniqueness
-        const existingUsername = findUserByUsername(username);
+        const existingUsername = await findUserByUsername(username);
         if (existingUsername && existingUsername.id !== user.id) {
             return NextResponse.json({ error: 'Username is already taken' }, { status: 409 });
         }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             user.username = username;
             user.dateOfBirth = dateOfBirth;
             user.country = country;
-            saveUser(user);
+            await saveUser(user);
 
             return NextResponse.json({
                 error: 'You must be 18 or older to use this service',
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         user.dateOfBirth = dateOfBirth;
         user.country = country;
         user.status = 'active';
-        saveUser(user);
+        await saveUser(user);
 
         // Generate JWT token
         const token = signToken(user.id, user.email);

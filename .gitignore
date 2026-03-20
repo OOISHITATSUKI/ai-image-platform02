@@ -43,3 +43,14 @@ next-env.d.ts
 
 # backups
 /backups/
+
+# runtime data (managed by Supabase, not git)
+data/users.json
+data/credit_log.json
+data/transactions.json
+data/login_log.json
+data/trusted_devices.json
+data/registration_attempts.json
+data/bans.json
+data/saved_faces.json
+data/inactivity_notified.json

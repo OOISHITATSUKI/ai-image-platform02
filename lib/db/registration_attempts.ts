@@ -1,6 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
+import { supabaseAdmin } from '../supabase-server';
 
 export interface RegistrationAttemptRecord {
     id: string;
@@ -10,54 +8,38 @@ export interface RegistrationAttemptRecord {
     createdAt: number;
 }
 
-const REGISTRATION_FILE = path.join(process.cwd(), 'data', 'registration_attempts.json');
-
-function readAttempts(): Record<string, RegistrationAttemptRecord> {
-    if (!fs.existsSync(REGISTRATION_FILE)) return {};
-    try {
-        return JSON.parse(fs.readFileSync(REGISTRATION_FILE, 'utf8'));
-    } catch {
-        return {};
-    }
-}
-
-function writeAttempts(attempts: Record<string, RegistrationAttemptRecord>): void {
-    const dir = path.dirname(REGISTRATION_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(REGISTRATION_FILE, JSON.stringify(attempts, null, 2));
-}
-
-export function logRegistrationAttempt(ipAddress: string, email: string, success: boolean): void {
-    const attempts = readAttempts();
-    const newAttempt: RegistrationAttemptRecord = {
-        id: crypto.randomUUID(),
-        ipAddress,
+export async function logRegistrationAttempt(ipAddress: string, email: string, success: boolean): Promise<void> {
+    const row = {
+        ip_address: ipAddress,
         email,
         success,
-        createdAt: Date.now()
+        created_at: Date.now(),
     };
-    attempts[newAttempt.id] = newAttempt;
-
-    // Optional: cleanup old attempts (older than 7 days) to save space
-    const now = Date.now();
-    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-    for (const [id, record] of Object.entries(attempts)) {
-        if (now - record.createdAt > SEVEN_DAYS) {
-            delete attempts[id];
-        }
+    const { error } = await supabaseAdmin
+        .from('registration_attempts')
+        .insert(row);
+    if (error) {
+        console.error('[registration_attempts] logRegistrationAttempt error:', error.message);
     }
 
-    writeAttempts(attempts);
+    // Cleanup old attempts (older than 7 days)
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    await supabaseAdmin
+        .from('registration_attempts')
+        .delete()
+        .lt('created_at', Date.now() - SEVEN_DAYS);
 }
 
-export function countRecentAttemptsByIp(ipAddress: string, timeWindowMs: number): number {
-    const attempts = readAttempts();
-    const now = Date.now();
-    let count = 0;
-    for (const record of Object.values(attempts)) {
-        if (record.ipAddress === ipAddress && (now - record.createdAt) <= timeWindowMs) {
-            count++;
-        }
+export async function countRecentAttemptsByIp(ipAddress: string, timeWindowMs: number): Promise<number> {
+    const cutoff = Date.now() - timeWindowMs;
+    const { count, error } = await supabaseAdmin
+        .from('registration_attempts')
+        .select('*', { count: 'exact', head: true })
+        .eq('ip_address', ipAddress)
+        .gte('created_at', cutoff);
+    if (error) {
+        console.error('[registration_attempts] countRecentAttemptsByIp error:', error.message);
+        return 0;
     }
-    return count;
+    return count ?? 0;
 }
