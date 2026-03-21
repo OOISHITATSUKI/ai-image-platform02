@@ -113,7 +113,7 @@ async function optimizePromptWithClaude(prompt: string, generationType: string, 
         systemPrompt = "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. NSFW is allowed: bare skin, nude, nipples, vagina etc. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else.";
     } else if (generationType === "img2img") {
         systemPrompt = "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
-    } else {
+    } else if (isNsfw) {
         systemPrompt = `You are a Stable Diffusion photorealistic prompt expert for an adult NSFW platform.
 Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
 Convert user input into 15-30 comma-separated English tags.
@@ -126,13 +126,33 @@ CRITICAL RULES:
    - Include: exact body position, limb placement, camera angle, facial expression, body contact points
    - Use strong weights like (tag:1.5) for the main action
    - Examples:
-     * "cowgirl/riding" → (girl on top:1.5), (straddling:1.5), (riding:1.4), (woman on top sex position:1.4), sitting on lap, legs apart, hips grinding, face to face, vaginal penetration, arched back, moaning. NEVER add cowboy hat or western/ranch themes.
-     * "blowjob" → (fellatio:1.5), (oral sex:1.4), (blowjob:1.4), kneeling, (penis in mouth:1.3), looking up, hands on thighs, from above angle
-     * "doggy" → (doggy style:1.5), (from behind:1.5), (bent over:1.4), on all fours, (rear view:1.3), back arched, ass up, hands on hips
-     * "missionary" → (missionary position:1.5), (lying on back:1.4), (legs spread:1.4), man on top, from above angle, arms around neck, on bed
+     * "cowgirl/riding" → (girl on top:1.7), (straddling:1.6), (riding position:1.6), (sitting on penis:1.5), legs apart straddling hips, hips grinding down, (vaginal penetration:1.5), bouncing, face to face, front view, sweat. NEVER add cowboy hat or western/ranch themes.
+     * "blowjob" → (fellatio:1.7), (oral sex:1.6), (blowjob:1.5), (penis in mouth:1.5), kneeling between legs, mouth wide open, tongue out, looking up at viewer, head between legs, (from above angle:1.3), saliva
+     * "doggy" → (doggy style sex:1.7), (from behind:1.7), (rear entry:1.6), (bent over:1.6), (on all fours:1.5), (ass up face down:1.5), hands gripping hips, back arched deeply, (rear view:1.4), knees on bed
+     * "missionary" → (missionary position:1.7), (missionary sex:1.7), (woman lying on back:1.6), (man on top of woman:1.6), (legs spread wide:1.5), (between her legs:1.5), (vaginal penetration:1.5), hips between thighs, arms wrapped around, from above angle
 4. If [Required Action/Pose: ...] is given, treat it as mandatory — place those action tags first with strong weights.
 5. If [Required Composition: ...] is given, respect it (do NOT add conflicting shot types).
 6. After action tags, add PHOTOREALISM tags that make the image look like a real photograph:
+   - Camera/lens: (shot on Canon EOS R5:1.2), 85mm lens, f/2.8 aperture, shallow depth of field, lens flare
+   - Skin realism: (realistic skin texture:1.3), visible skin pores, subtle skin blemishes, (natural skin imperfections:1.2), fine body hair, goosebumps, (uneven skin tone:1.1)
+   - Lighting: natural window light, golden hour, soft shadows, ambient occlusion, (volumetric lighting:1.1)
+   - Photo artifacts: film grain, subtle lens distortion, slight motion blur on edges, bokeh background
+   - AVOID these AI tells: Do NOT use "perfect skin", "flawless", "symmetrical", "porcelain". Real photos have asymmetry and imperfections.
+7. Do NOT add: age, ethnicity, body shape, hair color, hair style, or breast size tags (these are handled separately by the system).
+8. Keep output under 500 characters to leave room for character tags.
+9. Output ONLY comma-separated tags, nothing else.`;
+    } else {
+        systemPrompt = `You are a Stable Diffusion photorealistic prompt expert.
+Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
+Convert user input into 15-30 comma-separated English tags.
+
+CRITICAL RULES:
+1. Translate any non-English input to English first.
+2. This is a SFW (safe for work) generation. Do NOT include any NSFW, nude, naked, topless, sexual, or explicit tags. Keep all content clothed and non-sexual.
+3. ACTION/POSE: If the user describes a pose or action, output specific pose/body position tags at the start with weights like (tag:1.3).
+4. If [Required Action/Pose: ...] is given, treat it as mandatory — place those action tags first with strong weights.
+5. If [Required Composition: ...] is given, respect it (do NOT add conflicting shot types).
+6. Add PHOTOREALISM tags that make the image look like a real photograph:
    - Camera/lens: (shot on Canon EOS R5:1.2), 85mm lens, f/2.8 aperture, shallow depth of field, lens flare
    - Skin realism: (realistic skin texture:1.3), visible skin pores, subtle skin blemishes, (natural skin imperfections:1.2), fine body hair, goosebumps, (uneven skin tone:1.1)
    - Lighting: natural window light, golden hour, soft shadows, ambient occlusion, (volumetric lighting:1.1)
@@ -846,15 +866,15 @@ export async function POST(request: NextRequest) {
 
             if (ts.fetish && ts.fetish.length > 0) {
                 const actionLabels: Record<string, string> = {
-                    fellatio: 'fellatio blowjob oral sex, woman kneeling with mouth on penis, looking up, from above camera angle',
-                    cowgirl: 'girl on top sex position, woman straddling and riding man, sitting on lap, hips grinding, face to face, vaginal penetration',
-                    insertion: 'vaginal penetration sex, spread legs, penis inside vagina, moaning expression, intimate body contact',
-                    kiss: 'deep passionate tongue kiss, lips touching, eyes closed, embracing each other tightly, romantic closeup',
-                    missionary: 'missionary sex position, woman lying on back with legs spread, man on top, from above angle, on bed',
-                    doggy: 'doggy style sex from behind, woman bent over on all fours, rear view, back arched, ass up',
-                    standing: 'standing sex position, woman with one leg lifted against wall, face to face, upright penetration',
-                    handjob: 'handjob, woman stroking penis with hand, fingers wrapped around shaft, sitting beside',
-                    paizuri: 'paizuri titfuck, penis between breasts, woman pressing breasts together, kneeling',
+                    fellatio: 'fellatio blowjob oral sex, woman kneeling between mans legs, penis deep in mouth, sucking, tongue visible, looking up at camera, head between legs, from above angle, saliva dripping',
+                    cowgirl: 'girl on top riding sex position, woman straddling man sitting on his penis, legs apart over hips, grinding hips down, vaginal penetration, bouncing motion, hands on his chest, face to face front view, sweat on skin',
+                    insertion: 'vaginal penetration sex, penis inside vagina, bodies pressed together, legs spread wide, hips touching, moaning expression, arched back, sweat, intimate skin contact',
+                    kiss: 'deep passionate tongue kiss, two faces in profile view from the side, lips touching, eyes closed, embracing tightly, two separate heads visible, upper body shot, romantic',
+                    missionary: 'missionary sex position, woman lying flat on back on bed, man on top between her spread legs, his hips between her thighs, vaginal penetration, her ankles crossed behind his back, arms wrapped around him, from above camera angle, skin contact, bed sheets wrinkled',
+                    doggy: 'doggy style rear entry sex, woman bent over on all fours, ass raised up face pressed down, man behind gripping her hips, back arched deeply, rear view camera angle, knees on bed, looking back over shoulder, sweat on back',
+                    standing: 'standing sex against wall, woman pressed against wall with one leg hooked around mans waist, upright penetration, arms around shoulders, face to face, full body view, weight leaning against wall',
+                    handjob: 'handjob, woman gripping penis with hand, fingers wrapped around shaft, stroking pumping motion, sitting beside him, looking at viewer, arm extended',
+                    paizuri: 'paizuri titfuck, penis between breasts, woman squeezing breasts together around shaft with both hands, kneeling position, looking down at penis, cleavage wrapped around',
                 };
                 actionHint = ts.fetish.map(f => actionLabels[f] || f).join(', ');
             }
@@ -867,39 +887,43 @@ export async function POST(request: NextRequest) {
         if (!actionHint && prompt) {
             const promptLower = prompt.toLowerCase();
             const autoActionMap: [RegExp, string, string][] = [
-                [/フェラ|blowjob|fellatio|oral sex|しゃぶ/, 'fellatio', 'fellatio blowjob oral sex, woman kneeling with mouth on penis, looking up, from above camera angle'],
-                [/騎乗位|cowgirl|girl.?on.?top|またが/, 'cowgirl', 'girl on top sex position, woman straddling and riding man, sitting on lap, hips grinding, face to face, vaginal penetration'],
-                [/正常位|missionary|仰向け/, 'missionary', 'missionary sex position, woman lying on back with legs spread, man on top, from above angle, on bed'],
-                [/バック|後ろから|doggy|from.?behind|背面/, 'doggy', 'doggy style sex from behind, woman bent over on all fours, rear view, back arched, ass up'],
-                [/立ち|standing.?sex|壁/, 'standing', 'standing sex position, woman with one leg lifted against wall, face to face, upright penetration'],
-                [/手コキ|handjob|手で/, 'handjob', 'handjob, woman stroking penis with hand, fingers wrapped around shaft, sitting beside'],
-                [/パイズリ|paizuri|titfuck|挟/, 'paizuri', 'paizuri titfuck, penis between breasts, woman pressing breasts together, kneeling'],
-                [/キス|kiss|接吻/, 'kiss', 'deep passionate tongue kiss, lips touching, eyes closed, embracing each other tightly, romantic closeup'],
-                [/挿入|セックス|sex|ペニス|penetrat|fuck|ハメ/, 'insertion', 'vaginal penetration sex, spread legs, penis inside vagina, moaning expression, intimate body contact'],
+                [/フェラ|blowjob|fellatio|oral sex|しゃぶ/, 'fellatio', 'fellatio blowjob oral sex, woman kneeling between mans legs, penis deep in mouth, sucking, tongue visible, looking up at camera, from above angle, saliva'],
+                [/騎乗位|cowgirl|girl.?on.?top|またが/, 'cowgirl', 'girl on top riding sex, woman straddling man sitting on his penis, legs apart over hips, grinding down, vaginal penetration, bouncing, face to face front view, sweat'],
+                [/正常位|missionary|仰向け/, 'missionary', 'missionary sex, woman lying flat on back on bed, man on top between her spread legs, his hips between her thighs, vaginal penetration, ankles crossed behind his back, from above angle, bed sheets'],
+                [/バック|後ろから|doggy|from.?behind|背面/, 'doggy', 'doggy style rear entry sex, woman bent over on all fours, ass raised face pressed down, man behind gripping her hips, back arched deeply, rear view, knees on bed, looking back'],
+                [/立ち|standing.?sex|壁/, 'standing', 'standing sex against wall, woman pressed against wall with leg hooked around mans waist, upright penetration, arms around shoulders, face to face, full body'],
+                [/手コキ|handjob|手で/, 'handjob', 'handjob, woman gripping penis with hand, fingers wrapped around shaft, stroking pumping motion, sitting beside'],
+                [/パイズリ|paizuri|titfuck|挟/, 'paizuri', 'paizuri titfuck, penis between breasts, woman squeezing breasts together around shaft, kneeling, looking down'],
+                [/キス|kiss|接吻/, 'kiss', 'deep passionate tongue kiss, two faces shown in profile side view, lips touching, eyes closed, embracing tightly, two separate heads visible, upper body shot, romantic'],
+                [/挿入|セックス|sex|ペニス|penetrat|fuck|ハメ/, 'insertion', 'vaginal penetration sex, penis inside vagina, bodies pressed together, legs spread wide, hips touching, moaning, arched back, sweat'],
             ];
             for (const [pattern, fetishKey, hint] of autoActionMap) {
                 if (pattern.test(promptLower) || pattern.test(prompt)) {
                     actionHint = hint;
                     // Also inject the FETISH_MAP tags into tagPromptFragment
                     const fetishTags: Record<string, string> = {
-                        fellatio: '(fellatio:1.5), (oral sex:1.4), (blowjob:1.4), kneeling, mouth open, (penis in mouth:1.3), looking up at viewer, hands on thighs, submissive pose, from above angle',
-                        cowgirl: '(girl on top:1.5), (straddling:1.5), (riding:1.4), (woman on top sex position:1.4), sitting on lap, legs apart, hips grinding, face to face, front view, (vaginal penetration:1.3), intimate',
-                        insertion: '(vaginal penetration:1.5), (sex:1.5), (insertion:1.4), spread legs, (penis inside:1.3), moaning expression, arched back, intimate contact, sweat',
-                        kiss: '(passionate kissing:1.5), (deep kiss:1.4), (tongue kiss:1.3), lips touching, eyes closed, embracing, holding each other, romantic, face closeup, intertwined bodies',
-                        missionary: '(missionary position:1.5), (lying on back:1.4), (legs spread:1.4), (man on top:1.3), arms around neck, bed, pillow, from above angle, eye contact, intimate',
-                        doggy: '(doggy style:1.5), (from behind:1.5), (bent over:1.4), (rear view:1.3), on all fours, hands on hips, back arched, ass up, face down, looking back',
-                        standing: '(standing sex:1.5), (standing position:1.4), (leg lifted:1.3), against wall, one leg up, arms around shoulders, face to face, full body, upright penetration',
-                        handjob: '(handjob:1.5), (hand on penis:1.4), (stroking:1.3), fingers wrapped around shaft, sitting beside, looking at viewer, gentle grip, arm extended',
-                        paizuri: '(paizuri:1.5), (titfuck:1.5), (breasts around penis:1.4), (breast squeeze:1.3), pressing breasts together, cleavage, looking down, kneeling, penis between breasts',
+                        fellatio: '(fellatio:1.7), (oral sex:1.6), (blowjob:1.5), (penis in mouth:1.5), (sucking:1.4), kneeling between legs, mouth wide open, tongue out, looking up at viewer, hands on thighs, head between legs, (from above angle:1.3), saliva',
+                        cowgirl: '(girl on top:1.7), (straddling:1.6), (riding position:1.6), (woman on top sex:1.5), (sitting on penis:1.5), legs apart straddling hips, hips grinding down, (vaginal penetration:1.5), bouncing, hands on chest, face to face, front view, sweat',
+                        insertion: '(vaginal penetration:1.7), (sex:1.7), (penis inside vagina:1.6), (insertion:1.5), (spread legs:1.4), hips touching, bodies pressed together, moaning expression, arched back, sweat, intimate skin contact',
+                        kiss: '(passionate kissing:1.5), (deep kiss:1.4), (tongue kiss:1.3), (two distinct faces in profile:1.4), (side view of faces:1.3), lips touching, eyes closed, embracing tightly, (two separate heads:1.3), upper body shot, romantic',
+                        missionary: '(missionary position:1.7), (missionary sex:1.7), (woman lying on back:1.6), (man on top of woman:1.6), (legs spread wide:1.5), (between her legs:1.5), (vaginal penetration:1.5), hips between thighs, arms wrapped around man, ankles crossed behind back, bed sheets, pillow, from above angle, eye contact, skin contact',
+                        doggy: '(doggy style sex:1.7), (from behind:1.7), (rear entry:1.6), (bent over:1.6), (on all fours:1.5), (ass up face down:1.5), hands gripping hips, back arched deeply, (rear view:1.4), knees on bed, looking back over shoulder, sweat on back',
+                        standing: '(standing sex:1.7), (standing penetration:1.6), (leg lifted up:1.5), (pressed against wall:1.5), one leg hooked around waist, arms around shoulders, face to face, full body, upright position, (wall sex:1.4), weight against wall',
+                        handjob: '(handjob:1.7), (hand on penis:1.6), (stroking penis:1.5), (fingers wrapped around shaft:1.4), pumping motion, sitting beside, looking at viewer, arm extended, wrist motion',
+                        paizuri: '(paizuri:1.7), (titfuck:1.7), (penis between breasts:1.6), (breast squeeze:1.5), (breasts wrapped around shaft:1.5), pressing breasts together with hands, cleavage, looking down at penis, kneeling position',
                     };
                     const injectedTags = fetishTags[fetishKey] || '';
                     // Couple tags for sex positions
                     const needsCouple = ['fellatio','cowgirl','insertion','missionary','doggy','standing','handjob','paizuri'].includes(fetishKey);
-                    const coupleTag = needsCouple ? ', (1boy:1.2), (1girl:1.2), (couple:1.2)' : '';
-                    // Remove conflicting solo/1girl tags when couple is needed
+                    const coupleTag = needsCouple ? ', (1boy:1.4), (1girl:1.3), (couple:1.4), (man and woman:1.3), (2people:1.3)' : '';
+                    // Remove conflicting solo/1girl/2girls tags when couple is needed
                     if (needsCouple) {
                         tagPromptFragment = tagPromptFragment
                             .replace(/\(1girl:[\d.]+\),?\s*/g, '')
+                            .replace(/\(2girls:[\d.]+\),?\s*/g, '')
+                            .replace(/\(two women:[\d.]+\),?\s*/g, '')
+                            .replace(/\(multiple girls:[\d.]+\),?\s*/g, '')
+                            .replace(/several women,?\s*/g, '')
                             .replace(/solo,?\s*/g, '')
                             .replace(/,\s*,/g, ',')
                             .replace(/^,\s*|,\s*$/g, '');
@@ -909,6 +933,25 @@ export async function POST(request: NextRequest) {
                     break;
                 }
             }
+        }
+
+        // ── Auto-detect male+female couple from prompt text (even without explicit sex action) ──
+        const couplePromptPattern = /男性と女性|男女|男と女|man\s*and\s*woman|couple|カップル|彼氏|boyfriend|男性が|男が/i;
+        const hasCoupleInPrompt = prompt && couplePromptPattern.test(prompt);
+        if (hasCoupleInPrompt && !actionHint) {
+            // Couple keywords without explicit action — inject couple tags
+            tagPromptFragment = tagPromptFragment
+                .replace(/\(1girl:[\d.]+\),?\s*/g, '')
+                .replace(/\(2girls:[\d.]+\),?\s*/g, '')
+                .replace(/\(two women:[\d.]+\),?\s*/g, '')
+                .replace(/\(multiple girls:[\d.]+\),?\s*/g, '')
+                .replace(/several women,?\s*/g, '')
+                .replace(/solo,?\s*/g, '')
+                .replace(/,\s*,/g, ',')
+                .replace(/^,\s*|,\s*$/g, '');
+            const coupleInjection = '(1boy:1.4), (1girl:1.3), (couple:1.4), (man and woman:1.3), (2people:1.3)';
+            tagPromptFragment = coupleInjection + (tagPromptFragment ? ', ' + tagPromptFragment : '');
+            console.log('Auto-detected couple from prompt keywords');
         }
 
         // ── Model Selection Logic ──
@@ -946,10 +989,16 @@ export async function POST(request: NextRequest) {
         const basePrompt = prompt || (inpaintMode ? '(remove all clothes, completely nude, bare breasts, uncensored:1.5), detailed skin' : 'a beautiful image');
         // Pass action and composition hints to Claude
         let promptForClaude = basePrompt;
+        // Determine if couple mode is active (from UI fetish, auto-action, or prompt keywords)
+        const isCoupleMode = !!(actionHint && /sex|penetrat|riding|straddl|fellatio|blowjob|missionary|doggy|behind|handjob|paizuri|titfuck|kiss/i.test(actionHint)) || hasCoupleInPrompt;
+
         if (actionHint) {
             // Action SD tags are already injected in tagPromptFragment.
             // Tell Claude to NOT duplicate action/pose tags, only add scene/atmosphere/lighting.
             promptForClaude += `\n[Required Action/Pose: ${actionHint}]\n[NOTE: Action/pose SD tags are already injected separately. Do NOT output action/pose/position tags. Only output scene, atmosphere, lighting, and camera tags to complement the action.]`;
+        }
+        if (isCoupleMode) {
+            promptForClaude += `\n[IMPORTANT: This scene has TWO people (1 man + 1 woman). Do NOT output "solo", "1girl", "single person", or "alone" tags. The couple/1boy/1girl tags are already injected separately.]`;
         }
         if (tagSettings) {
             const ts = tagSettings as TagSettings;
@@ -1083,14 +1132,17 @@ export async function POST(request: NextRequest) {
         if (tagSettings && (tagSettings as TagSettings).peopleCount && (tagSettings as TagSettings).peopleCount !== '1') {
             finalNegative = finalNegative
                 .replace(/\(multiple faces:[\d.]+\),?\s*/g, '')
-                .replace(/\(multiple bodies:[\d.]+\),?\s*/g, '');
+                .replace(/\(multiple bodies:[\d.]+\),?\s*/g, '')
+                .replace(/multiple faces,?\s*/g, '')
+                .replace(/multiple bodies,?\s*/g, '');
         }
 
-        // Remove "male/man/boy/masculine" from negative when action requires a couple
+        // Remove "male/man/boy/masculine" and "multiple faces/bodies" from negative when couple is detected
         const hasActionCouple = actionHint && /sex|penetrat|riding|straddl|fellatio|blowjob|missionary|doggy|behind|handjob|paizuri|titfuck/i.test(actionHint);
         const hasUICouple = tagSettings && (tagSettings as TagSettings).fetish && (tagSettings as TagSettings).fetish.length > 0 &&
             ['fellatio','cowgirl','insertion','kiss','missionary','doggy','standing','handjob','paizuri'].some(f => (tagSettings as TagSettings).fetish.includes(f as any));
-        if (hasActionCouple || hasUICouple) {
+        const isCoupleScene = !!(hasActionCouple || hasUICouple || hasCoupleInPrompt);
+        if (isCoupleScene) {
             finalNegative = finalNegative
                 .replace(/\bmale\b,?\s*/g, '')
                 .replace(/\bman\b,?\s*/g, '')
@@ -1100,9 +1152,15 @@ export async function POST(request: NextRequest) {
                 .replace(/multiple bodies,?\s*/g, '')
                 .replace(/\(multiple faces:[\d.]+\),?\s*/g, '')
                 .replace(/\(multiple bodies:[\d.]+\),?\s*/g, '')
+                // Reduce extra limbs penalty for 2-person scenes (4 legs/arms is normal)
+                .replace(/\(extra limbs:[\d.]+\),?\s*/g, '')
                 .replace(/,\s*,/g, ',')
                 .replace(/^,\s*|,\s*$/g, '');
-            console.log('Couple action detected: removed male/man/boy from negative prompt');
+            // Add solo/alone to negative to prevent single-person generation
+            finalNegative += ', (solo:1.5), (alone:1.4), (single person:1.4), (only one person:1.4), (1girl solo:1.5)';
+            // Prevent face merging/fusion in couple scenes (especially kiss)
+            finalNegative += ', (fused faces:1.5), (merged faces:1.5), (overlapping faces:1.4), (conjoined:1.4)';
+            console.log('Couple detected: adjusted negative prompt for 2-person scene');
         }
 
         // ── Prompt Assembly ──
@@ -1149,21 +1207,24 @@ export async function POST(request: NextRequest) {
         const hasClothingInPrompt = /bikini|dress|uniform|lingerie|shirt|wear|outfit|cloth|swimsuit/i
             .test(optimizedPrompt);
 
+        // Couple body reinforcement prefix
+        const coupleBodyPrefix = isCoupleScene ? '(two people:1.4), (intertwined bodies:1.3), (skin to skin contact:1.3), (4 legs:1.2), (4 arms:1.2), ' : '';
+
         if (nudeMode && !hasClothingInPrompt) {
             // Nude ON + 服装指定なし → ヌード生成
             novitaRequest.prompt = enforceLimit(
-                `nsfw, nude, naked, bare skin, ${enhancedPrompt}`
+                `${coupleBodyPrefix}nsfw, nude, naked, bare skin, ${enhancedPrompt}`
             );
             novitaRequest.negative_prompt = enforceLimit(finalNegative);
         } else if (!nudeMode) {
             // Nude OFF → ヌード禁止（SFW画像）
-            novitaRequest.prompt = enforceLimit(enhancedPrompt);
+            novitaRequest.prompt = enforceLimit(`${coupleBodyPrefix}${enhancedPrompt}`);
             novitaRequest.negative_prompt = enforceLimit(
                 `${finalNegative}, nsfw, nude, naked, nipples, genitalia`
             );
         } else {
             // Nude ON + 服装指定あり → ユーザーの服装指定を優先
-            novitaRequest.prompt = enforceLimit(enhancedPrompt);
+            novitaRequest.prompt = enforceLimit(`${coupleBodyPrefix}${enhancedPrompt}`);
             novitaRequest.negative_prompt = enforceLimit(finalNegative);
         }
 
@@ -1295,7 +1356,12 @@ export async function POST(request: NextRequest) {
                 }
             }
         } else {
-            // txt2img: No specific strength/guidance override needed here beyond base params
+            // txt2img: boost params for couple/position scenes
+            if (isCoupleScene) {
+                novitaRequest.steps = isXL ? 38 : Math.max(quality.steps, 35);
+                novitaRequest.guidance_scale = isXL ? 6.5 : Math.max(quality.guidance, 8);
+                console.log('Couple scene: boosted steps=' + novitaRequest.steps + ' guidance=' + novitaRequest.guidance_scale);
+            }
         }
 
         const novitaBody = {

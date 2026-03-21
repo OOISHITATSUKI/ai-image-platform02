@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { MediaFilter } from '@/lib/types';
@@ -52,6 +52,7 @@ export default function RightPanel({
 
     const hasResults = resultMessages.length > 0;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
     const handleDownload = (url: string) => {
         const isDataUri = url.startsWith('data:');
@@ -146,46 +147,55 @@ export default function RightPanel({
                                             style={{ cursor: 'pointer' }}
                                             onClick={() => setLightboxUrl(msg.imageUrl!)}
                                         />
-                                        <div className="result-overlay" onClick={() => setLightboxUrl(msg.imageUrl!)}>
-                                            <div className="result-actions" onClick={(e) => e.stopPropagation()}>
+                                        <div
+                                            className="result-overlay"
+                                            onClick={isMobile ? undefined : () => setLightboxUrl(msg.imageUrl!)}
+                                        >
+                                            <div className="result-actions">
                                                 <button
                                                     className="result-action-btn"
-                                                    onClick={() => setLightboxUrl(msg.imageUrl!)}
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLightboxUrl(msg.imageUrl!); }}
                                                     title={t('actions.expand') || 'Expand'}
                                                 >
                                                     🔍
                                                 </button>
                                                 <button
-                                                    className={`result-action-btn ${msg.isFavorite ? 'favorite-active' : ''}`}
-                                                    onClick={() => activeChatId && toggleFavorite(activeChatId, msg.id)}
+                                                    className="result-action-btn"
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); activeChatId && toggleFavorite(activeChatId, msg.id); }}
                                                     title={t('actions.favorite')}
                                                 >
                                                     {msg.isFavorite ? '❤️' : '🤍'}
                                                 </button>
                                                 <button
                                                     className="result-action-btn"
-                                                    onClick={() => handleDownload(msg.imageUrl!)}
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDownload(msg.imageUrl!); }}
                                                     title={t('actions.download')}
                                                 >
                                                     ⬇
                                                 </button>
                                                 <button
                                                     className="result-action-btn"
-                                                    onClick={() => onActionInpaint(msg.imageUrl!)}
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionInpaint(msg.imageUrl!); }}
                                                     title={t('chat.actionInpaint')}
                                                 >
                                                     🖌
                                                 </button>
                                                 <button
                                                     className="result-action-btn"
-                                                    onClick={() => onActionFaceSwap(msg.imageUrl!)}
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionFaceSwap(msg.imageUrl!); }}
                                                     title={t('chat.actionFaceSwap')}
                                                 >
                                                     🔄
                                                 </button>
                                                 <button
                                                     className="result-action-btn"
-                                                    onClick={() => onActionRegenerate(msg.imageUrl!, msg.content.replace(/^Generated from: "(.*)"$/, '$1'))}
+                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionRegenerate(msg.imageUrl!, msg.content.replace(/^Generated from: "(.*)"$/, '$1')); }}
                                                     title={t('actions.regenerate')}
                                                 >
                                                     🔃

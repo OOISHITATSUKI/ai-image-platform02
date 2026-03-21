@@ -95,15 +95,15 @@ const COMPOSITION_NEGATIVE_MAP: Record<string, string> = {
 };
 
 const FETISH_MAP: Record<string, string> = {
-    fellatio: '(fellatio:1.5), (oral sex:1.4), (blowjob:1.4), kneeling, mouth open, (penis in mouth:1.3), looking up at viewer, hands on thighs, submissive pose, from above angle',
-    cowgirl: '(girl on top:1.5), (straddling:1.5), (riding:1.4), (woman on top sex position:1.4), sitting on lap, legs apart, hips grinding, face to face, front view, (vaginal penetration:1.3), intimate',
-    insertion: '(vaginal penetration:1.5), (sex:1.5), (insertion:1.4), spread legs, (penis inside:1.3), moaning expression, arched back, intimate contact, sweat',
-    kiss: '(passionate kissing:1.5), (deep kiss:1.4), (tongue kiss:1.3), lips touching, eyes closed, embracing, holding each other, romantic, face closeup, intertwined bodies',
-    missionary: '(missionary position:1.5), (lying on back:1.4), (legs spread:1.4), (man on top:1.3), arms around neck, bed, pillow, from above angle, eye contact, intimate',
-    doggy: '(doggy style:1.5), (from behind:1.5), (bent over:1.4), (rear view:1.3), on all fours, hands on hips, back arched, ass up, face down, looking back',
-    standing: '(standing sex:1.5), (standing position:1.4), (leg lifted:1.3), against wall, one leg up, arms around shoulders, face to face, full body, upright penetration',
-    handjob: '(handjob:1.5), (hand on penis:1.4), (stroking:1.3), fingers wrapped around shaft, sitting beside, looking at viewer, gentle grip, arm extended',
-    paizuri: '(paizuri:1.5), (titfuck:1.5), (breasts around penis:1.4), (breast squeeze:1.3), pressing breasts together, cleavage, looking down, kneeling, penis between breasts',
+    fellatio: '(fellatio:1.7), (oral sex:1.6), (blowjob:1.5), (penis in mouth:1.5), (sucking:1.4), kneeling between legs, mouth wide open, tongue out, looking up at viewer, hands on thighs, head between legs, (from above angle:1.3), saliva',
+    cowgirl: '(girl on top:1.7), (straddling:1.6), (riding position:1.6), (woman on top sex:1.5), (sitting on penis:1.5), legs apart straddling hips, hips grinding down, (vaginal penetration:1.5), bouncing, hands on chest, face to face, front view, sweat',
+    insertion: '(vaginal penetration:1.7), (sex:1.7), (penis inside vagina:1.6), (insertion:1.5), (spread legs:1.4), hips touching, bodies pressed together, moaning expression, arched back, sweat, intimate skin contact',
+    kiss: '(passionate kissing:1.5), (deep kiss:1.4), (tongue kiss:1.3), (two distinct faces in profile:1.4), (side view of faces:1.3), lips touching, eyes closed, embracing tightly, holding each other, romantic, (two separate heads:1.3), upper body shot',
+    missionary: '(missionary position:1.7), (missionary sex:1.7), (woman lying on back:1.6), (man on top of woman:1.6), (legs spread wide:1.5), (between her legs:1.5), (vaginal penetration:1.5), hips between thighs, arms wrapped around man, ankles crossed behind back, bed sheets, pillow, from above angle, eye contact, skin contact',
+    doggy: '(doggy style sex:1.7), (from behind:1.7), (rear entry:1.6), (bent over:1.6), (on all fours:1.5), (ass up face down:1.5), hands gripping hips, back arched deeply, (rear view:1.4), knees on bed, looking back over shoulder, sweat on back',
+    standing: '(standing sex:1.7), (standing penetration:1.6), (leg lifted up:1.5), (pressed against wall:1.5), one leg hooked around waist, arms around shoulders, face to face, full body, upright position, (wall sex:1.4), weight against wall',
+    handjob: '(handjob:1.7), (hand on penis:1.6), (stroking penis:1.5), (fingers wrapped around shaft:1.4), pumping motion, sitting beside, looking at viewer, arm extended, wrist motion',
+    paizuri: '(paizuri:1.7), (titfuck:1.7), (penis between breasts:1.6), (breast squeeze:1.5), (breasts wrapped around shaft:1.5), pressing breasts together with hands, cleavage, looking down at penis, kneeling position',
 };
 
 export interface TagPromptResult {
@@ -153,10 +153,10 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
         tags.fetish.forEach((f) => {
             if (FETISH_MAP[f]) highPriorityParts.push(FETISH_MAP[f]);
         });
-        // If action requires 2 people but count is 1, auto-imply
+        // If action requires 2 people, auto-imply male+female couple
         const requiresTwoPeople = ['fellatio', 'cowgirl', 'insertion', 'kiss', 'missionary', 'doggy', 'standing', 'handjob', 'paizuri'];
-        if (tags.fetish.some(f => requiresTwoPeople.includes(f)) && (!tags.peopleCount || tags.peopleCount === '1')) {
-            highPriorityParts.push('(1boy:1.2), (1girl:1.2), (couple:1.2)');
+        if (tags.fetish.some(f => requiresTwoPeople.includes(f))) {
+            highPriorityParts.push('(1boy:1.4), (1girl:1.3), (couple:1.4), (man and woman:1.3), (2people:1.3)');
         }
     }
 
@@ -165,11 +165,13 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
     const hasCouple = tags.fetish.length > 0 && tags.fetish.some(f =>
         ['fellatio', 'cowgirl', 'insertion', 'kiss', 'missionary', 'doggy', 'standing', 'handjob', 'paizuri'].includes(f)
     );
-    if (tags.peopleCount === '2') {
+    if (hasCouple) {
+        // Couple action already added 1boy+1girl tags in high priority — skip conflicting people tags
+    } else if (tags.peopleCount === '2') {
         characterParts.push('(2girls:1.4), (two women:1.3)');
     } else if (tags.peopleCount === 'multiple') {
         characterParts.push('(multiple girls:1.4), (group:1.3), several women');
-    } else if (tags.peopleCount === '1' && !hasCouple) {
+    } else if (tags.peopleCount === '1') {
         characterParts.push('(1girl:1.2), solo');
     }
 

@@ -60,12 +60,54 @@ export async function GET(request: NextRequest) {
                 type: img.image_type || 'jpeg',
             }));
 
-            // Skip face merge in status endpoint — it blocks the poll response for 30+ seconds.
-            // Face merge is already handled in the main generate route for face_swap mode.
+            // Apply face merge for txt2img + MyFace (selectedFaceImageUrl)
+            // Face swap mode is already handled in the main generate route, but txt2img
+            // with MyFace needs post-processing here after the image is generated.
             let finalImages = images;
             const metadata = taskMetadataStore.get(taskId);
             if (metadata?.selectedFaceImageUrl) {
-                console.log('Status endpoint: Skipping face merge (handled by generate route). Returning original images.');
+                try {
+                    console.log('Status endpoint: Applying MyFace merge to generated images...');
+                    let faceBase64 = '';
+                    const faceUrl = metadata.selectedFaceImageUrl;
+                    if (faceUrl.startsWith('data:')) {
+                        faceBase64 = faceUrl.replace(/^data:image\/\w+;base64,/, '');
+                    } else {
+                        const faceRes = await fetch(faceUrl);
+                        const faceBuf = await faceRes.arrayBuffer();
+                        faceBase64 = Buffer.from(faceBuf).toString('base64');
+                    }
+
+                    const mergedResults = await Promise.all(
+                        images.map(async (img: { url: string; type: string }) => {
+                            // Try face swap with up to 2 retries for multi-face images
+                            for (let attempt = 1; attempt <= 2; attempt++) {
+                                try {
+                                    const bodyRes = await fetch(img.url);
+                                    const bodyBuf = await bodyRes.arrayBuffer();
+                                    const bodyBase64 = Buffer.from(bodyBuf).toString('base64');
+                                    const swapped = await handleFaceSwapFinal(faceBase64, bodyBase64);
+                                    console.log(`MyFace merge succeeded (attempt ${attempt})`);
+                                    return swapped[0]; // { url, type }
+                                } catch (e) {
+                                    const errMsg = e instanceof Error ? e.message : String(e);
+                                    console.error(`MyFace merge attempt ${attempt} failed:`, errMsg);
+                                    if (attempt >= 2) {
+                                        console.warn('MyFace merge: returning original after retries (may be multi-face image)');
+                                        return img;
+                                    }
+                                    // Brief pause before retry
+                                    await new Promise(r => setTimeout(r, 500));
+                                }
+                            }
+                            return img;
+                        })
+                    );
+                    finalImages = mergedResults;
+                    console.log('Status endpoint: MyFace merge complete.');
+                } catch (e) {
+                    console.error('Status endpoint: MyFace merge failed, returning originals:', e);
+                }
             }
 
             // Clean up metadata

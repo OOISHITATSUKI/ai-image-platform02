@@ -46,9 +46,11 @@ export default function InpaintModal({ imageUrl, onClose, onSave }: InpaintModal
         let scale = 1;
 
         if (isMobile) {
-            // Force full viewport width, height follows aspect ratio
+            // Fit entire image within viewport (no scrolling needed)
             const containerWidth = window.innerWidth;
-            scale = containerWidth / imageWidth;
+            // Estimate header (~44px) + notice (~40px) + footer (~120px) + padding
+            const availableHeight = window.innerHeight - 220;
+            scale = Math.min(containerWidth / imageWidth, availableHeight / imageHeight);
         } else {
             // PC: fit within container while capping scale at 1.0
             const containerWidth = container.clientWidth;
