@@ -214,50 +214,6 @@ export default function LeftPanel({
         setReposeMode(false);
     };
 
-    // During generation, replace entire panel with generating card
-    // Read directly from store to avoid stale prop
-    const storeIsGenerating = useAppStore((s) => s.isGenerating);
-    if (storeIsGenerating) {
-        return (
-            <aside className="editor-left-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', padding: '24px' }}>
-                <div style={{
-                    background: 'linear-gradient(135deg, #1a1030, #1a1a2e)',
-                    border: '2px solid #7c5cfc',
-                    borderRadius: '16px',
-                    padding: '40px 24px',
-                    textAlign: 'center',
-                    boxShadow: '0 0 30px rgba(124,92,252,0.3)',
-                    animation: 'pulse-border 2s ease-in-out infinite',
-                    width: '100%',
-                    maxWidth: '360px',
-                }}>
-                    <div style={{
-                        width: 56, height: 56, margin: '0 auto 20px',
-                        border: '4px solid rgba(124,92,252,0.2)',
-                        borderTopColor: '#7c5cfc',
-                        borderRadius: '50%',
-                        animation: 'spin 0.8s linear infinite',
-                    }} />
-                    <p style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px' }}>
-                        ⏳ Generating...
-                    </p>
-                    <p style={{ color: '#a78bfa', fontSize: '0.9rem', margin: '0 0 16px' }}>
-                        AI is creating your image
-                    </p>
-                    <div style={{
-                        background: 'rgba(124,92,252,0.15)',
-                        borderRadius: '8px',
-                        padding: '10px 20px',
-                        display: 'inline-block',
-                    }}>
-                        <span style={{ color: '#c4b5fd', fontSize: '0.82rem' }}>
-                            ⏱ Estimated: 15–40 seconds
-                        </span>
-                    </div>
-                </div>
-            </aside>
-        );
-    }
 
     return (
         <aside className="editor-left-panel">

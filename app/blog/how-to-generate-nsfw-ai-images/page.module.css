@@ -113,6 +113,24 @@
   text-transform: uppercase; color: #444444; margin-bottom: 8px;
 }
 
+/* IMAGES */
+.htg-figure {
+  margin: 28px 0;
+}
+.htg-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #2a1515;
+}
+.htg-caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #666666;
+  text-align: center;
+  font-style: italic;
+}
+
 /* TIPS */
 .htg-tip-box {
   background: rgba(229, 52, 42, 0.12);
@@ -171,7 +189,7 @@
 }
 .htg-platform-cta {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #e5342a; color: white;
+  background: #e5342a; color: white !important;
   padding: 10px 20px; border-radius: 8px;
   font-size: 14px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
@@ -201,7 +219,7 @@
 .htg-bottom-cta p { color: #888888; margin-bottom: 24px; }
 .htg-bottom-cta-link {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #e5342a; color: white;
+  background: #e5342a; color: white !important;
   padding: 14px 32px; border-radius: 10px;
   font-size: 16px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
@@ -231,7 +249,7 @@
 .htg-sidebar-cta h4 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
 .htg-sidebar-cta p { font-size: 13px; color: #888888; margin-bottom: 16px; }
 .htg-sidebar-cta-link {
-  display: block; background: #e5342a; color: white;
+  display: block; background: #e5342a; color: white !important;
   padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
 }
@@ -282,5 +300,8 @@
   .htg-bottom-cta h3 { font-size: 20px; }
   .htg-bottom-cta p { font-size: 14px; }
   .htg-bottom-cta-link { display: flex; justify-content: center; width: 100%; box-sizing: border-box; }
+  .htg-figure { margin: 20px 0; }
+  .htg-img { border-radius: 8px; }
+  .htg-caption { font-size: 12px; }
   .htg-footer { padding: 24px 16px; }
 }

@@ -154,7 +154,7 @@
 .ctaBlock p { font-size: 15px; color: var(--muted); margin-bottom: 22px; }
 .ctaBtn {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--primary); color: white;
+  background: var(--primary); color: white !important;
   padding: 14px 32px; border-radius: 10px;
   font-size: 15px; font-weight: 600; text-decoration: none;
   transition: background 0.2s;
@@ -177,7 +177,7 @@
 .sctaTitle { font-family: 'DM Serif Display', serif; font-size: 17px; margin-bottom: 8px; color: var(--text); }
 .scta p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 .sctaLink {
-  display: block; background: var(--primary); color: white;
+  display: block; background: var(--primary); color: white !important;
   padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
 }

@@ -22,12 +22,12 @@ const ldJsonFaq = {
     {
       '@type': 'Question',
       name: 'What is the best AI portrait generator for realistic faces?',
-      acceptedAnswer: { '@type': 'Answer', text: 'The best AI portrait generators for realistic faces in 2025 are HelloWorld XL 7.0 (especially for Asian faces), Juggernaut XL V11 (best all-around realism), and RealVisXL V5.0 (studio portrait style). All three are SDXL-based models that excel at photorealistic facial detail.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'Image Nude using HelloWorld XL or Juggernaut XL produces the most photorealistic portrait results in 2025 — especially for Asian and European female subjects with detailed skin texture.' },
     },
     {
       '@type': 'Question',
-      name: 'How do I make AI portraits more realistic?',
-      acceptedAnswer: { '@type': 'Answer', text: 'To make AI portraits more realistic, use SDXL models at 1024px or higher resolution, add skin detail keywords like subsurface scattering and realistic skin pores, specify professional lighting (Rembrandt, butterfly, or split lighting), and include a strong negative prompt to prevent artifacts.' },
+      name: 'How do I make AI portraits look more realistic?',
+      acceptedAnswer: { '@type': 'Answer', text: 'Add RAW photo, photorealistic, and detailed skin texture to your prompt. Specify lighting precisely. Include subsurface scattering and realistic skin pores for natural skin rendering. Always use 1024px or higher resolution with SDXL models.' },
     },
   ],
 };
@@ -37,9 +37,9 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className={styles.faqItem}>
       <div className={styles.faqQ} onClick={() => setOpen(!open)}>
-        {question} <span className={styles.faqToggle}>{open ? '\u2212' : '+'}</span>
+        {question} <span>{open ? '\u2212' : '+'}</span>
       </div>
-      {open && <div className={`${styles.faqA} ${styles.faqAOpen}`}>{answer}</div>}
+      {open && <div className={styles.faqA}>{answer}</div>}
     </div>
   );
 }
@@ -76,160 +76,152 @@ export default function AiPortraitGeneratorRealisticFacesPage() {
             <h1 className={styles.h1}>Best AI Portrait Generator for Realistic Faces 2025</h1>
 
             <p className={styles.lede}>
-              Photorealistic AI faces have become indistinguishable from real photography &mdash; when you use the right tools and the right prompts. This guide covers everything you need to generate stunning, lifelike AI portraits consistently.
+              Photorealistic AI portraits now pass for real photography &mdash; when you use the right models and prompts. This guide covers exactly which models produce the best face results, how to write prompts that get there, and why lighting is the variable most people ignore.
             </p>
 
             {/* Why Faces Are Hard */}
-            <h2 id="why-faces-are-hard">Why Realistic Faces Are the Hardest Thing to Generate</h2>
-            <p>Humans are hardwired to detect facial imperfections. We notice a slightly asymmetric eye, an oddly textured patch of skin, or an unnatural catchlight faster than any other visual artifact. This is why AI-generated faces fall into the <strong>uncanny valley</strong> more easily than any other subject.</p>
-            <p>Early diffusion models struggled with faces constantly &mdash; warped eyes, melted skin, extra teeth. In 2025, the best SDXL-based models have largely solved these issues, but only when you use the right model, the right resolution, and the right prompt structure. Get any one of those wrong and the uncanny valley pulls you right back in.</p>
+            <h2 id="why-faces-are-hard">Why Realistic Faces Trip Up Most AI Generators</h2>
+            <p>Human brains have a dedicated system for detecting face anomalies &mdash; it&apos;s why the uncanny valley effect hits so hard. Eyes slightly too far apart, skin that looks plastic, a jaw that&apos;s off by a few degrees &mdash; any of these instantly reads as &ldquo;AI&rdquo; to any viewer, even one who couldn&apos;t articulate why.</p>
+            <p>Beating this requires the right model, the right resolution, and specific prompt language for skin and lighting. All three matter equally. Fix two out of three and results still look generated.</p>
 
             {/* Best Models */}
-            <h2 id="best-models">Best Models for Realistic Face Generation</h2>
+            <h2 id="best-models">The Models That Actually Deliver Realistic Faces</h2>
 
             <div className={styles.modelCard}>
               <div className={styles.modelName}>HelloWorld XL 7.0</div>
-              <div className={styles.modelBest}>Best for: Asian faces, K-beauty style, ultra-realistic skin</div>
-              <p>HelloWorld XL is the go-to model for generating Asian faces with stunning realism. The skin rendering is exceptionally detailed &mdash; pores, subsurface scattering, and natural color variation are all handled beautifully. If your focus is K-beauty or J-beauty aesthetics, this model is unmatched.</p>
+              <div className={styles.modelBest}>Best for: East Asian faces, K-beauty style, ultra-realistic skin texture</div>
+              <p>Purpose-built for East Asian facial features. Skin texture, natural makeup looks, and overall photographic quality are noticeably better than general-purpose models on Korean and Japanese subjects. Image Nude runs this as the primary model for Asian portrait generation.</p>
             </div>
 
             <div className={styles.modelCard}>
               <div className={styles.modelName}>Juggernaut XL V11</div>
-              <div className={styles.modelBest}>Best for: All ethnicities, photographic realism, versatility</div>
-              <p>Juggernaut XL is the most versatile realistic model available. It handles all ethnicities well, produces natural lighting, and excels at both close-up portraits and full-body shots. If you only use one model, this is the one to pick.</p>
+              <div className={styles.modelBest}>Best for: All ethnicities, versatile photorealistic results</div>
+              <p>The most versatile photorealistic model available in 2025. Handles diverse ethnicities consistently, with excellent natural lighting rendering and subtle skin imperfections that make results feel authentic rather than generated.</p>
             </div>
 
             <div className={styles.modelCard}>
               <div className={styles.modelName}>RealVisXL V5.0</div>
-              <div className={styles.modelBest}>Best for: Studio portrait style, sharp detail, professional look</div>
-              <p>RealVisXL produces images that look like they came from a professional photography studio. Sharp focus, clean skin, and excellent contrast make it ideal for headshots and editorial-style portraits. It&apos;s slightly less organic than Juggernaut but makes up for it with clarity.</p>
+              <div className={styles.modelBest}>Best for: Clean studio portrait style, editorial look</div>
+              <p>Sharp, clean results with a professional photography aesthetic. Strong for beauty portraits where crisp detail matters more than organic texture.</p>
             </div>
 
             <div className={styles.tip}>
-              <p><strong>Tip:</strong> Model selection matters more than any other single factor for face realism. Experiment with all three models using the same prompt to see which aesthetic matches your vision best.</p>
+              <p><strong>💡 Model selection:</strong> For Asian subjects, HelloWorld XL is the clear choice. For everything else or when you need to cover multiple ethnicities, Juggernaut XL is the safer default. Both run on Image Nude without any setup.</p>
             </div>
 
             {/* Resolution */}
-            <h2 id="resolution">Resolution and Quality Settings</h2>
+            <h2 id="resolution">Resolution: The Setting Most People Get Wrong</h2>
 
             <div className={styles.compareWrap}>
               <table className={styles.table}>
                 <thead>
                   <tr>
                     <th className={styles.th}>Resolution</th>
-                    <th className={styles.th}>Aspect</th>
                     <th className={styles.th}>Face Quality</th>
+                    <th className={styles.th}>Notes</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className={styles.td}>512 &times; 512</td>
-                    <td className={styles.td}>1:1</td>
+                    <td className={styles.tdH}>512 &times; 512</td>
                     <td className={`${styles.td} ${styles.no}`}>Poor</td>
+                    <td className={styles.td}>Never use for portraits</td>
                   </tr>
                   <tr>
-                    <td className={styles.td}>768 &times; 1024</td>
-                    <td className={styles.td}>3:4</td>
+                    <td className={styles.tdH}>768 &times; 1024</td>
                     <td className={`${styles.td} ${styles.mid}`}>Acceptable</td>
+                    <td className={styles.td}>SD1.5 models only</td>
                   </tr>
                   <tr>
-                    <td className={styles.td}>1024 &times; 1024</td>
-                    <td className={styles.td}>1:1</td>
+                    <td className={styles.tdH}>1024 &times; 1024</td>
                     <td className={`${styles.td} ${styles.ok}`}>Good</td>
+                    <td className={styles.td}>SDXL standard</td>
                   </tr>
                   <tr>
-                    <td className={styles.td}>1024 &times; 1536</td>
-                    <td className={styles.td}>2:3</td>
+                    <td className={styles.tdH}>1024 &times; 1536</td>
                     <td className={`${styles.td} ${styles.ok}`}>Excellent</td>
-                  </tr>
-                  <tr>
-                    <td className={styles.td}>1536 &times; 1024</td>
-                    <td className={styles.td}>3:2</td>
-                    <td className={`${styles.td} ${styles.ok}`}>Excellent</td>
+                    <td className={styles.td}>SDXL portrait orientation</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <p>SDXL models are natively trained at 1024px. Generating below that resolution forces the model to work outside its training distribution, resulting in softer features and more artifacts &mdash; especially around eyes and mouths. Always generate at 1024px or above for portrait work.</p>
+            <p>SDXL models &mdash; HelloWorld XL, Juggernaut XL, RealVisXL &mdash; <strong>need native 1024px resolution</strong> to produce quality results. Drop below that and quality degrades sharply, regardless of how well-written the prompt is.</p>
 
             {/* Prompt Structure */}
             <h2 id="prompt-anatomy">Portrait Prompt Structure</h2>
+            <p>Portraits need more face-specific language than general image generation. Follow this structure:</p>
 
             <div className={styles.promptBox}>
-              <span className={styles.promptLabel}>Portrait Prompt Template</span>
-              [subject &amp; ethnicity], [age], [facial features], [hair], [expression], [pose], [clothing or state], [background], [lighting], [quality tags]
+              <span className={styles.promptLabel}>Realistic Portrait Template</span>
+              [subject + age + ethnicity], [specific facial features], [hair description], [expression], [head angle], [lighting type], [background], RAW photo, photorealistic, 8k uhd, detailed skin texture, sharp focus, professional portrait photography, subsurface scattering, realistic skin pores
             </div>
 
-            <h3>Facial Feature Keywords That Work</h3>
+            <h3>Face-Specific Keywords That Work</h3>
             <ul>
-              <li><strong>Eyes:</strong> detailed iris, eye reflection, natural catchlight, almond-shaped eyes, expressive eyes</li>
-              <li><strong>Lips:</strong> natural lip color, slightly parted lips, glossy lips, soft lip texture</li>
-              <li><strong>Skin:</strong> realistic skin pores, subsurface scattering, natural skin texture, skin imperfections, freckles</li>
-              <li><strong>Face shape:</strong> high cheekbones, defined jawline, soft facial contours, oval face, heart-shaped face</li>
+              <li><strong>Eyes:</strong> &ldquo;almond-shaped eyes&rdquo;, &ldquo;bright expressive eyes&rdquo;, &ldquo;natural eye makeup&rdquo;, &ldquo;catchlights&rdquo;</li>
+              <li><strong>Lips:</strong> &ldquo;full lips&rdquo;, &ldquo;natural lip color&rdquo;, &ldquo;subtle smile&rdquo;, &ldquo;soft expression&rdquo;</li>
+              <li><strong>Skin:</strong> &ldquo;flawless skin&rdquo;, &ldquo;natural skin texture&rdquo;, &ldquo;warm complexion&rdquo;, &ldquo;subtle freckles&rdquo;</li>
+              <li><strong>Face structure:</strong> &ldquo;high cheekbones&rdquo;, &ldquo;defined jawline&rdquo;, &ldquo;oval face&rdquo;, &ldquo;soft features&rdquo;</li>
             </ul>
 
             {/* Lighting */}
-            <h2 id="lighting-for-faces">Lighting: The Most Important Variable</h2>
-            <p>Lighting makes or breaks portrait realism. The right lighting keywords tell the AI exactly how light should fall across facial features, creating depth and dimension that separates photorealistic results from flat, artificial-looking ones.</p>
+            <h2 id="lighting-for-faces">Lighting Is the Most Underused Variable</h2>
+            <p>Lighting changes the entire feel of a portrait &mdash; and most users either skip it entirely or use generic phrases like &ldquo;good lighting.&rdquo; Here&apos;s what actually works:</p>
 
             <div className={styles.promptBox}>
-              <span className={styles.promptLabel}>Lighting Options for Portraits</span>
-              Rembrandt lighting, dramatic triangle shadow on cheek<br />
-              butterfly lighting, soft shadow under nose, beauty lighting<br />
-              split lighting, half face in shadow, moody dramatic<br />
-              golden hour side lighting, warm tones, natural outdoor<br />
-              soft diffused window light, overcast, gentle even illumination
+              <span className={styles.promptLabel}>Lighting Prompts That Produce Realistic Results</span>
+              soft natural window light, diffused daylight &mdash; most universally flattering<br /><br />
+              Rembrandt lighting, one side lit, dramatic shadows &mdash; editorial / artistic<br /><br />
+              studio softbox lighting, even illumination, catchlights in eyes &mdash; professional look<br /><br />
+              golden hour sunlight, warm rim light, outdoor cinematic &mdash; warm and cinematic<br /><br />
+              ring light, flat even lighting, beauty photography &mdash; social media aesthetic
             </div>
 
             {/* Skin Realism */}
-            <h2 id="skin-realism">Getting Realistic Skin</h2>
-            <p>Skin is the biggest giveaway in AI portraits. Overly smooth, plastic-looking skin instantly breaks the illusion. Use these keywords to push the model toward natural skin rendering:</p>
+            <h2 id="skin-realism">Five Prompt Additions That Fix Plastic-Looking Skin</h2>
 
-            <div className={styles.checklist}>
-              <div className={styles.checkItem}><span className={styles.check}>&#10003;</span> subsurface scattering</div>
-              <div className={styles.checkItem}><span className={styles.check}>&#10003;</span> realistic skin pores</div>
-              <div className={styles.checkItem}><span className={styles.check}>&#10003;</span> natural skin imperfections</div>
-              <div className={styles.checkItem}><span className={styles.check}>&#10003;</span> RAW photo</div>
-              <div className={styles.checkItem}><span className={styles.check}>&#10003;</span> skin texture detail</div>
-            </div>
-
-            <p>Combine these with a strong negative prompt to prevent the AI from reverting to its default smooth-skin tendency:</p>
+            <ul className={styles.checklist}>
+              <li><span className={styles.check}>&#10003;</span><span><strong>subsurface scattering</strong> &mdash; makes skin look translucent and alive, not like painted plastic</span></li>
+              <li><span className={styles.check}>&#10003;</span><span><strong>realistic skin pores</strong> &mdash; fine texture detail that reads as genuinely human</span></li>
+              <li><span className={styles.check}>&#10003;</span><span><strong>natural skin imperfections</strong> &mdash; subtle variation that prevents the &ldquo;too perfect&rdquo; AI look</span></li>
+              <li><span className={styles.check}>&#10003;</span><span><strong>RAW photo</strong> &mdash; signals the model to prioritize photographic realism over illustrated quality</span></li>
+              <li><span className={styles.check}>&#10003;</span><span><strong>skin texture detail</strong> &mdash; broad instruction to render fine skin structure throughout</span></li>
+            </ul>
 
             <div className={`${styles.promptBox} ${styles.promptNeg}`}>
-              <span className={styles.promptLabel}>Negative Prompt for Skin</span>
-              plastic skin, airbrushed, smooth skin, blurry, overexposed, cartoon, anime, painting, illustration, cgi, 3d render, doll-like, wax figure, deformed face, bad anatomy
+              <span className={styles.promptLabel}>Negative Prompt for Portraits</span>
+              plastic skin, smooth skin, airbrushed, deformed, bad anatomy, ugly, blurry, low quality, watermark, extra fingers, bad eyes, asymmetrical face, cartoon, anime, illustration, 3d render, cgi, overexposed, underexposed
             </div>
 
             {/* Face Consistency */}
-            <h2 id="face-consistency">Saving and Reusing Faces</h2>
-            <p>Once you generate a face you love, you don&apos;t want to lose it. AI image generators produce a new random face every time &mdash; even with the exact same prompt. Face-saving technology solves this by extracting facial geometry from your best generation and reapplying it to every future image.</p>
-            <p>On Image Nude, you can save faces directly from your generated images and reuse them across unlimited scenes, poses, and settings &mdash; your character stays consistent while everything else changes.</p>
+            <h2 id="face-consistency">Save Faces You Want to Reuse</h2>
+            <p>Generate a face you love once &mdash; lose it on the next run. Every portrait user hits this problem. Image Nude&apos;s face-saving feature registers any generated face and lets you apply it to new generations instantly, without losing what made the original work.</p>
             <ul>
-              <li><strong>Free plan:</strong> Save 1 face, register from generated images only</li>
-              <li><strong>Paid plan:</strong> Save up to 10 faces, upload external images as face references</li>
+              <li><strong>Free plan:</strong> Save 1 face from generated images</li>
+              <li><strong>Paid plan:</strong> Save up to 10 faces, including from uploaded external images</li>
             </ul>
 
             {/* FAQ */}
-            <h2 id="faq">Frequently Asked Questions</h2>
+            <h2 id="faq">FAQ</h2>
 
             <FaqItem
               question="What is the best AI portrait generator for realistic faces?"
-              answer="The best AI portrait generators for realistic faces in 2025 are HelloWorld XL 7.0 (especially for Asian faces), Juggernaut XL V11 (best all-around realism), and RealVisXL V5.0 (studio portrait style). All three are SDXL-based models that excel at photorealistic facial detail."
+              answer="Image Nude with HelloWorld XL or Juggernaut XL produces the best photorealistic portrait results in 2025 — particularly for Asian and European female subjects with detailed skin texture rendering."
             />
             <FaqItem
-              question="How do I make AI portraits more realistic?"
-              answer="Use SDXL models at 1024px or higher resolution, add skin detail keywords like subsurface scattering and realistic skin pores, specify professional lighting (Rembrandt, butterfly, or split lighting), and include a strong negative prompt to prevent artifacts."
+              question="How do I make AI portraits look more realistic?"
+              answer="Add RAW photo, photorealistic, and detailed skin texture to your prompt. Specify lighting precisely. Include subsurface scattering and realistic skin pores. Always use 1024px minimum with SDXL models."
             />
             <FaqItem
-              question="Can I reuse the same AI face across different images?"
-              answer="Yes. Face-saving technology lets you extract facial geometry from a generated image and reapply it to every future generation. On Image Nude, free users can save 1 face and paid users can save up to 10."
+              question="Why do AI faces look fake?"
+              answer='The most common causes: resolution too low (use 1024px minimum), missing skin detail prompts (add subsurface scattering, realistic pores), wrong model (SDXL models only for portraits), or over-smoothed skin from not including "natural skin imperfections".'
             />
 
             {/* CTA */}
             <div className={styles.ctaBlock}>
               <h3>Generate Photorealistic Portraits Free</h3>
-              <p>20 free credits on signup. HelloWorld XL + Juggernaut XL included.</p>
+              <p>20 free credits on signup. HelloWorld XL and Juggernaut XL included.</p>
               <Link href="/register" className={styles.ctaBtn}>Start Free &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
             </div>

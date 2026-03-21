@@ -1,27 +1,49 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: "How to Generate NSFW AI Images: A Complete Beginner's Guide (2025)",
-  description: 'Step-by-step guide to generating high-quality NSFW AI images. Learn prompting techniques, the best tools, and how to get realistic results every time.',
+  title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations',
+  description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images' },
+  openGraph: {
+    title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations',
+    description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
+    url: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images',
+    siteName: 'Image Nude',
+    type: 'article',
+  },
 };
 
-const ldJson = {
-  '@context': 'https://schema.org',
-  '@type': 'HowTo',
-  name: 'How to Generate NSFW AI Images',
-  description: "Complete beginner's guide to generating high-quality NSFW AI images using AI tools.",
-  step: [
-    { '@type': 'HowToStep', name: 'Choose the right AI platform', text: 'Select a dedicated NSFW AI platform that supports adult content generation.' },
-    { '@type': 'HowToStep', name: 'Create your account', text: 'Sign up and verify your age. Look for platforms offering free credits.' },
-    { '@type': 'HowToStep', name: 'Write your prompt', text: 'Use descriptive prompts with style, subject, and quality keywords.' },
-    { '@type': 'HowToStep', name: 'Adjust generation settings', text: 'Set model, resolution, and style presets for your desired result.' },
-    { '@type': 'HowToStep', name: 'Generate and refine', text: 'Generate, review, and use inpainting or regeneration to refine results.' },
-  ],
-};
+const IMG = '/images/blog/nsfw-guide';
+
+const ldJson = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations',
+    datePublished: '2026-03-21',
+    dateModified: '2026-03-21',
+    author: { '@type': 'Organization', name: 'Image Nude' },
+    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
+    description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Generate NSFW AI Images',
+    description: 'Complete guide to generating high-quality NSFW AI images using AI tools.',
+    step: [
+      { '@type': 'HowToStep', name: 'Learn the basics', text: 'Understand the three main types: text-to-image, undress/inpaint, and face swap.' },
+      { '@type': 'HowToStep', name: 'Master prompts and tags', text: 'Write effective prompts and use character tags for consistent, high-quality results.' },
+      { '@type': 'HowToStep', name: 'Choose the right model', text: 'Understand the differences between SD1.5 and SDXL models.' },
+      { '@type': 'HowToStep', name: 'Use undress/inpaint mode', text: 'Upload a photo, paint over clothing, and let AI generate realistic results.' },
+      { '@type': 'HowToStep', name: 'Use face swap', text: 'Combine face and body images with front-facing photos for best results.' },
+    ],
+  },
+];
 
 export default function HowToGenerateNsfwPage() {
   return (
@@ -44,197 +66,198 @@ export default function HowToGenerateNsfwPage() {
 
             <div className={styles['htg-meta-row']}>
               <span className={styles['htg-tag']}>Guide</span>
-              <span className={styles['htg-meta-info']}>Updated March 2025 &middot; 10 min read</span>
+              <span className={styles['htg-meta-info']}>Updated March 2026 &middot; 10 min read</span>
             </div>
 
-            <h1 className={styles['htg-h1']}>How to Generate NSFW AI Images: A Complete Beginner&apos;s Guide</h1>
+            <h1 className={styles['htg-h1']}>How to Generate NSFW AI Images &mdash; What I Learned After 10,000+ Generations</h1>
 
             <p className={styles['htg-intro']}>
-              AI image generation has made it possible for anyone to create high-quality NSFW images — no artistic skill required.
-              This guide covers everything you need: how to choose the right tool, write effective prompts, and get the best possible results.
+              I&apos;ve generated over 10,000 AI images while building an NSFW AI platform. Along the way, I made every mistake possible &mdash; bad prompts, wrong models, wasted credits, and hours of trial and error. This guide is everything I wish someone had told me when I started. No generic advice &mdash; just the stuff that actually matters.
             </p>
 
-            {/* Step 1: Choosing Platform */}
-            <h2 id="choosing-platform">Step 1: Choosing the Right Platform</h2>
-            <p>Most mainstream AI image tools (Midjourney, DALL-E, Stable Diffusion via default interfaces) filter or block adult content. To generate NSFW images, you need a platform specifically designed for it.</p>
-            <p>There are three main types:</p>
+            {/* ───── The Basics ───── */}
+            <h2 id="basics">The Basics: What You Need to Know First</h2>
+            <p>Most mainstream AI tools (Midjourney, DALL-E) block adult content entirely. You need a dedicated NSFW platform. There are three main types of generation:</p>
+            <ul>
+              <li><strong>Text-to-image</strong> &mdash; Describe what you want, the AI creates it from scratch</li>
+              <li><strong>Undress / Inpaint</strong> &mdash; Upload a photo, paint over clothing, the AI replaces it with skin</li>
+              <li><strong>Face Swap</strong> &mdash; Combine one person&apos;s face with another person&apos;s body</li>
+            </ul>
+            <p>Some platforms do all three. Some only do one. If you&apos;re just starting out, pick a platform that combines them so you&apos;re not juggling multiple tools.</p>
+
+            {/* ───── Prompting ───── */}
+            <h2 id="prompting">The Prompt Problem (And What Nobody Tells You)</h2>
+            <p>Here&apos;s what I struggled with the most when I started: <strong>the balance between your prompt and the negative prompt.</strong> Most guides tell you to write a detailed positive prompt and slap on some negative keywords. But the reality is messier than that.</p>
+
+            <h3>&ldquo;Nude&rdquo; doesn&apos;t mean what you think</h3>
+            <p>My first prompt was something like <code>beautiful woman, nude, bedroom</code>. The result? A vaguely human shape with weird skin texture and a face that looked like it melted. Turns out, &ldquo;nude&rdquo; alone tells the AI almost nothing useful.</p>
+            <p>What works better:</p>
+
+            <div className={styles['htg-compare-grid']}>
+              <div className={`${styles['htg-compare-col']} ${styles['htg-bad-col']}`}>
+                <div className={styles['htg-compare-title-bad']}>Weak</div>
+                <div className={styles['htg-prompt-example']}>beautiful woman, naked, bedroom</div>
+              </div>
+              <div className={`${styles['htg-compare-col']} ${styles['htg-good-col']}`}>
+                <div className={styles['htg-compare-title-good']}>Better</div>
+                <div className={styles['htg-prompt-example']}>beautiful 25-year-old woman, long dark hair, athletic build, lying on white silk sheets, soft afternoon light, photorealistic, 8k, detailed skin texture, natural body proportions</div>
+              </div>
+            </div>
+
+            <p>The difference is that the second prompt gives the AI <em>context</em> &mdash; lighting, setting, physical details, quality level. The more specific you are, the less the AI has to guess.</p>
+
+            <h3>But there&apos;s an even easier way: use tags</h3>
+            <p>Writing long, detailed prompts works, but it&apos;s tedious. What I found is that <strong>combining a simple prompt with visual tags is far more effective</strong> than trying to describe everything in text.</p>
+            <p>Here&apos;s a real example from Image Nude. I typed just one line:</p>
+            <div className={styles['htg-prompt-example']}>Men and women in swimsuits inside the hotel</div>
+            <p>With only that prompt, the result was vague &mdash; the AI didn&apos;t know what kind of person, what body type, what angle. It was a generic, forgettable image.</p>
+
+            <p>Then I kept the same prompt but added character tags &mdash; Ethnicity: Asian, Hair Color: Brown, Hair Style: Long Straight, Breast Size: Huge, Composition: Full Body, Scene: Bedroom.</p>
+
+            <figure className={styles['htg-figure']}>
+              <Image src={`${IMG}/imagenude-prompt-tags.png`} alt="Image Nude editor with character tags like Ethnicity, Hair Color, Breast Size applied alongside the prompt" width={760} height={428} className={styles['htg-img']} />
+              <figcaption className={styles['htg-caption']}>The same prompt with character tags produces a much more specific and higher-quality result.</figcaption>
+            </figure>
+
+            <p>The difference is night and day. The tags give the AI the specifics that would take 50+ words to describe in a prompt. If the platform you&apos;re using supports tag-based input, <strong>use it.</strong> It&apos;s faster and more consistent than prompt engineering alone.</p>
+
+            <h3>The negative prompt is just as important</h3>
+            <p>This was my biggest &ldquo;aha moment.&rdquo; A great positive prompt with no negative prompt will still produce garbage. The negative prompt is what prevents the AI from generating nightmare hands, extra fingers, and melted faces.</p>
+            <p>My go-to negative prompt:</p>
+            <div className={styles['htg-prompt-example']}>
+              <span style={{ color: '#ff6b6b' }}>Negative prompt:</span> deformed, bad anatomy, ugly, blurry, low quality, watermark, text, extra fingers, mutated hands, poorly drawn face, cartoon, anime, painting, sketch
+            </div>
+
+            <div className={styles['htg-tip-box']}>
+              <p><strong>Key insight:</strong> <code>deformed fingers</code> is non-negotiable. Without it, about 30% of my generations had hands that looked like they belonged in a horror movie. With it, that drops to maybe 5%.</p>
+            </div>
+
+            <h3>Quality tags that actually matter</h3>
+            <p>Add these to any prompt and you&apos;ll see immediate improvement:</p>
+            <div className={styles['htg-prompt-example']}>masterpiece, best quality, ultra-realistic, photorealistic, 8k uhd, detailed skin texture, professional lighting, sharp focus, RAW photo</div>
+            <p>I tested dozens of quality tags and these are the ones that consistently make a difference. Tags like &ldquo;award-winning&rdquo; or &ldquo;trending on artstation&rdquo; don&apos;t seem to do much for NSFW content specifically.</p>
+
+            {/* ───── Models ───── */}
+            <h2 id="models">Models Matter More Than You Think</h2>
+
+            <h3>SD1.5 vs SDXL &mdash; not what I expected</h3>
+            <p>When SDXL came out, I assumed newer = better. I was wrong.</p>
+            <p><strong>SD1.5 actually produces cleaner results in many cases.</strong> The skin texture is smoother, the lighting is more natural, and there are fewer artifacts. SDXL is technically more powerful, but it requires more careful prompting to get good NSFW results.</p>
+            <p>That said, SDXL models have caught up significantly. The one I ended up using for most of my work is <strong>HelloWorld XL V7.0</strong> &mdash; it hits the sweet spot of realism without the weird &ldquo;AI shine&rdquo; that a lot of SDXL models have. It&apos;s particularly good at <strong>Asian faces</strong>, which most Western-trained models struggle with.</p>
+            <p>If you&apos;re just starting out, try both a SD1.5 and SDXL model with the same prompt and see which one you prefer. The &ldquo;best&rdquo; model is the one that matches the style you&apos;re going for.</p>
+
+            <h3>One thing to watch out for</h3>
+            <p>SD1.5 and SDXL models use <strong>different prompting syntax.</strong> Weighted prompts like <code>(beautiful:1.3)</code> work in SD1.5 but can break in SDXL. If you switch models and your results suddenly get worse, check if your prompt syntax is compatible.</p>
+
+            {/* ───── Undress / Inpaint ───── */}
+            <h2 id="undress-mode">Undress / Inpaint: What Actually Works</h2>
+            <p>Inpainting (also called &ldquo;undress mode&rdquo;) is where you upload a photo, paint over clothing, and the AI generates skin underneath. It&apos;s simple in theory but the results vary wildly depending on your source image.</p>
+            <p>Here&apos;s what it looks like in practice. You use a brush to paint over the clothing you want removed:</p>
+
+            <figure className={styles['htg-figure']}>
+              <Image src={`${IMG}/imagenude-inpaint-mask.png`} alt="Nude Mode brush tool in Image Nude — purple mask painted over clothing area" width={760} height={428} className={styles['htg-img']} />
+              <figcaption className={styles['htg-caption']}>Nude Mode in Image Nude &mdash; paint over clothing with the brush tool. The purple area is what the AI will regenerate.</figcaption>
+            </figure>
+
+            <p>And here&apos;s the result &mdash; the AI replaced the masked area with natural-looking skin:</p>
+
+            <figure className={styles['htg-figure']}>
+              <Image src={`${IMG}/imagenude-inpaint-result.png`} alt="Inpaint result showing AI-generated realistic skin matching the original image" width={760} height={428} className={styles['htg-img']} />
+              <figcaption className={styles['htg-caption']}>The AI generates realistic skin that matches the lighting and skin tone of the original image.</figcaption>
+            </figure>
+
+            <h3>The secret: source image quality is everything</h3>
+            <p>After hundreds of inpaint attempts, here&apos;s what I&apos;ve learned:</p>
+
+            <div className={styles['htg-compare-grid']}>
+              <div className={`${styles['htg-compare-col']} ${styles['htg-good-col']}`}>
+                <div className={styles['htg-compare-title-good']}>High success rate (80%+)</div>
+                <ul>
+                  <li>Clear, well-lit photos</li>
+                  <li>More skin already visible (bikini, tank top)</li>
+                  <li>Simple, uncluttered background</li>
+                  <li>High resolution (1024px+ recommended)</li>
+                </ul>
+              </div>
+              <div className={`${styles['htg-compare-col']} ${styles['htg-bad-col']}`}>
+                <div className={styles['htg-compare-title-bad']}>Low success rate (&lt;50%)</div>
+                <ul>
+                  <li>Dark or heavily filtered photos</li>
+                  <li>Full clothing coverage (winter coat, etc.)</li>
+                  <li>Complex backgrounds with multiple people</li>
+                  <li>Low resolution or heavily compressed images</li>
+                </ul>
+              </div>
+            </div>
+
+            <p>The counterintuitive thing is that <strong>images with more skin exposure produce better results.</strong> The AI has more context about the person&apos;s skin tone, lighting, and body proportions when there&apos;s already some skin visible.</p>
+
+            <div className={styles['htg-tip-box']}>
+              <p><strong>Pro tip:</strong> For images with a lot of clothing, running inpaint once often isn&apos;t enough. I get better results by running it 2&ndash;3 times, each time removing a bit more. It&apos;s slower, but the quality is noticeably better than trying to remove everything in one pass.</p>
+            </div>
+
+            {/* ───── Face Swap ───── */}
+            <h2 id="face-swap">Face Swap: The Angle Problem</h2>
+            <p>Face Swap is my favorite feature because it produces the most dramatic results. But there&apos;s a catch that nobody talks about.</p>
+
+            <figure className={styles['htg-figure']}>
+              <Image src={`${IMG}/imagenude-faceswap.png`} alt="Face Swap UI in Image Nude — Body image, Face image, and generated result side by side" width={760} height={428} className={styles['htg-img']} />
+              <figcaption className={styles['htg-caption']}>Face Swap in Image Nude &mdash; upload a Body image and a Face image, and the AI combines them.</figcaption>
+            </figure>
+
+            <h3>Front-facing photos only (seriously)</h3>
+            <p>I tested Face Swap extensively and here&apos;s the brutal truth:</p>
 
             <div className={styles['htg-table-wrap']}>
               <table className={styles['htg-table']}>
                 <thead>
-                  <tr><th>Type</th><th>Best For</th><th>Examples</th><th>Limitation</th></tr>
+                  <tr><th>Face</th><th>Body</th><th>Success Rate</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Text-to-image NSFW</td><td>Creating scenes from scratch</td><td>Image Nude, Promptchan</td><td>Requires prompt skill</td></tr>
-                  <tr><td>Undress / Inpaint tools</td><td>Editing uploaded photos</td><td>Image Nude</td><td>Photo quality matters</td></tr>
-                  <tr><td>Face Swap tools</td><td>Applying specific faces</td><td>Image Nude</td><td>Source face quality matters</td></tr>
+                  <tr><td>Front face</td><td>Front body</td><td style={{ color: '#63eb8b' }}>90%+</td></tr>
+                  <tr><td>Front face</td><td>Slight angle</td><td style={{ color: '#cccccc' }}>~70%</td></tr>
+                  <tr><td>Front face</td><td>Side angle</td><td style={{ color: '#f59e0b' }}>~50%</td></tr>
+                  <tr><td>Side face</td><td>Any body</td><td style={{ color: '#ef4444' }}>Unpredictable</td></tr>
                 </tbody>
               </table>
             </div>
 
-            <p>For most beginners, a platform that combines all three — like <Link href="/">Image Nude</Link> — is the best starting point. It removes the need to juggle multiple tools.</p>
+            <p>If both your face source and body target are front-facing with similar lighting, the result is almost always convincing. The moment you introduce angles, the AI struggles to match perspective.</p>
 
             <div className={styles['htg-tip-box']}>
-              <p><strong>&#x1F4A1; Privacy first:</strong> Before uploading any photos, check the platform&apos;s image retention policy. The best platforms (Image Nude) delete images within 1 hour. Some platforms retain images indefinitely.</p>
+              <p><strong>Lighting matters too:</strong> If your face photo was taken in warm indoor light and the body photo is in cool outdoor light, the skin tones won&apos;t match. Try to use photos with similar lighting conditions for best results.</p>
             </div>
 
-            {/* Step 2: Setting Up */}
-            <h2 id="getting-started">Step 2: Setting Up Your Account</h2>
+            {/* ───── Common Mistakes ───── */}
+            <h2 id="mistakes">Common Mistakes I Made (So You Don&apos;t Have To)</h2>
+            <ol>
+              <li><strong>Using the same prompt for different models.</strong> SD1.5 and SDXL handle prompts differently. What works for one may not work for the other.</li>
+              <li><strong>Ignoring the negative prompt.</strong> I spent weeks fine-tuning positive prompts before I realized the negative prompt was doing 50% of the work.</li>
+              <li><strong>Trying to inpaint low-quality images.</strong> Garbage in, garbage out. If the source photo is blurry or dark, no amount of AI magic will fix it.</li>
+              <li><strong>Not generating multiple variations.</strong> AI has randomness built in. The same prompt produces different results every time. I always generate at least 3&ndash;4 variations and pick the best one.</li>
+              <li><strong>Overthinking prompts.</strong> After a certain point, adding more keywords doesn&apos;t help. A focused 30-word prompt usually beats a 100-word essay.</li>
+            </ol>
 
-            <div className={styles['htg-step-block']}>
-              <div className={styles['htg-step-num']}>1</div>
-              <h3>Create Your Account</h3>
-              <p>Go to <Link href="/register">imagenude.com/register</Link>. Registration requires only an email address. You&apos;ll receive 20 free credits on signup — enough for 4 undress generations or 6 face swaps.</p>
-              <ul>
-                <li>No credit card required for the free tier</li>
-                <li>Consider using a dedicated email for privacy</li>
-                <li>You must be 18+ to use the service</li>
-              </ul>
-            </div>
-
-            <div className={styles['htg-step-block']}>
-              <div className={styles['htg-step-num']}>2</div>
-              <h3>Understand the Credit System</h3>
-              <p>Most AI image platforms use a credit system. Here&apos;s what to expect at Image Nude:</p>
-              <ul>
-                <li><strong>Text-to-image:</strong> 3 credits per generation</li>
-                <li><strong>Inpaint / Undress:</strong> 5 credits per generation</li>
-                <li><strong>Face Swap:</strong> 3 credits per swap</li>
-                <li><strong>Video generation:</strong> 10–15 credits per video</li>
-              </ul>
-            </div>
-
-            {/* Step 3: Prompting */}
-            <h2 id="prompting">Step 3: Writing Effective Prompts</h2>
-            <p>Prompt writing is the most important skill for AI image generation. The difference between a mediocre and exceptional result often comes down entirely to the prompt.</p>
-
-            <h3>The Basic Prompt Formula</h3>
-            <p>A good NSFW prompt follows this structure:</p>
-            <div className={styles['htg-prompt-example']}>
-              [Subject description] + [Physical appearance] + [Pose/Action] + [Setting/Background] + [Style/Quality tags]
-            </div>
-
-            <h3>Good vs. Bad Prompt Examples</h3>
-
-            <div className={styles['htg-compare-grid']}>
-              <div className={`${styles['htg-compare-col']} ${styles['htg-bad-col']}`}>
-                <div className={styles['htg-compare-title-bad']}>&#x274C; Weak Prompt</div>
-                <div className={styles['htg-prompt-example']}>beautiful woman, naked, bedroom</div>
-              </div>
-              <div className={`${styles['htg-compare-col']} ${styles['htg-good-col']}`}>
-                <div className={styles['htg-compare-title-good']}>&#x2705; Strong Prompt</div>
-                <div className={styles['htg-prompt-example']}>beautiful 25-year-old woman, long dark hair, brown eyes, athletic build, lying on white silk sheets, soft afternoon light, photorealistic, 8k, hyperdetailed skin texture, professional photography</div>
-              </div>
-            </div>
-
-            <div className={styles['htg-compare-grid']}>
-              <div className={`${styles['htg-compare-col']} ${styles['htg-bad-col']}`}>
-                <div className={styles['htg-compare-title-bad']}>&#x274C; Weak Prompt</div>
-                <div className={styles['htg-prompt-example']}>asian girl, shower</div>
-              </div>
-              <div className={`${styles['htg-compare-col']} ${styles['htg-good-col']}`}>
-                <div className={styles['htg-compare-title-good']}>&#x2705; Strong Prompt</div>
-                <div className={styles['htg-prompt-example']}>beautiful Japanese woman, 28, shoulder-length black hair, slender figure, standing in modern glass shower, steam, natural light, realistic skin, high-resolution portrait, cinematic quality</div>
-              </div>
-            </div>
-
-            <h3>Essential Quality Tags</h3>
-            <p>Adding these tags to any prompt dramatically improves output quality:</p>
-            <div className={styles['htg-prompt-example']}>
-              masterpiece, best quality, ultra-realistic, photorealistic, 8k uhd, detailed skin texture, professional lighting, sharp focus, RAW photo
-            </div>
-
-            <h3>Negative Prompts</h3>
-            <p>Most platforms also support negative prompts — telling the AI what NOT to generate. This is crucial for avoiding common AI artifacts:</p>
-            <div className={styles['htg-prompt-example']}>
-              <span style={{ color: '#ff6b6b' }}>Negative prompt:</span> deformed, bad anatomy, ugly, blurry, low quality, watermark, text, extra fingers, cartoon, anime, painting, sketch
-            </div>
-
-            <div className={styles['htg-tip-box']}>
-              <p><strong>&#x1F4A1; Use Image Nude&apos;s built-in presets:</strong> Image Nude includes one-click style and quality presets that automatically add the right quality tags. If you&apos;re just starting out, these presets are the fastest way to get great results without memorizing prompt formulas.</p>
-            </div>
-
-            {/* Step 4: Undress Mode */}
-            <h2 id="undress-mode">Step 4: Using Undress / Inpaint Mode</h2>
-
-            <div className={styles['htg-step-block']}>
-              <div className={styles['htg-step-num']}>1</div>
-              <h3>Upload Your Photo</h3>
-              <p>Upload a clear, well-lit photo. The better the source photo quality, the more realistic the output. Images with a single subject and neutral background tend to produce the best results.</p>
-              <ul>
-                <li>Minimum recommended resolution: 512&times;512</li>
-                <li>Supported formats: JPG, PNG, WebP</li>
-                <li>Avoid heavy compression or filters</li>
-              </ul>
-            </div>
-
-            <div className={styles['htg-step-block']}>
-              <div className={styles['htg-step-num']}>2</div>
-              <h3>Paint the Mask</h3>
-              <p>Use the brush tool to paint over the clothing areas you want to modify. Be precise — painting too far outside the clothing area can cause distortion in the result.</p>
-              <ul>
-                <li>Use a smaller brush for detailed areas</li>
-                <li>You can undo and redo strokes with the toolbar</li>
-                <li>Painting slightly inside the clothing edge gives cleaner results</li>
-              </ul>
-            </div>
-
-            <div className={styles['htg-step-block']}>
-              <div className={styles['htg-step-num']}>3</div>
-              <h3>Add an Inpaint Prompt (Optional)</h3>
-              <p>You can optionally describe what you want generated in the masked area. For undress results, a prompt like:</p>
-              <div className={styles['htg-prompt-example']}>realistic nude skin, natural body, photorealistic, detailed</div>
-              <p>...often produces better results than leaving the prompt field empty.</p>
-            </div>
-
-            {/* Step 5: Face Swap */}
-            <h2 id="face-swap">Step 5: Using Face Swap</h2>
-            <p>Face Swap lets you apply any face to any body in a single generation. Here&apos;s how to get the best results:</p>
+            {/* ───── Getting Started ───── */}
+            <h2 id="getting-started">Getting Started</h2>
+            <p>If you want to try this yourself, most NSFW platforms offer some form of free trial. Here are the main options:</p>
             <ul>
-              <li><strong>Body image (target):</strong> Upload the image with the body you want to use</li>
-              <li><strong>Face image (source):</strong> Upload a clear, front-facing photo of the face you want to apply</li>
-              <li>The AI automatically matches skin tone, lighting angle, and expression</li>
-              <li>For best results, use a source face photo with good lighting and minimal background clutter</li>
+              <li><strong>Text-to-image platforms</strong> &mdash; SoulGen, Promptchan AI (see our <Link href="/blog/best-ai-undress-tools">tool comparison</Link> for details)</li>
+              <li><strong>All-in-one platforms</strong> &mdash; Tools that combine txt2img, inpaint, and face swap in one place</li>
             </ul>
-
-            <div className={styles['htg-tip-box']}>
-              <p><strong>&#x1F4A1; Pro workflow:</strong> Use Undress mode first to generate the body result, then immediately use Face Swap to apply the exact face you want. This combined workflow is unique to Image Nude.</p>
-            </div>
-
-            {/* Pro Tips */}
-            <h2 id="tips">Pro Tips for Better Results</h2>
+            <p>Look for platforms that:</p>
             <ul>
-              <li><strong>Generate multiple times.</strong> AI generation has randomness built in. The same prompt will produce different results each time. Generate 3–5 variations and choose the best.</li>
-              <li><strong>Adjust guidance scale.</strong> If the platform exposes this setting, a higher value follows the prompt more closely. Start around 7–9.</li>
-              <li><strong>Start with presets.</strong> Body type, hair color, and style presets in Image Nude are fine-tuned for best results. Use them before writing complex custom prompts.</li>
-              <li><strong>Use reference images when available.</strong> Some platforms let you upload a reference image to guide the style. Use this to get consistent results across multiple generations.</li>
-              <li><strong>Save prompts that work.</strong> When you get a great result, save the exact prompt. Good prompts are reusable.</li>
+              <li>Delete your images automatically (1 hour or less)</li>
+              <li>Accept crypto if payment privacy matters to you</li>
+              <li>Offer free credits so you can test before paying</li>
             </ul>
+            <p>I built <Link href="/">Image Nude</Link> to solve exactly these problems &mdash; it does txt2img, undress, and face swap in one platform with 20 free credits and automatic image deletion. But regardless of which tool you choose, the prompting and technique tips in this guide apply everywhere.</p>
 
-            {/* Platform Recommendation */}
-            <h2 id="platform-recommendation">Recommended Platform</h2>
-
-            <div className={styles['htg-platform-card']}>
-              <div className={styles['htg-platform-icon']}>&#x2726;</div>
-              <div>
-                <div className={styles['htg-platform-name']}>Image Nude</div>
-                <div className={styles['htg-platform-desc']}>The most complete NSFW AI platform in 2025. Combines text-to-image, inpaint/undress, face swap, and video generation in one interface — with the best privacy policy in the category.</div>
-                <div className={styles['htg-platform-feats']}>
-                  <span className={styles['htg-feat-chip']}>Free trial (20 credits)</span>
-                  <span className={styles['htg-feat-chip']}>Images deleted in 1hr</span>
-                  <span className={styles['htg-feat-chip']}>Crypto payments</span>
-                  <span className={styles['htg-feat-chip']}>Undress + Face Swap</span>
-                  <span className={styles['htg-feat-chip']}>8s generation time</span>
-                </div>
-                <Link href="/register" className={styles['htg-platform-cta']}>Try Free — 20 Credits &rarr;</Link>
-              </div>
-            </div>
-
-            {/* Legal */}
-            <h2 id="rules">Important Rules &amp; Legal Considerations</h2>
+            {/* ───── Legal ───── */}
+            <h2 id="rules">Legal &amp; Safety Reminder</h2>
 
             <div className={styles['htg-warning-box']}>
-              <p><strong>&#x26A0;&#xFE0F; Usage rules:</strong> Generating content depicting minors is strictly illegal and violates all platform terms of service. Generating non-consensual deepfakes of real, identifiable individuals is illegal in many jurisdictions. Reputable platforms like Image Nude generate only fictional AI content. Always use these tools responsibly and in accordance with the laws of your country.</p>
+              <p>This should be obvious, but: never generate content depicting minors, and never create non-consensual deepfakes of real people. These are illegal in most countries and will get you banned from any reputable platform immediately. Use AI image generation responsibly and always respect the laws in your jurisdiction.</p>
             </div>
 
             {/* Bottom CTA */}
@@ -252,18 +275,19 @@ export default function HowToGenerateNsfwPage() {
             <div className={styles['htg-toc']}>
               <h4>In This Guide</h4>
               <ol>
-                <li><a href="#choosing-platform">Choosing a Platform</a></li>
-                <li><a href="#getting-started">Setting Up Your Account</a></li>
-                <li><a href="#prompting">Writing Effective Prompts</a></li>
-                <li><a href="#undress-mode">Undress / Inpaint Mode</a></li>
+                <li><a href="#basics">The Basics</a></li>
+                <li><a href="#prompting">Prompts &amp; Tags</a></li>
+                <li><a href="#models">Choosing Models</a></li>
+                <li><a href="#undress-mode">Undress / Inpaint</a></li>
                 <li><a href="#face-swap">Face Swap</a></li>
-                <li><a href="#tips">Pro Tips</a></li>
-                <li><a href="#rules">Legal Considerations</a></li>
+                <li><a href="#mistakes">Common Mistakes</a></li>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#rules">Legal &amp; Safety</a></li>
               </ol>
             </div>
             <div className={styles['htg-sidebar-cta']}>
               <h4>Try It Now</h4>
-              <p>Image Nude gives you 20 free credits — no credit card needed.</p>
+              <p>Image Nude gives you 20 free credits &mdash; no credit card needed.</p>
               <Link href="/register" className={styles['htg-sidebar-cta-link']}>Start Free &rarr;</Link>
               <p className={styles['htg-sidebar-note']}>20 free credits on signup</p>
             </div>
@@ -272,7 +296,7 @@ export default function HowToGenerateNsfwPage() {
 
         {/* Footer */}
         <footer className={styles['htg-footer']}>
-          <p>&copy; 2025 Image Nude &middot; <Link href="/privacy">Privacy Policy</Link> &middot; <Link href="/terms">Terms</Link> &middot; 18+ Only &middot; All generated content is AI-created</p>
+          <p>&copy; 2026 Image Nude &middot; <Link href="/privacy">Privacy Policy</Link> &middot; <Link href="/terms">Terms</Link> &middot; 18+ Only &middot; All generated content is AI-created</p>
         </footer>
       </div>
     </>

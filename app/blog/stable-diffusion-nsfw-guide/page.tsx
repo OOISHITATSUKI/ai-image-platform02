@@ -8,7 +8,7 @@ import styles from './page.module.css';
 const ldJsonArticle = {
   '@context': 'https://schema.org',
   '@type': 'Article',
-  headline: 'Stable Diffusion NSFW Guide 2025 — Models, Prompts & Easier Alternatives',
+  headline: 'Stable Diffusion NSFW Guide 2025 — Models, Settings & Browser Alternatives',
   datePublished: '2025-03-13',
   dateModified: '2025-03-13',
   author: { '@type': 'Organization', name: 'Image Nude' },
@@ -22,17 +22,17 @@ const ldJsonFaq = {
     {
       '@type': 'Question',
       name: 'How do I enable NSFW in Stable Diffusion?',
-      acceptedAnswer: { '@type': 'Answer', text: 'In AUTOMATIC1111 WebUI, NSFW content is enabled by default when using NSFW-capable models. No special setting is required — simply use an uncensored model like AbyssOrangeMix or Juggernaut XL and include adult content in your prompt.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'AUTOMATIC1111 WebUI has no content filter by default — just load an uncensored model like Juggernaut XL or AbyssOrangeMix and include adult content in your prompt. No special toggle needed.' },
     },
     {
       '@type': 'Question',
       name: 'What is the best Stable Diffusion model for NSFW?',
-      acceptedAnswer: { '@type': 'Answer', text: 'For realistic NSFW generation: Juggernaut XL V11 or RealVisXL V5.0. For anime NSFW: AbyssOrangeMix3 or CounterfeitXL. All available on Civitai.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'For realistic NSFW: Juggernaut XL V11 or RealVisXL V5.0. For anime NSFW: AbyssOrangeMix3 or CounterfeitXL. All available free on Civitai.' },
     },
     {
       '@type': 'Question',
       name: 'Is there an easier alternative to Stable Diffusion for NSFW?',
-      acceptedAnswer: { '@type': 'Answer', text: 'Yes. Image Nude runs the same SDXL models as Stable Diffusion in a browser — no setup, no GPU required, no technical knowledge needed. Free to start with 20 credits.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'Yes. Image Nude runs the same SDXL models as Stable Diffusion in a browser — zero setup, no GPU required. Free to start with 20 credits on signup.' },
     },
   ],
 };
@@ -42,9 +42,9 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className={styles.faqItem}>
       <div className={styles.faqQ} onClick={() => setOpen(!open)}>
-        {question} <span className={styles.faqToggle}>{open ? '\u2212' : '+'}</span>
+        {question} <span>{open ? '\u2212' : '+'}</span>
       </div>
-      {open && <div className={`${styles.faqA} ${styles.faqAOpen}`}>{answer}</div>}
+      {open && <div className={styles.faqA}>{answer}</div>}
     </div>
   );
 }
@@ -78,130 +78,126 @@ export default function StableDiffusionNsfwGuidePage() {
               <span className={styles.metaInfo}>March 2025 &middot; 11 min read</span>
             </div>
 
-            <h1 className={styles.h1}>Stable Diffusion NSFW Guide 2025 &mdash; Models, Prompts &amp; Easier Alternatives</h1>
+            <h1 className={styles.h1}>Stable Diffusion NSFW Guide 2025 &mdash; Models, Settings &amp; Browser Alternatives</h1>
 
             <p className={styles.lede}>
-              Stable Diffusion is the most powerful open-source AI image generator available today &mdash; but getting it running for NSFW content requires significant technical setup, the right hardware, and careful model selection. This guide covers everything you need to know, plus a browser-based alternative that skips the complexity entirely.
+              Stable Diffusion is the most powerful open-source image platform available &mdash; and the most complex. This guide cuts through the setup noise to cover the NSFW models worth using, the settings that actually matter, and a zero-setup browser alternative for anyone without a dedicated GPU.
             </p>
 
             {/* Overview */}
-            <h2 id="overview">What Is Stable Diffusion?</h2>
-            <p>Stable Diffusion is an open-source text-to-image AI model released by Stability AI. Unlike cloud-based platforms, it runs locally on your own computer &mdash; which means you have full control over models, settings, and the type of content you generate.</p>
-            <p>The most popular way to use Stable Diffusion is through <strong>AUTOMATIC1111 WebUI</strong> (also called A1111), a community-built interface that gives you access to every setting the model supports. There are also newer alternatives like ComfyUI, Forge, and InvokeAI, but A1111 remains the standard for most users.</p>
-            <p>The trade-off for this control is complexity. You need a capable GPU, technical knowledge to install and configure the software, and the patience to troubleshoot issues. For users who want results without the setup, browser-based alternatives like <Link href="/">Image Nude</Link> run the same SDXL models with zero installation.</p>
-
-            {/* Setup Requirements */}
-            <h2 id="setup-requirements">Setup Requirements</h2>
-            <p>Before you can run Stable Diffusion locally, you&apos;ll need the following hardware and software:</p>
-            <ul>
-              <li><strong>GPU:</strong> NVIDIA GPU with at least 8 GB VRAM (RTX 3060 or better recommended). AMD GPUs work but have limited support.</li>
-              <li><strong>RAM:</strong> 16 GB system RAM minimum, 32 GB recommended for SDXL models.</li>
-              <li><strong>Storage:</strong> 20&ndash;50 GB free disk space for models, extensions, and outputs. Each checkpoint model is 2&ndash;7 GB.</li>
-              <li><strong>OS:</strong> Windows 10/11 or Linux. macOS works on Apple Silicon but with slower performance.</li>
-              <li><strong>Software:</strong> Python 3.10+, Git, CUDA toolkit (for NVIDIA), and AUTOMATIC1111 WebUI or ComfyUI.</li>
-            </ul>
+            <h2 id="overview">What Stable Diffusion Actually Is</h2>
+            <p>Stable Diffusion is an open-source AI image generation system that runs locally on your machine or through cloud interfaces. Unlike commercial tools, it ships without content filters &mdash; which makes it the default choice for uncensored NSFW generation in the enthusiast community.</p>
+            <p>Most users run it through <strong>AUTOMATIC1111 WebUI</strong> (A1111): a browser-based control panel for generation, inpainting, upscaling, and extension management. The trade-off is real &mdash; setup requires a compatible GPU, Python knowledge, and tolerance for frequent breaking changes as models and extensions update.</p>
 
             <div className={styles.callout}>
-              <strong>No GPU?</strong> You don&apos;t need any of this. <Link href="/">Image Nude</Link> runs the same SDXL models in your browser &mdash; no installation, no GPU, no technical knowledge required. <Link href="/register">Start free with 20 credits &rarr;</Link>
+              <p><strong>No GPU?</strong> <Link href="/">Image Nude</Link> runs the same SDXL models in a browser &mdash; zero setup, no hardware requirements. 20 free credits on signup.</p>
             </div>
 
+            {/* Setup Requirements */}
+            <h2 id="setup-requirements">Hardware Requirements</h2>
+            <ul>
+              <li><strong>GPU:</strong> NVIDIA RTX 3060 12GB minimum &mdash; RTX 3080 or 4080 for comfortable generation speeds</li>
+              <li><strong>RAM:</strong> 16GB minimum, 32GB for smoother multitasking</li>
+              <li><strong>Storage:</strong> 50GB+ free &mdash; models run 2&ndash;7GB each and accumulate fast</li>
+              <li><strong>OS:</strong> Windows 10/11 or Linux</li>
+              <li><strong>Software:</strong> Python 3.10, Git, CUDA drivers matching your GPU</li>
+            </ul>
+
             {/* Best Models */}
-            <h2 id="best-models">Best NSFW Models for Stable Diffusion</h2>
-            <p>The model (checkpoint) you choose determines the style and quality of your generations. Here are the top choices for NSFW content in 2025.</p>
+            <h2 id="best-models">The NSFW Models Worth Using</h2>
 
             <h3>Realistic Generation (SDXL)</h3>
             <ul>
-              <li><strong>Juggernaut XL V11</strong> &mdash; The gold standard for photorealistic NSFW. Exceptional skin texture, natural lighting, and anatomical accuracy. Best overall choice for realistic adult content.</li>
-              <li><strong>RealVisXL V5.0</strong> &mdash; Excellent realism with slightly warmer color grading. Great for portrait-style generations and close-up shots.</li>
-              <li><strong>HelloWorld XL 7.0</strong> &mdash; Versatile SDXL model that handles both realistic and semi-realistic styles. Good all-rounder with strong NSFW capabilities.</li>
+              <li><strong>Juggernaut XL V11</strong> &mdash; The best all-around photorealistic NSFW model in 2025. Handles diverse subjects, excellent skin rendering, consistent anatomy. Download free from Civitai.</li>
+              <li><strong>RealVisXL V5.0</strong> &mdash; Clean, sharp results with a professional photography look. Strong for portraits where fine detail matters more than organic texture.</li>
+              <li><strong>HelloWorld XL 7.0</strong> &mdash; Optimized specifically for East Asian facial features. Best-in-class for Korean and Japanese character generation.</li>
             </ul>
 
             <h3>Anime Generation</h3>
             <ul>
-              <li><strong>AbyssOrangeMix3</strong> &mdash; The most popular anime NSFW model. Produces high-quality anime-style characters with excellent detail and consistency.</li>
-              <li><strong>CounterfeitXL</strong> &mdash; SDXL-based anime model with beautiful color palettes and sharp line work. Great for detailed anime illustrations.</li>
-              <li><strong>Animagine XL 3.0</strong> &mdash; Purpose-built for anime with strong understanding of anime-specific tags and styles. Supports Danbooru-style prompting.</li>
+              <li><strong>AbyssOrangeMix3 (AOM3)</strong> &mdash; Classic SD1.5 anime model, still widely used. Detailed hentai-style illustration with strong anatomy.</li>
+              <li><strong>CounterfeitXL</strong> &mdash; SDXL-based anime. More detailed than AOM3 with better proportions and sharpness.</li>
+              <li><strong>Animagine XL 3.0</strong> &mdash; Strong danbooru-trained model, excellent for character consistency across generations.</li>
             </ul>
 
             <div className={styles.tip}>
-              <p><strong>Tip:</strong> SD 1.5 models are smaller and faster but produce lower-resolution output (512&times;512 native). SDXL models generate at 1024&times;1024 natively and produce significantly better results. If your GPU can handle it, always choose SDXL.</p>
+              <p><strong>💡 SD1.5 vs SDXL:</strong> SDXL produces significantly better quality but needs 8GB+ VRAM and only works at native 1024px. SD1.5 runs at 512&ndash;768px on less VRAM. For NSFW generation in 2025, use SDXL whenever your hardware allows it.</p>
             </div>
 
             {/* Settings */}
-            <h2 id="settings">Optimal Settings for NSFW Generation</h2>
-            <p>These settings work well as a starting point for most NSFW generations in AUTOMATIC1111:</p>
+            <h2 id="settings">Settings That Actually Matter</h2>
 
             <div className={styles.settingsGrid}>
               <div className={styles.settingCard}>
                 <div className={styles.settingName}>Sampler</div>
                 <div className={styles.settingValue}>DPM++ 2M Karras</div>
-                <div className={styles.settingNote}>Best balance of quality and speed</div>
+                <div className={styles.settingNote}>Best quality-to-speed ratio for most subjects</div>
               </div>
               <div className={styles.settingCard}>
                 <div className={styles.settingName}>Steps</div>
                 <div className={styles.settingValue}>25&ndash;35</div>
-                <div className={styles.settingNote}>Higher steps = more detail, slower</div>
+                <div className={styles.settingNote}>Diminishing returns above 40 &mdash; don&apos;t go higher</div>
               </div>
               <div className={styles.settingCard}>
                 <div className={styles.settingName}>CFG Scale</div>
                 <div className={styles.settingValue}>6&ndash;8</div>
-                <div className={styles.settingNote}>How closely to follow the prompt</div>
+                <div className={styles.settingNote}>Higher = stricter prompt adherence; lower = more variation</div>
               </div>
               <div className={styles.settingCard}>
-                <div className={styles.settingName}>Resolution</div>
+                <div className={styles.settingName}>Resolution (SDXL)</div>
                 <div className={styles.settingValue}>1024 &times; 1024</div>
-                <div className={styles.settingNote}>Native SDXL resolution</div>
+                <div className={styles.settingNote}>Never use SD1.5 sizes with SDXL models</div>
               </div>
               <div className={styles.settingCard}>
                 <div className={styles.settingName}>Hires Fix</div>
                 <div className={styles.settingValue}>Enabled</div>
-                <div className={styles.settingNote}>Fixes artifacts at higher resolutions</div>
+                <div className={styles.settingNote}>2x upscale adds fine detail &mdash; worth the extra time</div>
               </div>
               <div className={styles.settingCard}>
                 <div className={styles.settingName}>Hires Upscaler</div>
                 <div className={styles.settingValue}>4x-UltraSharp</div>
-                <div className={styles.settingNote}>Best upscaler for realistic skin</div>
+                <div className={styles.settingNote}>Best general-purpose upscaler for realistic subjects</div>
               </div>
             </div>
 
             {/* Prompts */}
             <h2 id="prompts">NSFW Prompt Structure for Stable Diffusion</h2>
-            <p>The prompt structure for Stable Diffusion follows the same principles as any AI image generator, but with model-specific conventions. Here are three ready-to-use templates:</p>
+            <p>SD-specific prompts use weighted syntax that non-SD tools often ignore. The parentheses notation directly boosts those tags in the generation:</p>
 
             <div className={styles.promptBox}>
-              <span className={styles.promptLabel}>Realistic SDXL Prompt</span>
-              photorealistic, RAW photo, beautiful woman, 25 years old, long brown hair, slender figure, lying on white bed sheets, soft morning light from window, detailed skin texture, 8k uhd, masterpiece, best quality, sharp focus, professional photography
+              <span className={styles.promptLabel}>Realistic NSFW &mdash; SDXL</span>
+              (masterpiece:1.2), (best quality:1.2), (photorealistic:1.4), RAW photo, beautiful [ethnicity] woman, [age] years old, [hair description], [body type], [pose], [setting], [lighting], detailed skin texture, subsurface scattering, (8k uhd:1.1), sharp focus
             </div>
 
             <div className={styles.promptBox}>
-              <span className={styles.promptLabel}>Anime SD1.5 Prompt</span>
-              masterpiece, best quality, 1girl, solo, long pink hair, blue eyes, slender body, sitting on bed, soft lighting, detailed face, beautiful detailed eyes, anime style, high resolution
+              <span className={styles.promptLabel}>Anime NSFW &mdash; SD1.5</span>
+              (masterpiece:1.3), (best quality:1.2), (highly detailed:1.2), 1girl, beautiful, [hair color] hair, [eye color] eyes, [body description], [pose], [setting], anime style, absurdres, highres
             </div>
 
             <div className={`${styles.promptBox} ${styles.promptNeg}`}>
               <span className={styles.promptLabel}>Universal Negative Prompt</span>
-              deformed, bad anatomy, ugly, blurry, low quality, watermark, text, signature, extra fingers, extra limbs, missing limbs, fused fingers, too many fingers, cartoon, 3d render, cgi, plastic skin, overexposed, underexposed, cropped
+              (worst quality:2), (low quality:2), (normal quality:2), lowres, bad anatomy, bad hands, watermark, text, error, missing fingers, extra digit, cropped, jpeg artifacts, signature, blurry, ugly, duplicate, mutilated, extra fingers, mutated hands, poorly drawn face, deformed
             </div>
 
             {/* Extensions */}
-            <h2 id="extensions">Essential Extensions for NSFW Generation</h2>
-            <p>Extensions add powerful features to AUTOMATIC1111 that improve quality and control:</p>
+            <h2 id="extensions">Four Extensions That Make NSFW Generation Practical</h2>
             <ul>
-              <li><strong>ADetailer</strong> &mdash; Automatically detects and refines faces and hands in your generations. Dramatically reduces deformed faces and fingers &mdash; the most common NSFW generation artifacts.</li>
-              <li><strong>ControlNet</strong> &mdash; Lets you control the pose, composition, and structure of your generations using reference images. Essential for consistent poses and compositions.</li>
-              <li><strong>Ultimate SD Upscale</strong> &mdash; Upscales images beyond the model&apos;s native resolution while maintaining detail. Use with 4x-UltraSharp for best results on realistic content.</li>
-              <li><strong>Civitai Helper</strong> &mdash; Browse and download models directly from Civitai within the WebUI. Simplifies model management and makes it easy to try new checkpoints.</li>
+              <li><strong>ADetailer</strong> &mdash; Auto-detects and inpaints faces and hands. Fixes the anatomy artifacts that make most generations unusable without manual correction.</li>
+              <li><strong>ControlNet</strong> &mdash; Control pose and composition with precision. Essential once you need specific body positions rather than random results.</li>
+              <li><strong>Ultimate SD Upscale</strong> &mdash; Tile-based upscaling that adds fine detail at high resolutions without the distortion of standard upscalers.</li>
+              <li><strong>Civitai Helper</strong> &mdash; Browse and download models directly inside A1111 without leaving the interface.</li>
             </ul>
 
             {/* Alternative */}
-            <h2 id="alternative">The Easier Alternative: Browser-Based SDXL</h2>
-            <p>Stable Diffusion is powerful but demands time, hardware, and technical knowledge. If you want the same SDXL model quality without the setup, browser-based platforms are the practical alternative.</p>
+            <h2 id="alternative">The Browser Alternative: Same Models, Zero Setup</h2>
+            <p>Stable Diffusion setup takes 2&ndash;4 hours for experienced users and considerably longer for beginners. Models conflict with extensions. Python environments break. GPU drivers need updates.</p>
+            <p>For users without a high-end GPU &mdash; or who want to generate from any device without any of that overhead:</p>
 
             <div className={styles.compareTable}>
               <table>
                 <thead>
                   <tr>
-                    <th className={styles.tdH}></th>
+                    <th className={styles.tdH}>Factor</th>
                     <th>Stable Diffusion (Local)</th>
                     <th>Image Nude (Browser)</th>
                   </tr>
@@ -209,74 +205,74 @@ export default function StableDiffusionNsfwGuidePage() {
                 <tbody>
                   <tr>
                     <td className={styles.tdH}>Setup time</td>
-                    <td>1&ndash;3 hours</td>
-                    <td className={styles.ok}>None &mdash; instant</td>
+                    <td className={styles.no}>2&ndash;4 hours</td>
+                    <td className={styles.ok}>0 minutes</td>
                   </tr>
                   <tr>
                     <td className={styles.tdH}>GPU required</td>
-                    <td>Yes (8 GB+ VRAM)</td>
+                    <td className={styles.no}>Yes &mdash; 8GB+ VRAM</td>
                     <td className={styles.ok}>No</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Technical knowledge</td>
-                    <td>High</td>
-                    <td className={styles.ok}>None</td>
-                  </tr>
-                  <tr>
-                    <td className={styles.tdH}>SDXL models</td>
+                    <td className={styles.tdH}>SDXL model quality</td>
                     <td className={styles.ok}>Yes</td>
-                    <td className={styles.ok}>Yes</td>
+                    <td className={styles.ok}>Same models</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Model variety</td>
-                    <td className={styles.ok}>Unlimited (manual)</td>
-                    <td className={styles.mid}>Curated selection</td>
+                    <td className={styles.tdH}>Face saving</td>
+                    <td className={styles.mid}>Via extensions</td>
+                    <td className={styles.ok}>Built-in</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Speed</td>
-                    <td className={styles.mid}>Depends on GPU</td>
-                    <td className={styles.ok}>Fast (cloud GPUs)</td>
+                    <td className={styles.tdH}>Inpaint / Undress</td>
+                    <td className={styles.mid}>Via extensions</td>
+                    <td className={styles.ok}>Built-in</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Cost</td>
-                    <td className={styles.no}>$300+ GPU</td>
-                    <td className={styles.ok}>Free tier available</td>
+                    <td className={styles.tdH}>Face Swap</td>
+                    <td className={styles.mid}>Via extensions</td>
+                    <td className={styles.ok}>Built-in</td>
                   </tr>
                   <tr>
                     <td className={styles.tdH}>Privacy</td>
-                    <td className={styles.ok}>Fully local</td>
-                    <td className={styles.mid}>Auto-deleted in 1 hr</td>
+                    <td className={styles.ok}>Local &mdash; stays on your machine</td>
+                    <td className={styles.ok}>Auto-deleted in 1 hour</td>
+                  </tr>
+                  <tr>
+                    <td className={styles.tdH}>Cost</td>
+                    <td className={styles.ok}>Free if you have the GPU</td>
+                    <td className={styles.ok}>Free trial, paid from $14.99</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <p>For users who want full control and already have the hardware, Stable Diffusion is unbeatable. For everyone else, browser-based SDXL delivers the same model quality with none of the friction.</p>
+            <p>If you have a capable GPU and enjoy the control, run Stable Diffusion locally. If you want results in under a minute without any setup overhead, Image Nude delivers the same SDXL model quality through a browser.</p>
 
             {/* FAQ */}
-            <h2 id="faq">Frequently Asked Questions</h2>
+            <h2 id="faq">FAQ</h2>
 
             <FaqItem
               question="How do I enable NSFW in Stable Diffusion?"
-              answer="In AUTOMATIC1111 WebUI, NSFW content is enabled by default when using NSFW-capable models. No special setting is required — simply use an uncensored model like AbyssOrangeMix or Juggernaut XL and include adult content in your prompt."
+              answer="AUTOMATIC1111 has no content filter by default — load an uncensored model like Juggernaut XL or AbyssOrangeMix and include adult content in your prompt. No special toggle or setting required."
             />
             <FaqItem
               question="What is the best Stable Diffusion model for NSFW?"
-              answer="For realistic NSFW generation: Juggernaut XL V11 or RealVisXL V5.0. For anime NSFW: AbyssOrangeMix3 or CounterfeitXL. All available on Civitai."
+              answer="For realistic NSFW: Juggernaut XL V11 or RealVisXL V5.0. For anime NSFW: AbyssOrangeMix3 or CounterfeitXL. All free to download on Civitai."
             />
             <FaqItem
               question="Is there an easier alternative to Stable Diffusion for NSFW?"
-              answer="Yes. Image Nude runs the same SDXL models as Stable Diffusion in a browser — no setup, no GPU required, no technical knowledge needed. Free to start with 20 credits."
+              answer="Yes. Image Nude runs the same SDXL models as Stable Diffusion in a browser — zero setup, no GPU required. Free to start with 20 credits on signup."
             />
             <FaqItem
-              question="Can I use Stable Diffusion on a Mac?"
-              answer="Yes, but only on Apple Silicon (M1/M2/M3/M4) Macs. Performance is significantly slower than an NVIDIA GPU. For Mac users, a browser-based alternative is usually more practical."
+              question="What CFG scale should I use for Stable Diffusion NSFW?"
+              answer="6–8 works for most NSFW generation. Lower values (5–6) give more natural variation; higher (8–10) stick more tightly to the prompt. Avoid exceeding 12 — it consistently produces oversaturated, distorted results."
             />
 
             {/* CTA */}
             <div className={styles.ctaBlock}>
               <h3>Same SDXL Models &mdash; Zero Setup</h3>
-              <p>Run the same models as Stable Diffusion in your browser. No GPU, no installation, no technical knowledge.</p>
+              <p>Skip the GPU requirement. Generate in a browser with the same models. Free to start.</p>
               <Link href="/register" className={styles.ctaBtn}>Try Free &mdash; 20 Credits &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
             </div>
@@ -289,11 +285,11 @@ export default function StableDiffusionNsfwGuidePage() {
               <h4 className={styles.tocTitle}>Contents</h4>
               <ol>
                 <li><a href="#overview">What Is Stable Diffusion?</a></li>
-                <li><a href="#setup-requirements">Setup Requirements</a></li>
+                <li><a href="#setup-requirements">Hardware Requirements</a></li>
                 <li><a href="#best-models">Best NSFW Models</a></li>
-                <li><a href="#settings">Optimal Settings</a></li>
+                <li><a href="#settings">Settings That Matter</a></li>
                 <li><a href="#prompts">Prompt Structure</a></li>
-                <li><a href="#extensions">Extensions</a></li>
+                <li><a href="#extensions">Essential Extensions</a></li>
                 <li><a href="#alternative">Browser Alternative</a></li>
                 <li><a href="#faq">FAQ</a></li>
               </ol>
@@ -302,14 +298,13 @@ export default function StableDiffusionNsfwGuidePage() {
               <h4 className={styles.sctaTitle}>No GPU? No Problem.</h4>
               <p>Same SDXL models in a browser. Free trial.</p>
               <Link href="/register" className={styles.sctaLink}>Start Free &rarr;</Link>
-              <p className={styles.sctaNote}>No credit card &middot; 18+</p>
+              <p className={styles.sctaNote}>No setup &middot; No GPU &middot; 18+</p>
             </div>
             <div className={styles.related}>
               <h4 className={styles.relatedTitle}>Related Articles</h4>
               <ul>
                 <li><Link href="/blog/how-to-write-nsfw-ai-prompts">How to Write NSFW AI Prompts</Link></li>
                 <li><Link href="/blog/ai-portrait-generator-realistic-faces">AI Portrait Generator Guide</Link></li>
-                <li><Link href="/blog/how-to-generate-nsfw-ai-images">How to Generate NSFW AI Images</Link></li>
                 <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2025</Link></li>
               </ul>
             </div>

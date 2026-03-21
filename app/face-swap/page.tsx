@@ -5,13 +5,15 @@ import styles from './page.module.css';
 import FaqSection from './FaqSection';
 
 export const metadata: Metadata = {
-  title: 'AI Face Swap Tool – Realistic Face Replacement | Image Nude',
-  description: 'The most advanced AI face swap tool online. Swap any face into any photo with photorealistic accuracy. Free to try – 20 credits on sign up.',
+  title: 'AI Face Swap — Free Online Tool | Image Nude',
+  description: 'Swap faces in any photo with AI. Upload two images and get instant results. Free to try, no experience needed.',
   alternates: { canonical: 'https://imagenude.com/face-swap' },
   openGraph: {
-    title: 'AI Face Swap Tool – Realistic Results in Seconds',
-    description: 'Advanced AI face swap that blends faces seamlessly into any photo. Try free today.',
+    title: 'AI Face Swap — Free Online Tool | Image Nude',
+    description: 'Swap faces in any photo with AI. Upload two images and get instant results. Free to try, no experience needed.',
     url: 'https://imagenude.com/face-swap',
+    siteName: 'Image Nude',
+    type: 'website',
   },
 };
 

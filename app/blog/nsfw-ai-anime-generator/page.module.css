@@ -83,27 +83,27 @@
 .toolCard {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px; padding: 28px;
-  margin: 20px 0; display: flex; gap: 24px;
+  border-radius: 16px; padding: 24px;
+  margin: 16px 0; display: flex; gap: 20px;
   align-items: flex-start;
   transition: border-color 0.2s;
 }
-.toolCard:hover { border-color: rgba(229,52,42,0.4); }
+.toolCard:hover { border-color: rgba(229,52,42,0.3); }
 .toolRank {
-  display: flex; align-items: center; justify-content: center;
-  width: 44px; height: 44px; border-radius: 50%;
-  background: var(--primary); color: white;
-  font-size: 20px; font-weight: 700; flex-shrink: 0;
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px; color: var(--primary);
+  line-height: 1; min-width: 36px; flex-shrink: 0;
 }
 .toolInfo { flex: 1; }
-.toolInfo h3 { margin: 0 0 10px; }
-.toolInfo p { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+.toolInfo h3 { margin: 0 0 6px; font-size: 18px; }
+.toolInfo p { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
 .toolTags { display: flex; flex-wrap: wrap; gap: 8px; }
 .toolTag {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--muted); padding: 4px 12px; border-radius: 100px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  background: var(--primary-dim);
+  color: var(--primary);
+  border: 1px solid rgba(229,52,42,0.2);
+  padding: 2px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600;
 }
 .toolTagFree {
   background: rgba(74,222,128,0.1);
@@ -121,8 +121,7 @@
   border-radius: 12px; padding: 20px;
   transition: border-color 0.2s;
 }
-.styleCard:hover { border-color: rgba(229,52,42,0.4); }
-.styleIcon { font-size: 24px; margin-bottom: 10px; }
+.styleCard:hover { border-color: rgba(229,52,42,0.3); }
 .styleCard h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
 .styleCard p { font-size: 13px; color: var(--muted); margin: 0; }
 
@@ -174,7 +173,7 @@
 .ctaBlock p { font-size: 15px; color: var(--muted); margin-bottom: 22px; }
 .ctaBtn {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--primary); color: white;
+  background: var(--primary); color: white !important;
   padding: 14px 32px; border-radius: 10px;
   font-size: 15px; font-weight: 600; text-decoration: none;
   transition: background 0.2s;
@@ -200,7 +199,7 @@
 .sctaTitle { font-family: 'DM Serif Display', serif; font-size: 17px; margin-bottom: 8px; color: var(--text); }
 .scta p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 .sctaLink {
-  display: block; background: var(--primary); color: white;
+  display: block; background: var(--primary); color: white !important;
   padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
 }

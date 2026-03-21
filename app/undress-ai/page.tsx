@@ -5,13 +5,15 @@ import styles from './page.module.css';
 import FaqSection from './FaqSection';
 
 export const metadata: Metadata = {
-  title: 'AI Undress Tool – Realistic Nude Image Generator | Image Nude',
-  description: 'The most advanced AI undress tool online. Remove clothing from any photo instantly. Free to try – 20 credits on sign up.',
+  title: 'AI Undress Tool — Free, No Login Required | Image Nude',
+  description: 'Remove clothing from any photo with AI. Free to try, no sign up needed. Photorealistic results in 8 seconds. Try our AI undress tool now.',
   alternates: { canonical: 'https://imagenude.com/undress-ai' },
   openGraph: {
-    title: 'AI Undress Tool – Realistic Results in Seconds',
-    description: 'Advanced AI that removes clothing from photos with photorealistic quality. Try free today.',
+    title: 'AI Undress Tool — Free, No Login Required | Image Nude',
+    description: 'Remove clothing from any photo with AI. Free to try, no sign up needed. Photorealistic results in 8 seconds.',
     url: 'https://imagenude.com/undress-ai',
+    siteName: 'Image Nude',
+    type: 'website',
   },
 };
 

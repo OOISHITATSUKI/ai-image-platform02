@@ -5,8 +5,6 @@
   --border: #2a1515;
   --primary: #e5342a;
   --primary-dim: rgba(229,52,42,0.1);
-  --primary-glow: rgba(229,52,42,0.25);
-  --accent: #ff6b4a;
   --text: #f0f0f0;
   --muted: #888888;
   --dim: #444444;
@@ -82,21 +80,20 @@
 .modelCard {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px;
-  margin: 16px 0;
-  border-left: 3px solid var(--primary);
+  border-radius: 14px; padding: 22px;
+  margin: 14px 0;
   transition: border-color 0.2s;
 }
-.modelCard:hover { border-color: rgba(229,52,42,0.5); }
+.modelCard:hover { border-color: rgba(229,52,42,0.3); }
 .modelName {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px; color: var(--text); margin-bottom: 4px;
+  font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 4px;
 }
 .modelBest {
-  font-size: 13px; color: var(--primary); font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 12px; color: var(--primary); font-weight: 600;
+  margin-bottom: 8px;
 }
-.modelCard p { margin: 0; font-size: 15px; }
+.modelCard p { margin: 0; font-size: 14px; }
 
 /* PROMPT BOXES */
 .promptBox {
@@ -121,50 +118,50 @@
 
 /* CHECKLIST */
 .checklist {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
 }
-.checkItem {
+.checklist li {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
   font-size: 15px; color: var(--muted);
-  padding: 6px 0;
-  display: flex; align-items: center; gap: 10px;
 }
+.checklist li:last-child { border-bottom: none; }
 .check {
-  color: #4ade80; font-size: 16px; font-weight: 700;
+  color: #4ade80; font-weight: 700; flex-shrink: 0;
 }
 
 /* COMPARISON TABLE */
 .compareWrap {
-  margin: 20px 0; overflow-x: auto;
+  margin: 24px 0; overflow-x: auto;
 }
 .table {
   width: 100%; border-collapse: collapse;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px; overflow: hidden;
+  font-size: 14px;
 }
 .th {
+  background: var(--surface2);
   text-align: left; padding: 12px 16px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dim);
+  font-weight: 600;
   border-bottom: 1px solid var(--border);
-  background: var(--code-bg);
+  color: var(--text);
 }
 .td {
-  padding: 12px 16px; font-size: 14px;
+  padding: 11px 16px;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
 }
 .tdH {
-  padding: 12px 16px; font-size: 14px;
+  padding: 11px 16px;
   color: var(--text); font-weight: 600;
   border-bottom: 1px solid var(--border);
 }
-.ok { color: #4ade80; font-weight: 600; }
-.mid { color: #facc15; font-weight: 600; }
-.no { color: #f87171; opacity: 0.7; font-weight: 600; }
+tr:last-child .td, tr:last-child .tdH { border-bottom: none; }
+.ok { color: #4ade80; }
+.mid { color: #fbbf24; }
+.no { color: var(--dim); }
 
 /* TIP */
 .tip {
@@ -182,13 +179,7 @@
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 0;
 }
-.faqToggle {
-  font-size: 22px; color: var(--dim); font-weight: 300;
-  flex-shrink: 0; margin-left: 16px;
-}
 .faqA { font-size: 15px; color: var(--muted); margin-top: 12px; }
-.faqAOpen { animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* CTA */
 .ctaBlock {
@@ -199,7 +190,7 @@
 .ctaBlock p { font-size: 15px; color: var(--muted); margin-bottom: 22px; }
 .ctaBtn {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--primary); color: white;
+  background: var(--primary); color: white !important;
   padding: 14px 32px; border-radius: 10px;
   font-size: 15px; font-weight: 600; text-decoration: none;
   transition: background 0.2s;
@@ -225,7 +216,7 @@
 .sctaTitle { font-family: 'DM Serif Display', serif; font-size: 17px; margin-bottom: 8px; color: var(--text); }
 .scta p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 .sctaLink {
-  display: block; background: var(--primary); color: white;
+  display: block; background: var(--primary); color: white !important;
   padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
 }
@@ -251,5 +242,4 @@
 @media (max-width: 900px) {
   .wrap { grid-template-columns: 1fr; padding: 32px 20px; }
   .sidebar { display: none; }
-  .table { font-size: 13px; }
 }

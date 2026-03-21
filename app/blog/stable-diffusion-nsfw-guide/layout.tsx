@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Stable Diffusion NSFW Guide 2025 — Models, Prompts & Easier Alternatives',
-  description: 'Complete guide to Stable Diffusion NSFW generation in 2025. Best models, prompts, settings — plus easier browser alternatives that require zero setup.',
+  title: 'Stable Diffusion NSFW Guide 2025 — Models, Settings & Browser Alternatives',
+  description: 'Complete Stable Diffusion NSFW guide for 2025. Best uncensored models, optimal settings, prompts — plus a zero-setup browser alternative for users without a GPU.',
   alternates: { canonical: 'https://imagenude.com/blog/stable-diffusion-nsfw-guide' },
 };
 

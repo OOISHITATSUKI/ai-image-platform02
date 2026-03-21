@@ -23,5 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/blog/ai-face-swap-vs-deepfake`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/blog/how-to-use-ai-face-swap-adults`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/blog/ai-portrait-generator-realistic-faces`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/blog/nsfw-ai-anime-generator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/blog/stable-diffusion-nsfw-guide`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/blog/how-to-write-nsfw-ai-prompts`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
   ];
 }

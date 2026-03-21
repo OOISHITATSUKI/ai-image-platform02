@@ -5,8 +5,6 @@
   --border: #2a1515;
   --primary: #e5342a;
   --primary-dim: rgba(229,52,42,0.1);
-  --primary-glow: rgba(229,52,42,0.25);
-  --accent: #ff6b4a;
   --text: #f0f0f0;
   --muted: #888888;
   --dim: #444444;
@@ -109,35 +107,32 @@
 
 /* CALLOUT */
 .callout {
-  background: rgba(74,222,128,0.06);
-  border: 1px solid rgba(74,222,128,0.2);
-  border-radius: 12px; padding: 18px 22px; margin: 22px 0;
-  font-size: 15px; color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px 24px; margin: 24px 0;
 }
-.callout strong { color: #4ade80; }
-.callout a { color: var(--primary); }
+.callout p { margin: 0; font-size: 15px; }
+.callout strong { color: var(--primary); }
 
 /* SETTINGS GRID */
 .settingsGrid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 14px; margin: 24px 0;
+  gap: 14px; margin: 20px 0;
 }
 .settingCard {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px 20px;
-  transition: border-color 0.2s;
+  border-radius: 12px; padding: 16px;
 }
-.settingCard:hover { border-color: rgba(229,52,42,0.4); }
 .settingName {
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--dim); margin-bottom: 6px;
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--dim); margin-bottom: 4px;
 }
 .settingValue {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px; color: var(--text);
-  margin-bottom: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 15px; font-weight: 700;
+  color: var(--primary); margin-bottom: 4px;
 }
 .settingNote {
   font-size: 12px; color: var(--muted);
@@ -152,25 +147,23 @@
   font-size: 14px;
 }
 .compareTable th {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface2);
   padding: 12px 16px; text-align: left;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
   color: var(--text);
 }
 .compareTable td {
-  border: 1px solid var(--border);
-  padding: 10px 16px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
   color: var(--muted);
 }
+.compareTable tr:last-child td { border-bottom: none; }
 .tdH {
   font-weight: 600; color: var(--text);
-  background: var(--surface);
-  white-space: nowrap;
 }
 .ok { color: #4ade80; }
-.mid { color: #facc15; }
+.mid { color: #fbbf24; }
 .no { color: var(--dim); }
 
 /* FAQ */
@@ -181,17 +174,7 @@
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 0;
 }
-.faqToggle {
-  font-size: 22px; color: var(--dim);
-  flex-shrink: 0; margin-left: 16px;
-}
 .faqA { font-size: 15px; color: var(--muted); margin-top: 12px; }
-.faqAOpen { animation: fadeIn 0.2s ease; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 /* CTA */
 .ctaBlock {
@@ -202,7 +185,7 @@
 .ctaBlock p { font-size: 15px; color: var(--muted); margin-bottom: 22px; }
 .ctaBtn {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--primary); color: white;
+  background: var(--primary); color: white !important;
   padding: 14px 32px; border-radius: 10px;
   font-size: 15px; font-weight: 600; text-decoration: none;
   transition: background 0.2s;
@@ -228,7 +211,7 @@
 .sctaTitle { font-family: 'DM Serif Display', serif; font-size: 17px; margin-bottom: 8px; color: var(--text); }
 .scta p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 .sctaLink {
-  display: block; background: var(--primary); color: white;
+  display: block; background: var(--primary); color: white !important;
   padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600;
   text-decoration: none; transition: background 0.2s;
 }
@@ -255,6 +238,4 @@
   .wrap { grid-template-columns: 1fr; padding: 32px 20px; }
   .sidebar { display: none; }
   .settingsGrid { grid-template-columns: 1fr; }
-  .compareTable { margin: 16px -20px; }
-  .compareTable table { font-size: 13px; }
 }
