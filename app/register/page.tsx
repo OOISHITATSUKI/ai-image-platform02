@@ -76,7 +76,16 @@ export default function RegisterPage() {
             localStorage.setItem('auth_token', data.token);
             setUser(data.user);
             useAppStore.setState({ isAuthenticated: true, ageVerified: true });
-            setTimeout(() => router.push('/editor'), 100);
+
+            // Store unlocked count for post-registration notification
+            if (data.unlockedCount && data.unlockedCount > 0) {
+                localStorage.setItem('guest_unlocked_count', String(data.unlockedCount));
+            }
+
+            // Clear guest gen count
+            localStorage.removeItem('guest_gen_count');
+
+            setTimeout(() => router.push('/'), 100);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {

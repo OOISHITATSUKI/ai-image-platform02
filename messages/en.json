@@ -148,7 +148,10 @@
         "ctaButton": "Try Free Now →",
         "ctaSub": "No card needed",
         "recentCreations": "Recent Creations",
-        "viewAll": "View All"
+        "viewAll": "View All",
+        "welcomeTitle": "Welcome to Image Nude",
+        "startCreating": "Start Creating",
+        "ageNotice": "18+ only. All content AI-generated."
     },
     "pricing": {
         "title": "Choose Your Plan",
@@ -440,5 +443,30 @@
         "done": "Done",
         "generateFailed": "Generation failed",
         "errorOccurred": "An error occurred"
+    },
+    "guest": {
+        "unlockImage": "Unlock This Image — Free, 10 seconds",
+        "rateLimitReached": "Please wait before generating again.",
+        "bannerTitle": "Like the result?",
+        "bannerBenefitUnlock": "Unlock this image without watermark",
+        "bannerBenefitDownload": "Download in full quality",
+        "bannerBenefitHistory": "Save your generation history",
+        "bannerBenefitCredits": "Get 20 free credits",
+        "bannerNote": "Just email + password. No credit card.",
+        "blurPreviewLabel": "Full quality",
+        "loadingTip1": "No watermark for registered users",
+        "loadingTip2": "Save and download your creations",
+        "loadingTip3": "20 free credits on signup",
+        "loadingTip4": "Just email + password — 10 seconds",
+        "fullscreenCtaTitle": "Enjoying Image Nude?",
+        "fullscreenCtaDesc": "Unlock all your images and get 20 free credits.",
+        "fullscreenCtaCta": "Unlock for Free"
+    },
+    "unlock": {
+        "successTitle": "Welcome! Your account is ready.",
+        "imagesUnlocked": "images unlocked (watermark removed)",
+        "creditsAdded": "20 free credits added",
+        "creditsRemaining": "You now have {count} credits remaining.",
+        "viewMyImages": "View My Images"
     }
 }

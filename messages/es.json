@@ -129,7 +129,10 @@
         "ctaButton": "Prueba gratis →",
         "ctaSub": "Sin tarjeta",
         "recentCreations": "Creaciones recientes",
-        "viewAll": "Ver todo"
+        "viewAll": "Ver todo",
+        "welcomeTitle": "Bienvenido a Image Nude",
+        "startCreating": "Empezar a Crear",
+        "ageNotice": "Solo mayores de 18. Todo el contenido es generado por IA."
     },
     "pricing": {
         "title": "Elige tu plan",
@@ -407,5 +410,30 @@
         "done": "Listo",
         "generateFailed": "Generación fallida",
         "errorOccurred": "Ocurrió un error"
+    },
+    "guest": {
+        "unlockImage": "Desbloquear esta imagen — Gratis, 10 segundos",
+        "rateLimitReached": "Espera antes de generar de nuevo.",
+        "bannerTitle": "¿Te gusta el resultado?",
+        "bannerBenefitUnlock": "Desbloquea sin marca de agua",
+        "bannerBenefitDownload": "Descarga en alta calidad",
+        "bannerBenefitHistory": "Guarda tu historial de generación",
+        "bannerBenefitCredits": "Obtén 20 créditos gratis",
+        "bannerNote": "Solo email + contraseña. Sin tarjeta de crédito.",
+        "blurPreviewLabel": "Calidad completa",
+        "loadingTip1": "Sin marca de agua para usuarios registrados",
+        "loadingTip2": "Guarda y descarga tus creaciones",
+        "loadingTip3": "20 créditos gratis al registrarte",
+        "loadingTip4": "Solo email + contraseña — 10 segundos",
+        "fullscreenCtaTitle": "¿Disfrutas Image Nude?",
+        "fullscreenCtaDesc": "Desbloquea todas tus imágenes y obtén 20 créditos gratis.",
+        "fullscreenCtaCta": "Desbloquear Gratis"
+    },
+    "unlock": {
+        "successTitle": "¡Bienvenido! Tu cuenta está lista.",
+        "imagesUnlocked": "imágenes desbloqueadas (marca de agua eliminada)",
+        "creditsAdded": "20 créditos gratis añadidos",
+        "creditsRemaining": "Tienes {count} créditos restantes.",
+        "viewMyImages": "Ver Mis Imágenes"
     }
 }

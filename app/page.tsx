@@ -1,483 +1,831 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
+import type { AspectRatio, GenerationType } from '@/lib/types';
+import LeftPanel from '@/components/editor/LeftPanel';
+import RightPanel from '@/components/editor/RightPanel';
+import Img2VidPanel from '@/components/editor/Img2VidPanel';
+import WelcomeIntroModal from '@/components/guest/WelcomeIntroModal';
+import GuestPromoBanner from '@/components/guest/GuestPromoBanner';
 
-const STATS = [
-    { value: '50K+', label: 'Images Created' },
-    { value: '4.8', label: 'User Rating' },
-    { value: '<10s', label: 'Generation Time' },
-    { value: '100%', label: 'Private & Secure' },
-];
-const REVIEWS = [
-    { name: 'Alex K.', rating: 5, text: "Incredible quality. Better than any other AI generator I've tried.", avatar: 'A', color: '#dc2626' },
-    { name: 'Miku T.', rating: 5, text: 'The anime style is absolutely stunning. Love the tag system.', avatar: 'M', color: '#7c3aed' },
-    { name: 'Carlos R.', rating: 4, text: 'Fast generation, great results. Video feature is a game changer.', avatar: 'C', color: '#0891b2' },
-    { name: 'Sarah L.', rating: 5, text: 'So easy to use. Created exactly what I imagined in seconds.', avatar: 'S', color: '#ca8a04' },
-];
-const FEATURES = [
-    { icon: '✦', title: 'Text to Image', desc: 'Describe your vision. AI creates it.' },
-    { icon: '◈', title: 'Face Swap', desc: 'Blend faces seamlessly into any scene.' },
-    { icon: '▶', title: 'AI Video', desc: 'Bring your images to life with motion.' },
-];
-const SAMPLE_IMAGES = [
-    { prompt: 'Elegant portrait, golden hour', style: 'Realistic' },
-    { prompt: 'Fantasy warrior queen', style: 'Anime' },
-    { prompt: 'Beach sunset scene', style: 'Realistic' },
-    { prompt: 'Cyberpunk city girl', style: 'Digital Art' },
-    { prompt: 'Classical painting style', style: 'Art' },
-    { prompt: 'Fashion editorial look', style: 'Realistic' },
-    { prompt: 'Neon nightlife portrait', style: 'Digital Art' },
-    { prompt: 'Ethereal forest fairy', style: 'Anime' },
-];
-
-function StarRating({ count }: { count: number }) {
-    return (
-        <div style={{ display: 'flex', gap: 2 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} style={{ color: i < count ? '#f59e0b' : '#333', fontSize: 14 }}>★</span>
-            ))}
-        </div>
-    );
-}
-
-function TryItNowSection() {
-    const [demoState, setDemoState] = useState<'idle' | 'processing' | 'result' | 'error' | 'limit'>('idle');
-    const [ethnicity, setEthnicity] = useState('japanese');
-    const [bustSize, setBustSize] = useState('medium');
-    const [prompt, setPrompt] = useState('');
-    const [resultImage, setResultImage] = useState<string | null>(null);
-    const [errorMsg, setErrorMsg] = useState('');
-    const [progress, setProgress] = useState(0);
-    const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const getFingerprint = useCallback(() => {
-        if (typeof window === 'undefined') return 'ssr';
-        const nav = window.navigator;
-        const raw = [nav.userAgent, nav.language, screen.width, screen.height, screen.colorDepth, new Date().getTimezoneOffset()].join('|');
-        let hash = 0;
-        for (let i = 0; i < raw.length; i++) { hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0; }
-        return hash.toString(36);
-    }, []);
-
-    const handleGenerate = async () => {
-        setDemoState('processing'); setProgress(0);
-        progressRef.current = setInterval(() => {
-            setProgress(p => p >= 90 ? 90 : p + Math.random() * 6 + 2);
-        }, 600);
-        try {
-            const res = await fetch('/api/demo-generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ethnicity, bustSize, prompt, fingerprintHash: getFingerprint() }),
-            });
-            if (progressRef.current) clearInterval(progressRef.current);
-            if (res.status === 429) { setDemoState('limit'); return; }
-            const data = await res.json();
-            if (!res.ok || !data.success) { setErrorMsg(data.error || 'Generation failed.'); setDemoState('error'); return; }
-            setProgress(100); setResultImage(data.image);
-            setTimeout(() => setDemoState('result'), 400);
-        } catch {
-            if (progressRef.current) clearInterval(progressRef.current);
-            setErrorMsg('Network error. Please try again.'); setDemoState('error');
-        }
-    };
-
-    const handleReset = () => { setDemoState('idle'); setResultImage(null); setProgress(0); setErrorMsg(''); };
-
-    const ethnicityOptions = [
-        { value: 'asian', label: '🌏 Asian' },
-        { value: 'european', label: '🌍 European' },
-        { value: 'latina', label: '💃 Latina' },
-        { value: 'black', label: '✨ Black' },
-        { value: 'middleeastern', label: '🌙 Middle Eastern' },
-    ];
-    const bustOptions = [
-        { value: 'small', label: 'Small' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'large', label: 'Large' },
-        { value: 'huge', label: 'Huge' },
-    ];
-    const bustIndex = bustOptions.findIndex(o => o.value === bustSize);
-
-    return (
-        <section className="hp-section hp-section-pad">
-            <div className="hp-glow" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 500, background: 'radial-gradient(circle, rgba(220,38,38,0.06), transparent 70%)' }} />
-            <div style={{ maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                    <div className="hp-label"><span className="hp-pulse">●</span> Live Demo — No Sign Up Required</div>
-                    <h2 className="hp-heading">Try It <span className="hp-accent-text">Free</span></h2>
-                    <p className="hp-subtext" style={{ maxWidth: 520, margin: '0 auto' }}>3 simple steps. No account needed. Results in ~10 seconds.</p>
-                </div>
-                <div className="hp-demo-card">
-                    {demoState === 'idle' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">1</span>
-                                    <span className="hp-demo-step-title">Choose Ethnicity</span>
-                                </div>
-                                <div className="hp-demo-options">
-                                    {ethnicityOptions.map(o => (
-                                        <button key={o.value} className={`hp-demo-opt ${ethnicity === o.value ? 'active' : ''}`} onClick={() => setEthnicity(o.value)}>{o.label}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">2</span>
-                                    <span className="hp-demo-step-title">Select Body Type</span>
-                                </div>
-                                <div className="hp-bust-slider-wrap">
-                                    <div className="hp-bust-labels" style={{ marginBottom: 4 }}>
-                                        {bustOptions.map(o => (
-                                            <button key={o.value} onClick={() => setBustSize(o.value)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: o.value === bustSize ? '#f87171' : '#555', fontWeight: o.value === bustSize ? 700 : 400, fontSize: 12, padding: '4px 0', fontFamily: 'inherit', transition: 'all 0.2s' }}>{o.label}</button>
-                                        ))}
-                                    </div>
-                                    <input type="range" min={0} max={3} step={1} value={bustIndex}
-                                        onChange={e => setBustSize(bustOptions[Number(e.target.value)].value)}
-                                        className="hp-bust-slider" />
-                                </div>
-                            </div>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">3</span>
-                                    <span className="hp-demo-step-title">Describe the Scene</span>
-                                    <span style={{ color: '#555', fontSize: 12, fontWeight: 400, marginLeft: 8 }}>optional</span>
-                                </div>
-                                <textarea
-                                    className="hp-demo-textarea"
-                                    value={prompt}
-                                    onChange={e => setPrompt(e.target.value)}
-                                    placeholder="e.g. on the beach, sunset lighting, looking at camera..."
-                                    maxLength={200}
-                                    rows={2}
-                                />
-                            </div>
-                            <button className="hp-btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 16, padding: '18px', gap: 8 }} onClick={handleGenerate}>
-                                Generate Now — It&apos;s Free
-                            </button>
-                            <div className="hp-trust-row" style={{ justifyContent: 'center', fontSize: 12, color: '#444' }}>
-                                <span>No sign up</span>
-                                <span>~10 seconds</span>
-                                <span>100% private</span>
-                            </div>
-                        </div>
-                    )}
-                    {demoState === 'processing' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16, animation: 'hpPulse 1s ease infinite' }}>⚡</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>AI is generating your image...</h3>
-                            <div className="hp-progress-track"><div className="hp-progress-bar" style={{ width: `${Math.min(progress, 100)}%` }} /></div>
-                            <p style={{ fontSize: 13, color: '#555', marginTop: 12 }}>{Math.round(Math.min(progress, 100))}%</p>
-                        </div>
-                    )}
-                    {demoState === 'result' && resultImage && (
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(220,38,38,0.2)', boxShadow: '0 0 40px rgba(220,38,38,0.1)', maxWidth: 360, margin: '0 auto 24px', position: 'relative' }}>
-                                <img src={resultImage} alt="Generated" style={{ width: '100%', display: 'block', pointerEvents: 'none', userSelect: 'none' }} draggable={false} onContextMenu={e => e.preventDefault()} />
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent' }} onContextMenu={e => e.preventDefault()} />
-                                <div style={{ position: 'absolute', bottom: 12, right: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.6)', fontSize: 10, color: '#888', fontWeight: 600, letterSpacing: '0.5px' }}>PREVIEW · 512px</div>
-                            </div>
-                            <div className="hp-signup-banner">
-                                <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🔥 Like what you see? Try the full editor!</div>
-                                    <div style={{ fontSize: 13, color: '#888' }}>Upload your photo · Undress AI · Face Swap · HD 1024px · More styles</div>
-                                </div>
-                                <Link href="/editor" className="hp-btn-primary" style={{ whiteSpace: 'nowrap' }}>Open Editor →</Link>
-                            </div>
-                            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-                                <Link href="/editor" style={{ fontSize: 14, color: '#e5342a', fontWeight: 600, textDecoration: 'none' }}>Open Full Editor — Upload & Undress →</Link>
-                            </div>
-                            <button onClick={handleReset} className="hp-btn-text">↺ Generate another</button>
-                        </div>
-                    )}
-                    {demoState === 'error' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>😕</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Something went wrong</h3>
-                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>{errorMsg}</p>
-                            <button className="hp-btn-primary" onClick={handleReset}>Try Again</button>
-                        </div>
-                    )}
-                    {demoState === 'limit' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>🔥</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>You liked it!</h3>
-                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Free demo limit reached. Sign up to unlock unlimited generations + HD quality + Undress AI.</p>
-                            <Link href="/register" className="hp-btn-primary">Sign Up Free — Get 20 Credits</Link>
-                            <div style={{ marginTop: 12 }}><Link href="/editor" style={{ fontSize: 13, color: '#888', textDecoration: 'underline' }}>or try the full editor →</Link></div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function BeforeAfterSlider() {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const beforeRef = useRef<HTMLDivElement>(null);
-    const beforeImgRef = useRef<HTMLImageElement>(null);
-    const lineRef = useRef<HTMLDivElement>(null);
-    const handleRef = useRef<HTMLDivElement>(null);
-    const isDragging = useRef(false);
-
-    useEffect(() => {
-        const c = containerRef.current;
-        if (!c) return;
-        // Set before image width to match container
-        const setImgWidth = () => {
-            if (beforeImgRef.current) beforeImgRef.current.style.width = `${c.offsetWidth}px`;
-        };
-        setImgWidth();
-        const ro = new ResizeObserver(setImgWidth);
-        ro.observe(c);
-
-        let raf = 0;
-        const apply = (pct: number) => {
-            if (beforeRef.current) beforeRef.current.style.width = `${pct}%`;
-            if (lineRef.current) lineRef.current.style.left = `${pct}%`;
-            if (handleRef.current) handleRef.current.style.left = `${pct}%`;
-        };
-        const update = (cx: number) => {
-            const r = c.getBoundingClientRect();
-            const pct = Math.max(2, Math.min(98, ((cx - r.left) / r.width) * 100));
-            cancelAnimationFrame(raf);
-            raf = requestAnimationFrame(() => apply(pct));
-        };
-        const down = (e: PointerEvent) => { isDragging.current = true; c.setPointerCapture(e.pointerId); update(e.clientX); };
-        const move = (e: PointerEvent) => { if (!isDragging.current) return; e.preventDefault(); update(e.clientX); };
-        const up = () => { isDragging.current = false; };
-        c.addEventListener('pointerdown', down, { passive: false });
-        c.addEventListener('pointermove', move, { passive: false });
-        c.addEventListener('pointerup', up);
-        c.addEventListener('pointercancel', up);
-        return () => { ro.disconnect(); c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up); };
-    }, []);
-
-    return (
-        <div
-            ref={containerRef}
-            style={{
-                position: 'relative', width: '100%', maxWidth: 480, aspectRatio: '3/4',
-                borderRadius: 20, overflow: 'hidden', cursor: 'col-resize', userSelect: 'none',
-                touchAction: 'none', WebkitUserSelect: 'none',
-                border: '2px solid rgba(220,38,38,0.3)', boxShadow: '0 0 60px rgba(220,38,38,0.15)',
-            }}
-        >
-            <img src="/hero/mihon_after.webp" alt="After" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
-            <div ref={beforeRef} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%', overflow: 'hidden', willChange: 'width', contain: 'layout style paint' }}>
-                <img ref={beforeImgRef} src="/hero/mihon_before.webp" alt="Before" loading="eager" decoding="async" style={{ position: 'absolute', top: 0, left: 0, height: '100%', objectFit: 'cover', maxWidth: 'none' }} draggable={false} />
-            </div>
-            <div ref={lineRef} style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 3, background: '#fff', transform: 'translateX(-50%)', zIndex: 2, boxShadow: '0 0 8px rgba(0,0,0,0.5)' }} />
-            <div ref={handleRef} style={{
-                position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 3,
-                width: 44, height: 44, borderRadius: '50%', background: 'rgba(220,38,38,0.9)', border: '3px solid #fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#fff',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
-            }}>
-                ⟷
-            </div>
-            <div style={{ position: 'absolute', top: 12, left: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.6)', fontSize: 11, color: '#ccc', fontWeight: 600, zIndex: 1 }}>BEFORE</div>
-            <div style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(220,38,38,0.7)', fontSize: 11, color: '#fff', fontWeight: 600, zIndex: 1 }}>AFTER</div>
-        </div>
-    );
+interface UploadSlot {
+    file: File;
+    previewUrl: string;
+    label: string;
+    maskBase64?: string;
 }
 
 export default function HomePage() {
-    const { createChat, setGenerationType, chats } = useAppStore();
+    const {
+        chats, activeChatId, createChat, addMessage,
+        isGenerating, setIsGenerating, submitTrigger,
+        img2vidImageUrl, settings, user,
+        deductCredits, addCredits, updateSettings,
+        tagSettings, setGenerationType,
+        selectedFaceId, savedFaces,
+        isAuthenticated,
+    } = useAppStore();
     const { t } = useTranslation();
-    const [activeFeature, setActiveFeature] = useState(0);
-    const [isVisible, setIsVisible] = useState(false);
+
+    const isGuest = !isAuthenticated;
+    const isImg2Vid = settings.generationType === 'img2vid';
+    const pollAbortRef = useRef<(() => void) | null>(null);
+
+    // Guest generation count (tracked in localStorage)
+    const [guestGenCount, setGuestGenCount] = useState(0);
+    const [guestCooldown, setGuestCooldown] = useState(0);
+    const [lastGuestResult, setLastGuestResult] = useState<{ watermarked?: string; blurred?: string } | null>(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
-        const interval = setInterval(() => setActiveFeature(f => (f + 1) % 3), 3000);
-        return () => clearInterval(interval);
+        if (typeof window !== 'undefined') {
+            const count = parseInt(localStorage.getItem('guest_gen_count') || '0', 10);
+            setGuestGenCount(count);
+        }
     }, []);
 
-    const handleToolClick = (type: string) => {
-        setGenerationType(type as any);
-        if (chats.length === 0) createChat();
+    // Cooldown timer
+    useEffect(() => {
+        if (guestCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setGuestCooldown(prev => {
+                if (prev <= 1) { clearInterval(timer); return 0; }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [guestCooldown]);
+
+    // Shared state between Left and Right panels
+    const [inputText, setInputText] = useState('');
+    const [uploads, setUploads] = useState<UploadSlot[]>([]);
+    const faceSwapMode = settings.generationType === 'face_swap';
+    const inpaintMode = settings.generationType === 'inpaint';
+    const setFaceSwapMode = (v: boolean) => setGenerationType(v ? 'face_swap' : 'txt2img');
+    const setInpaintMode = (v: boolean) => setGenerationType(v ? 'inpaint' : 'txt2img');
+    const [reposeMode, setReposeMode] = useState(false);
+    const [showInpaintModal, setShowInpaintModal] = useState(false);
+    const [generationError, setGenerationError] = useState<string | null>(null);
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [showRegisterToast, setShowRegisterToast] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsChecks, setTermsChecks] = useState({ terms: false, content: false, age: false });
+    const rightPanelRef = useRef<HTMLDivElement>(null);
+    const inputTextRef = useRef(inputText);
+    const uploadsRef = useRef(uploads);
+    inputTextRef.current = inputText;
+    uploadsRef.current = uploads;
+
+    // When generating starts: close keyboard + scroll to generating card on mobile
+    useEffect(() => {
+        if (isGenerating) {
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
+            if (window.innerWidth < 1024) {
+                setTimeout(() => {
+                    const container = document.querySelector('.editor-layout-v2');
+                    const genCard = document.querySelector('.editor-generate-sticky');
+                    if (container && genCard) {
+                        const cardTop = (genCard as HTMLElement).offsetTop;
+                        container.scrollTo({ top: cardTop - 20, behavior: 'smooth' });
+                    }
+                }, 400);
+            }
+        }
+    }, [isGenerating]);
+
+    // Reset on chat switch
+    useEffect(() => {
+        setInputText('');
+        setUploads([]);
+        setGenerationError(null);
+    }, [activeChatId]);
+
+    // Clear files when switching to text-only mode
+    useEffect(() => {
+        const showAttach = !['txt2img', 'txt2vid'].includes(settings.generationType);
+        if (!showAttach && uploads.length > 0) {
+            uploads.forEach((s) => URL.revokeObjectURL(s.previewUrl));
+            setUploads([]);
+        }
+    }, [settings.generationType]);
+
+    // Recover pending generation results after mobile screen-off / tab restore
+    const recoverPendingGeneration = async () => {
+        const pendingJson = localStorage.getItem('pending_generation');
+        if (!pendingJson) return;
+        try {
+            const pending = JSON.parse(pendingJson);
+            const { taskId, chatId: pendingChatId, prompt: pendingPrompt, generationType: pendingGenType, model: pendingModel, creditCost: pendingCreditCost, startedAt } = pending;
+            if (Date.now() - startedAt > 3 * 60 * 1000) {
+                localStorage.removeItem('pending_generation');
+                setIsGenerating(false);
+                return;
+            }
+            const statusRes = await fetch(`/api/generate/status?taskId=${taskId}`);
+            const statusData = await statusRes.json();
+            if (statusData.status === 'SUCCEED' && statusData.images?.length > 0) {
+                localStorage.removeItem('pending_generation');
+                if (pollAbortRef.current) { pollAbortRef.current(); pollAbortRef.current = null; }
+                for (const img of statusData.images) {
+                    addMessage(pendingChatId, {
+                        role: 'assistant',
+                        content: `Generated from: "${pendingPrompt || 'uploaded reference'}"`,
+                        imageUrl: img.url,
+                        generationType: pendingGenType,
+                        model: pendingModel,
+                        isFavorite: false,
+                    });
+                }
+                setIsGenerating(false);
+            } else if (statusData.status === 'FAILED') {
+                localStorage.removeItem('pending_generation');
+                if (pollAbortRef.current) { pollAbortRef.current(); pollAbortRef.current = null; }
+                setGenerationError(statusData.error || 'Generation failed');
+                setIsGenerating(false);
+            } else if (statusData.status === 'PROCESSING') {
+                if (!pollAbortRef.current) {
+                    setIsGenerating(true);
+                    startPolling(taskId, pendingChatId, pendingPrompt, pendingGenType as GenerationType, pendingModel, pendingCreditCost, startedAt);
+                }
+            }
+        } catch {
+            localStorage.removeItem('pending_generation');
+            setIsGenerating(false);
+        }
     };
 
-    const gradients = [
-        'linear-gradient(160deg, #2a1520, #150d12)',
-        'linear-gradient(160deg, #151d2a, #0d1115)',
-        'linear-gradient(160deg, #1d2a15, #111509)',
-        'linear-gradient(160deg, #2a2215, #15120d)',
-        'linear-gradient(160deg, #201528, #130d18)',
-        'linear-gradient(160deg, #15282a, #0d1515)',
-        'linear-gradient(160deg, #281515, #180d0d)',
-        'linear-gradient(160deg, #15152a, #0d0d18)',
-    ];
-    const emojis = ['👩', '⚔️', '🌅', '🌃', '🎨', '📸', '💜', '🧚'];
-    const heroImages = ['/hero/card2-after.webp', '/hero/card3-after.webp', '/hero/card4-after.webp', '/hero/card5-after.webp'];
+    // Reusable polling function (abortable)
+    const startPolling = (taskId: string, chatId: string, prompt: string, genType: GenerationType, model: string, creditCost: number, startedAt: number) => {
+        if (pollAbortRef.current) { pollAbortRef.current(); }
+        let cancelled = false;
+        pollAbortRef.current = () => { cancelled = true; };
+
+        const poll = async () => {
+            if (cancelled) return;
+            if (Date.now() - startedAt > 180_000) {
+                localStorage.removeItem('pending_generation');
+                pollAbortRef.current = null;
+                setGenerationError('Generation timed out');
+                setIsGenerating(false);
+                return;
+            }
+            try {
+                const statusRes = await fetch(`/api/generate/status?taskId=${taskId}`);
+                if (cancelled) return;
+                const statusData = await statusRes.json();
+                if (statusData.status === 'SUCCEED' && statusData.images?.length > 0) {
+                    localStorage.removeItem('pending_generation');
+                    pollAbortRef.current = null;
+                    for (const img of statusData.images) {
+                        addMessage(chatId, {
+                            role: 'assistant',
+                            content: `Generated from: "${prompt || 'uploaded reference'}"`,
+                            imageUrl: img.url,
+                            generationType: genType,
+                            model,
+                            isFavorite: false,
+                        });
+                        try {
+                            const saveToken = localStorage.getItem('auth_token');
+                            if (saveToken) {
+                                fetch('/api/generations', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${saveToken}` },
+                                    body: JSON.stringify({
+                                        prompt: prompt || 'uploaded reference',
+                                        modelName: model,
+                                        fileUrl: img.url,
+                                        fileType: 'image',
+                                        generationType: genType,
+                                        creditsUsed: creditCost,
+                                        status: 'success',
+                                        params: {},
+                                    }),
+                                }).catch(() => {});
+                            }
+                        } catch {}
+                    }
+                    setIsGenerating(false);
+                    return;
+                } else if (statusData.status === 'FAILED') {
+                    localStorage.removeItem('pending_generation');
+                    pollAbortRef.current = null;
+                    setGenerationError(statusData.error || 'Generation failed');
+                    setIsGenerating(false);
+                    return;
+                }
+            } catch (err) {
+                console.error('Poll error:', err);
+            }
+            if (!cancelled) {
+                setTimeout(poll, 3000);
+            }
+        };
+        setTimeout(poll, 3000);
+    };
+
+    // On mount + visibility change: try to recover
+    useEffect(() => {
+        recoverPendingGeneration();
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                recoverPendingGeneration();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => document.removeEventListener('visibilitychange', handleVisibility);
+    }, []);
+
+    // Convert file utilities
+    const convertImageToPng = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return reject(new Error('Canvas not supported'));
+                ctx.drawImage(img, 0, 0);
+                const dataUrl = canvas.toDataURL('image/png');
+                resolve(dataUrl.split(',')[1]);
+            };
+            img.onerror = () => reject(new Error('Failed to decode image'));
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const fileToBase64 = async (file: File): Promise<string> => {
+        const safeTypes = ['image/jpeg', 'image/png'];
+        if (!safeTypes.includes(file.type)) return convertImageToPng(file);
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve((reader.result as string).split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const friendlyError = (raw: string): string => {
+        if (raw.includes('INVALID_IMAGE_FORMAT')) {
+            return 'This image format is not supported. Supported formats: JPG, PNG';
+        }
+        if (raw.includes('Account temporarily suspended')) return t('chat.error_temp_ban');
+        if (raw.includes('Account permanently banned')) return t('chat.error_permanent_ban');
+        return raw;
+    };
+
+    const reUploadImage = async (url: string) => {
+        try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const file = new File([blob], `ai_ref_${Date.now()}.png`, { type: 'image/png' });
+            uploads.forEach((s) => URL.revokeObjectURL(s.previewUrl));
+            const newSlot: UploadSlot = { file, previewUrl: URL.createObjectURL(file), label: 'Image 1' };
+            setUploads([newSlot]);
+            return true;
+        } catch {
+            setGenerationError('Failed to load image.');
+            return false;
+        }
+    };
+
+    const handleAgreeTerms = async () => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        try {
+            const res = await fetch('/api/auth/agree-terms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+            });
+            const data = await res.json();
+            if (res.ok && user) {
+                useAppStore.getState().setUser({ ...user, termsAgreedAt: data.termsAgreedAt });
+                setShowTermsModal(false);
+            }
+        } catch (err) {
+            console.error('Failed to agree terms:', err);
+        }
+    };
+
+    // ── Guest generation handler ──
+    const handleGuestGenerate = async (prompt: string, uploadsForGen: UploadSlot[]) => {
+        setGenerationError(null);
+        setIsGenerating(true);
+
+        try {
+            // Build request body based on generation type
+            const body: Record<string, unknown> = {
+                prompt,
+                generationType: settings.generationType,
+                modelId: settings.model,
+                aspectRatio: settings.aspectRatio,
+                tagSettings,
+            };
+
+            if (uploadsForGen.length > 0 && settings.generationType !== 'txt2img') {
+                body.imageBase64 = await fileToBase64(uploadsForGen[0].file);
+                if (uploadsForGen.length > 1) {
+                    body.additionalImages = await Promise.all(
+                        uploadsForGen.slice(1).map(s => fileToBase64(s.file))
+                    );
+                }
+                if (inpaintMode && uploadsForGen[0]?.maskBase64) {
+                    body.maskBase64 = uploadsForGen[0].maskBase64;
+                }
+            }
+
+            body.faceSwapMode = faceSwapMode;
+            body.inpaintMode = inpaintMode;
+            body.nudeMode = settings.nudeMode ?? true;
+
+            const res = await fetch('/api/demo-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (res.status === 429) {
+                const data = await res.json();
+                const remaining = data.remainingSeconds || 75;
+                setGuestCooldown(remaining);
+                setGenerationError(data.error || t('guest.rateLimitReached'));
+                setIsGenerating(false);
+                return;
+            }
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                setGenerationError(friendlyError(data.error || 'Generation failed'));
+                setIsGenerating(false);
+                return;
+            }
+
+            // Update guest gen count
+            const newCount = guestGenCount + 1;
+            setGuestGenCount(newCount);
+            localStorage.setItem('guest_gen_count', String(newCount));
+
+            // Set cooldown
+            setGuestCooldown(75);
+
+            // Add result to chat
+            let chatId = activeChatId;
+            if (!chatId) chatId = createChat();
+
+            addMessage(chatId, {
+                role: 'user',
+                content: prompt,
+                imageUrl: uploadsForGen[0]?.previewUrl ?? undefined,
+                isFavorite: false,
+            });
+
+            addMessage(chatId, {
+                role: 'assistant',
+                content: `Generated from: "${prompt || 'uploaded reference'}"`,
+                imageUrl: data.image,
+                generationType: settings.generationType,
+                model: settings.model,
+                isFavorite: false,
+            });
+
+            // Store last result for blur preview
+            setLastGuestResult({
+                watermarked: data.image,
+                blurred: data.image, // same image, CSS blur applied on frontend
+            });
+
+            setInputText('');
+            setUploads([]);
+        } catch (err) {
+            console.error('Guest generation error:', err);
+            setGenerationError('Network error. Please try again.');
+        }
+
+        setIsGenerating(false);
+    };
+
+    // Main submit handler
+    const handleSubmit = async (e?: React.FormEvent, skipGuard?: boolean) => {
+        try { e?.preventDefault(); } catch (_) {}
+        if (!skipGuard && isGenerating) return;
+
+        const currentInputText = inputTextRef.current;
+        const currentUploadsList = uploadsRef.current;
+
+        // ── Guest path: use demo-generate API ──
+        if (isGuest) {
+            if (guestCooldown > 0) {
+                setGenerationError(`Please wait ${guestCooldown} seconds before generating again.`);
+                if (skipGuard) setIsGenerating(false);
+                return;
+            }
+            await handleGuestGenerate(currentInputText.trim(), [...currentUploadsList]);
+            return;
+        }
+
+        // ── Authenticated path: existing logic ──
+        if (user && !user.termsAgreedAt) {
+            setShowTermsModal(true);
+            if (skipGuard) setIsGenerating(false);
+            return;
+        }
+
+        // Mode validations
+        if (faceSwapMode) {
+            const hasSavedFace = !!selectedFaceId;
+            if (currentUploadsList.length < 2 && !(currentUploadsList.length >= 1 && hasSavedFace)) {
+                setGenerationError(t('chat.faceSwapNoImage'));
+                if (skipGuard) setIsGenerating(false);
+                return;
+            }
+        } else if (inpaintMode) {
+            if (currentUploadsList.length === 0) { setGenerationError(t('chat.uploadRequiredForInpaint')); if (skipGuard) setIsGenerating(false); return; }
+        } else if (settings.generationType === 'img2img') {
+            if (reposeMode && currentUploadsList.length === 0) { setGenerationError(t('chat.reposeNoImage')); if (skipGuard) setIsGenerating(false); return; }
+            else if (currentUploadsList.length === 0) { setGenerationError(t('chat.img2imgNoImage')); if (skipGuard) setIsGenerating(false); return; }
+            else if (!currentInputText.trim()) { setGenerationError(t('chat.promptRequired')); if (skipGuard) setIsGenerating(false); return; }
+        }
+
+        const isImageGeneration = ['txt2img', 'img2img', 'img_edit', 'face_swap', 'inpaint'].includes(settings.generationType);
+        const isVideoGeneration = ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType);
+
+        let creditCost = settings.count * 1;
+        if (isVideoGeneration) creditCost = settings.count * 5;
+        else if (faceSwapMode) creditCost = settings.count * 5;
+        else if (inpaintMode) creditCost = settings.count * 3;
+
+        if (!user || !user.email) { setShowRegisterModal(true); if (skipGuard) setIsGenerating(false); return; }
+        const isTestAccount = user?.email === 'ooisidegesu@gmail.com';
+        if (!isTestAccount && user.credits < creditCost) {
+            setGenerationError(`Not enough credits. (Need: ${creditCost}, Have: ${user.credits})`);
+            if (skipGuard) setIsGenerating(false);
+            return;
+        }
+
+        setGenerationError(null);
+
+        let chatId = activeChatId;
+        if (!chatId) chatId = createChat();
+
+        addMessage(chatId, {
+            role: 'user',
+            content: currentInputText.trim(),
+            imageUrl: currentUploadsList[0]?.previewUrl ?? undefined,
+            isFavorite: false,
+        });
+
+        const userPrompt = currentInputText.trim();
+        const currentUploads = [...currentUploadsList];
+
+        setIsGenerating(true);
+
+        setTimeout(() => {
+            setInputText('');
+            setUploads([]);
+        }, 500);
+        if (!isTestAccount) {
+            deductCredits(creditCost);
+            const token = window.localStorage.getItem('auth_token');
+            if (token) {
+                fetch('/api/billing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ action: 'deduct', amount: creditCost }),
+                }).catch(e => console.error('Failed to sync credit deduction:', e));
+            }
+        }
+
+        if (isImageGeneration) {
+            try {
+                let imageBase64: string | undefined;
+                let additionalImages: string[] | undefined;
+                if (currentUploads.length > 0 && (settings.generationType !== 'txt2img' || inpaintMode)) {
+                    imageBase64 = await fileToBase64(currentUploads[0].file);
+                    if (currentUploads.length > 1) {
+                        additionalImages = await Promise.all(
+                            currentUploads.slice(1).map((s) => fileToBase64(s.file))
+                        );
+                    }
+                }
+                const token = window.localStorage.getItem('auth_token');
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        prompt: userPrompt,
+                        modelId: settings.model,
+                        generationType: ['face_swap', 'inpaint'].includes(settings.generationType) ? 'img2img' : settings.generationType,
+                        aspectRatio: settings.aspectRatio,
+                        resolution: settings.resolution,
+                        count: settings.count,
+                        qualityPreset: settings.qualityPreset,
+                        imageBase64,
+                        additionalImages,
+                        faceSwapMode,
+                        inpaintMode,
+                        reposeMode,
+                        maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
+                        nudeMode: settings.nudeMode ?? true,
+                        tagSettings,
+                        selectedFaceImageUrl: selectedFaceId
+                            ? savedFaces.find(f => f.id === selectedFaceId)?.image_url
+                            : undefined,
+                    }),
+                });
+
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error(`API error: ${res.status}`);
+                }
+                const data = await res.json();
+                if (!res.ok || data.error) throw new Error(data.error || `API error: ${res.status}`);
+
+                let images: { url: string; type: string }[] = [];
+                if (data.taskId && !data.images) {
+                    const pollStartedAt = Date.now();
+                    localStorage.setItem('pending_generation', JSON.stringify({
+                        taskId: data.taskId,
+                        chatId,
+                        prompt: userPrompt,
+                        generationType: settings.generationType,
+                        model: settings.model,
+                        creditCost,
+                        startedAt: pollStartedAt,
+                    }));
+                    startPolling(data.taskId, chatId, userPrompt, settings.generationType, settings.model, creditCost, pollStartedAt);
+                    setInpaintMode(false);
+                    setFaceSwapMode(false);
+                    setReposeMode(false);
+                    return;
+                } else {
+                    images = data.images || [];
+                }
+
+                setInpaintMode(false);
+                setFaceSwapMode(false);
+                setReposeMode(false);
+
+                if (images.length === 0) throw new Error('No images returned from API');
+
+                for (const img of images) {
+                    addMessage(chatId, {
+                        role: 'assistant',
+                        content: `Generated from: "${userPrompt || 'uploaded reference'}"`,
+                        imageUrl: img.url,
+                        generationType: settings.generationType,
+                        model: settings.model,
+                        isFavorite: false,
+                        settings: { ...settings },
+                    });
+
+                    try {
+                        const saveToken = localStorage.getItem('auth_token');
+                        if (saveToken) {
+                            fetch('/api/generations', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${saveToken}` },
+                                body: JSON.stringify({
+                                    prompt: userPrompt || 'uploaded reference',
+                                    modelName: settings.model,
+                                    fileUrl: img.url,
+                                    fileType: 'image',
+                                    generationType: settings.generationType,
+                                    creditsUsed: creditCost,
+                                    status: 'success',
+                                    params: {},
+                                }),
+                            }).catch(() => {});
+                        }
+                    } catch {}
+                }
+            } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : 'Generation failed';
+                setGenerationError(friendlyError(msg));
+                if (!isTestAccount) addCredits(creditCost);
+            }
+        } else if (isVideoGeneration) {
+            try {
+                const imageBase64 = img2vidImageUrl ?? '';
+                if (!imageBase64) {
+                    addMessage(chatId, { role: 'assistant', content: 'Please upload an image.', generationType: settings.generationType, model: settings.model, isFavorite: false });
+                    setIsGenerating(false);
+                    return;
+                }
+                const actionTag = (tagSettings.fetish || [])
+                    .map((f: string) => ({
+                        fellatio: 'blowjob, oral sex', cowgirl: 'cowgirl position, riding on top',
+                        insertion: 'penetration, vaginal insertion', kiss: 'passionate kissing',
+                        missionary: 'missionary position', doggy: 'doggy style, from behind',
+                        standing: 'standing sex position', handjob: 'handjob, stroking penis',
+                        paizuri: 'paizuri, titjob',
+                    } as Record<string, string>)[f]).filter(Boolean).join(', ');
+
+                const authToken = localStorage.getItem('auth_token') ?? '';
+                const res = await fetch('/api/video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ imageBase64, prompt: userPrompt, actionTag, duration: settings.duration, model: settings.model }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const errMsg = data.error === 'plan_upgrade_required' ? 'Video generation requires a paid plan.'
+                        : data.error === 'insufficient_credits' ? `Not enough credits. Need: ${data.required} / Have: ${data.current}`
+                        : `Video generation failed: ${data.error}`;
+                    addMessage(chatId, { role: 'assistant', content: errMsg, generationType: settings.generationType, model: settings.model, isFavorite: false });
+                } else {
+                    addMessage(chatId, { role: 'assistant', content: '', videoUrl: data.videoUrl, generationType: settings.generationType, model: settings.model, isFavorite: false, settings: { ...settings } });
+                }
+            } catch {
+                addMessage(chatId, { role: 'assistant', content: 'An error occurred during video generation.', generationType: settings.generationType, model: settings.model, isFavorite: false });
+            }
+        }
+
+        setIsGenerating(false);
+    };
+
+    // Auto-submit flag for one-click generate
+    const [autoSubmitPending, setAutoSubmitPending] = useState(false);
+
+    // Submit trigger from store (used by mobile touch)
+    useEffect(() => {
+        if (submitTrigger > 0) {
+            handleSubmit(undefined, true);
+        }
+    }, [submitTrigger]);
+
+    // Effect: fire handleSubmit after state updates from one-click generate
+    useEffect(() => {
+        if (autoSubmitPending && inputText) {
+            setAutoSubmitPending(false);
+            handleSubmit(new Event('submit') as unknown as React.FormEvent);
+        }
+    }, [autoSubmitPending, inputText]);
+
+    // One-click generate
+    const handleOneClickGenerate = () => {
+        const preset = {
+            prompt: 'beautiful woman, beach, golden hour, bikini, wind in hair, photorealistic',
+            model: 'novita-helloworld-xl',
+            aspectRatio: '9:16' as AspectRatio,
+            resolution: '512' as const,
+            nudeMode: true,
+        };
+        setInputText(preset.prompt);
+        updateSettings({
+            model: preset.model,
+            aspectRatio: preset.aspectRatio,
+            resolution: preset.resolution,
+            nudeMode: preset.nudeMode,
+            generationType: 'txt2img',
+        });
+        setAutoSubmitPending(true);
+    };
+
+    const handleSamplePrompt = (prompt: string) => {
+        setInputText(prompt);
+    };
+
+    const handleActionInpaint = async (imgUrl: string) => {
+        setGenerationType('inpaint');
+        const success = await reUploadImage(imgUrl);
+        if (success) {
+            setShowInpaintModal(true);
+        }
+    };
+
+    const handleActionFaceSwap = async (imgUrl: string) => {
+        setGenerationType('face_swap');
+        await reUploadImage(imgUrl);
+    };
+
+    const handleActionRegenerate = async (imgUrl: string, originalPrompt: string) => {
+        const success = await reUploadImage(imgUrl);
+        if (success) setInputText(originalPrompt);
+    };
 
     return (
-        <div className="hp-root">
-            <section className="hp-hero" style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'none' : 'translateY(20px)' }}>
-                <div className="hp-glow" style={{ top: -200, right: -100, background: 'radial-gradient(circle, #dc2626, transparent)' }} />
-                <div className="hp-glow" style={{ top: 200, left: -200, background: 'radial-gradient(circle, #7c1d1d, transparent)', opacity: 0.08 }} />
-                <div className="hp-hero-inner">
-                    <div>
-                        <div className="hp-label"><span className="hp-pulse">●</span> AI-Powered Generation</div>
-                        <h1 className="hp-title">AI Undress Tool.<br /><span className="hp-accent-text">Upload a photo. Remove clothing.</span><br />Done in 8 seconds.</h1>
-                        <p className="hp-subtitle">Upload any photo and our AI removes clothing instantly. Photorealistic results. No experience needed. Free to start.</p>
-                        <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 48 }}>
-                            <Link href="/editor" className="hp-btn-primary">Try It Free <span style={{ fontSize: 18 }}>→</span></Link>
-                            <a href="#hp-gallery" className="hp-btn-ghost">View Gallery</a>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {['Undress AI', 'Face Swap', 'Nude Mode', 'Inpaint', 'Free Trial'].map(tag => (
-                                <span key={tag} className="hp-tag">{tag}</span>
-                            ))}
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <BeforeAfterSlider />
-                    </div>
-                </div>
-            </section>
+        <>
+            {/* SEO Header - compact one-liner */}
+            <div className="homepage-seo-header">
+                <h1>Image Nude — AI Nude Generator | Free to try, no sign up needed</h1>
+            </div>
 
-            <TryItNowSection />
+            {/* Welcome intro modal for first-time visitors */}
+            <WelcomeIntroModal />
 
-            <section className="hp-stats-bar">
-                <div className="hp-stats-inner">
-                    {STATS.map((s, i) => (
-                        <div key={i} className="hp-stat">
-                            <div className="hp-stat-value">{s.value}</div>
-                            <div className="hp-stat-label">{s.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            <section className="hp-section hp-section-pad">
-                <div style={{ maxWidth: 1000, margin: '0 auto', textAlign: 'center' }}>
-                    <div className="hp-label">Simple Process</div>
-                    <h2 className="hp-heading" style={{ marginBottom: 60 }}>Three Steps. <span className="hp-accent-text">That's It.</span></h2>
-                    <div className="hp-steps-grid">
-                        {[
-                            { num: '01', title: 'Describe', desc: 'Type what you want to create, or select from style presets and tags.' },
-                            null,
-                            { num: '02', title: 'Generate', desc: 'AI creates your image in under 10 seconds. Adjust and regenerate freely.' },
-                            null,
-                            { num: '03', title: 'Download', desc: 'Save in high resolution. Your images, your privacy, always.' },
-                        ].map((step, i) => step === null ? (
-                            <div key={i} className="hp-step-connector" />
-                        ) : (
-                            <div key={i} style={{ padding: '0 20px' }}>
-                                <div className="hp-step-num">{step.num}</div>
-                                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>{step.title}</h3>
-                                <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6 }}>{step.desc}</p>
+            <div className="editor-layout-v2">
+                {/* Terms Agreement Modal */}
+                {showTermsModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                        <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 32, maxWidth: 480, width: '100%', border: '1px solid #2a2a3e' }}>
+                            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: '#e0e0e8' }}>Before You Start Generating</h2>
+                            <p style={{ fontSize: '0.85rem', color: '#8b8ba7', marginBottom: 20 }}>Please review and agree to continue.</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.85rem', color: '#e0e0e8' }}>
+                                    <input type="checkbox" checked={termsChecks.terms} onChange={(e) => setTermsChecks(p => ({ ...p, terms: e.target.checked }))} style={{ marginTop: 3 }} />
+                                    <span>I agree to the <a href="/terms" target="_blank" style={{ color: '#7c5cfc' }}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{ color: '#7c5cfc' }}>Privacy Policy</a></span>
+                                </label>
+                                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.85rem', color: '#e0e0e8' }}>
+                                    <input type="checkbox" checked={termsChecks.content} onChange={(e) => setTermsChecks(p => ({ ...p, content: e.target.checked }))} style={{ marginTop: 3 }} />
+                                    <span>I agree to the <a href="/content-policy" target="_blank" style={{ color: '#7c5cfc' }}>Content Policy</a></span>
+                                </label>
+                                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.85rem', color: '#e0e0e8' }}>
+                                    <input type="checkbox" checked={termsChecks.age} onChange={(e) => setTermsChecks(p => ({ ...p, age: e.target.checked }))} style={{ marginTop: 3 }} />
+                                    <span>I confirm I am 18+ and will not generate prohibited content (minors, real persons)</span>
+                                </label>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id="hp-gallery" className="hp-section hp-section-pad">
-                <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }} className="hp-gallery-wrap">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 40 }}>
-                        <div>
-                            <div className="hp-label">Showcase</div>
-                            <h2 className="hp-heading">See What's <span className="hp-accent-text">Possible</span></h2>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button onClick={() => setShowTermsModal(false)} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: '1px solid #2a2a3e', background: 'transparent', color: '#8b8ba7', cursor: 'pointer', fontSize: '0.9rem' }}>Cancel</button>
+                                <button onClick={handleAgreeTerms} disabled={!termsChecks.terms || !termsChecks.content || !termsChecks.age} style={{ flex: 1, padding: '10px 16px', borderRadius: 8, border: 'none', background: termsChecks.terms && termsChecks.content && termsChecks.age ? 'linear-gradient(135deg,#7c5cfc,#6a4ff0)' : '#333', color: '#fff', cursor: termsChecks.terms && termsChecks.content && termsChecks.age ? 'pointer' : 'not-allowed', fontSize: '0.9rem', fontWeight: 600 }}>Agree & Continue</button>
+                            </div>
                         </div>
                     </div>
-                    <div className="hp-gallery-grid">
-                        {SAMPLE_IMAGES.map((img, i) => (
-                            <div key={i} className="hp-gallery-card">
-                                <img src={heroImages[i % heroImages.length]} alt={img.style} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }} />
-                                <div className="hp-card-overlay">
-                                    <div style={{ fontSize: 11, color: '#f87171', fontWeight: 600, marginBottom: 2 }}>{img.style}</div>
-                                    <div style={{ fontSize: 12, color: '#aaa' }}>"{img.prompt}"</div>
-                                </div>
+                )}
+
+                {/* Registration Modal */}
+                {showRegisterModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(4px)' }} onClick={() => setShowRegisterModal(false)}>
+                        <div style={{ background: 'var(--bg-card, #1a1a2e)', borderRadius: '16px', padding: '32px', maxWidth: '420px', width: '90%', border: '1px solid var(--border-subtle, #333)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎨</div>
+                            <h2 style={{ color: 'var(--text-primary, #fff)', fontSize: '1.4rem', fontWeight: 700, marginBottom: '12px' }}>{t('auth.registerRequired')}</h2>
+                            <p style={{ color: 'var(--text-secondary, #aaa)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '24px' }}>{t('auth.registerMessage')}</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <a href="/register" style={{ display: 'block', padding: '14px 24px', background: 'linear-gradient(135deg, #7c5cfc, #6366f1)', color: '#fff', borderRadius: '12px', fontWeight: 700, fontSize: '1rem', textDecoration: 'none', boxShadow: '0 4px 15px rgba(124,92,252,0.4)' }}>{t('auth.registerFree')}</a>
+                                <button onClick={() => setShowRegisterModal(false)} style={{ padding: '12px 24px', background: 'transparent', color: 'var(--text-tertiary, #888)', border: '1px solid var(--border-subtle, #333)', borderRadius: '12px', cursor: 'pointer', fontSize: '0.9rem' }}>{t('auth.closeModal')}</button>
                             </div>
-                        ))}
+                        </div>
                     </div>
-                    <div style={{ textAlign: 'center', marginTop: 48 }}>
-                        <Link href="/editor" className="hp-btn-primary" style={{ fontSize: 16, padding: '18px 48px' }} onClick={() => handleToolClick('txt2img')}>
-                            Start Creating — It's Free <span style={{ fontSize: 20 }}>→</span>
-                        </Link>
-                        <p style={{ fontSize: 13, color: '#555', marginTop: 12 }}>No credit card required. Free credits on sign up.</p>
-                    </div>
-                </div>
-            </section>
+                )}
 
-            <section className="hp-section hp-section-pad">
-                <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-                    <div className="hp-label">Powerful Tools</div>
-                    <h2 className="hp-heading" style={{ marginBottom: 12 }}>Everything You <span className="hp-accent-text">Need</span></h2>
-                    <p className="hp-subtext" style={{ marginBottom: 48 }}>From text prompts to video generation — all in one platform.</p>
-                    <div className="hp-features-grid">
-                        {FEATURES.map((f, i) => (
-                            <div key={i} className={`hp-feature-card ${activeFeature === i ? 'active' : ''}`} onClick={() => setActiveFeature(i)}>
-                                <div style={{ fontSize: 32, marginBottom: 16, color: '#f87171' }}>{f.icon}</div>
-                                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{f.title}</h3>
-                                <p style={{ fontSize: 14, color: '#666', lineHeight: 1.5 }}>{f.desc}</p>
-                            </div>
-                        ))}
+                {/* Guest cooldown indicator */}
+                {isGuest && guestCooldown > 0 && (
+                    <div style={{
+                        position: 'fixed', bottom: 20, right: 20, zIndex: 100,
+                        background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+                        borderRadius: 12, padding: '10px 16px', fontSize: '0.85rem', color: '#fbbf24',
+                        backdropFilter: 'blur(8px)',
+                    }}>
+                        Next generation in {guestCooldown}s
                     </div>
-                    <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 32, flexWrap: 'wrap' }}>
-                        {['Inpainting', 'Style Presets', '4K Upscale', 'Pose Control', 'NSFW Mode', 'Batch Generation'].map(tag => (
-                            <span key={tag} className="hp-tag">{tag}</span>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                )}
 
-            <section className="hp-section hp-section-pad" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                        <div className="hp-label">Testimonials</div>
-                        <h2 className="hp-heading">Loved by <span className="hp-accent-text">Creators</span></h2>
-                    </div>
-                    <div className="hp-reviews-grid">
-                        {REVIEWS.map((r, i) => (
-                            <div key={i} className="hp-review-card">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(135deg, ${r.color}, ${r.color}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#fff' }}>{r.avatar}</div>
-                                    <div>
-                                        <div style={{ fontSize: 14, fontWeight: 600 }}>{r.name}</div>
-                                        <StarRating count={r.rating} />
-                                    </div>
-                                </div>
-                                <p style={{ fontSize: 13, color: '#888', lineHeight: 1.6, fontStyle: 'italic' }}>"{r.text}"</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+                {isImg2Vid ? (
+                    <>
+                        <Img2VidPanel />
+                        <RightPanel
+                            onOneClickGenerate={handleOneClickGenerate}
+                            onSamplePrompt={handleSamplePrompt}
+                            onActionInpaint={handleActionInpaint}
+                            onActionFaceSwap={handleActionFaceSwap}
+                            onActionRegenerate={handleActionRegenerate}
+                            isGenerating={isGenerating}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <LeftPanel
+                            inputText={inputText}
+                            setInputText={setInputText}
+                            uploads={uploads}
+                            setUploads={setUploads}
+                            faceSwapMode={faceSwapMode}
+                            setFaceSwapMode={setFaceSwapMode}
+                            inpaintMode={inpaintMode}
+                            setInpaintMode={setInpaintMode}
+                            reposeMode={reposeMode}
+                            setReposeMode={setReposeMode}
+                            showInpaintModal={showInpaintModal}
+                            setShowInpaintModal={setShowInpaintModal}
+                            onSubmit={handleSubmit}
+                            isGenerating={isGenerating}
+                            generationError={generationError}
+                            setGenerationError={setGenerationError}
+                        />
+                        <div ref={rightPanelRef} className="editor-right-wrapper">
+                            <RightPanel
+                                onOneClickGenerate={handleOneClickGenerate}
+                                onSamplePrompt={handleSamplePrompt}
+                                onActionInpaint={handleActionInpaint}
+                                onActionFaceSwap={handleActionFaceSwap}
+                                onActionRegenerate={handleActionRegenerate}
+                                isGenerating={isGenerating}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
 
-            <section className="hp-section hp-section-pad-lg" style={{ textAlign: 'center' }}>
-                <div className="hp-glow" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, #dc2626, transparent)', opacity: 0.08, width: 800, height: 400 }} />
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                    <h2 className="hp-cta-heading">
-                        Ready to Create<br /><span className="hp-accent-text">Something Amazing</span>?
-                    </h2>
-                    <p className="hp-subtext" style={{ maxWidth: 400, margin: '0 auto 40px' }}>Join thousands of creators. Start generating for free. No credit card needed.</p>
-                    <Link href="/register" className="hp-btn-primary" style={{ fontSize: 18, padding: '20px 56px' }}>
-                        Get Started — Free <span style={{ fontSize: 22 }}>→</span>
-                    </Link>
-                </div>
-            </section>
-
-            <footer className="hp-footer">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div className="hp-footer-logo">N</div>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: '#555' }}>ImageNude</span>
-                </div>
-                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                    {[{ label: 'AI Undress', href: '/undress-ai' }, { label: 'Face Swap', href: '/face-swap' }, { label: 'Blog', href: '/blog' }, { label: 'NSFW AI Guide', href: '/blog/how-to-generate-nsfw-ai-images' }, { label: 'Best Undress Tools', href: '/blog/best-ai-undress-tools' }, { label: 'Face Swap Guide', href: '/blog/ai-face-swap-adults' }, { label: 'Terms', href: '/terms' }, { label: 'Privacy', href: '/privacy' }, { label: 'Content Policy', href: '/content-policy' }, { label: 'DMCA', href: '/dmca' }, { label: '2257', href: '/2257' }].map(l => (
-                        <Link key={l.label} href={l.href} style={{ color: '#444', textDecoration: 'none', fontSize: 13 }}>{l.label}</Link>
-                    ))}
-                </div>
-                <div style={{ fontSize: 12, color: '#333' }}>© 2026 All rights reserved</div>
-            </footer>
-        </div>
+            {/* Guest promo banner - shown after generation */}
+            {isGuest && guestGenCount > 0 && (
+                <GuestPromoBanner genCount={guestGenCount} lastResult={lastGuestResult} />
+            )}
+        </>
     );
 }

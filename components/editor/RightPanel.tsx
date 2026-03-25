@@ -5,6 +5,35 @@ import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { MediaFilter } from '@/lib/types';
 
+const GUEST_TIPS = [
+    'No watermark for registered users',
+    'Save and download your creations',
+    '20 free credits on signup',
+    'Just email + password — 10 seconds',
+];
+
+function GuestLoadingTip() {
+    const [tipIndex, setTipIndex] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTipIndex(i => (i + 1) % GUEST_TIPS.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="guest-loading-tip" style={{ marginTop: 16, textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: 4 }}>💡 Did you know?</div>
+            <div style={{ fontSize: '0.85rem', color: '#a78bfa' }}>
+                ✅ {GUEST_TIPS[tipIndex]}
+            </div>
+            <a href="/register" style={{ fontSize: '0.8rem', color: '#7c5cfc', textDecoration: 'none', marginTop: 6, display: 'inline-block' }}>
+                → Unlock for Free (10 seconds)
+            </a>
+        </div>
+    );
+}
+
 interface RightPanelProps {
     onOneClickGenerate: () => void;
     onSamplePrompt: (prompt: string) => void;
@@ -22,6 +51,7 @@ export default function RightPanel({
     const {
         chats, activeChatId, toggleFavorite,
         mediaFilter, setMediaFilter,
+        isAuthenticated,
     } = useAppStore();
     const { t } = useTranslation();
 
@@ -168,14 +198,34 @@ export default function RightPanel({
                                                 >
                                                     {msg.isFavorite ? '❤️' : '🤍'}
                                                 </button>
-                                                <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDownload(msg.imageUrl!); }}
-                                                    title={t('actions.download')}
-                                                >
-                                                    ⬇
-                                                </button>
+                                                {isAuthenticated ? (
+                                                    <button
+                                                        className="result-action-btn"
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDownload(msg.imageUrl!); }}
+                                                        title={t('actions.download')}
+                                                    >
+                                                        ⬇
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="result-action-btn"
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); e.preventDefault();
+                                                            fetch('/api/guest/event', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ eventType: 'unlock_click' }),
+                                                            }).catch(() => {});
+                                                            window.location.href = '/register';
+                                                        }}
+                                                        title="Unlock to download"
+                                                        style={{ fontSize: '0.65rem' }}
+                                                    >
+                                                        🔓
+                                                    </button>
+                                                )}
                                                 <button
                                                     className="result-action-btn"
                                                     onPointerDown={(e) => e.stopPropagation()}
@@ -246,6 +296,7 @@ export default function RightPanel({
                                 <p style={{ color: '#8b8ba7', fontSize: '0.82rem', margin: 0, textAlign: 'center' }}>
                                     AI is creating your image... (~15-40 sec)
                                 </p>
+                                {!isAuthenticated && <GuestLoadingTip />}
                             </div>
                         )}
                     </div>
@@ -264,12 +315,29 @@ export default function RightPanel({
                     <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
                         <img src={lightboxUrl} alt="Full size" />
                         <div className="lightbox-actions">
-                            <button
-                                className="lightbox-btn lightbox-download"
-                                onClick={() => handleDownload(lightboxUrl)}
-                            >
-                                ⬇ {t('actions.download')}
-                            </button>
+                            {isAuthenticated ? (
+                                <button
+                                    className="lightbox-btn lightbox-download"
+                                    onClick={() => handleDownload(lightboxUrl)}
+                                >
+                                    ⬇ {t('actions.download')}
+                                </button>
+                            ) : (
+                                <button
+                                    className="lightbox-btn lightbox-download"
+                                    onClick={() => {
+                                        fetch('/api/guest/event', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ eventType: 'unlock_click' }),
+                                        }).catch(() => {});
+                                        window.location.href = '/register';
+                                    }}
+                                    style={{ background: 'linear-gradient(135deg, #7c5cfc, #6366f1)' }}
+                                >
+                                    🔓 Unlock This Image — Free, 10 seconds
+                                </button>
+                            )}
                             <button
                                 className="lightbox-btn lightbox-close"
                                 onClick={() => setLightboxUrl(null)}

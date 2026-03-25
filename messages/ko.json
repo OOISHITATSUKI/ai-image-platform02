@@ -132,7 +132,10 @@
         "title": "AI로 놀라운 콘텐츠 제작",
         "subtitle": "차세대 NSFW 이미지 및 동영상 생성.",
         "recentCreations": "최근 작품",
-        "viewAll": "전체 보기"
+        "viewAll": "전체 보기",
+        "welcomeTitle": "Image Nude에 오신 것을 환영합니다",
+        "startCreating": "만들기 시작",
+        "ageNotice": "18세 이상만 이용 가능. 모든 콘텐츠는 AI 생성입니다."
     },
     "pricing": {
         "title": "플랜 선택",
@@ -410,5 +413,30 @@
         "done": "완료",
         "generateFailed": "생성 실패",
         "errorOccurred": "오류가 발생했습니다"
+    },
+    "guest": {
+        "unlockImage": "이 이미지 잠금 해제 — 무료, 10초",
+        "rateLimitReached": "다시 생성하기 전에 잠시 기다려 주세요.",
+        "bannerTitle": "결과가 마음에 드시나요?",
+        "bannerBenefitUnlock": "워터마크 없이 이미지 잠금 해제",
+        "bannerBenefitDownload": "고화질로 다운로드",
+        "bannerBenefitHistory": "생성 기록 저장",
+        "bannerBenefitCredits": "무료 크레딧 20개 받기",
+        "bannerNote": "이메일 + 비밀번호만 필요. 신용카드 불필요.",
+        "blurPreviewLabel": "전체 화질",
+        "loadingTip1": "등록 사용자는 워터마크 없음",
+        "loadingTip2": "작품 저장 및 다운로드 가능",
+        "loadingTip3": "가입 시 20 크레딧 무료",
+        "loadingTip4": "이메일 + 비밀번호 — 10초",
+        "fullscreenCtaTitle": "Image Nude를 즐기고 계신가요?",
+        "fullscreenCtaDesc": "모든 이미지를 잠금 해제하고 20 크레딧을 받으세요.",
+        "fullscreenCtaCta": "무료로 잠금 해제"
+    },
+    "unlock": {
+        "successTitle": "환영합니다! 계정이 준비되었습니다.",
+        "imagesUnlocked": "개 이미지 잠금 해제 (워터마크 제거됨)",
+        "creditsAdded": "무료 크레딧 20개 추가됨",
+        "creditsRemaining": "남은 크레딧: {count}개",
+        "viewMyImages": "내 이미지 보기"
     }
 }

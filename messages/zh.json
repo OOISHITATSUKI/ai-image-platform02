@@ -122,7 +122,10 @@
         "title": "用AI创作精彩内容",
         "subtitle": "下一代NSFW图像和视频生成，前所未有的控制力。",
         "recentCreations": "最近作品",
-        "viewAll": "查看全部"
+        "viewAll": "查看全部",
+        "welcomeTitle": "欢迎来到Image Nude",
+        "startCreating": "开始创作",
+        "ageNotice": "仅限18岁以上。所有内容均为AI生成。"
     },
     "pricing": {
         "title": "选择套餐",
@@ -400,5 +403,30 @@
         "done": "完成",
         "generateFailed": "生成失败",
         "errorOccurred": "发生错误"
+    },
+    "guest": {
+        "unlockImage": "解锁此图片 — 免费，10秒",
+        "rateLimitReached": "请等待后再次生成。",
+        "bannerTitle": "喜欢这个结果吗？",
+        "bannerBenefitUnlock": "无水印解锁图片",
+        "bannerBenefitDownload": "高清下载",
+        "bannerBenefitHistory": "保存生成历史",
+        "bannerBenefitCredits": "获得20免费积分",
+        "bannerNote": "只需邮箱+密码。无需信用卡。",
+        "blurPreviewLabel": "完整画质",
+        "loadingTip1": "注册用户无水印",
+        "loadingTip2": "保存和下载你的作品",
+        "loadingTip3": "注册即送20积分",
+        "loadingTip4": "邮箱+密码 — 10秒完成",
+        "fullscreenCtaTitle": "享受Image Nude吗？",
+        "fullscreenCtaDesc": "解锁所有图片并获得20免费积分。",
+        "fullscreenCtaCta": "免费解锁"
+    },
+    "unlock": {
+        "successTitle": "欢迎！您的账号已准备就绪。",
+        "imagesUnlocked": "张图片已解锁（水印已移除）",
+        "creditsAdded": "已添加20免费积分",
+        "creditsRemaining": "您还有{count}积分。",
+        "viewMyImages": "查看我的图片"
     }
 }

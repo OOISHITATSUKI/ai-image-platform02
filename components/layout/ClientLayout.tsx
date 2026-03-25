@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 import Footer from './Footer';
 import AgeGate from '@/components/ui/AgeGate';
 import WelcomeModal from '@/components/ui/WelcomeModal';
+import UnlockNotification from '@/components/guest/UnlockNotification';
 import { useAppStore } from '@/lib/store';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -16,8 +17,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     // Pages that don't use the sidebar layout
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isPublicPage = pathname === '/terms' || pathname === '/privacy' || pathname === '/content-policy' || pathname === '/dmca' || pathname === '/2257' || pathname === '/help';
-    const isHomePage = pathname === '/';
-    const isLandingPage = pathname === '/undress-ai' || pathname === '/face-swap' || pathname === '/blog' || pathname?.startsWith('/blog/');
+    const isHomePage = false; // Homepage is now the editor — rendered with sidebar
+    const isAboutPage = pathname === '/about';
+    const isLandingPage = pathname === '/undress-ai' || pathname === '/face-swap' || pathname === '/blog' || pathname?.startsWith('/blog/') || isAboutPage;
     const isAdminPage = pathname?.startsWith('/admin');
 
     // Prevent hydration mismatch and handle mobile initial state
@@ -107,16 +109,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         );
     }
 
-    // Homepage renders standalone (has its own full design)
-    if (isHomePage) {
-        return (
-            <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
-                {children}
-            </div>
-        );
-    }
-
-    // Landing pages and blog pages render standalone (no sidebar, scrollable)
+    // Landing pages, about page, and blog pages render standalone (no sidebar, scrollable)
     if (isLandingPage) {
         return (
             <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
@@ -137,6 +130,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
             {/* Welcome modal — shows 20 credits gift for new users */}
             {isAuthenticated && <WelcomeModal />}
+
+            {/* Post-registration unlock notification */}
+            {isAuthenticated && <UnlockNotification />}
 
             <div className="mobile-header">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>

@@ -4,6 +4,7 @@ import { verifyToken, findUserById, readUsers } from '@/lib/auth';
 import type { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 export async function checkAdmin() {
     const cookieStore = await cookies();
@@ -82,6 +83,82 @@ export async function GET(req: NextRequest) {
         todayUniqueDemoUsers = new Set(generated.filter(e => e.createdAt >= msToday).map(e => e.ip)).size;
     }
 
+    // ── Guest Generation Stats (from Supabase) ──
+    let guestGenTotal = 0;
+    let guestGenToday = 0;
+    let guestUniqueTotal = 0;
+    let guestUniqueToday = 0;
+    let guestConversionRate = 0;
+    let guestAvgGensBeforeRegister = 0;
+    let guestGenByType = { txt2img: 0, faceswap: 0, inpaint: 0 };
+    let guestUnlockClicks = 0;
+
+    try {
+        const todayISO = today.toISOString();
+
+        // Total guest generations
+        const { count: totalGuestCount } = await supabaseAdmin
+            .from('guest_generations')
+            .select('*', { count: 'exact', head: true });
+        guestGenTotal = totalGuestCount || 0;
+
+        // Today's guest generations
+        const { count: todayGuestCount } = await supabaseAdmin
+            .from('guest_generations')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', todayISO);
+        guestGenToday = todayGuestCount || 0;
+
+        // Unique guests (total)
+        const { data: uniqueGuests } = await supabaseAdmin
+            .from('guest_generations')
+            .select('guest_id')
+            .limit(10000);
+        if (uniqueGuests) {
+            guestUniqueTotal = new Set(uniqueGuests.map((g: { guest_id: string }) => g.guest_id)).size;
+        }
+
+        // Unique guests today
+        const { data: uniqueGuestsToday } = await supabaseAdmin
+            .from('guest_generations')
+            .select('guest_id')
+            .gte('created_at', todayISO)
+            .limit(10000);
+        if (uniqueGuestsToday) {
+            guestUniqueToday = new Set(uniqueGuestsToday.map((g: { guest_id: string }) => g.guest_id)).size;
+        }
+
+        // Conversion rate (guests who registered)
+        const { count: registeredCount } = await supabaseAdmin
+            .from('guest_generations')
+            .select('guest_id', { count: 'exact', head: true })
+            .eq('registered', true);
+        if (guestUniqueTotal > 0) {
+            guestConversionRate = Math.round(((registeredCount || 0) / guestUniqueTotal) * 100);
+        }
+
+        // Generation type breakdown
+        const { data: typeBreakdown } = await supabaseAdmin
+            .from('guest_generations')
+            .select('generation_type')
+            .limit(50000);
+        if (typeBreakdown) {
+            for (const row of typeBreakdown) {
+                const t = row.generation_type as keyof typeof guestGenByType;
+                if (t in guestGenByType) guestGenByType[t]++;
+            }
+        }
+
+        // Unlock click events
+        const { count: unlockCount } = await supabaseAdmin
+            .from('guest_events')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_type', 'unlock_click');
+        guestUnlockClicks = unlockCount || 0;
+    } catch (e) {
+        console.error('Failed to fetch guest stats:', e);
+    }
+
     return NextResponse.json({
         totalUsers,
         newUsersToday,
@@ -94,5 +171,14 @@ export async function GET(req: NextRequest) {
         todayDemoTrials,
         uniqueDemoUsers,
         todayUniqueDemoUsers,
+        // Guest generation stats
+        guestGenTotal,
+        guestGenToday,
+        guestUniqueTotal,
+        guestUniqueToday,
+        guestConversionRate,
+        guestAvgGensBeforeRegister,
+        guestGenByType,
+        guestUnlockClicks,
     });
 }

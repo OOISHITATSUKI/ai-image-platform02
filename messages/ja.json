@@ -148,7 +148,10 @@
         "ctaButton": "無料で生成してみる →",
         "ctaSub": "カード不要",
         "recentCreations": "最近の作品",
-        "viewAll": "すべて表示"
+        "viewAll": "すべて表示",
+        "welcomeTitle": "Image Nudeへようこそ",
+        "startCreating": "作成を開始",
+        "ageNotice": "18歳以上限定。すべてAI生成コンテンツです。"
     },
     "pricing": {
         "title": "プランを選択",
@@ -435,5 +438,30 @@
         "done": "完了",
         "generateFailed": "生成に失敗しました",
         "errorOccurred": "エラーが発生しました"
+    },
+    "guest": {
+        "unlockImage": "この画像をアンロック — 無料、10秒",
+        "rateLimitReached": "次の生成までお待ちください。",
+        "bannerTitle": "結果が気に入りましたか？",
+        "bannerBenefitUnlock": "透かしなしで画像をアンロック",
+        "bannerBenefitDownload": "高画質でダウンロード",
+        "bannerBenefitHistory": "生成履歴を保存",
+        "bannerBenefitCredits": "20クレジット無料プレゼント",
+        "bannerNote": "メールとパスワードだけ。クレジットカード不要。",
+        "blurPreviewLabel": "フル画質",
+        "loadingTip1": "登録ユーザーは透かしなし",
+        "loadingTip2": "作品を保存・ダウンロード可能",
+        "loadingTip3": "登録で20クレジット無料",
+        "loadingTip4": "メール＋パスワードで10秒",
+        "fullscreenCtaTitle": "Image Nudeを楽しんでいますか？",
+        "fullscreenCtaDesc": "すべての画像をアンロックして20クレジットを獲得。",
+        "fullscreenCtaCta": "無料でアンロック"
+    },
+    "unlock": {
+        "successTitle": "ようこそ！アカウントの準備ができました。",
+        "imagesUnlocked": "枚の画像をアンロック（透かし除去済み）",
+        "creditsAdded": "20クレジットを付与しました",
+        "creditsRemaining": "残り{count}クレジット",
+        "viewMyImages": "マイ画像を見る"
     }
 }

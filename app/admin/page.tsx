@@ -14,6 +14,14 @@ interface Stats {
     todayDemoTrials: number;
     uniqueDemoUsers: number;
     todayUniqueDemoUsers: number;
+    guestGenTotal: number;
+    guestGenToday: number;
+    guestUniqueTotal: number;
+    guestUniqueToday: number;
+    guestConversionRate: number;
+    guestAvgGensBeforeRegister: number;
+    guestGenByType: { txt2img: number; faceswap: number; inpaint: number };
+    guestUnlockClicks: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -94,9 +102,9 @@ export default function AdminDashboardPage() {
                 ))}
             </div>
 
-            {/* Demo Stats */}
+            {/* Demo Stats (Legacy) */}
             <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                🎯 お試しデモ（ホームページ）
+                🎯 お試しデモ（レガシー）
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
                 {demoCards.map(card => (
@@ -106,6 +114,47 @@ export default function AdminDashboardPage() {
                     </div>
                 ))}
             </div>
+
+            {/* Guest Generation Stats (New) */}
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
+                🏠 ゲスト生成（ホームページエディター）
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>ゲスト生成（総数）</div>
+                    <div style={valueStyle('#a78bfa')}>{stats.guestGenTotal?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>本日のゲスト生成</div>
+                    <div style={valueStyle('#34d399')}>{stats.guestGenToday?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>ユニークゲスト（総数）</div>
+                    <div style={valueStyle('#60a5fa')}>{stats.guestUniqueTotal?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>本日のユニークゲスト</div>
+                    <div style={valueStyle('#38bdf8')}>{stats.guestUniqueToday?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>登録コンバージョン率</div>
+                    <div style={valueStyle('#10b981')}>{stats.guestConversionRate || 0}%</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>Unlockクリック数</div>
+                    <div style={valueStyle('#f472b6')}>{stats.guestUnlockClicks?.toLocaleString() || 0}</div>
+                </div>
+            </div>
+            {stats.guestGenByType && (
+                <div style={{ ...cardStyle, marginBottom: '40px' }}>
+                    <div style={labelStyle}>機能別ゲスト生成</div>
+                    <div style={{ display: 'flex', gap: 24, marginTop: 8 }}>
+                        <span style={{ color: '#a78bfa' }}>txt2img: <strong>{stats.guestGenByType.txt2img}</strong></span>
+                        <span style={{ color: '#f472b6' }}>Face Swap: <strong>{stats.guestGenByType.faceswap}</strong></span>
+                        <span style={{ color: '#fb923c' }}>Inpaint: <strong>{stats.guestGenByType.inpaint}</strong></span>
+                    </div>
+                </div>
+            )}
 
             {/* 7-Day Trend Note */}
             <div style={{ ...cardStyle, padding: '28px', marginBottom: '24px' }}>

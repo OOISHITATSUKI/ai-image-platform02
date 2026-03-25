@@ -142,12 +142,47 @@ export async function POST(req: NextRequest) {
             console.error('[Register] Step email enqueue error:', e);
         }
 
+        // ── Unlock guest images ──
+        let unlockedCount = 0;
+        try {
+            const { data: guestImages } = await supabaseAdmin
+                .from('guest_generations')
+                .select('*')
+                .eq('guest_id', ip)
+                .eq('unlocked', false);
+
+            if (guestImages && guestImages.length > 0) {
+                for (const img of guestImages) {
+                    await supabaseAdmin
+                        .from('guest_generations')
+                        .update({
+                            unlocked: true,
+                            registered: true,
+                            registered_at: new Date().toISOString(),
+                            user_id: userId,
+                        })
+                        .eq('id', img.id);
+                }
+                unlockedCount = guestImages.length;
+
+                // Record registration event
+                await supabaseAdmin.from('guest_events').insert({
+                    guest_id: ip,
+                    event_type: 'register_complete',
+                    metadata: { user_id: userId, unlocked_count: unlockedCount },
+                });
+            }
+        } catch (e) {
+            console.error('[Register] Guest image unlock error:', e);
+        }
+
         // Generate JWT
         const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '30d' });
 
         return NextResponse.json({
             success: true,
             token,
+            unlockedCount,
             user: {
                 id: newUser.id,
                 email: newUser.email,
