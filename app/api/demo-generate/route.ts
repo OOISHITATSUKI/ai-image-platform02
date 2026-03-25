@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from "uuid";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
 const DEMO_STATS_FILE = path.join(process.cwd(), "data", "demo_stats.json");
-const GUEST_IMAGES_DIR = path.join(process.cwd(), "public", "outputs", "guest");
+const IMAGES_DIR = path.join(process.cwd(), "data", "images");
 
-// Ensure guest images directory exists
-try { fs.mkdirSync(GUEST_IMAGES_DIR, { recursive: true }); } catch {}
+// Ensure images directory exists
+try { fs.mkdirSync(IMAGES_DIR, { recursive: true }); } catch {}
 
 function recordDemoEvent(event: string, ip: string, extra?: Record<string, unknown>) {
     try {
@@ -293,10 +293,10 @@ export async function POST(request: NextRequest) {
         const watermarkedBuffer = await addWatermark(originalBuffer);
 
         // ── Save both versions to disk ──
-        const originalPath = path.join(GUEST_IMAGES_DIR, `${imageId}_original.jpg`);
-        const watermarkedPath = path.join(GUEST_IMAGES_DIR, `${imageId}_watermarked.jpg`);
-        fs.writeFileSync(originalPath, originalBuffer);
-        fs.writeFileSync(watermarkedPath, watermarkedBuffer);
+        const originalFilename = `guest_${imageId}_original.jpg`;
+        const watermarkedFilename = `guest_${imageId}_watermarked.jpg`;
+        fs.writeFileSync(path.join(IMAGES_DIR, originalFilename), originalBuffer);
+        fs.writeFileSync(path.join(IMAGES_DIR, watermarkedFilename), watermarkedBuffer);
 
         // ── Record to database ──
         try {
@@ -305,8 +305,8 @@ export async function POST(request: NextRequest) {
                 guest_id: guestId,
                 generation_type: generationType === "txt2img" ? "txt2img" : faceSwapMode ? "faceswap" : inpaintMode ? "inpaint" : "txt2img",
                 prompt: prompt || null,
-                original_path: `/outputs/guest/${imageId}_original.jpg`,
-                watermarked_path: `/outputs/guest/${imageId}_watermarked.jpg`,
+                original_path: `/api/images/${originalFilename}`,
+                watermarked_path: `/api/images/${watermarkedFilename}`,
                 unlocked: false,
                 registered: false,
             });
@@ -321,7 +321,7 @@ export async function POST(request: NextRequest) {
         recordDemoEvent("generated", ip, { generationType, imageId });
 
         // ── Return watermarked image URL ──
-        const watermarkedUrl = `/outputs/guest/${imageId}_watermarked.jpg`;
+        const watermarkedUrl = `/api/images/${watermarkedFilename}`;
         return NextResponse.json({
             success: true,
             image: watermarkedUrl,
