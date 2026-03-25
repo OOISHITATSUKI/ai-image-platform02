@@ -14,6 +14,8 @@ import {
 } from '@/lib/db/trusted_devices';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendOTPEmail } from '@/lib/email';
+import { saveGeneration } from '@/lib/db/generations';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const DEVICE_OTP_TTL_MS = 10 * 60 * 1000;  // 10 minutes
@@ -136,9 +138,54 @@ export async function POST(req: NextRequest) {
             await touchDevice(trustedDevice.id, ip, country);
         }
 
+        // ── Unlock guest images on login ──
+        let unlockedCount = 0;
+        try {
+            const { data: guestImages } = await supabaseAdmin
+                .from('guest_generations')
+                .select('*')
+                .eq('guest_id', ip)
+                .eq('unlocked', false);
+
+            if (guestImages && guestImages.length > 0) {
+                for (const img of guestImages) {
+                    await supabaseAdmin
+                        .from('guest_generations')
+                        .update({
+                            unlocked: true,
+                            registered: true,
+                            registered_at: new Date().toISOString(),
+                            user_id: user.id,
+                        })
+                        .eq('id', img.id);
+
+                    // Add original (watermark-free) image to user's library
+                    const originalUrl = img.original_path;
+                    if (originalUrl) {
+                        saveGeneration({
+                            userId: user.id,
+                            prompt: img.prompt || 'Guest generation (unlocked)',
+                            modelName: 'novita-helloworld-xl',
+                            params: {},
+                            fileUrl: originalUrl,
+                            fileType: 'image',
+                            generationType: (img.generation_type === 'faceswap' ? 'faceswap' : img.generation_type === 'inpaint' ? 'inpaint' : 'txt2img') as 'txt2img' | 'img2img' | 'inpaint' | 'faceswap',
+                            creditsUsed: 0,
+                            status: 'success',
+                        });
+                    }
+                }
+                unlockedCount = guestImages.length;
+                console.log(`[Login] Unlocked ${unlockedCount} guest images for user ${user.id}`);
+            }
+        } catch (e) {
+            console.error('[Login] Guest image unlock error:', e);
+        }
+
         const responseBody = {
             success: true,
             token,
+            unlockedCount,
             user: {
                 id: user.id,
                 email: user.email,

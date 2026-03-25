@@ -95,14 +95,19 @@ export function deleteGeneration(id: string): boolean {
 }
 
 // Purge expired generations (older than 1 hour)
+// Guest-unlocked images (creditsUsed=0, fileUrl contains "guest_") are kept for 24 hours
 const EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+const GUEST_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours for unlocked guest images
 
 export function purgeExpiredGenerations(): number {
     const generations = readGenerations();
     const now = Date.now();
     let purged = 0;
     for (const [id, gen] of Object.entries(generations)) {
-        if (now - gen.createdAt > EXPIRY_MS) {
+        // Guest-unlocked images get 24h retention
+        const isGuestUnlocked = gen.creditsUsed === 0 && gen.fileUrl?.includes('guest_');
+        const expiry = isGuestUnlocked ? GUEST_EXPIRY_MS : EXPIRY_MS;
+        if (now - gen.createdAt > expiry) {
             delete generations[id];
             purged++;
         }

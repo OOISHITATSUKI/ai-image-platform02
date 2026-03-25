@@ -47,11 +47,19 @@ export default function LoginPage() {
     }, [resendCooldown]);
 
     // Handle success — store token and redirect
-    const onLoginSuccess = (token: string, user: object) => {
+    const onLoginSuccess = (token: string, user: object, unlockedCount?: number) => {
         localStorage.setItem('auth_token', token);
         setUser(user as any);
         useAppStore.setState({ isAuthenticated: true, ageVerified: true });
-        setTimeout(() => router.push('/editor'), 100);
+
+        // Store unlocked count for post-login notification
+        if (unlockedCount && unlockedCount > 0) {
+            localStorage.setItem('guest_unlocked_count', String(unlockedCount));
+        }
+        // Clear guest gen count
+        localStorage.removeItem('guest_gen_count');
+
+        setTimeout(() => router.push('/'), 100);
     };
 
     // ── Step 1: email + password ──────────────────────────
@@ -85,7 +93,7 @@ export default function LoginPage() {
             }
 
             // Normal success
-            onLoginSuccess(data.token, data.user);
+            onLoginSuccess(data.token, data.user, data.unlockedCount);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
@@ -106,7 +114,7 @@ export default function LoginPage() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            onLoginSuccess(data.token, data.user);
+            onLoginSuccess(data.token, data.user, data.unlockedCount);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {

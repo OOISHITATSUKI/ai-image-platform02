@@ -11,6 +11,7 @@ import {
 } from '@/lib/auth';
 
 import { logRegistrationAttempt, countRecentAttemptsByIp } from '@/lib/db/registration_attempts';
+import { saveGeneration } from '@/lib/db/generations';
 import { rateLimit } from '@/lib/rateLimit';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
@@ -142,8 +143,9 @@ export async function POST(req: NextRequest) {
             console.error('[Register] Step email enqueue error:', e);
         }
 
-        // ── Unlock guest images ──
+        // ── Unlock guest images: move to user's library (watermark-free) ──
         let unlockedCount = 0;
+        const unlockedImages: { id: string; url: string; prompt: string; type: string }[] = [];
         try {
             const { data: guestImages } = await supabaseAdmin
                 .from('guest_generations')
@@ -153,6 +155,7 @@ export async function POST(req: NextRequest) {
 
             if (guestImages && guestImages.length > 0) {
                 for (const img of guestImages) {
+                    // 1. Mark as unlocked in guest_generations
                     await supabaseAdmin
                         .from('guest_generations')
                         .update({
@@ -162,6 +165,29 @@ export async function POST(req: NextRequest) {
                             user_id: userId,
                         })
                         .eq('id', img.id);
+
+                    // 2. Add the ORIGINAL (watermark-free) image to user's generation library
+                    const originalUrl = img.original_path; // e.g. /api/images/guest_xxx_original.jpg
+                    if (originalUrl) {
+                        saveGeneration({
+                            userId,
+                            prompt: img.prompt || 'Guest generation (unlocked)',
+                            modelName: 'novita-helloworld-xl',
+                            params: {},
+                            fileUrl: originalUrl,
+                            fileType: 'image',
+                            generationType: (img.generation_type === 'faceswap' ? 'faceswap' : img.generation_type === 'inpaint' ? 'inpaint' : 'txt2img') as 'txt2img' | 'img2img' | 'inpaint' | 'faceswap',
+                            creditsUsed: 0,
+                            status: 'success',
+                        });
+
+                        unlockedImages.push({
+                            id: img.id,
+                            url: originalUrl,
+                            prompt: img.prompt || '',
+                            type: img.generation_type,
+                        });
+                    }
                 }
                 unlockedCount = guestImages.length;
 
@@ -171,6 +197,8 @@ export async function POST(req: NextRequest) {
                     event_type: 'register_complete',
                     metadata: { user_id: userId, unlocked_count: unlockedCount },
                 });
+
+                console.log(`[Register] Unlocked ${unlockedCount} guest images for user ${userId}`);
             }
         } catch (e) {
             console.error('[Register] Guest image unlock error:', e);
@@ -183,6 +211,7 @@ export async function POST(req: NextRequest) {
             success: true,
             token,
             unlockedCount,
+            unlockedImages,
             user: {
                 id: newUser.id,
                 email: newUser.email,
