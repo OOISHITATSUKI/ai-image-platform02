@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { GenerationType, Locale } from '@/lib/types';
@@ -33,6 +33,10 @@ export default function Sidebar() {
     const [chatHistoryOpen, setChatHistoryOpen] = useState(true);
     const editInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
+    const pathname = usePathname();
+
+    // Determine the editor target: if user is on homepage, stay on /; otherwise go to /editor
+    const editorHref = isAuthenticated ? '/editor' : '/';
 
     const closeSidebarOnMobile = () => {
         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
@@ -43,7 +47,7 @@ export default function Sidebar() {
     const handleNewChat = () => {
         createChat();
         closeSidebarOnMobile();
-        router.push('/editor');
+        router.push(editorHref);
     };
 
     const formatRelativeTime = (ts: number) => {
@@ -63,7 +67,7 @@ export default function Sidebar() {
     const handleSelectChat = (id: string) => {
         setActiveChat(id);
         closeSidebarOnMobile();
-        router.push('/editor');
+        router.push(editorHref);
     };
 
     const handleStartRename = (id: string, currentName: string) => {
@@ -175,7 +179,7 @@ export default function Sidebar() {
                         return (
                             <Link
                                 key={item.type}
-                                href="/editor"
+                                href={editorHref}
                                 className={`nav-item ${isActive ? 'active' : ''}`}
                                 onClick={() => handleGenTypeClick(item.type)}
                             >

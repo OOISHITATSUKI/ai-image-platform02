@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { AspectRatio, GenerationType } from '@/lib/types';
@@ -16,6 +17,16 @@ interface UploadSlot {
 }
 
 export default function EditorPage() {
+    const editorRouter = useRouter();
+    const { isAuthenticated: editorIsAuth } = useAppStore();
+
+    // Redirect guests to homepage editor (/ supports guest generation)
+    useEffect(() => {
+        if (!editorIsAuth) {
+            editorRouter.replace('/');
+        }
+    }, [editorIsAuth, editorRouter]);
+
     const {
         chats, activeChatId, createChat, addMessage,
         isGenerating, setIsGenerating, submitTrigger,
