@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
-import { supabaseAdmin } from "@/lib/supabase-server";
+import { saveGuestImage } from "@/lib/db/guest_images";
 
 const DEMO_STATS_FILE = path.join(process.cwd(), "data", "demo_stats.json");
 const IMAGES_DIR = path.join(process.cwd(), "data", "images");
@@ -298,21 +298,20 @@ export async function POST(request: NextRequest) {
         fs.writeFileSync(path.join(IMAGES_DIR, originalFilename), originalBuffer);
         fs.writeFileSync(path.join(IMAGES_DIR, watermarkedFilename), watermarkedBuffer);
 
-        // ── Record to database ──
+        // ── Record to local file ──
         try {
-            await supabaseAdmin.from("guest_generations").insert({
+            saveGuestImage({
                 id: imageId,
-                guest_id: guestId,
-                generation_type: generationType === "txt2img" ? "txt2img" : faceSwapMode ? "faceswap" : inpaintMode ? "inpaint" : "txt2img",
-                prompt: prompt || null,
-                original_path: `/api/images/${originalFilename}`,
-                watermarked_path: `/api/images/${watermarkedFilename}`,
+                guestId,
+                generationType: generationType === "txt2img" ? "txt2img" : faceSwapMode ? "faceswap" : inpaintMode ? "inpaint" : "txt2img",
+                prompt: prompt || "",
+                originalPath: `/api/images/${originalFilename}`,
+                watermarkedPath: `/api/images/${watermarkedFilename}`,
                 unlocked: false,
-                registered: false,
+                createdAt: Date.now(),
             });
-        } catch (dbErr) {
-            console.error("[Guest gen] DB insert error:", dbErr);
-            // Don't fail the request if DB insert fails
+        } catch (err) {
+            console.error("[Guest gen] Record error:", err);
         }
 
         // ── Record cooldown ──

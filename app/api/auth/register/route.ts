@@ -12,6 +12,7 @@ import {
 
 import { logRegistrationAttempt, countRecentAttemptsByIp } from '@/lib/db/registration_attempts';
 import { saveGeneration } from '@/lib/db/generations';
+import { unlockGuestImages } from '@/lib/db/guest_images';
 import { rateLimit } from '@/lib/rateLimit';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
@@ -147,57 +148,32 @@ export async function POST(req: NextRequest) {
         let unlockedCount = 0;
         const unlockedImages: { id: string; url: string; prompt: string; type: string }[] = [];
         try {
-            const { data: guestImages } = await supabaseAdmin
-                .from('guest_generations')
-                .select('*')
-                .eq('guest_id', ip)
-                .eq('unlocked', false);
+            const guestImages = unlockGuestImages(ip, userId);
 
-            if (guestImages && guestImages.length > 0) {
-                for (const img of guestImages) {
-                    // 1. Mark as unlocked in guest_generations
-                    await supabaseAdmin
-                        .from('guest_generations')
-                        .update({
-                            unlocked: true,
-                            registered: true,
-                            registered_at: new Date().toISOString(),
-                            user_id: userId,
-                        })
-                        .eq('id', img.id);
-
-                    // 2. Add the ORIGINAL (watermark-free) image to user's generation library
-                    const originalUrl = img.original_path; // e.g. /api/images/guest_xxx_original.jpg
-                    if (originalUrl) {
-                        saveGeneration({
-                            userId,
-                            prompt: img.prompt || 'Guest generation (unlocked)',
-                            modelName: 'novita-helloworld-xl',
-                            params: {},
-                            fileUrl: originalUrl,
-                            fileType: 'image',
-                            generationType: (img.generation_type === 'faceswap' ? 'faceswap' : img.generation_type === 'inpaint' ? 'inpaint' : 'txt2img') as 'txt2img' | 'img2img' | 'inpaint' | 'faceswap',
-                            creditsUsed: 0,
-                            status: 'success',
-                        });
-
-                        unlockedImages.push({
-                            id: img.id,
-                            url: originalUrl,
-                            prompt: img.prompt || '',
-                            type: img.generation_type,
-                        });
-                    }
-                }
-                unlockedCount = guestImages.length;
-
-                // Record registration event
-                await supabaseAdmin.from('guest_events').insert({
-                    guest_id: ip,
-                    event_type: 'register_complete',
-                    metadata: { user_id: userId, unlocked_count: unlockedCount },
+            for (const img of guestImages) {
+                // Add the ORIGINAL (watermark-free) image to user's generation library
+                saveGeneration({
+                    userId,
+                    prompt: img.prompt || 'Guest generation (unlocked)',
+                    modelName: 'novita-helloworld-xl',
+                    params: {},
+                    fileUrl: img.originalPath,
+                    fileType: 'image',
+                    generationType: (img.generationType === 'faceswap' ? 'faceswap' : img.generationType === 'inpaint' ? 'inpaint' : 'txt2img') as 'txt2img' | 'img2img' | 'inpaint' | 'faceswap',
+                    creditsUsed: 0,
+                    status: 'success',
                 });
 
+                unlockedImages.push({
+                    id: img.id,
+                    url: img.originalPath,
+                    prompt: img.prompt || '',
+                    type: img.generationType,
+                });
+            }
+            unlockedCount = guestImages.length;
+
+            if (unlockedCount > 0) {
                 console.log(`[Register] Unlocked ${unlockedCount} guest images for user ${userId}`);
             }
         } catch (e) {
