@@ -35,8 +35,9 @@ export default function Sidebar() {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Determine the editor target: if user is on homepage, stay on /; otherwise go to /editor
-    const editorHref = isAuthenticated ? '/editor' : '/';
+    // Stay on current page when switching modes — both / and /editor are editors
+    // Guests always stay on /; authenticated users stay where they are
+    const editorHref = !isAuthenticated ? '/' : (pathname === '/' ? '/' : '/editor');
 
     const closeSidebarOnMobile = () => {
         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
@@ -47,7 +48,7 @@ export default function Sidebar() {
     const handleNewChat = () => {
         createChat();
         closeSidebarOnMobile();
-        router.push(editorHref);
+        if (!isOnEditor) router.push(editorHref);
     };
 
     const formatRelativeTime = (ts: number) => {
@@ -67,7 +68,7 @@ export default function Sidebar() {
     const handleSelectChat = (id: string) => {
         setActiveChat(id);
         closeSidebarOnMobile();
-        router.push(editorHref);
+        if (!isOnEditor) router.push(editorHref);
     };
 
     const handleStartRename = (id: string, currentName: string) => {
@@ -83,12 +84,19 @@ export default function Sidebar() {
         setEditingChatId(null);
     };
 
-    const handleGenTypeClick = (type: GenerationType) => {
+    // Whether we're already on an editor page (/ or /editor)
+    const isOnEditor = pathname === '/' || pathname === '/editor';
+
+    const handleGenTypeClick = (type: GenerationType, e?: React.MouseEvent) => {
         setGenerationType(type);
         if (chats.length === 0) {
             createChat();
         }
         closeSidebarOnMobile();
+        // If already on an editor page, prevent navigation — just switch mode
+        if (isOnEditor && e) {
+            e.preventDefault();
+        }
     };
 
     const navItems = [
@@ -181,7 +189,7 @@ export default function Sidebar() {
                                 key={item.type}
                                 href={editorHref}
                                 className={`nav-item ${isActive ? 'active' : ''}`}
-                                onClick={() => handleGenTypeClick(item.type)}
+                                onClick={(e) => handleGenTypeClick(item.type, e)}
                             >
                                 <span className="nav-icon">{item.icon}</span>
                                 {!sidebarCollapsed && (
