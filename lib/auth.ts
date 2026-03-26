@@ -98,6 +98,12 @@ export interface UserRecord {
     passwordResetExpiresAt?: number;
     passwordResetAttempts?: number;
     passwordResetLockedUntil?: number;
+
+    // OAuth
+    authProvider?: 'email' | 'google';
+    googleId?: string;
+    avatarUrl?: string;
+    displayName?: string;
 }
 
 // ============================================================
@@ -145,6 +151,10 @@ function dbRowToUserRecord(row: any): UserRecord {
         passwordResetExpiresAt: row.password_reset_expires_at ?? undefined,
         passwordResetAttempts: row.password_reset_attempts ?? 0,
         passwordResetLockedUntil: row.password_reset_locked_until ?? undefined,
+        authProvider: row.auth_provider ?? 'email',
+        googleId: row.google_id ?? undefined,
+        avatarUrl: row.avatar_url ?? undefined,
+        displayName: row.display_name ?? undefined,
     };
 }
 
@@ -189,6 +199,10 @@ function userRecordToDbRow(user: UserRecord): Record<string, any> {
         password_reset_expires_at: user.passwordResetExpiresAt ?? null,
         password_reset_attempts: user.passwordResetAttempts ?? 0,
         password_reset_locked_until: user.passwordResetLockedUntil ?? null,
+        auth_provider: user.authProvider ?? 'email',
+        google_id: user.googleId ?? null,
+        avatar_url: user.avatarUrl ?? null,
+        display_name: user.displayName ?? null,
     };
 }
 

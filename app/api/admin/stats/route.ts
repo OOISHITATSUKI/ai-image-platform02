@@ -39,6 +39,9 @@ export async function GET(req: NextRequest) {
     const totalUsers = users.length;
     const newUsersToday = users.filter(u => u.createdAt >= msToday).length;
     const bannedUsers = users.filter(u => u.status === 'banned').length;
+    const usersThisWeek = users.filter(u => u.createdAt >= msToday - 6 * 24 * 60 * 60 * 1000).length;
+    const googleUsers = users.filter(u => u.authProvider === 'google').length;
+    const emailUsers = users.filter(u => !u.authProvider || u.authProvider === 'email').length;
 
     // Filter Blocks
     const FILTER_BLOCKS_FILE = path.join(process.cwd(), 'data', 'filter_blocks.json');
@@ -83,7 +86,8 @@ export async function GET(req: NextRequest) {
         todayUniqueDemoUsers = new Set(generated.filter(e => e.createdAt >= msToday).map(e => e.ip)).size;
     }
 
-    // ── Guest Generation Stats (from Supabase) ──
+    // ── Guest Generation Stats (from local JSON) ──
+    const GUEST_IMAGES_FILE = path.join(process.cwd(), 'data', 'guest_images.json');
     let guestGenTotal = 0;
     let guestGenToday = 0;
     let guestUniqueTotal = 0;
@@ -92,77 +96,62 @@ export async function GET(req: NextRequest) {
     let guestAvgGensBeforeRegister = 0;
     let guestGenByType = { txt2img: 0, faceswap: 0, inpaint: 0 };
     let guestUnlockClicks = 0;
+    let guestUnlockedTotal = 0;
 
-    try {
-        const todayISO = today.toISOString();
+    if (fs.existsSync(GUEST_IMAGES_FILE)) {
+        try {
+            const guestImages = Object.values(
+                JSON.parse(fs.readFileSync(GUEST_IMAGES_FILE, 'utf8'))
+            ) as { guestId: string; generationType: string; unlocked: boolean; createdAt: number }[];
 
-        // Total guest generations
-        const { count: totalGuestCount } = await supabaseAdmin
-            .from('guest_generations')
-            .select('*', { count: 'exact', head: true });
-        guestGenTotal = totalGuestCount || 0;
+            guestGenTotal = guestImages.length;
+            guestGenToday = guestImages.filter(g => g.createdAt >= msToday).length;
 
-        // Today's guest generations
-        const { count: todayGuestCount } = await supabaseAdmin
-            .from('guest_generations')
-            .select('*', { count: 'exact', head: true })
-            .gte('created_at', todayISO);
-        guestGenToday = todayGuestCount || 0;
+            const allIPs = new Set(guestImages.map(g => g.guestId));
+            guestUniqueTotal = allIPs.size;
 
-        // Unique guests (total)
-        const { data: uniqueGuests } = await supabaseAdmin
-            .from('guest_generations')
-            .select('guest_id')
-            .limit(10000);
-        if (uniqueGuests) {
-            guestUniqueTotal = new Set(uniqueGuests.map((g: { guest_id: string }) => g.guest_id)).size;
-        }
+            const todayIPs = new Set(guestImages.filter(g => g.createdAt >= msToday).map(g => g.guestId));
+            guestUniqueToday = todayIPs.size;
 
-        // Unique guests today
-        const { data: uniqueGuestsToday } = await supabaseAdmin
-            .from('guest_generations')
-            .select('guest_id')
-            .gte('created_at', todayISO)
-            .limit(10000);
-        if (uniqueGuestsToday) {
-            guestUniqueToday = new Set(uniqueGuestsToday.map((g: { guest_id: string }) => g.guest_id)).size;
-        }
+            // Unlocked = registered guests
+            guestUnlockedTotal = guestImages.filter(g => g.unlocked).length;
+            const unlockedIPs = new Set(guestImages.filter(g => g.unlocked).map(g => g.guestId));
+            if (guestUniqueTotal > 0) {
+                guestConversionRate = Math.round((unlockedIPs.size / guestUniqueTotal) * 100);
+            }
 
-        // Conversion rate (guests who registered)
-        const { count: registeredCount } = await supabaseAdmin
-            .from('guest_generations')
-            .select('guest_id', { count: 'exact', head: true })
-            .eq('registered', true);
-        if (guestUniqueTotal > 0) {
-            guestConversionRate = Math.round(((registeredCount || 0) / guestUniqueTotal) * 100);
-        }
-
-        // Generation type breakdown
-        const { data: typeBreakdown } = await supabaseAdmin
-            .from('guest_generations')
-            .select('generation_type')
-            .limit(50000);
-        if (typeBreakdown) {
-            for (const row of typeBreakdown) {
-                const t = row.generation_type as keyof typeof guestGenByType;
+            // Type breakdown
+            for (const img of guestImages) {
+                const t = img.generationType as keyof typeof guestGenByType;
                 if (t in guestGenByType) guestGenByType[t]++;
             }
+        } catch (e) {
+            console.error('Failed to read guest_images.json:', e);
         }
+    }
 
-        // Unlock click events
+    // Also combine demo_stats events for total guest activity
+    // (demo-generate API records both legacy demo and guest editor events)
+    guestGenTotal = Math.max(guestGenTotal, totalDemoTrials);
+
+    // Unlock click events from Supabase (if available)
+    try {
         const { count: unlockCount } = await supabaseAdmin
             .from('guest_events')
             .select('*', { count: 'exact', head: true })
             .eq('event_type', 'unlock_click');
         guestUnlockClicks = unlockCount || 0;
-    } catch (e) {
-        console.error('Failed to fetch guest stats:', e);
+    } catch {
+        // guest_events table might not exist, that's ok
     }
 
     return NextResponse.json({
         totalUsers,
         newUsersToday,
         bannedUsers,
+        usersThisWeek,
+        googleUsers,
+        emailUsers,
         totalBlocks,
         todayBlocks,
         todayGenerations,
@@ -180,5 +169,6 @@ export async function GET(req: NextRequest) {
         guestAvgGensBeforeRegister,
         guestGenByType,
         guestUnlockClicks,
+        guestUnlockedTotal,
     });
 }

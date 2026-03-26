@@ -6,6 +6,9 @@ interface Stats {
     totalUsers: number;
     newUsersToday: number;
     bannedUsers: number;
+    usersThisWeek: number;
+    googleUsers: number;
+    emailUsers: number;
     totalBlocks: number;
     todayBlocks: number;
     todayGenerations: number;
@@ -22,6 +25,7 @@ interface Stats {
     guestAvgGensBeforeRegister: number;
     guestGenByType: { txt2img: number; faceswap: number; inpaint: number };
     guestUnlockClicks: number;
+    guestUnlockedTotal: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -77,13 +81,7 @@ export default function AdminDashboardPage() {
         { label: '本日の新規登録', value: stats.newUsersToday.toLocaleString(), color: '#60a5fa' },
         { label: 'BAN済みユーザー', value: stats.bannedUsers.toLocaleString(), color: '#f87171' },
         { label: '総売上 (USD)', value: `$${stats.totalRevenue.toFixed(2)}`, color: '#10b981' },
-    ];
-
-    const demoCards = [
-        { label: 'デモ総生成数', value: stats.totalDemoTrials.toLocaleString(), color: '#f472b6' },
-        { label: '本日のデモ生成', value: stats.todayDemoTrials.toLocaleString(), color: '#fb923c' },
-        { label: 'デモ利用ユニークIP', value: stats.uniqueDemoUsers.toLocaleString(), color: '#a78bfa' },
-        { label: '本日のユニークIP', value: stats.todayUniqueDemoUsers.toLocaleString(), color: '#38bdf8' },
+        { label: '今週の新規登録', value: (stats.usersThisWeek ?? 0).toLocaleString(), color: '#38bdf8' },
     ];
 
     return (
@@ -102,22 +100,30 @@ export default function AdminDashboardPage() {
                 ))}
             </div>
 
-            {/* Demo Stats (Legacy) */}
+            {/* Auth Provider Breakdown */}
             <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                🎯 お試しデモ（レガシー）
+                🔐 登録方法別
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
-                {demoCards.map(card => (
-                    <div key={card.label} style={cardStyle}>
-                        <div style={labelStyle}>{card.label}</div>
-                        <div style={valueStyle(card.color)}>{card.value}</div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>Google 登録</div>
+                    <div style={valueStyle('#4285F4')}>{(stats.googleUsers ?? 0).toLocaleString()}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        {stats.totalUsers > 0 ? Math.round(((stats.googleUsers ?? 0) / stats.totalUsers) * 100) : 0}%
                     </div>
-                ))}
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>Email 登録</div>
+                    <div style={valueStyle('#a78bfa')}>{(stats.emailUsers ?? 0).toLocaleString()}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        {stats.totalUsers > 0 ? Math.round(((stats.emailUsers ?? 0) / stats.totalUsers) * 100) : 0}%
+                    </div>
+                </div>
             </div>
 
-            {/* Guest Generation Stats (New) */}
+            {/* Guest Generation Stats */}
             <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                🏠 ゲスト生成（ホームページエディター）
+                🏠 ゲスト生成
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                 <div style={cardStyle}>
@@ -141,8 +147,12 @@ export default function AdminDashboardPage() {
                     <div style={valueStyle('#10b981')}>{stats.guestConversionRate || 0}%</div>
                 </div>
                 <div style={cardStyle}>
+                    <div style={labelStyle}>アンロック済み画像</div>
+                    <div style={valueStyle('#f472b6')}>{stats.guestUnlockedTotal?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
                     <div style={labelStyle}>Unlockクリック数</div>
-                    <div style={valueStyle('#f472b6')}>{stats.guestUnlockClicks?.toLocaleString() || 0}</div>
+                    <div style={valueStyle('#fb923c')}>{stats.guestUnlockClicks?.toLocaleString() || 0}</div>
                 </div>
             </div>
             {stats.guestGenByType && (
