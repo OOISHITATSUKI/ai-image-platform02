@@ -15,6 +15,16 @@ import { saveGeneration } from '@/lib/db/generations';
 import { unlockGuestImages } from '@/lib/db/guest_images';
 import { rateLimit } from '@/lib/rateLimit';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { sendWelcomeEmail } from '@/lib/email';
+
+const SUPPORTED_LOCALES = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+function normalizeLocale(locale: unknown): string {
+    if (typeof locale === 'string') {
+        const base = locale.split('-')[0].toLowerCase();
+        if (SUPPORTED_LOCALES.includes(base)) return base;
+    }
+    return 'en';
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || 'videogen-jwt-secret-change-in-production';
 const SALT_ROUNDS = 10;
@@ -44,7 +54,8 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { email, password, fingerprintHash } = await req.json();
+        const { email, password, fingerprintHash, locale: rawLocale } = await req.json();
+        const locale = normalizeLocale(rawLocale);
 
         if (!email || !isValidEmail(email)) {
             return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
@@ -94,7 +105,7 @@ export async function POST(req: NextRequest) {
             emailVerified: false,
             plan: 'free',
             credits: existingUser?.credits ?? 20,
-            locale: 'en',
+            locale,
             theme: 'dark',
             firstGenerationConfirmed: true,
             fingerprintHash: fingerprintHash || existingUser?.fingerprintHash,
@@ -117,6 +128,11 @@ export async function POST(req: NextRequest) {
 
         await saveUser(newUser);
         await logRegistrationAttempt(ip, normalizedEmail, true);
+
+        // Send welcome email (non-blocking)
+        sendWelcomeEmail(normalizedEmail, locale).catch((e) =>
+            console.error('[Register] Welcome email error:', e)
+        );
 
         // Enqueue step email sequences triggered by registration
         try {

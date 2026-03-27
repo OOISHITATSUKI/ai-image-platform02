@@ -8,7 +8,7 @@ import fpPromise from '@fingerprintjs/fingerprintjs';
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { setUser } = useAppStore();
+    const { setUser, locale } = useAppStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [termsAgreed, setTermsAgreed] = useState(false);
@@ -67,7 +67,7 @@ export default function RegisterPage() {
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, fingerprintHash }),
+                body: JSON.stringify({ email, password, fingerprintHash, locale }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
@@ -120,7 +120,7 @@ export default function RegisterPage() {
 
                     {/* Google OAuth button */}
                     <a
-                        href="/api/auth/google"
+                        href={`/api/auth/google?locale=${encodeURIComponent(locale)}`}
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             gap: '10px', width: '100%', padding: '12px 16px',

@@ -10,7 +10,7 @@ type Step = 'password' | 'mfa' | 'forgot-password' | 'reset-password';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { setUser } = useAppStore();
+    const { setUser, locale } = useAppStore();
     const { t } = useTranslation();
 
     // Step 1 state
@@ -256,7 +256,7 @@ export default function LoginPage() {
 
                             {/* Google OAuth button */}
                             <a
-                                href="/api/auth/google"
+                                href={`/api/auth/google?locale=${encodeURIComponent(locale)}`}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     gap: '10px', width: '100%', padding: '12px 16px',

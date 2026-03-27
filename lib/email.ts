@@ -70,6 +70,146 @@ export async function sendOTPEmail(to: string, otp: string, type: 'register' | '
   }
 }
 
+// ── Welcome Email ──────────────────────────────────────────────
+
+const WELCOME_CONTENT: Record<string, { subject: string; heading: string; subheading: string; items: string[]; cta: string; privacy: string; footer: string }> = {
+  en: {
+    subject: 'Welcome to Image Nude — Your 20 Free Credits Are Ready',
+    heading: 'Welcome to Image Nude!',
+    subheading: "Your account is ready. Here's what you can do:",
+    items: [
+      '20 free credits loaded',
+      'Text to Image — describe anything, AI creates it',
+      'Face Swap — swap any face onto any body',
+      'Undress AI — remove clothing from any photo',
+    ],
+    cta: 'Start creating now',
+    privacy: 'Your images are automatically deleted within 1 hour for your privacy.',
+    footer: 'Questions? Reply to this email.\n— Image Nude Team',
+  },
+  ja: {
+    subject: 'Image Nude へようこそ — 20クレジットをプレゼント',
+    heading: 'Image Nude へようこそ！',
+    subheading: 'アカウントの準備ができました。',
+    items: [
+      '20クレジットを付与しました',
+      'テキストから画像生成 — 説明するだけでAIが作成',
+      'フェイススワップ — 顔を自由に入れ替え',
+      'Undress AI — 写真から衣服を除去',
+    ],
+    cta: '今すぐ始める',
+    privacy: 'プライバシー保護のため、画像は1時間以内に自動削除されます。',
+    footer: 'ご質問はこのメールに返信してください。\n— Image Nude チーム',
+  },
+  es: {
+    subject: 'Bienvenido a Image Nude — Tus 20 créditos gratuitos están listos',
+    heading: '¡Bienvenido a Image Nude!',
+    subheading: 'Tu cuenta está lista. Esto es lo que puedes hacer:',
+    items: [
+      '20 créditos gratuitos cargados',
+      'Texto a imagen — describe cualquier cosa, la IA lo crea',
+      'Face Swap — cambia cualquier cara en cualquier cuerpo',
+      'Undress AI — elimina ropa de cualquier foto',
+    ],
+    cta: 'Empieza a crear ahora',
+    privacy: 'Tus imágenes se eliminan automáticamente en 1 hora para proteger tu privacidad.',
+    footer: '¿Preguntas? Responde a este correo.\n— El equipo de Image Nude',
+  },
+  zh: {
+    subject: '欢迎加入 Image Nude — 您的20个免费积分已准备好',
+    heading: '欢迎加入 Image Nude！',
+    subheading: '您的账户已准备就绪，您可以：',
+    items: [
+      '已赠送20个免费积分',
+      '文字生成图像 — 描述任何内容，AI为您创作',
+      '换脸功能 — 将任意脸替换到任意身体上',
+      'Undress AI — 去除照片中的衣物',
+    ],
+    cta: '立即开始创作',
+    privacy: '为保护您的隐私，图像将在1小时内自动删除。',
+    footer: '如有疑问，请回复此邮件。\n— Image Nude 团队',
+  },
+  ko: {
+    subject: 'Image Nude에 오신 것을 환영합니다 — 20 무료 크레딧이 준비되었습니다',
+    heading: 'Image Nude에 오신 것을 환영합니다!',
+    subheading: '계정이 준비되었습니다. 다음을 이용하실 수 있습니다:',
+    items: [
+      '20 무료 크레딧 지급 완료',
+      '텍스트로 이미지 생성 — 설명하면 AI가 만들어 드립니다',
+      '페이스 스왑 — 어떤 얼굴이든 자유롭게 교체',
+      'Undress AI — 사진에서 의류 제거',
+    ],
+    cta: '지금 바로 시작하기',
+    privacy: '개인정보 보호를 위해 이미지는 1시간 이내에 자동 삭제됩니다.',
+    footer: '질문이 있으시면 이 이메일에 답장해 주세요.\n— Image Nude 팀',
+  },
+  pt: {
+    subject: 'Bem-vindo ao Image Nude — Seus 20 créditos gratuitos estão prontos',
+    heading: 'Bem-vindo ao Image Nude!',
+    subheading: 'Sua conta está pronta. Veja o que você pode fazer:',
+    items: [
+      '20 créditos gratuitos carregados',
+      'Texto para Imagem — descreva qualquer coisa, a IA cria',
+      'Face Swap — troque qualquer rosto em qualquer corpo',
+      'Undress AI — remova roupas de qualquer foto',
+    ],
+    cta: 'Comece a criar agora',
+    privacy: 'Suas imagens são automaticamente excluídas em 1 hora para sua privacidade.',
+    footer: 'Dúvidas? Responda a este e-mail.\n— Equipe Image Nude',
+  },
+};
+
+export async function sendWelcomeEmail(to: string, locale: string): Promise<boolean> {
+  const resend = getResend();
+  if (!resend) return false;
+
+  const content = WELCOME_CONTENT[locale] ?? WELCOME_CONTENT['en'];
+  const itemRows = content.items
+    .map(item => `<tr><td style="padding:6px 0;color:#e0e0ee;font-size:14px;">✅ ${item}</td></tr>`)
+    .join('');
+  const footerLines = content.footer.split('\n').join('<br>');
+
+  const html = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a1a;padding:40px 20px;">
+      <div style="max-width:520px;margin:auto;background:#1a1a2e;border-radius:12px;padding:40px;border:1px solid #2a2a4a;">
+        <h1 style="color:#c084fc;font-size:26px;margin:0 0 8px;text-align:center;">Image Nude</h1>
+        <h2 style="color:#ffffff;font-size:18px;margin:0 0 8px;text-align:center;">${content.heading}</h2>
+        <p style="color:#9999ae;font-size:14px;text-align:center;margin:0 0 24px;">${content.subheading}</p>
+        <div style="background:#0f0f23;border-radius:8px;padding:20px 24px;margin:0 0 24px;">
+          <table style="width:100%;border-collapse:collapse;">${itemRows}</table>
+        </div>
+        <div style="text-align:center;margin:0 0 16px;">
+          <a href="https://imagenude.com" style="display:inline-block;background:#c084fc;color:#fff;font-size:15px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">${content.cta} →</a>
+        </div>
+        <p style="text-align:center;margin:0 0 24px;">
+          <a href="https://imagenude.com" style="color:#9999ae;font-size:13px;">https://imagenude.com</a>
+        </p>
+        <p style="color:#6b6b85;font-size:12px;text-align:center;margin:0 0 16px;">${content.privacy}</p>
+        <hr style="border:none;border-top:1px solid #2a2a4a;margin:16px 0;" />
+        <p style="color:#6b6b85;font-size:12px;text-align:center;margin:0;">${footerLines}</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: content.subject,
+      html,
+    });
+    if (error) {
+      console.error('[Email] Welcome email failed:', error);
+      return false;
+    }
+    console.log(`[Email] Welcome email sent to ${to} (locale: ${locale}, id: ${data?.id})`);
+    return true;
+  } catch (err) {
+    console.error('[Email] Welcome email error:', err);
+    return false;
+  }
+}
+
 // ── Admin Milestone Notification ──────────────────────────────
 const ADMIN_EMAIL = 'ooisidegesu@gmail.com';
 const MILESTONE_FLAG_FILE = path.join(process.cwd(), 'data', 'milestone_100_sent.flag');

@@ -9,6 +9,7 @@ import {
 import { saveGeneration } from '@/lib/db/generations';
 import { unlockGuestImages } from '@/lib/db/guest_images';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { sendWelcomeEmail } from '@/lib/email';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'videogen-jwt-secret-change-in-production';
 
@@ -100,6 +101,7 @@ export async function GET(req: NextRequest) {
     const ip = getIp(req);
     const now = Date.now();
     const normalizedEmail = googleUser.email.toLowerCase().trim();
+    const locale = req.cookies.get('google_oauth_locale')?.value ?? 'en';
 
     // Find or create user
     let user = await findUserByEmail(normalizedEmail);
@@ -117,7 +119,7 @@ export async function GET(req: NextRequest) {
             emailVerified: googleUser.email_verified ?? true,
             plan: 'free',
             credits: 20,
-            locale: 'en',
+            locale,
             theme: 'dark',
             firstGenerationConfirmed: true,
             registrationIp: ip,
@@ -143,6 +145,11 @@ export async function GET(req: NextRequest) {
         };
         await saveUser(newUser);
         user = newUser;
+
+        // Send welcome email (non-blocking)
+        sendWelcomeEmail(normalizedEmail, locale).catch((e) =>
+            console.error('[Google OAuth] Welcome email error:', e)
+        );
 
         // Enqueue step email sequences
         try {
@@ -231,8 +238,9 @@ export async function GET(req: NextRequest) {
 
     const response = NextResponse.redirect(new URL('/auth/callback', appUrl));
 
-    // Clear state cookie
+    // Clear state and locale cookies
     response.cookies.delete('google_oauth_state');
+    response.cookies.delete('google_oauth_locale');
 
     // Set short-lived auth result cookie (readable by JS)
     response.cookies.set('google_auth_result', authResult, {
