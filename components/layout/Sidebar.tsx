@@ -122,6 +122,14 @@ export default function Sidebar() {
 
     const [showAccountMenu, setShowAccountMenu] = useState(false);
     const accountMenuRef = useRef<HTMLDivElement>(null);
+    const [unlockedNewCount, setUnlockedNewCount] = useState(0);
+
+    // Check for newly unlocked guest images badge
+    React.useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const count = parseInt(localStorage.getItem('guest_unlocked_new') || '0', 10);
+        if (count > 0) setUnlockedNewCount(count);
+    }, [isAuthenticated]);
 
     // Close menu when clicking outside
     React.useEffect(() => {
@@ -169,10 +177,36 @@ export default function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className="nav-item"
-                            onClick={closeSidebarOnMobile}
+                            onClick={() => {
+                                closeSidebarOnMobile();
+                                // Clear badge when clicking Library
+                                if (item.href === '/library' && unlockedNewCount > 0) {
+                                    localStorage.removeItem('guest_unlocked_new');
+                                    setUnlockedNewCount(0);
+                                }
+                            }}
                         >
                             <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && t(item.labelKey)}
+                            {!sidebarCollapsed && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+                                    {t(item.labelKey)}
+                                    {item.href === '/library' && unlockedNewCount > 0 && (
+                                        <span style={{
+                                            background: '#ef4444',
+                                            color: '#fff',
+                                            fontSize: '0.6rem',
+                                            fontWeight: 700,
+                                            borderRadius: 10,
+                                            padding: '1px 6px',
+                                            minWidth: 18,
+                                            textAlign: 'center',
+                                            lineHeight: '16px',
+                                        }}>
+                                            {unlockedNewCount}
+                                        </span>
+                                    )}
+                                </span>
+                            )}
                         </Link>
                     ))}
                 </div>
@@ -385,6 +419,31 @@ export default function Sidebar() {
                     </div>
                 )}
 
+                {/* Language Selector */}
+                {!sidebarCollapsed && (
+                    <div style={{ padding: '0 12px', marginBottom: 8 }}>
+                        <select
+                            value={locale}
+                            onChange={(e) => setLocale(e.target.value as Locale)}
+                            style={{
+                                width: '100%',
+                                padding: '6px 10px',
+                                borderRadius: 8,
+                                border: '1px solid var(--border-color, #333)',
+                                background: 'var(--bg-secondary, #1a1a2e)',
+                                color: 'var(--text-primary, #fff)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                outline: 'none',
+                            }}
+                        >
+                            {languages.map((lang) => (
+                                <option key={lang.value} value={lang.value}>{lang.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 {/* User Profile Bar */}
                 {isAuthenticated ? (
                     <div
@@ -414,16 +473,21 @@ export default function Sidebar() {
 
                 {/* Condensed Legal Footer */}
                 {!sidebarCollapsed && (
-                    <div style={{ padding: '8px 16px', display: 'flex', flexWrap: 'wrap', gap: '4px 8px', justifyContent: 'center' }}>
-                        <Link href="/terms" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Terms</Link>
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
-                        <Link href="/privacy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Privacy</Link>
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
-                        <Link href="/content-policy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Content</Link>
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
-                        <Link href="/dmca" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>DMCA</Link>
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
-                        <Link href="/2257" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>2257</Link>
+                    <div style={{ borderTop: '1px solid var(--border-color, #2a2a3e)', marginTop: 4, padding: '8px 16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+                            <Link href="/blog" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Blog</Link>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px', justifyContent: 'center' }}>
+                            <Link href="/terms" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Terms</Link>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                            <Link href="/privacy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Privacy</Link>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                            <Link href="/content-policy" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>Content</Link>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                            <Link href="/dmca" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>DMCA</Link>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.3 }}>{' · '}</span>
+                            <Link href="/2257" onClick={() => setShowAccountMenu(false)} style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.5, textDecoration: 'none' }}>2257</Link>
+                        </div>
                     </div>
                 )}
             </div>
