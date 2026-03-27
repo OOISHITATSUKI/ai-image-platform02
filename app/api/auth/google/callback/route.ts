@@ -10,6 +10,7 @@ import { saveGeneration } from '@/lib/db/generations';
 import { unlockGuestImages } from '@/lib/db/guest_images';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { sendWelcomeEmail } from '@/lib/email';
+import { markGuestGenerationsRegistered } from '@/lib/db/guest_generations';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'videogen-jwt-secret-change-in-production';
 
@@ -150,6 +151,10 @@ export async function GET(req: NextRequest) {
         sendWelcomeEmail(normalizedEmail, locale).catch((e) =>
             console.error('[Google OAuth] Welcome email error:', e)
         );
+
+        // Mark guest analytics records as registered
+        try { markGuestGenerationsRegistered(ip); } catch {}
+
 
         // Enqueue step email sequences
         try {

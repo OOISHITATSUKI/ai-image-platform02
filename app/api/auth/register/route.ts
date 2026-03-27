@@ -16,6 +16,7 @@ import { unlockGuestImages } from '@/lib/db/guest_images';
 import { rateLimit } from '@/lib/rateLimit';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { sendWelcomeEmail } from '@/lib/email';
+import { markGuestGenerationsRegistered } from '@/lib/db/guest_generations';
 
 const SUPPORTED_LOCALES = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
 function normalizeLocale(locale: unknown): string {
@@ -133,6 +134,10 @@ export async function POST(req: NextRequest) {
         sendWelcomeEmail(normalizedEmail, locale).catch((e) =>
             console.error('[Register] Welcome email error:', e)
         );
+
+        // Mark guest analytics records as registered
+        try { markGuestGenerationsRegistered(ip); } catch {}
+
 
         // Enqueue step email sequences triggered by registration
         try {
