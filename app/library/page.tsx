@@ -49,6 +49,18 @@ export default function LibraryPage() {
     const [hasMore, setHasMore] = useState(false);
     const [total, setTotal] = useState(0);
     const PAGE_SIZE = 24;
+    const [showNewBadges, setShowNewBadges] = useState(false);
+
+    // Check if we should show NEW badges on unlocked guest images
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const newCount = parseInt(localStorage.getItem('guest_unlocked_new') || '0', 10);
+        if (newCount > 0) {
+            setShowNewBadges(true);
+            // Clear after viewing
+            localStorage.removeItem('guest_unlocked_new');
+        }
+    }, []);
 
     const getToken = () => typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
@@ -327,6 +339,19 @@ export default function LibraryPage() {
                                         )
                                     ) : (
                                         <div style={styles.noImage}>🖼️</div>
+                                    )}
+                                    {/* NEW badge for recently unlocked guest images */}
+                                    {showNewBadges && gen.creditsUsed === 0 && gen.fileUrl?.includes('guest_') && (
+                                        <div style={{
+                                            position: 'absolute', top: 8, left: 8, zIndex: 2,
+                                            background: 'linear-gradient(135deg, #7c5cfc, #6366f1)',
+                                            color: '#fff', fontSize: '0.6rem', fontWeight: 800,
+                                            padding: '2px 8px', borderRadius: 6,
+                                            letterSpacing: '0.5px',
+                                            boxShadow: '0 2px 8px rgba(124,92,252,0.5)',
+                                        }}>
+                                            NEW
+                                        </div>
                                     )}
                                     {/* Overlay on hover */}
                                     <div style={styles.cardOverlay}>

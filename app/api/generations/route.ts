@@ -7,6 +7,7 @@ import {
     purgeExpiredGenerations,
     type GenerationRecord,
 } from '@/lib/db/generations';
+import { purgeExpiredGuestImages } from '@/lib/db/guest_images';
 
 // Max items per page
 const DEFAULT_LIMIT = 20;
@@ -23,6 +24,8 @@ export async function GET(req: NextRequest) {
 
     // Purge expired generation records (older than 1 hour)
     purgeExpiredGenerations();
+    // Also purge expired guest images (older than 24 hours, not unlocked)
+    purgeExpiredGuestImages();
 
     const { searchParams } = new URL(req.url);
     const offset = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10));

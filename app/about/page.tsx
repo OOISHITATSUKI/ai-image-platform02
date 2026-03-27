@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
@@ -44,173 +44,34 @@ function StarRating({ count }: { count: number }) {
 }
 
 function TryItNowSection() {
-    const [demoState, setDemoState] = useState<'idle' | 'processing' | 'result' | 'error' | 'limit'>('idle');
-    const [ethnicity, setEthnicity] = useState('japanese');
-    const [bustSize, setBustSize] = useState('medium');
-    const [prompt, setPrompt] = useState('');
-    const [resultImage, setResultImage] = useState<string | null>(null);
-    const [errorMsg, setErrorMsg] = useState('');
-    const [progress, setProgress] = useState(0);
-    const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const getFingerprint = useCallback(() => {
-        if (typeof window === 'undefined') return 'ssr';
-        const nav = window.navigator;
-        const raw = [nav.userAgent, nav.language, screen.width, screen.height, screen.colorDepth, new Date().getTimezoneOffset()].join('|');
-        let hash = 0;
-        for (let i = 0; i < raw.length; i++) { hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0; }
-        return hash.toString(36);
-    }, []);
-
-    const handleGenerate = async () => {
-        setDemoState('processing'); setProgress(0);
-        progressRef.current = setInterval(() => {
-            setProgress(p => p >= 90 ? 90 : p + Math.random() * 6 + 2);
-        }, 600);
-        try {
-            const res = await fetch('/api/demo-generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ethnicity, bustSize, prompt, fingerprintHash: getFingerprint() }),
-            });
-            if (progressRef.current) clearInterval(progressRef.current);
-            if (res.status === 429) { setDemoState('limit'); return; }
-            const data = await res.json();
-            if (!res.ok || !data.success) { setErrorMsg(data.error || 'Generation failed.'); setDemoState('error'); return; }
-            setProgress(100); setResultImage(data.image);
-            setTimeout(() => setDemoState('result'), 400);
-        } catch {
-            if (progressRef.current) clearInterval(progressRef.current);
-            setErrorMsg('Network error. Please try again.'); setDemoState('error');
-        }
-    };
-
-    const handleReset = () => { setDemoState('idle'); setResultImage(null); setProgress(0); setErrorMsg(''); };
-
-    const ethnicityOptions = [
-        { value: 'asian', label: '🌏 Asian' },
-        { value: 'european', label: '🌍 European' },
-        { value: 'latina', label: '💃 Latina' },
-        { value: 'black', label: '✨ Black' },
-        { value: 'middleeastern', label: '🌙 Middle Eastern' },
-    ];
-    const bustOptions = [
-        { value: 'small', label: 'Small' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'large', label: 'Large' },
-        { value: 'huge', label: 'Huge' },
-    ];
-    const bustIndex = bustOptions.findIndex(o => o.value === bustSize);
-
     return (
         <section className="hp-section hp-section-pad">
             <div className="hp-glow" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 500, background: 'radial-gradient(circle, rgba(220,38,38,0.06), transparent 70%)' }} />
             <div style={{ maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: 48 }}>
-                    <div className="hp-label"><span className="hp-pulse">●</span> Live Demo — No Sign Up Required</div>
+                    <div className="hp-label"><span className="hp-pulse">●</span> Free to Try — No Sign Up Required</div>
                     <h2 className="hp-heading">Try It <span className="hp-accent-text">Free</span></h2>
-                    <p className="hp-subtext" style={{ maxWidth: 520, margin: '0 auto' }}>3 simple steps. No account needed. Results in ~10 seconds.</p>
+                    <p className="hp-subtext" style={{ maxWidth: 520, margin: '0 auto' }}>Generate AI images instantly. No account needed. All features available.</p>
                 </div>
                 <div className="hp-demo-card">
-                    {demoState === 'idle' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">1</span>
-                                    <span className="hp-demo-step-title">Choose Ethnicity</span>
-                                </div>
-                                <div className="hp-demo-options">
-                                    {ethnicityOptions.map(o => (
-                                        <button key={o.value} className={`hp-demo-opt ${ethnicity === o.value ? 'active' : ''}`} onClick={() => setEthnicity(o.value)}>{o.label}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">2</span>
-                                    <span className="hp-demo-step-title">Select Body Type</span>
-                                </div>
-                                <div className="hp-bust-slider-wrap">
-                                    <div className="hp-bust-labels" style={{ marginBottom: 4 }}>
-                                        {bustOptions.map(o => (
-                                            <button key={o.value} onClick={() => setBustSize(o.value)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: o.value === bustSize ? '#f87171' : '#555', fontWeight: o.value === bustSize ? 700 : 400, fontSize: 12, padding: '4px 0', fontFamily: 'inherit', transition: 'all 0.2s' }}>{o.label}</button>
-                                        ))}
-                                    </div>
-                                    <input type="range" min={0} max={3} step={1} value={bustIndex}
-                                        onChange={e => setBustSize(bustOptions[Number(e.target.value)].value)}
-                                        className="hp-bust-slider" />
-                                </div>
-                            </div>
-                            <div>
-                                <div className="hp-demo-step-header">
-                                    <span className="hp-demo-step-num">3</span>
-                                    <span className="hp-demo-step-title">Describe the Scene</span>
-                                    <span style={{ color: '#555', fontSize: 12, fontWeight: 400, marginLeft: 8 }}>optional</span>
-                                </div>
-                                <textarea
-                                    className="hp-demo-textarea"
-                                    value={prompt}
-                                    onChange={e => setPrompt(e.target.value)}
-                                    placeholder="e.g. on the beach, sunset lighting, looking at camera..."
-                                    maxLength={200}
-                                    rows={2}
-                                />
-                            </div>
-                            <button className="hp-btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 16, padding: '18px', gap: 8 }} onClick={handleGenerate}>
-                                Generate Now — It&apos;s Free
-                            </button>
-                            <div className="hp-trust-row" style={{ justifyContent: 'center', fontSize: 12, color: '#444' }}>
-                                <span>No sign up</span>
-                                <span>~10 seconds</span>
-                                <span>100% private</span>
-                            </div>
+                    <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                        <div style={{ fontSize: 48, marginBottom: 20 }}>⚡</div>
+                        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: '#fff' }}>Full Editor — Free Access</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28, fontSize: 14, color: '#aaa' }}>
+                            <span>Text to Image — describe anything</span>
+                            <span>Undress AI — upload & transform</span>
+                            <span>Face Swap — swap faces instantly</span>
+                            <span>AI Video — bring images to life</span>
                         </div>
-                    )}
-                    {demoState === 'processing' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16, animation: 'hpPulse 1s ease infinite' }}>⚡</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>AI is generating your image...</h3>
-                            <div className="hp-progress-track"><div className="hp-progress-bar" style={{ width: `${Math.min(progress, 100)}%` }} /></div>
-                            <p style={{ fontSize: 13, color: '#555', marginTop: 12 }}>{Math.round(Math.min(progress, 100))}%</p>
+                        <Link href="/" className="hp-btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 16, padding: '18px', gap: 8, display: 'inline-flex' }}>
+                            Open Editor — Start Free
+                        </Link>
+                        <div className="hp-trust-row" style={{ justifyContent: 'center', fontSize: 12, color: '#444', marginTop: 16 }}>
+                            <span>No sign up</span>
+                            <span>~10 seconds</span>
+                            <span>100% private</span>
                         </div>
-                    )}
-                    {demoState === 'result' && resultImage && (
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(220,38,38,0.2)', boxShadow: '0 0 40px rgba(220,38,38,0.1)', maxWidth: 360, margin: '0 auto 24px', position: 'relative' }}>
-                                <img src={resultImage} alt="Generated" style={{ width: '100%', display: 'block', pointerEvents: 'none', userSelect: 'none' }} draggable={false} onContextMenu={e => e.preventDefault()} />
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent' }} onContextMenu={e => e.preventDefault()} />
-                                <div style={{ position: 'absolute', bottom: 12, right: 12, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.6)', fontSize: 10, color: '#888', fontWeight: 600, letterSpacing: '0.5px' }}>PREVIEW · 512px</div>
-                            </div>
-                            <div className="hp-signup-banner">
-                                <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>🔥 Like what you see? Try the full editor!</div>
-                                    <div style={{ fontSize: 13, color: '#888' }}>Upload your photo · Undress AI · Face Swap · HD 1024px · More styles</div>
-                                </div>
-                                <Link href="/editor" className="hp-btn-primary" style={{ whiteSpace: 'nowrap' }}>Open Editor →</Link>
-                            </div>
-                            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-                                <Link href="/editor" style={{ fontSize: 14, color: '#e5342a', fontWeight: 600, textDecoration: 'none' }}>Open Full Editor — Upload & Undress →</Link>
-                            </div>
-                            <button onClick={handleReset} className="hp-btn-text">↺ Generate another</button>
-                        </div>
-                    )}
-                    {demoState === 'error' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>😕</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Something went wrong</h3>
-                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>{errorMsg}</p>
-                            <button className="hp-btn-primary" onClick={handleReset}>Try Again</button>
-                        </div>
-                    )}
-                    {demoState === 'limit' && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>🔥</div>
-                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>You liked it!</h3>
-                            <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>Free demo limit reached. Sign up to unlock unlimited generations + HD quality + Undress AI.</p>
-                            <Link href="/register" className="hp-btn-primary">Sign Up Free — Get 20 Credits</Link>
-                            <div style={{ marginTop: 12 }}><Link href="/editor" style={{ fontSize: 13, color: '#888', textDecoration: 'underline' }}>or try the full editor →</Link></div>
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </section>

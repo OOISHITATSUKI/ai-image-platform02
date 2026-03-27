@@ -29,28 +29,41 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         // ── Restore session: invoke /api/auth/me if auth_token exists ──
         const restoreSession = async () => {
             const token = localStorage.getItem('auth_token');
-            if (!token) return;
 
-            try {
-                const res = await fetch('/api/auth/me', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    // use setUser to trigger the chat loading logic
-                    useAppStore.getState().setUser(data.user);
-                    // Ensure termsAgreedAt persists in store
-                    const currentUser = useAppStore.getState().user;
-                    if (currentUser && data.user.termsAgreedAt && !currentUser.termsAgreedAt) {
-                        useAppStore.setState({ user: { ...currentUser, termsAgreedAt: data.user.termsAgreedAt } });
+            if (token) {
+                try {
+                    const res = await fetch('/api/auth/me', {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        // use setUser to trigger the chat loading logic
+                        // await so localeManuallySet is set before browser detection runs
+                        await useAppStore.getState().setUser(data.user);
+                        // Ensure termsAgreedAt persists in store
+                        const currentUser = useAppStore.getState().user;
+                        if (currentUser && data.user.termsAgreedAt && !currentUser.termsAgreedAt) {
+                            useAppStore.setState({ user: { ...currentUser, termsAgreedAt: data.user.termsAgreedAt } });
+                        }
+                        useAppStore.setState({ ageVerified: true });
+                    } else {
+                        // Invalid token -> clean up securely using the store logout
+                        useAppStore.getState().logout();
                     }
-                    useAppStore.setState({ ageVerified: true });
-                } else {
-                    // Invalid token -> clean up securely using the store logout
-                    useAppStore.getState().logout();
+                } catch (err) {
+                    console.error('Session restore failed:', err);
                 }
-            } catch (err) {
-                console.error('Session restore failed:', err);
+            }
+
+            // ── Auto-detect browser language (runs every visit) ──
+            // Priority: 1) manually chosen (localStorage) 2) browser lang 3) 'en'
+            const { localeManuallySet } = useAppStore.getState();
+            if (!localeManuallySet) {
+                const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+                const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
+                const detected = supported.includes(browserLang) ? browserLang : 'en';
+                // Use setState directly to skip Supabase sync (auto-detect only)
+                useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });
             }
         };
 

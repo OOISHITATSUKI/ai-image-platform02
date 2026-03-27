@@ -34,6 +34,71 @@ function GuestLoadingTip() {
     );
 }
 
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+function GuestImageCountdown({ createdAt }: { createdAt: number }) {
+    const [now, setNow] = useState(Date.now());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 60_000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const expiresAt = createdAt + TWENTY_FOUR_HOURS_MS;
+    const remaining = expiresAt - now;
+
+    if (remaining <= 0) {
+        return (
+            <div style={{ padding: '6px 10px', background: '#dc262622', borderRadius: 6, fontSize: '0.75rem', color: '#f87171' }}>
+                This image has expired
+            </div>
+        );
+    }
+
+    const hours = Math.floor(remaining / 3_600_000);
+    const minutes = Math.floor((remaining % 3_600_000) / 60_000);
+    const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+    // Color based on urgency
+    const urgencyColor = hours < 1 ? '#f87171' : hours < 6 ? '#fbbf24' : '#94a3b8';
+    const urgencyBg = hours < 1 ? '#dc262615' : hours < 6 ? '#f59e0b12' : '#64748b10';
+
+    return (
+        <div style={{
+            padding: '6px 10px',
+            background: urgencyBg,
+            borderRadius: 6,
+            fontSize: '0.73rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+        }}>
+            <span style={{ color: urgencyColor }}>
+                {'⏰'} Deleted in {timeStr}
+            </span>
+            <a
+                href="/register"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    fetch('/api/guest/event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ eventType: 'countdown_unlock_click' }),
+                    }).catch(() => {});
+                }}
+                style={{
+                    color: '#7c5cfc',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.73rem',
+                }}
+            >
+                {'🔓'} Unlock forever — Free, 10s
+            </a>
+        </div>
+    );
+}
+
 interface RightPanelProps {
     onOneClickGenerate: () => void;
     onSamplePrompt: (prompt: string) => void;
@@ -255,8 +320,9 @@ export default function RightPanel({
                                         <div
   className="result-time"
   title={(() => {
-    const exp = new Date(msg.timestamp + 3600000);
-    const minLeft = Math.round((msg.timestamp + 3600000 - Date.now()) / 60000);
+    const ttl = isAuthenticated ? 3600000 : TWENTY_FOUR_HOURS_MS;
+    const exp = new Date(msg.timestamp + ttl);
+    const minLeft = Math.round((msg.timestamp + ttl - Date.now()) / 60000);
     return minLeft > 0
       ? t('editor.imageExpiresAt', { time: exp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
         + ' · ' + t('editor.imageExpiresIn', { min: String(minLeft) })
@@ -266,6 +332,9 @@ export default function RightPanel({
   {formatTime(msg.timestamp)}
 </div>
                                     </div>
+                                )}
+                                {!isAuthenticated && msg.imageUrl && msg.role === 'assistant' && (
+                                    <GuestImageCountdown createdAt={msg.timestamp} />
                                 )}
                                 {msg.videoUrl && (
                                     <div className="result-video-wrapper">

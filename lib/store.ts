@@ -134,6 +134,7 @@ interface AppState {
 
     // ----- Locale -----
     locale: Locale;
+    localeManuallySet: boolean;
     setLocale: (locale: Locale) => Promise<void>;
 
     // ----- User -----
@@ -236,9 +237,10 @@ export const useAppStore = create<AppState>()(
 
             // ----- Locale -----
             locale: 'en',
+            localeManuallySet: false,
             setLocale: async (locale) => {
                 console.log('setLocale called with:', locale);
-                set({ locale });
+                set({ locale, localeManuallySet: true });
                 const user = get().user;
                 if (user) {
                     try {
@@ -299,7 +301,7 @@ export const useAppStore = create<AppState>()(
 
                         if (user.locale) {
                             console.log('Applying locale from auth response:', user.locale);
-                            set({ locale: user.locale as Locale });
+                            set({ locale: user.locale as Locale, localeManuallySet: true });
                         }
 
                         // Status check for debugging
@@ -597,6 +599,7 @@ export const useAppStore = create<AppState>()(
                 return {
                     theme: state.theme,
                     locale: state.locale,
+                    localeManuallySet: state.localeManuallySet,
                     chats: sanitizedChats,
                     activeChatId: state.activeChatId,
                     user: state.user,
