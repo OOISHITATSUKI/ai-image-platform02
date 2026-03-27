@@ -426,6 +426,7 @@ export default function Sidebar() {
                                 border: '1px solid #5865F2', background: 'transparent',
                                 color: '#5865F2', fontSize: '0.85rem', fontWeight: 600,
                                 textDecoration: 'none', cursor: 'pointer',
+                                width: '100%', boxSizing: 'border-box',
                             }}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
