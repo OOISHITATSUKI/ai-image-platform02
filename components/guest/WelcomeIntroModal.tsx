@@ -1,26 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from '@/lib/useTranslation';
+import { useAppStore } from '@/lib/store';
 
 export default function WelcomeIntroModal() {
-    const [show, setShow] = useState(false);
+    const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+    const [show, setShow] = useState(true);
     const { t } = useTranslation();
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const seen = localStorage.getItem('seen_intro');
-        if (!seen) {
-            setShow(true);
-        }
-    }, []);
+    // ログイン済みユーザーには表示しない
+    if (isAuthenticated || !show) return null;
 
     const handleClose = () => {
         setShow(false);
-        localStorage.setItem('seen_intro', '1');
     };
-
-    if (!show) return null;
 
     return (
         <div className="welcome-intro-overlay" onClick={handleClose}>
