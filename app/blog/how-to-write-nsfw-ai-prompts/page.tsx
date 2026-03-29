@@ -4,6 +4,7 @@ import Script from 'next/script';
 import Link from 'next/link';
 import { useState } from 'react';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 const ldJsonArticle = {
   '@context': 'https://schema.org',
@@ -69,10 +70,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
       />
       <div className={styles.root}>
         {/* Nav */}
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>Image Nude</Link>
-          <Link href="/blog" className={styles.navBack}>&larr; Blog</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles.wrap}>
           {/* Article */}
@@ -326,6 +324,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
               <p>Try your prompts on Image Nude. 20 free credits on signup &mdash; no credit card required.</p>
               <Link href="/register" className={styles.ctaBtn}>Start Free &mdash; 20 Credits &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
+              <p style={{ marginTop: 12, fontSize: 13 }}>Try: <Link href="/undress-ai">Free AI undress tool</Link> &middot; <Link href="/face-swap">AI face swap</Link> &middot; <Link href="/blog/best-ai-undress-tools">Compare all tools</Link></p>
             </div>
 
           </article>

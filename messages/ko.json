@@ -444,5 +444,33 @@
     "creditsAdded": "무료 크레딧 20개 추가됨",
     "creditsRemaining": "남은 크레딧: {count}개",
     "viewMyImages": "내 이미지 보기"
+  },
+  "blog": {
+    "nav": {
+      "allArticles": "← 전체 기사",
+      "tryFree": "무료 체험"
+    },
+    "index": {
+      "heroLabel": "블로그",
+      "heroTitle": "가이드, 리뷰 &",
+      "heroAccent": "전문가 팁",
+      "heroSubtext": "AI 이미지 생성 도구에 대해 알아야 할 모든 것.",
+      "readArticle": "기사 읽기 →",
+      "ctaHeading": "지금 시작할 준비가 되셨나요?",
+      "ctaText": "Image Nude 무료 체험 — 신용카드 없이 20 크레딧.",
+      "ctaBtn": "무료로 시작하기 →"
+    },
+    "tags": {
+      "Guide": "가이드",
+      "Review": "리뷰",
+      "Explainer": "해설",
+      "How-To": "사용법"
+    },
+    "article": {
+      "minRead": "분 읽기",
+      "updated": "업데이트",
+      "langNotice": "이 기사는 현재 영어로만 제공됩니다.",
+      "langNoticeDismiss": "확인"
+    }
   }
 }

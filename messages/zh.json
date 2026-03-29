@@ -434,5 +434,33 @@
     "creditsAdded": "已添加20免费积分",
     "creditsRemaining": "您还有{count}积分。",
     "viewMyImages": "查看我的图片"
+  },
+  "blog": {
+    "nav": {
+      "allArticles": "← 所有文章",
+      "tryFree": "免费试用"
+    },
+    "index": {
+      "heroLabel": "博客",
+      "heroTitle": "指南、评测与",
+      "heroAccent": "专家技巧",
+      "heroSubtext": "关于AI图像生成工具你需要了解的一切。",
+      "readArticle": "阅读文章 →",
+      "ctaHeading": "准备好开始创作了吗？",
+      "ctaText": "免费试用 Image Nude — 20个积分，无需信用卡。",
+      "ctaBtn": "免费开始 →"
+    },
+    "tags": {
+      "Guide": "指南",
+      "Review": "评测",
+      "Explainer": "解说",
+      "How-To": "教程"
+    },
+    "article": {
+      "minRead": "分钟阅读",
+      "updated": "更新于",
+      "langNotice": "本文目前仅提供英文版本。",
+      "langNoticeDismiss": "知道了"
+    }
   }
 }

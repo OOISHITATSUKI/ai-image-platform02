@@ -1,7 +1,7 @@
 /* === Undress AI LP — Brand Colors === */
 
 .lp-root {
-  background: #0a0a0a; color: #ffffff;
+  background: var(--bg-base, #1a1a2e); color: #ffffff;
   font-family: inherit; font-size: 16px; line-height: 1.6;
   overflow-x: hidden; min-height: 100vh;
 }

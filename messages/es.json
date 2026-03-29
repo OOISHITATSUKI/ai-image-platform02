@@ -441,5 +441,33 @@
     "creditsAdded": "20 créditos gratis añadidos",
     "creditsRemaining": "Tienes {count} créditos restantes.",
     "viewMyImages": "Ver Mis Imágenes"
+  },
+  "blog": {
+    "nav": {
+      "allArticles": "← Todos los Artículos",
+      "tryFree": "Prueba Gratis"
+    },
+    "index": {
+      "heroLabel": "Blog",
+      "heroTitle": "Guías, Reseñas y",
+      "heroAccent": "Consejos de Expertos",
+      "heroSubtext": "Todo lo que necesitas saber sobre las herramientas de generación de imágenes con IA.",
+      "readArticle": "Leer Artículo →",
+      "ctaHeading": "¿Listo para Crear?",
+      "ctaText": "Prueba Image Nude gratis — 20 créditos, sin tarjeta de crédito.",
+      "ctaBtn": "Empieza Gratis →"
+    },
+    "tags": {
+      "Guide": "Guía",
+      "Review": "Reseña",
+      "Explainer": "Explicación",
+      "How-To": "Tutorial"
+    },
+    "article": {
+      "minRead": "min de lectura",
+      "updated": "Actualizado",
+      "langNotice": "Este artículo solo está disponible en inglés por ahora.",
+      "langNoticeDismiss": "Entendido"
+    }
   }
 }

@@ -1,12 +1,22 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide',
-  description: 'Step-by-step guide to using AI face swap for adult content. Learn tips for realistic results, best practices, and how to get started for free.',
+  title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide | Image Nude',
+  description: 'Step-by-step guide to using AI face swap for adult content. Tips for realistic results, best image choices, advanced workflows, and how to get started free.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-use-ai-face-swap-adults' },
+  openGraph: {
+    title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide | Image Nude',
+    description: 'Step-by-step guide to using AI face swap for adult content. Tips for realistic results, best image choices, advanced workflows, and how to get started free.',
+    url: 'https://imagenude.com/blog/how-to-use-ai-face-swap-adults',
+    siteName: 'Image Nude',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    type: 'article',
+  },
 };
 
 const ldJson = {
@@ -17,11 +27,13 @@ const ldJson = {
   step: [
     { '@type': 'HowToStep', name: 'Sign up and get free credits', text: 'Create a free account at Image Nude. You receive 20 credits on signup with no credit card required.' },
     { '@type': 'HowToStep', name: 'Select Face Swap mode', text: 'Click the Face Swap button in the toolbar. Two upload slots appear — one for the body (target) and one for the face (source).' },
-    { '@type': 'HowToStep', name: 'Upload your images', text: 'Upload the body image in slot 1 and the face image in slot 2.' },
-    { '@type': 'HowToStep', name: 'Generate your result', text: 'Click Generate. The AI blends the face onto the body in approximately 8 seconds.' },
-    { '@type': 'HowToStep', name: 'Download immediately', text: 'Download your result. Images are automatically deleted from servers within 1 hour.' },
+    { '@type': 'HowToStep', name: 'Upload the body image', text: 'Drop your body image into Slot 1. This is the image whose body shows up in the final result.' },
+    { '@type': 'HowToStep', name: 'Upload the face image', text: 'Drop your face image into Slot 2. Front-facing shots with even lighting give the most accurate results.' },
+    { '@type': 'HowToStep', name: 'Generate and download', text: 'Click Generate. The AI blends the face onto the body in approximately 8 seconds. Download immediately — images delete within 1 hour.' },
   ],
 };
+
+const IMG = '/images/blog/AIFaceSwap';
 
 export default function HowToUseAiFaceSwapAdultsPage() {
   return (
@@ -33,10 +45,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
       />
       <div className={styles.root}>
         {/* Nav */}
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>Image Nude</Link>
-          <Link href="/blog" className={styles.navBack}>&larr; Blog</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles.wrap}>
           {/* Article */}
@@ -50,8 +59,19 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             <h1 className={styles.h1}>How to Use AI Face Swap for Adults: Complete 2025 Guide</h1>
 
             <p className={styles.lede}>
-              AI face swap tools got good fast. The outputs now look realistic enough to fool a casual observer &mdash; and you don&apos;t need any editing skills to pull it off. This guide walks you through everything from your first swap to advanced techniques.
+              AI face swap tools got good fast. The outputs now look realistic enough to fool a casual observer &mdash; and you don&apos;t need any editing skills to pull it off. This guide walks you through everything from your first swap to advanced techniques that pros use.
             </p>
+
+            <figure className={styles.figure}>
+              <Image
+                src={`${IMG}/hero.png`}
+                alt="AI face swap process — body image plus face image equals realistic result"
+                width={1200}
+                height={630}
+                className={styles.figImg}
+              />
+              <figcaption className={styles.figCaption}>Two inputs, one output. The AI handles skin tone matching, lighting correction, and angle adjustment automatically.</figcaption>
+            </figure>
 
             {/* What You Need */}
             <h2 id="what-you-need">What You Need to Get Started</h2>
@@ -61,7 +81,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
               <li><strong>A body image (target)</strong> &mdash; the image with the body you want to use</li>
               <li><strong>A face image (source)</strong> &mdash; a clear photo of the face you want to apply</li>
             </ul>
-            <p>No technical knowledge, no software to install, no editing chops. The AI takes care of lighting correction, skin tone matching, angle adjustment, and blending the face in.</p>
+            <p>No technical knowledge, no software to install, no editing chops required. The AI takes care of lighting correction, skin tone matching, angle adjustment, and blending.</p>
 
             {/* Step-by-Step */}
             <h2 id="step-by-step">Step-by-Step: Your First Face Swap</h2>
@@ -75,8 +95,19 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>2</div>
               <h3>Open Face Swap Mode</h3>
-              <p>Click <strong>Face Swap</strong> in the toolbar. The editor switches to Face Swap mode with two upload slots side by side.</p>
+              <p>Click <strong>Face Swap</strong> in the toolbar. The editor switches to Face Swap mode with two upload slots side by side &mdash; one for the body, one for the face.</p>
             </div>
+
+            <figure className={styles.figure}>
+              <Image
+                src={`${IMG}/ui-screenshot.png`}
+                alt="Image Nude face swap interface showing two upload slots — body slot and face slot"
+                width={900}
+                height={550}
+                className={styles.figImg}
+              />
+              <figcaption className={styles.figCaption}>The Face Swap interface: Slot 1 takes the body image, Slot 2 takes the face. Drop your images in and hit Generate.</figcaption>
+            </figure>
 
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>3</div>
@@ -113,14 +144,25 @@ export default function HowToUseAiFaceSwapAdultsPage() {
                 </thead>
                 <tbody>
                   <tr><td className={styles.tdH}>Front-facing, good lighting</td><td><span className={styles.ok}>Excellent</span></td><td>Best possible results</td></tr>
-                  <tr><td className={styles.tdH}>Slight angle (15-30&deg;)</td><td><span className={styles.ok}>Very Good</span></td><td>AI corrects angle automatically</td></tr>
-                  <tr><td className={styles.tdH}>Profile / side view</td><td><span className={styles.mid}>Fair</span></td><td>Accuracy drops</td></tr>
+                  <tr><td className={styles.tdH}>Slight angle (15&ndash;30&deg;)</td><td><span className={styles.ok}>Very Good</span></td><td>AI corrects angle automatically</td></tr>
+                  <tr><td className={styles.tdH}>Profile / side view</td><td><span className={styles.mid}>Fair</span></td><td>Accuracy drops significantly</td></tr>
                   <tr><td className={styles.tdH}>Blurry or low resolution</td><td><span className={styles.mid}>Poor</span></td><td>Artifacts more likely</td></tr>
                   <tr><td className={styles.tdH}>Sunglasses or mask</td><td><span className={styles.no}>Very Poor</span></td><td>Face landmarks blocked</td></tr>
                   <tr><td className={styles.tdH}>Extreme shadows</td><td><span className={styles.no}>Poor</span></td><td>Skin tone mismatch likely</td></tr>
                 </tbody>
               </table>
             </div>
+
+            <figure className={styles.figure}>
+              <Image
+                src={`${IMG}/face-image-examples.png`}
+                alt="Good vs bad face image examples for AI face swap — front-facing clear vs side profile dark"
+                width={900}
+                height={450}
+                className={styles.figImg}
+              />
+              <figcaption className={styles.figCaption}>Left: ideal face source — front-facing, clear, even lighting. Right: poor source — side profile, shadows, low resolution. The source quality directly determines your output quality.</figcaption>
+            </figure>
 
             <h3>Choosing the Right Body Image</h3>
             <ul>
@@ -132,7 +174,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
 
             {/* Advanced Workflow */}
             <h2 id="advanced-workflow">Advanced Workflow: Undress + Face Swap</h2>
-            <p>The real power move is chaining Undress mode and Face Swap together. This way you control both the body and the face in a single workflow.</p>
+            <p>The real power move is chaining <Link href="/undress-ai">Undress mode</Link> and <Link href="/face-swap">Face Swap</Link> together. This way you control both the body and the face in a single workflow.</p>
 
             <div className={styles.workflow}>
               <h3>The Two-Step Workflow</h3>
@@ -140,8 +182,8 @@ export default function HowToUseAiFaceSwapAdultsPage() {
                 <div className={styles.wfStep}>
                   <div className={styles.wfNum}>1</div>
                   <div className={styles.wfText}>
-                    <h4>Generate or upload your body image</h4>
-                    <p>Use txt2img to generate a body, or upload a photo. Run Nude Mode (inpaint) to remove clothing if needed.</p>
+                    <h4>Generate or undress your body image</h4>
+                    <p>Use txt2img to generate a body, or upload a photo and run Nude Mode to remove clothing. This becomes your body target.</p>
                   </div>
                 </div>
                 <div className={styles.wfStep}>
@@ -155,11 +197,22 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             </div>
 
             <div className={styles.tip}>
-              <p><strong>Save your favorite faces:</strong> Register faces you plan to reuse with Image Nude&apos;s face-saving feature. Free users get 1 slot; paid users get up to 10. Saved faces show up in the &ldquo;My Faces&rdquo; panel for one-click selection.</p>
+              <p><strong>Save your favorite faces:</strong> Register faces you plan to reuse with Image Nude&apos;s face-saving feature. Free users get 1 slot; paid users get up to 10. Saved faces show up in the &ldquo;My Faces&rdquo; panel for one-click selection on any future generation. Learn more in our guide on <Link href="/blog/how-to-create-consistent-ai-character">creating a consistent AI character</Link>.</p>
             </div>
 
             {/* Common Mistakes */}
             <h2 id="common-mistakes">Common Mistakes to Avoid</h2>
+
+            <figure className={styles.figure}>
+              <Image
+                src={`${IMG}/mistakes-comparison.png`}
+                alt="Common face swap mistakes — mismatched lighting and low quality source images"
+                width={900}
+                height={450}
+                className={styles.figImg}
+              />
+              <figcaption className={styles.figCaption}>The two most common failure modes: mismatched lighting between source images (left) and a low-quality face source (right). Both are easy to avoid.</figcaption>
+            </figure>
 
             <div className={styles.mistakeItem}>
               <div className={styles.mistakeIcon}>&#9888;&#65039;</div>
@@ -201,6 +254,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
               <p>20 credits on signup. No credit card required. Results in 8 seconds.</p>
               <Link href="/register" className={styles.ctaBtn}>Try Face Swap Free &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
+              <p style={{ marginTop: 12, fontSize: 13 }}>Also see: <Link href="/blog/ai-face-swap-vs-deepfake">Face Swap vs Deepfake explained</Link> &middot; <Link href="/blog/ai-face-swap-adults">Best NSFW face swap tools 2025</Link></p>
             </div>
 
           </article>

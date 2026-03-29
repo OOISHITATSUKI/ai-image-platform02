@@ -3,16 +3,18 @@ import Script from 'next/script';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'I Tested 3 AI Undress Tools So You Don\'t Have To — Here\'s What Actually Works (2026)',
+  title: 'I Tested 3 AI Undress Tools So You Don\'t Have To — Here\'s What Actually Works (2026) | Image Nude',
   description: 'Honest comparison of SoulGen, Promptchan AI, and Undress.app. Real screenshots, real prices, real opinions.',
   alternates: { canonical: 'https://imagenude.com/blog/best-ai-undress-tools' },
   openGraph: {
-    title: 'I Tested 3 AI Undress Tools — Here\'s What Actually Works (2026)',
+    title: 'I Tested 3 AI Undress Tools — Here\'s What Actually Works (2026) | Image Nude',
     description: 'I signed up, paid, and tested SoulGen, Promptchan AI, and Undress.app myself. Honest comparison of features, pricing, and quality.',
     url: 'https://imagenude.com/blog/best-ai-undress-tools',
     siteName: 'Image Nude',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     type: 'article',
   },
 };
@@ -42,10 +44,7 @@ export default function BestUndressToolsPage() {
       />
       <div className={styles['but-root']}>
         {/* Nav */}
-        <nav className={styles['but-nav']}>
-          <Link href="/" className={styles['but-logo']}>Image Nude</Link>
-          <Link href="/blog" className={styles['but-nav-back']}>&larr; All Articles</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles['but-wrap']}>
           <article className={styles['but-article']}>
@@ -276,7 +275,7 @@ export default function BestUndressToolsPage() {
             {/* Disclosure */}
             <h2 id="disclosure">One More Thing</h2>
             <p>Full disclosure: I run an AI image platform called <Link href="/">Image Nude</Link>. It does text-to-image, face swap, and undress (inpaint) &mdash; and you can try it free with 20 credits, no credit card required.</p>
-            <p>I&apos;m not going to rank my own tool in this list because that would be dishonest. But if you want to compare it yourself, <Link href="/">give it a try</Link> and see how it stacks up.</p>
+            <p>I&apos;m not going to rank my own tool in this list because that would be dishonest. But if you want to compare it yourself, <Link href="/">give it a try</Link> and see how it stacks up. You can go directly to the <Link href="/undress-ai">free AI undress tool — no login required</Link>, or check out the <Link href="/face-swap">face swap tool</Link>.</p>
 
             <Link href="/editor" className={styles['but-cta-large']}>
               Try Image Nude Free &mdash; 20 Credits &rarr;

@@ -4,6 +4,7 @@ import Script from 'next/script';
 import Link from 'next/link';
 import { useState } from 'react';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 const ldJsonArticle = {
   '@context': 'https://schema.org',
@@ -64,10 +65,7 @@ export default function StableDiffusionNsfwGuidePage() {
       />
       <div className={styles.root}>
         {/* Nav */}
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>Image Nude</Link>
-          <Link href="/blog" className={styles.navBack}>&larr; Blog</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles.wrap}>
           {/* Article */}
@@ -224,12 +222,12 @@ export default function StableDiffusionNsfwGuidePage() {
                     <td className={styles.ok}>Built-in</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Inpaint / Undress</td>
+                    <td className={styles.tdH}><Link href="/undress-ai">Inpaint / Undress</Link></td>
                     <td className={styles.mid}>Via extensions</td>
                     <td className={styles.ok}>Built-in</td>
                   </tr>
                   <tr>
-                    <td className={styles.tdH}>Face Swap</td>
+                    <td className={styles.tdH}><Link href="/face-swap">Face Swap</Link></td>
                     <td className={styles.mid}>Via extensions</td>
                     <td className={styles.ok}>Built-in</td>
                   </tr>

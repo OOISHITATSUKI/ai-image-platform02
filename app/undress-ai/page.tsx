@@ -3,16 +3,18 @@ import Script from 'next/script';
 import Link from 'next/link';
 import styles from './page.module.css';
 import FaqSection from './FaqSection';
+import LangSelector from '@/components/blog/LangSelector';
 
 export const metadata: Metadata = {
   title: 'AI Undress Tool — Free, No Login Required | Image Nude',
-  description: 'Remove clothing from any photo with AI. Free to try, no sign up needed. Photorealistic results in 8 seconds. Try our AI undress tool now.',
+  description: 'Remove clothing from any photo with AI. Free to try, no login needed. No sign up. Photorealistic results in 8 seconds.',
   alternates: { canonical: 'https://imagenude.com/undress-ai' },
   openGraph: {
     title: 'AI Undress Tool — Free, No Login Required | Image Nude',
-    description: 'Remove clothing from any photo with AI. Free to try, no sign up needed. Photorealistic results in 8 seconds.',
+    description: 'Remove clothing from any photo with AI. Free to try, no login needed. No sign up. Photorealistic results in 8 seconds.',
     url: 'https://imagenude.com/undress-ai',
     siteName: 'Image Nude',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     type: 'website',
   },
 };
@@ -48,7 +50,10 @@ export default function UndressAiPage() {
         {/* Nav */}
         <nav className={styles['lp-nav']}>
           <Link href="/" className={styles['lp-logo']}>Image Nude</Link>
-          <Link href="/register" className={styles['lp-nav-cta']}>Try Free &rarr;</Link>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <LangSelector />
+            <Link href="/register" className={styles['lp-nav-cta']}>Try Free &rarr;</Link>
+          </div>
         </nav>
 
         {/* Hero */}
@@ -62,11 +67,11 @@ export default function UndressAiPage() {
                 #1 AI Undress Tool Online
               </div>
               <h1 className={styles['lp-h1']}>
-                Remove Clothing<br />with <span className={styles['lp-h1-accent']}>AI Precision</span>
+                AI Undress Tool<br /><span className={styles['lp-h1-accent']}>Free, No Login Required</span>
               </h1>
               <p className={styles['lp-hero-desc']}>
-                Upload any photo and let our advanced AI generate a photorealistic nude version in seconds.
-                No technical skills needed — just upload, paint, and generate.
+                Upload any photo and let our advanced AI undress tool generate a photorealistic nude version in seconds.
+                Free to use — no login required, no sign up needed. Just upload, paint, and generate.
               </p>
               <div className={styles['lp-cta-group']}>
                 <Link href="/register" className={styles['lp-btn-primary']}>&#x2726; Try for Free</Link>

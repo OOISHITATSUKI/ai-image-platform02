@@ -13,13 +13,13 @@
 /* ── CSS Custom Properties (Dark Theme Default) ── */
 :root {
   /* Background layers */
-  --bg-base: #0a0a0c;
-  --bg-sidebar: #0f0f12;
-  --bg-panel: #131318;
-  --bg-card: #1a1a22;
-  --bg-card-hover: #22222e;
-  --bg-input: #1e1e28;
-  --bg-elevated: #252530;
+  --bg-base: #1a1a2e;
+  --bg-sidebar: #14142a;
+  --bg-panel: #1e1e3a;
+  --bg-card: #22223a;
+  --bg-card-hover: #2a2a48;
+  --bg-input: #20203e;
+  --bg-elevated: #28284a;
 
   /* Accent / Brand */
   --primary: #7c5cfc;
@@ -48,7 +48,7 @@
   --info: #3b82f6;
 
   /* Glassmorphism */
-  --glass-bg: rgba(20, 20, 30, 0.7);
+  --glass-bg: rgba(26, 26, 46, 0.7);
   --glass-border: rgba(255, 255, 255, 0.06);
   --glass-blur: 20px;
 

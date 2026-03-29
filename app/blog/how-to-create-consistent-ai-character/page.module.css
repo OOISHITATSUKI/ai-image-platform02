@@ -129,6 +129,24 @@
 .useCard h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
 .useCard p { font-size: 13px; color: var(--muted); margin: 0; }
 
+/* FIGURES */
+.figure {
+  margin: 32px 0;
+}
+.figImg {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+.figCaption {
+  font-size: 13px;
+  color: var(--dim);
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
 /* CTA */
 .ctaBlock {
   background: var(--surface2); border: 1px solid var(--border);

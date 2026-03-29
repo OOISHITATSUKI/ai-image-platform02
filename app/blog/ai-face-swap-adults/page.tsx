@@ -2,11 +2,20 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import Link from 'next/link';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'AI Face Swap for Adults — What I Learned After 1,000+ Swaps',
+  title: 'AI Face Swap for Adults — What I Learned After 1,000+ Swaps | Image Nude',
   description: 'The angle problem, the lighting trick, and why 90% of face swap failures come from the same mistake. Real tips from hands-on testing.',
   alternates: { canonical: 'https://imagenude.com/blog/ai-face-swap-adults' },
+  openGraph: {
+    title: 'AI Face Swap for Adults — What I Learned After 1,000+ Swaps | Image Nude',
+    description: 'The angle problem, the lighting trick, and why 90% of face swap failures come from the same mistake. Real tips from hands-on testing.',
+    url: 'https://imagenude.com/blog/ai-face-swap-adults',
+    siteName: 'Image Nude',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    type: 'article',
+  },
 };
 
 const ldJson = {
@@ -29,13 +38,7 @@ export default function AiFaceSwapAdultsPage() {
       />
       <div className={styles['afs-root']}>
         {/* Nav */}
-        <nav className={styles['afs-nav']}>
-          <Link href="/" className={styles['afs-logo']}>Image Nude</Link>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <Link href="/blog" style={{ fontSize: '14px', color: '#888', textDecoration: 'none' }}>← All Articles</Link>
-            <Link href="/register" className={styles['afs-nav-cta']}>Try Free</Link>
-          </div>
-        </nav>
+        <BlogNav />
 
         <div className={styles['afs-wrap']}>
           {/* Article */}
@@ -235,7 +238,7 @@ export default function AiFaceSwapAdultsPage() {
             <h3>All-in-one platforms (face swap + image generation):</h3>
             <ul>
               <li><strong>SoulGen</strong> — &quot;Looks Like&quot; feature for face-matching. Strong character creation tools. $12.99/month intro price. Google/Apple/email login.</li>
-              <li><strong>Image Nude</strong> — Face swap, undress, and txt2img in one place. 20 free credits, crypto payments, images auto-deleted in 1 hour. <em>(Disclosure: I built this.)</em></li>
+              <li><strong>Image Nude</strong> — <Link href="/face-swap">Try free AI face swap</Link>, then <Link href="/undress-ai">combine with our undress tool</Link> for the full workflow. 20 free credits, crypto payments, images auto-deleted in 1 hour. <em>(Disclosure: I built this.)</em></li>
             </ul>
 
             <h3>Face swap only:</h3>
@@ -243,7 +246,7 @@ export default function AiFaceSwapAdultsPage() {
               <li><strong>DeepSwap</strong> — Photo and video face swap. Decent results, but no image generation. Privacy policy is vague.</li>
             </ul>
 
-            <p>For detailed pricing and screenshots of each tool, check out the <Link href="/blog/best-ai-undress-tools">full comparison</Link>.</p>
+            <p>For detailed pricing and screenshots of each tool, <Link href="/blog/best-ai-undress-tools">see all tool reviews</Link>.</p>
 
             {/* Quick Reference */}
             <h2 id="quick-reference">Quick Reference: 6 Rules for Better Face Swaps</h2>

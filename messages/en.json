@@ -474,5 +474,33 @@
     "creditsAdded": "20 free credits added",
     "creditsRemaining": "You now have {count} credits remaining.",
     "viewMyImages": "View My Images"
+  },
+  "blog": {
+    "nav": {
+      "allArticles": "← All Articles",
+      "tryFree": "Try Free"
+    },
+    "index": {
+      "heroLabel": "Blog",
+      "heroTitle": "Guides, Reviews &",
+      "heroAccent": "Expert Tips",
+      "heroSubtext": "Everything you need to know about AI image generation tools.",
+      "readArticle": "Read Article →",
+      "ctaHeading": "Ready to Create?",
+      "ctaText": "Try Image Nude free — 20 credits, no credit card required.",
+      "ctaBtn": "Get Started Free →"
+    },
+    "tags": {
+      "Guide": "Guide",
+      "Review": "Review",
+      "Explainer": "Explainer",
+      "How-To": "How-To"
+    },
+    "article": {
+      "minRead": "min read",
+      "updated": "Updated",
+      "langNotice": "This article is currently only available in English.",
+      "langNoticeDismiss": "Got it"
+    }
   }
 }

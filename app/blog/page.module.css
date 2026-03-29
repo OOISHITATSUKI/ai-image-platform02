@@ -1,7 +1,7 @@
 /* === Blog Index Page === */
 
 .root {
-  background: #0a0a0a;
+  background: var(--bg-base, #1a1a2e);
   color: #ffffff;
   font-family: inherit;
   min-height: 100vh;

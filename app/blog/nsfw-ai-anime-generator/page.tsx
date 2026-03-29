@@ -4,6 +4,7 @@ import Script from 'next/script';
 import Link from 'next/link';
 import { useState } from 'react';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 const ldJsonArticle = {
   '@context': 'https://schema.org',
@@ -64,10 +65,7 @@ export default function NsfwAiAnimeGeneratorPage() {
       />
       <div className={styles.root}>
         {/* Nav */}
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>Image Nude</Link>
-          <Link href="/blog" className={styles.navBack}>&larr; Blog</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles.wrap}>
           {/* Article */}
@@ -219,6 +217,7 @@ export default function NsfwAiAnimeGeneratorPage() {
               <p>20 credits on signup. No credit card. Results in under 10 seconds.</p>
               <Link href="/register" className={styles.ctaBtn}>Start Free &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
+              <p style={{ marginTop: 12, fontSize: 13 }}>Also try: <Link href="/undress-ai">Free AI undress tool</Link> &middot; <Link href="/face-swap">AI face swap</Link> &middot; <Link href="/blog/best-ai-undress-tools">Tool reviews</Link></p>
             </div>
 
           </article>

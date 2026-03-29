@@ -2,7 +2,7 @@
 
 /* ---------- Root & Globals ---------- */
 .fs-root {
-  background: #0a0a0a;
+  background: var(--bg-base, #1a1a2e);
   color: #ffffff;
   font-family: 'Inter', 'Outfit', sans-serif;
   min-height: 100vh;

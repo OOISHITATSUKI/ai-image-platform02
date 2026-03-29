@@ -469,5 +469,33 @@
     "creditsAdded": "20クレジットを付与しました",
     "creditsRemaining": "残り{count}クレジット",
     "viewMyImages": "マイ画像を見る"
+  },
+  "blog": {
+    "nav": {
+      "allArticles": "← 記事一覧",
+      "tryFree": "無料で試す"
+    },
+    "index": {
+      "heroLabel": "ブログ",
+      "heroTitle": "ガイド、レビュー＆",
+      "heroAccent": "専門家のヒント",
+      "heroSubtext": "AI画像生成ツールについて知っておくべきすべて。",
+      "readArticle": "記事を読む →",
+      "ctaHeading": "今すぐ作成を始めよう",
+      "ctaText": "Image Nudeを無料でお試し — クレジットカード不要で20クレジット。",
+      "ctaBtn": "無料で始める →"
+    },
+    "tags": {
+      "Guide": "ガイド",
+      "Review": "レビュー",
+      "Explainer": "解説",
+      "How-To": "ハウツー"
+    },
+    "article": {
+      "minRead": "分で読める",
+      "updated": "更新日",
+      "langNotice": "この記事は現在英語のみ提供されています。",
+      "langNoticeDismiss": "了解"
+    }
   }
 }

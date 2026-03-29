@@ -1,7 +1,7 @@
 /* === Best AI Undress Tools Blog — Rewritten March 2026 === */
 
 .but-root {
-  background: #0a0a0a;
+  background: var(--bg-base, #1a1a2e);
   color: #ffffff;
   font-family: inherit;
   font-size: 18px;

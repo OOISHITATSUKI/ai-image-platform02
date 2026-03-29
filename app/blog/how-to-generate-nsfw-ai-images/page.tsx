@@ -3,16 +3,18 @@ import Script from 'next/script';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
+import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations',
+  title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations | Image Nude',
   description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images' },
   openGraph: {
-    title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations',
+    title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations | Image Nude',
     description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
     url: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images',
     siteName: 'Image Nude',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     type: 'article',
   },
 };
@@ -55,10 +57,7 @@ export default function HowToGenerateNsfwPage() {
       />
       <div className={styles['htg-root']}>
         {/* Nav */}
-        <nav className={styles['htg-nav']}>
-          <Link href="/" className={styles['htg-logo']}>Image Nude</Link>
-          <Link href="/blog" className={styles['htg-nav-back']}>&larr; All Articles</Link>
-        </nav>
+        <BlogNav />
 
         <div className={styles['htg-wrap']}>
           {/* Article */}
@@ -196,6 +195,8 @@ export default function HowToGenerateNsfwPage() {
               <p><strong>Pro tip:</strong> For images with a lot of clothing, running inpaint once often isn&apos;t enough. I get better results by running it 2&ndash;3 times, each time removing a bit more. It&apos;s slower, but the quality is noticeably better than trying to remove everything in one pass.</p>
             </div>
 
+            <p>Want to try it yourself? <Link href="/undress-ai">Try the undress tool for free</Link> — no login required.</p>
+
             {/* ───── Face Swap ───── */}
             <h2 id="face-swap">Face Swap: The Angle Problem</h2>
             <p>Face Swap is my favorite feature because it produces the most dramatic results. But there&apos;s a catch that nobody talks about.</p>
@@ -228,6 +229,8 @@ export default function HowToGenerateNsfwPage() {
               <p><strong>Lighting matters too:</strong> If your face photo was taken in warm indoor light and the body photo is in cool outdoor light, the skin tones won&apos;t match. Try to use photos with similar lighting conditions for best results.</p>
             </div>
 
+            <p>For a deeper dive into face swap techniques, <Link href="/blog/ai-face-swap-adults">learn about face swap</Link> — including the angle problem and lighting tricks that fix most failures.</p>
+
             {/* ───── Common Mistakes ───── */}
             <h2 id="mistakes">Common Mistakes I Made (So You Don&apos;t Have To)</h2>
             <ol>
@@ -242,8 +245,9 @@ export default function HowToGenerateNsfwPage() {
             <h2 id="getting-started">Getting Started</h2>
             <p>If you want to try this yourself, most NSFW platforms offer some form of free trial. Here are the main options:</p>
             <ul>
-              <li><strong>Text-to-image platforms</strong> &mdash; SoulGen, Promptchan AI (see our <Link href="/blog/best-ai-undress-tools">tool comparison</Link> for details)</li>
-              <li><strong>All-in-one platforms</strong> &mdash; Tools that combine txt2img, inpaint, and face swap in one place</li>
+              <li><strong>Text-to-image platforms</strong> &mdash; SoulGen, Promptchan AI (<Link href="/blog/best-ai-undress-tools">compare the best tools</Link> for pricing and details)</li>
+              <li><strong>Undress / Inpaint</strong> &mdash; <Link href="/undress-ai">Try the undress tool for free</Link> — no login required</li>
+              <li><strong>Face Swap</strong> &mdash; All-in-one platforms that combine txt2img, inpaint, and face swap in one place</li>
             </ul>
             <p>Look for platforms that:</p>
             <ul>
