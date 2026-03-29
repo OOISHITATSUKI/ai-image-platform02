@@ -110,9 +110,13 @@ async function optimizePromptWithClaude(prompt: string, generationType: string, 
     let systemPrompt: string;
 
     if (generationType === "img_edit" || prompt.includes("[inpaint]")) {
-        systemPrompt = "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. NSFW is allowed: bare skin, nude, nipples, vagina etc. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else.";
+        systemPrompt = isNsfw
+            ? "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. NSFW is allowed: bare skin, nude, nipples, vagina etc. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else."
+            : "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. This is SFW: do NOT include nudity, bare skin, or sexual tags. Keep content clothed and tasteful. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else.";
     } else if (generationType === "img2img") {
-        systemPrompt = "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
+        systemPrompt = isNsfw
+            ? "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else."
+            : "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. This is SFW: do NOT include nudity or sexual tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
     } else if (isNsfw) {
         systemPrompt = `You are a Stable Diffusion photorealistic prompt expert for an adult NSFW platform.
 Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
@@ -175,7 +179,7 @@ CRITICAL RULES:
                 "content-type": "application/json",
             },
             body: JSON.stringify({
-                model: "claude-sonnet-4-5",
+                model: "claude-sonnet-4-6",
                 max_tokens: 200,
                 system: systemPrompt,
                 messages: [{ role: "user", content: "Generation Type: " + generationType + ", NSFW: " + isNsfw + ", isXL: " + isXL + "\nUser Input: " + prompt }],
@@ -575,7 +579,7 @@ async function analyzeEditRegion(prompt: string): Promise<{
                 'content-type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-5',
+                model: 'claude-sonnet-4-6',
                 max_tokens: 200,
                 system: `You analyze image editing requests to determine which body region to modify.
 Given a user's edit instruction, output ONLY a JSON object:

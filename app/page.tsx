@@ -714,7 +714,7 @@ export default function HomePage() {
         <>
             {/* SEO Header - compact one-liner */}
             <div className="homepage-seo-header">
-                <h1>Image Nude — AI Nude Generator | Free to try, no sign up needed</h1>
+                <h1>AI Nude Generator — Free AI Photo Generator | No Sign Up Required</h1>
             </div>
 
             {/* Welcome intro modal for first-time visitors */}

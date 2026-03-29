@@ -1,13 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from '@/lib/useTranslation';
 import { useAppStore } from '@/lib/store';
+
+const DEMO_VIDEOS = [
+    '/videos/demo-intro-1.mp4',
+    '/videos/demo-intro-2.mp4',
+    '/videos/demo-intro-3.mp4',
+];
 
 export default function WelcomeIntroModal() {
     const isAuthenticated = useAppStore((s) => s.isAuthenticated);
     const [show, setShow] = useState(true);
     const { t } = useTranslation();
+
+    const randomVideo = useMemo(
+        () => DEMO_VIDEOS[Math.floor(Math.random() * DEMO_VIDEOS.length)],
+        []
+    );
 
     // ログイン済みユーザーには表示しない
     if (isAuthenticated || !show) return null;
@@ -52,16 +63,14 @@ export default function WelcomeIntroModal() {
                     border: '1px solid rgba(255,255,255,0.08)',
                 }}>
                     <video
+                        key={randomVideo}
                         autoPlay
                         muted
                         loop
                         playsInline
                         style={{ width: '100%', borderRadius: 12 }}
-                        poster="/videos/demo-intro-poster.jpg"
                     >
-                        <source src="/videos/demo-intro.webm" type="video/webm" />
-                        <source src="/videos/demo-intro.mp4" type="video/mp4" />
-                        {/* Fallback if no video file exists yet */}
+                        <source src={randomVideo} type="video/mp4" />
                     </video>
                 </div>
 
