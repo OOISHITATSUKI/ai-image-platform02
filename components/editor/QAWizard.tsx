@@ -381,13 +381,6 @@ export default function QAWizard({ isNsfw, mode = 'modal', onComplete, onGenerat
     if (completed) {
         return (
             <div className="qa-done-panel">
-                {/* Floating particles */}
-                <div className="qa-particles qa-particles-done">
-                    <div className="qa-particle qa-p1" />
-                    <div className="qa-particle qa-p2" />
-                    <div className="qa-particle qa-p3" />
-                </div>
-
                 <div className="qa-done-header">
                     <span className="qa-done-icon">✦</span>
                     <span className="qa-done-title">{t('qa.completed')}</span>
@@ -446,13 +439,6 @@ export default function QAWizard({ isNsfw, mode = 'modal', onComplete, onGenerat
 
     return (
         <div className={`qa-wizard qa-theme-${theme}`}>
-            {/* Floating particles */}
-            <div className="qa-particles">
-                <div className="qa-particle qa-p1" />
-                <div className="qa-particle qa-p2" />
-                <div className="qa-particle qa-p3" />
-            </div>
-
             {/* Header label */}
             <div className="qa-header-label">✦ {t('qa.headerLabel')}</div>
 

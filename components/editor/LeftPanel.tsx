@@ -15,7 +15,7 @@ import InpaintModal from './InpaintModal';
 import MyFaces from './MyFaces';
 import dynamic from 'next/dynamic';
 const QAModal = dynamic(() => import('./QAModal'), { ssr: false, loading: () => null });
-import QAWizard from './QAWizard';
+const QAWizard = dynamic(() => import('./QAWizard'), { ssr: false, loading: () => null });
 import type { QAData } from './QAWizard';
 
 interface UploadSlot {
