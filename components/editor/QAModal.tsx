@@ -43,63 +43,62 @@ export default function QAModal({
     const [visible, setVisible] = useState(false);
     const [trigger, setTrigger] = useState<Trigger | null>(null);
     const [isReturning, setIsReturning] = useState(false);
+    const [wizardKey, setWizardKey] = useState(0);
 
-    // Determine if modal should show
+    // Modal shows only: first visit, returning after 7+ days, URL param, env override
     useEffect(() => {
-        // 1. URL param override
-        if (searchParams.get('qa_modal') === '1') {
-            setTrigger('url_param');
-            setVisible(true);
-            return;
-        }
+        const timer = setTimeout(() => {
+            if (searchParams.get('qa_modal') === '1') {
+                setTrigger('url_param');
+                setVisible(true);
+                return;
+            }
 
-        // 2. Env var override
-        if (ALWAYS_SHOW) {
-            setTrigger('env_force');
-            setVisible(true);
-            return;
-        }
+            if (ALWAYS_SHOW) {
+                setTrigger('env_force');
+                setVisible(true);
+                return;
+            }
 
-        // 3. Cookie-based logic
-        const visitedAt = getCookie(COOKIE_KEY);
+            const visitedAt = getCookie(COOKIE_KEY);
 
-        if (!visitedAt) {
-            // First visit ever
-            setTrigger('auto_first');
-            setVisible(true);
+            if (!visitedAt) {
+                setTrigger('auto_first');
+                setVisible(true);
+                setCookie(COOKIE_KEY, new Date().toISOString(), 365);
+                return;
+            }
+
+            const lastVisit = new Date(visitedAt).getTime();
+            if (Date.now() - lastVisit > SEVEN_DAYS_MS) {
+                setTrigger('auto_returning');
+                setIsReturning(true);
+                setVisible(true);
+                setCookie(COOKIE_KEY, new Date().toISOString(), 365);
+                return;
+            }
+
             setCookie(COOKIE_KEY, new Date().toISOString(), 365);
-            return;
-        }
-
-        const lastVisit = new Date(visitedAt).getTime();
-        if (Date.now() - lastVisit > SEVEN_DAYS_MS) {
-            // Returning after 7+ days
-            setTrigger('auto_returning');
-            setIsReturning(true);
-            setVisible(true);
-            setCookie(COOKIE_KEY, new Date().toISOString(), 365);
-            return;
-        }
-
-        // Update cookie timestamp
-        setCookie(COOKIE_KEY, new Date().toISOString(), 365);
+        }, 500);
+        return () => clearTimeout(timer);
     }, [searchParams]);
 
-    // Public method to open manually (called from sidebar)
+    // Manual open (sidebar "使い方を見る" button)
     const openManually = useCallback(() => {
         setTrigger('manual');
+        setWizardKey((k) => k + 1);
+        setIsReturning(false);
         setVisible(true);
     }, []);
 
-    // Store the manual open function globally so sidebar can call it
     useEffect(() => {
         (window as unknown as Record<string, unknown>).__openQAModal = openManually;
         return () => { delete (window as unknown as Record<string, unknown>).__openQAModal; };
     }, [openManually]);
 
-    const handleClose = () => setVisible(false);
+    const handleClose = useCallback(() => setVisible(false), []);
 
-    const handleComplete = (answers: Record<string, string | null>, promptText: string) => {
+    const handleComplete = useCallback((answers: Record<string, string | null>, promptText: string) => {
         if (promptText) setInputText(promptText);
         onQAComplete?.({
             answers,
@@ -107,38 +106,36 @@ export default function QAModal({
             completed: true,
             skippedCount: Object.values(answers).filter((v) => v === null).length,
         });
-    };
+    }, [setInputText, onQAComplete]);
 
-    const handleGenerate = () => {
+    const handleGenerate = useCallback(() => {
         handleClose();
         setTimeout(() => onSubmit(undefined, true), 100);
-    };
+    }, [handleClose, onSubmit]);
 
-    const handleOpenTags = () => {
+    const handleOpenTags = useCallback(() => {
         handleClose();
         setTagsExpanded(true);
         setTimeout(() => document.querySelector('.editor-collapsible-section:first-of-type')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-    };
+    }, [handleClose, setTagsExpanded]);
 
-    const handleOpenSettings = () => {
+    const handleOpenSettings = useCallback(() => {
         handleClose();
         setSettingsExpanded(true);
         setTimeout(() => document.querySelector('.editor-collapsible-section:last-of-type')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-    };
+    }, [handleClose, setSettingsExpanded]);
 
-    const handleDismissToPrompt = () => {
+    const handleDismissToPrompt = useCallback(() => {
         handleClose();
-    };
+    }, [handleClose]);
 
     if (!visible) return null;
 
     return (
         <div className="qa-modal-overlay" onClick={handleClose}>
             <div className="qa-modal-container" onClick={(e) => e.stopPropagation()}>
-                {/* Close button */}
                 <button className="qa-modal-close" onClick={handleClose}>✕</button>
 
-                {/* Header */}
                 <div className="qa-modal-header">
                     {isReturning && (
                         <div className="qa-modal-returning">👋 {t('qa.returningMessage')}</div>
@@ -147,8 +144,9 @@ export default function QAModal({
                     <p className="qa-modal-subtitle">{t('qa.modalSubtitle')}</p>
                 </div>
 
-                {/* QA Wizard inside modal */}
                 <QAWizard
+                    key={wizardKey}
+                    mode="modal"
                     isNsfw={contentLevel === 'nsfw'}
                     onComplete={handleComplete}
                     onGenerate={handleGenerate}

@@ -13,7 +13,9 @@ import type {
 } from '@/lib/types';
 import InpaintModal from './InpaintModal';
 import MyFaces from './MyFaces';
-import QAModal from './QAModal';
+import dynamic from 'next/dynamic';
+const QAModal = dynamic(() => import('./QAModal'), { loading: () => null });
+import QAWizard from './QAWizard';
 import type { QAData } from './QAWizard';
 
 interface UploadSlot {
@@ -57,11 +59,20 @@ export default function LeftPanel({
     const prevGenerating = useRef(false);
     const submitCalledRef = useRef(false);
 
+    // Inline Q&A state — independent from modal
+    const [inlineQAKey, setInlineQAKey] = useState(0);
+    const [inlineQACompleted, setInlineQACompleted] = useState(false);
+
     useEffect(() => {
         if (prevGenerating.current && !isGenerating) {
             setShowDone(true);
             const timer = setTimeout(() => setShowDone(false), 2500);
-            return () => clearTimeout(timer);
+            // Reset inline QA 1.5s after generation completes
+            const qaTimer = setTimeout(() => {
+                setInlineQAKey((k) => k + 1);
+                setInlineQACompleted(false);
+            }, 1500);
+            return () => { clearTimeout(timer); clearTimeout(qaTimer); };
         }
         prevGenerating.current = isGenerating;
     }, [isGenerating]);
@@ -76,6 +87,12 @@ export default function LeftPanel({
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Reset inline Q&A when chat changes
+    useEffect(() => {
+        setInlineQAKey((k) => k + 1);
+        setInlineQACompleted(false);
+    }, [activeChatId]);
 
     // Collapsible sections - read from localStorage
     const [settingsExpanded, setSettingsExpanded] = useState(() => {
@@ -705,6 +722,29 @@ export default function LeftPanel({
                     )}
                 </div>
 
+                {/* ── Inline Q&A Wizard ── */}
+                {!inlineQACompleted && (
+                    <QAWizard
+                        key={inlineQAKey}
+                        mode="inline"
+                        isNsfw={contentLevel === 'nsfw'}
+                        onComplete={(answers, promptText) => {
+                            setInlineQACompleted(true);
+                            if (promptText) setInputText(promptText);
+                            onQAComplete?.({
+                                answers,
+                                questions: Object.keys(answers),
+                                completed: true,
+                                skippedCount: Object.values(answers).filter((v) => v === null).length,
+                            });
+                        }}
+                        onGenerate={() => onSubmit(undefined, true)}
+                        onOpenTags={() => setTagsExpanded(true)}
+                        onOpenSettings={() => setSettingsExpanded(true)}
+                        onDismissToPrompt={() => setInlineQACompleted(true)}
+                    />
+                )}
+
                 {/* ── 5. Prompt input area ── */}
                 <div className="editor-prompt-section">
                     <div className="editor-prompt-section-label">✦ {t('editor.placeholder1')}</div>
@@ -749,8 +789,8 @@ export default function LeftPanel({
                             </div>
                             {([
                                 { key: 'A' as const, emoji: '🔄', label: t('suggestions.moreSame'), text: suggestions.A },
-                                { key: 'B' as const, emoji: '🆕', label: t('suggestions.tryNew'), text: suggestions.B },
-                                { key: 'C' as const, emoji: '🎲', label: t('suggestions.differentAngle'), text: suggestions.C },
+                                { key: 'B' as const, emoji: '✨', label: t('suggestions.tryNew'), text: suggestions.B },
+                                { key: 'C' as const, emoji: '🔀', label: t('suggestions.differentAngle'), text: suggestions.C },
                             ]).map((s) => (
                                 <button
                                     key={s.key}

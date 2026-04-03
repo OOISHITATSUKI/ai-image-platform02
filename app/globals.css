@@ -899,7 +899,8 @@ video {
   inset: 0;
   z-index: 9999;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -992,6 +993,7 @@ video {
   background: linear-gradient(135deg, #1a1a2e, #2d1b4e, #1a1a3e, #3d1a4e);
   background-size: 300% 300%;
   animation: qa-gradient 8s ease infinite;
+  animation-delay: 0.3s;
   box-shadow: 0 0 24px rgba(124, 92, 252, 0.12);
   overflow: hidden;
   position: relative;
@@ -1040,6 +1042,7 @@ video {
   position: absolute;
   border-radius: 50%;
   background: rgba(167, 139, 250, 0.6);
+  will-change: transform, opacity;
 }
 
 .qa-p1  { width: 4px; height: 4px; bottom: 10%; left: 12%; animation: qa-float-1 5s ease-in-out infinite; }
@@ -8864,6 +8867,10 @@ button, a, [role="button"] {
 @media (max-width: 768px) {
   .guest-promo-banner {
     left: 0;
+    padding: 12px 16px;
+  }
+  .guest-promo-banner.large {
+    padding: 16px 20px;
   }
 }
 

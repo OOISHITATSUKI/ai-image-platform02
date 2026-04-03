@@ -7,9 +7,10 @@ import { useTranslation } from '@/lib/useTranslation';
 interface GuestPromoBannerProps {
     genCount: number;
     lastResult?: { watermarked?: string; blurred?: string } | null;
+    cooldown?: number;
 }
 
-export default function GuestPromoBanner({ genCount, lastResult }: GuestPromoBannerProps) {
+export default function GuestPromoBanner({ genCount, lastResult, cooldown = 0 }: GuestPromoBannerProps) {
     const { t } = useTranslation();
     const [fullscreenDismissed, setFullscreenDismissed] = useState(false);
     const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -115,7 +116,7 @@ export default function GuestPromoBanner({ genCount, lastResult }: GuestPromoBan
                     )}
                 </div>
 
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', flexShrink: 0 }}>
                     <a
                         href="/api/auth/google"
                         style={{
@@ -148,6 +149,17 @@ export default function GuestPromoBanner({ genCount, lastResult }: GuestPromoBan
                     >
                         🔓 {t('guest.unlockImage') || 'Unlock — Free, 10s'}
                     </Link>
+                    {cooldown > 0 && (
+                        <div style={{
+                            padding: isLarge ? '10px 16px' : '8px 14px',
+                            background: 'rgba(245,158,11,0.15)',
+                            border: '1px solid rgba(245,158,11,0.3)',
+                            borderRadius: 10, fontSize: '0.82rem', color: '#fbbf24',
+                            whiteSpace: 'nowrap',
+                        }}>
+                            Next generation in {cooldown}s
+                        </div>
+                    )}
                     {genCount < 6 && (
                         <button
                             onClick={() => setBannerDismissed(true)}

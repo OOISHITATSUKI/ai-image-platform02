@@ -777,8 +777,8 @@ export default function HomePage() {
                     </div>
                 )}
 
-                {/* Guest cooldown indicator */}
-                {isGuest && guestCooldown > 0 && (
+                {/* Guest cooldown indicator - only show standalone when banner is not visible */}
+                {isGuest && guestCooldown > 0 && !(guestGenCount > 0) && (
                     <div style={{
                         position: 'fixed', bottom: 20, right: 20, zIndex: 100,
                         background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
@@ -839,7 +839,7 @@ export default function HomePage() {
 
             {/* Guest promo banner - shown after generation */}
             {isGuest && guestGenCount > 0 && (
-                <GuestPromoBanner genCount={guestGenCount} lastResult={lastGuestResult} />
+                <GuestPromoBanner genCount={guestGenCount} lastResult={lastGuestResult} cooldown={guestCooldown} />
             )}
         </>
     );

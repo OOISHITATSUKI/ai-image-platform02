@@ -147,6 +147,7 @@ const LIGHTING_JA: Record<string, string> = {
 
 interface QAWizardProps {
     isNsfw: boolean;
+    mode?: 'modal' | 'inline';
     onComplete: (answers: Record<string, string | null>, promptText: string) => void;
     onGenerate?: () => void;
     onOpenTags?: () => void;
@@ -161,7 +162,7 @@ export interface QAData {
     skippedCount: number;
 }
 
-export default function QAWizard({ isNsfw, onComplete, onGenerate, onOpenTags, onOpenSettings, onDismissToPrompt }: QAWizardProps) {
+export default function QAWizard({ isNsfw, mode = 'modal', onComplete, onGenerate, onOpenTags, onOpenSettings, onDismissToPrompt }: QAWizardProps) {
     const { updateTagSettings } = useAppStore();
     const { t } = useTranslation();
     const locale = useAppStore((s) => s.locale);
@@ -174,7 +175,14 @@ export default function QAWizard({ isNsfw, onComplete, onGenerate, onOpenTags, o
     const [selectedValue, setSelectedValue] = useState<string | null | undefined>(undefined);
     const [slideDir, setSlideDir] = useState<'right' | 'left'>('right');
     const [animating, setAnimating] = useState(false);
+    const animatingRef = useRef(false);
     const prevStepRef = useRef(0);
+    const questionsRef = useRef(questions);
+    questionsRef.current = questions;
+
+    // Store latest callbacks in refs to avoid stale closures in setTimeout
+    const onCompleteRef = useRef(onComplete);
+    onCompleteRef.current = onComplete;
 
     const currentQ = questions[currentStep] || null;
 
@@ -302,48 +310,60 @@ export default function QAWizard({ isNsfw, onComplete, onGenerate, onOpenTags, o
         return parts.join(isJa ? '、' : ', ');
     }, [locale]);
 
-    const advanceStep = useCallback((newAnswers: Record<string, string | null>, nextStep: number) => {
+    const advanceStep = useCallback((newAnswers: Record<string, string | null>, nextStep: number, fromStep: number) => {
         setSlideDir('right');
         setAnimating(true);
+        animatingRef.current = true;
+        console.log('[QAWizard] advanceStep called:', { fromStep, nextStep, totalQuestions: questionsRef.current.length });
         setTimeout(() => {
-            if (nextStep >= questions.length) {
+            if (nextStep >= questionsRef.current.length) {
                 setCompleted(true);
                 const prompt = buildPrompt(newAnswers);
-                onComplete(newAnswers, prompt);
+                onCompleteRef.current(newAnswers, prompt);
             } else {
-                prevStepRef.current = currentStep;
+                prevStepRef.current = fromStep;
                 setCurrentStep(nextStep);
             }
             setSelectedValue(undefined);
             setAnimating(false);
+            animatingRef.current = false;
+            console.log('[QAWizard] advanceStep done:', { nextStep, animating: false });
         }, 350);
-    }, [questions.length, currentStep, buildPrompt, onComplete]);
+    }, [buildPrompt]);
 
     const handleSelect = (value: string | null) => {
-        if (!currentQ || animating) return;
+        if (!currentQ || animatingRef.current) {
+            console.log('[QAWizard] handleSelect blocked:', { currentQ: currentQ?.id, animating: animatingRef.current });
+            return;
+        }
+        console.log('[QAWizard] handleSelect:', { step: currentStep, questionId: currentQ.id, value, totalQuestions: questions.length });
         setSelectedValue(value);
         const newAnswers = { ...answers, [currentQ.id]: value };
         setAnswers(newAnswers);
         applyToTags(currentQ.id, value);
-        advanceStep(newAnswers, currentStep + 1);
+        advanceStep(newAnswers, currentStep + 1, currentStep);
     };
 
     const handleSkip = () => {
-        if (!currentQ || animating) return;
+        if (!currentQ || animatingRef.current) return;
+        console.log('[QAWizard] handleSkip:', { step: currentStep, questionId: currentQ.id });
         setSkippedCount((c) => c + 1);
         const newAnswers = { ...answers, [currentQ.id]: null };
         setAnswers(newAnswers);
-        advanceStep(newAnswers, currentStep + 1);
+        advanceStep(newAnswers, currentStep + 1, currentStep);
     };
 
     const handleEditAnswer = (step: number) => {
+        if (animatingRef.current) return;
         setSlideDir('left');
         setAnimating(true);
+        animatingRef.current = true;
         setTimeout(() => {
             prevStepRef.current = currentStep;
             setCurrentStep(step);
             setCompleted(false);
             setAnimating(false);
+            animatingRef.current = false;
         }, 200);
     };
 
@@ -366,11 +386,6 @@ export default function QAWizard({ isNsfw, onComplete, onGenerate, onOpenTags, o
                     <div className="qa-particle qa-p1" />
                     <div className="qa-particle qa-p2" />
                     <div className="qa-particle qa-p3" />
-                    <div className="qa-particle qa-p4" />
-                    <div className="qa-particle qa-p5" />
-                    <div className="qa-particle qa-p6" />
-                    <div className="qa-particle qa-p7" />
-                    <div className="qa-particle qa-p8" />
                 </div>
 
                 <div className="qa-done-header">
@@ -436,13 +451,6 @@ export default function QAWizard({ isNsfw, onComplete, onGenerate, onOpenTags, o
                 <div className="qa-particle qa-p1" />
                 <div className="qa-particle qa-p2" />
                 <div className="qa-particle qa-p3" />
-                <div className="qa-particle qa-p4" />
-                <div className="qa-particle qa-p5" />
-                <div className="qa-particle qa-p6" />
-                <div className="qa-particle qa-p7" />
-                <div className="qa-particle qa-p8" />
-                <div className="qa-particle qa-p9" />
-                <div className="qa-particle qa-p10" />
             </div>
 
             {/* Header label */}
