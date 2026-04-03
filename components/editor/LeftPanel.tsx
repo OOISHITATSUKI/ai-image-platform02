@@ -16,6 +16,8 @@ import MyFaces from './MyFaces';
 import dynamic from 'next/dynamic';
 const QAModal = dynamic(() => import('./QAModal'), { ssr: false, loading: () => null });
 const QAWizard = dynamic(() => import('./QAWizard'), { ssr: false, loading: () => null });
+const InpaintTutorialModal = dynamic(() => import('./InpaintTutorialModal'), { ssr: false, loading: () => null });
+const FaceSwapTutorialModal = dynamic(() => import('./FaceSwapTutorialModal'), { ssr: false, loading: () => null });
 import type { QAData } from './QAWizard';
 
 interface UploadSlot {
@@ -359,8 +361,9 @@ export default function LeftPanel({
                                             <button
                                                 className="editor-mask-btn"
                                                 onClick={(e) => { e.stopPropagation(); setShowInpaintModal(true); }}
+                                                title={t('editor.inpaintTooltip')}
                                             >
-                                                🖌️ {t('chat.inpaintModalTitle')}
+                                                🖌️ {t('editor.inpaintPaint')}
                                             </button>
                                         )}
                                     </div>
@@ -383,6 +386,7 @@ export default function LeftPanel({
                         />
                     </div>
                 )}
+
 
                 {/* 3. Character Tags Section - Collapsible (txt2img only) */}
                 {isImageMode && settings.generationType === 'txt2img' && (
@@ -723,7 +727,7 @@ export default function LeftPanel({
                 </div>
 
                 {/* ── Inline Q&A Wizard ── */}
-                {!inlineQACompleted && (
+                {settings.generationType === 'txt2img' && !inlineQACompleted && (
                     <QAWizard
                         key={inlineQAKey}
                         mode="inline"
@@ -758,7 +762,7 @@ export default function LeftPanel({
                     )}
 
                     {/* Prompt textarea */}
-                    {!faceSwapMode && (
+                    {!faceSwapMode && !inpaintMode && (
                         <div className={`editor-prompt-area editor-prompt-${contentLevel}`} style={{ position: 'relative' }}>
                             <span className={`content-level-badge ${contentLevel}`}>
                                 {contentLevel === 'nsfw' ? 'NSFW🔞' : 'SFW'}
@@ -781,7 +785,7 @@ export default function LeftPanel({
                     )}
 
                     {/* 6. Suggestion cards — below prompt */}
-                    {!isGenerating && suggestions && resultMessages.length > 0 ? (
+                    {!faceSwapMode && !inpaintMode && !isGenerating && suggestions && resultMessages.length > 0 ? (
                         <div className="suggest-section">
                             <div className="suggest-header">
                                 <span className="suggest-header-icon">✨</span>
@@ -930,6 +934,10 @@ export default function LeftPanel({
                 setSettingsExpanded={setSettingsExpanded}
                 onQAComplete={onQAComplete}
             />
+
+            {/* Tutorial Modals */}
+            {inpaintMode && <InpaintTutorialModal />}
+            {faceSwapMode && <FaceSwapTutorialModal />}
         </aside>
     );
 }

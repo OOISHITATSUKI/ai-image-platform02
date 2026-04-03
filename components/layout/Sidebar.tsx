@@ -479,7 +479,13 @@ export default function Sidebar() {
                     <div style={{ padding: '0 12px', marginBottom: 4 }}>
                         <button
                             onClick={() => {
-                                const fn = (window as unknown as Record<string, unknown>).__openQAModal;
+                                const w = window as unknown as Record<string, unknown>;
+                                const key = settings.generationType === 'inpaint'
+                                    ? '__openInpaintTutorial'
+                                    : settings.generationType === 'face_swap'
+                                        ? '__openFaceSwapTutorial'
+                                        : '__openQAModal';
+                                const fn = w[key];
                                 if (typeof fn === 'function') (fn as () => void)();
                             }}
                             style={{

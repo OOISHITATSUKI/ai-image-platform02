@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
-import type { AgeTag, EthnicityTag, SituationTag, StylePresetTag, OutfitTag, HairColorTag, HairStyleTag } from '@/lib/types';
+import type { AspectRatio, AgeTag, EthnicityTag, SituationTag, StylePresetTag, OutfitTag, HairColorTag, HairStyleTag } from '@/lib/types';
 
 // ── Question definitions ──
 
@@ -163,7 +163,7 @@ export interface QAData {
 }
 
 export default function QAWizard({ isNsfw, mode = 'modal', onComplete, onGenerate, onOpenTags, onOpenSettings, onDismissToPrompt }: QAWizardProps) {
-    const { updateTagSettings } = useAppStore();
+    const { updateTagSettings, settings, updateSettings } = useAppStore();
     const { t } = useTranslation();
     const locale = useAppStore((s) => s.locale);
 
@@ -413,6 +413,32 @@ export default function QAWizard({ isNsfw, mode = 'modal', onComplete, onGenerat
                     <button className="qa-done-action" onClick={onOpenSettings}>
                         ⚙️ {t('qa.openSettings')}
                     </button>
+                </div>
+
+                {/* Aspect ratio selector */}
+                <div className="qa-done-aspect">
+                    <div className="qa-done-aspect-label">{t('qa.selectAspectRatio')}</div>
+                    <div className="qa-done-aspect-grid">
+                        {([
+                            { ratio: '1:1' as AspectRatio, w: 28, h: 28, label: '1:1', desc: t('qa.aspectSquare') },
+                            { ratio: '4:3' as AspectRatio, w: 32, h: 24, label: '4:3', desc: t('qa.aspectLandscape') },
+                            { ratio: '3:4' as AspectRatio, w: 24, h: 32, label: '3:4', desc: t('qa.aspectPortrait') },
+                            { ratio: '16:9' as AspectRatio, w: 38, h: 21, label: '16:9', desc: t('qa.aspectWide') },
+                            { ratio: '9:16' as AspectRatio, w: 21, h: 38, label: '9:16', desc: t('qa.aspectFullBody') },
+                        ]).map((item) => (
+                            <button
+                                key={item.ratio}
+                                className={`qa-done-aspect-btn ${settings.aspectRatio === item.ratio ? 'active' : ''}`}
+                                onClick={() => updateSettings({ aspectRatio: item.ratio })}
+                            >
+                                <svg width={item.w} height={item.h} viewBox={`0 0 ${item.w} ${item.h}`} className="qa-done-aspect-rect">
+                                    <rect x="0.5" y="0.5" width={item.w - 1} height={item.h - 1} rx="3" />
+                                </svg>
+                                <span className="qa-done-aspect-ratio">{item.label}</span>
+                                <span className="qa-done-aspect-desc">{item.desc}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Generate button */}

@@ -1,29 +1,44 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '@/lib/useTranslation';
 import { useAppStore } from '@/lib/store';
 
 const DEMO_VIDEOS = [
-    '/videos/demo-intro-1.mp4',
-    '/videos/demo-intro-2.mp4',
-    '/videos/demo-intro-3.mp4',
+    { src: '/videos/demo-intro-1.webm', poster: '/images/welcome-thumb-1.jpg' },
+    { src: '/videos/demo-intro-2.webm', poster: '/images/welcome-thumb-2.jpg' },
+    { src: '/videos/demo-intro-3.webm', poster: '/images/welcome-thumb-3.jpg' },
 ];
 
 export default function WelcomeIntroModal() {
     const isAuthenticated = useAppStore((s) => s.isAuthenticated);
     const [show, setShow] = useState(true);
     const { t } = useTranslation();
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-    const randomVideo = useMemo(
+    const randomEntry = useMemo(
         () => DEMO_VIDEOS[Math.floor(Math.random() * DEMO_VIDEOS.length)],
         []
     );
+
+    // Start playing only when modal is shown
+    useEffect(() => {
+        if (show && !isAuthenticated && videoRef.current) {
+            videoRef.current.src = randomEntry.src;
+            videoRef.current.load();
+            videoRef.current.play().catch(() => {});
+        }
+    }, [show, isAuthenticated, randomEntry]);
 
     // ログイン済みユーザーには表示しない
     if (isAuthenticated || !show) return null;
 
     const handleClose = () => {
+        if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.removeAttribute('src');
+            videoRef.current.load();
+        }
         setShow(false);
     };
 
@@ -50,7 +65,7 @@ export default function WelcomeIntroModal() {
                     AI-powered image generation. Free to try, no sign up needed.
                 </p>
 
-                {/* Demo video placeholder */}
+                {/* Demo video — lazy loaded */}
                 <div style={{
                     background: '#111',
                     borderRadius: 12,
@@ -63,15 +78,14 @@ export default function WelcomeIntroModal() {
                     border: '1px solid rgba(255,255,255,0.08)',
                 }}>
                     <video
-                        key={randomVideo}
-                        autoPlay
+                        ref={videoRef}
                         muted
                         loop
                         playsInline
+                        preload="none"
+                        poster={randomEntry.poster}
                         style={{ width: '100%', borderRadius: 12 }}
-                    >
-                        <source src={randomVideo} type="video/mp4" />
-                    </video>
+                    />
                 </div>
 
                 <button className="welcome-intro-cta" onClick={handleClose}>

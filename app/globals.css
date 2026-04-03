@@ -839,15 +839,24 @@ video {
 
 .editor-mask-btn {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: var(--primary);
+  bottom: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #534AB7, #7F77DD);
   color: #fff;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
   border: none;
   cursor: pointer;
+  box-shadow: 0 0 16px rgba(83, 74, 183, 0.6);
+  transition: all 0.2s ease;
+}
+
+.editor-mask-btn:hover {
+  background: linear-gradient(135deg, #6358D4, #9690E8);
+  box-shadow: 0 0 24px rgba(83, 74, 183, 0.8);
+  transform: translateY(-1px);
 }
 
 .editor-swap-btn {
@@ -1339,6 +1348,85 @@ video {
 .qa-done-restart:hover {
   color: rgba(255, 255, 255, 0.55);
 }
+
+/* ── QA Done Aspect Ratio Selector ── */
+.qa-done-aspect {
+  margin: 12px 0 14px;
+}
+
+.qa-done-aspect-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.qa-done-aspect-grid {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.qa-done-aspect-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 6px 6px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 54px;
+}
+
+.qa-done-aspect-btn .qa-done-aspect-rect rect {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.5;
+}
+
+.qa-done-aspect-btn:hover {
+  border-color: rgba(124, 92, 252, 0.4);
+}
+
+.qa-done-aspect-btn:hover .qa-done-aspect-rect rect {
+  stroke: rgba(124, 92, 252, 0.6);
+}
+
+.qa-done-aspect-btn.active {
+  border-color: var(--primary);
+  background: rgba(124, 92, 252, 0.12);
+}
+
+.qa-done-aspect-btn.active .qa-done-aspect-rect rect {
+  fill: rgba(124, 92, 252, 0.3);
+  stroke: var(--primary);
+}
+
+.qa-done-aspect-ratio {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.qa-done-aspect-btn.active .qa-done-aspect-ratio {
+  color: var(--primary);
+}
+
+.qa-done-aspect-desc {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+}
+
+.qa-done-aspect-btn.active .qa-done-aspect-desc {
+  color: rgba(167, 139, 250, 0.7);
+}
+
 
 /* ── Prompt Section ── */
 .editor-prompt-section {
@@ -8786,6 +8874,132 @@ button, a, [role="button"] {
 }
 
 /* ── Welcome Intro Modal ── */
+/* ── Inpaint Tutorial Modal ── */
+.inpaint-tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.inpaint-tutorial-card {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e, #1e1430);
+  border: 1px solid rgba(124, 92, 252, 0.3);
+  border-radius: 20px;
+  padding: 36px 28px 28px;
+  max-width: 640px;
+  width: 92%;
+  text-align: center;
+}
+
+.inpaint-tutorial-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.inpaint-tutorial-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 24px;
+}
+
+.inpaint-tutorial-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.inpaint-tutorial-step {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.inpaint-tutorial-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.inpaint-tutorial-icon {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.inpaint-tutorial-step h3 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.inpaint-tutorial-step p {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.inpaint-tutorial-arrow {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1.4rem;
+  margin-top: 40px;
+  flex-shrink: 0;
+}
+
+.inpaint-tutorial-cta {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #7c5cfc, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.inpaint-tutorial-cta:hover {
+  transform: scale(1.02);
+}
+
+@media (max-width: 480px) {
+  .inpaint-tutorial-steps {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .inpaint-tutorial-arrow {
+    display: none;
+  }
+}
+
 .welcome-intro-overlay {
   position: fixed;
   inset: 0;

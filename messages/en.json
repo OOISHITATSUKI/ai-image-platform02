@@ -62,6 +62,11 @@
     "img2imgStrengthLow": "Keep Original",
     "img2imgStrengthHigh": "Strong Change",
     "autoDeleteWarning": "⚠️ Generated images are automatically deleted after 1 hour. Please download them if you wish to save them.",
+    "nudeModeOnHint": "Turn on to remove clothing",
+    "nudeModeOffHint": "When OFF, clothing is modified instead",
+    "inpaintGuide": "Paint the area you want to remove",
+    "inpaintPaint": "Paint & Remove",
+    "inpaintTooltip": "Paint the area you want to remove",
     "welcomeTitle": "Start Creating",
     "welcomeOneClick": "One-Click Generate",
     "welcomeDescription": "Enter a prompt or click one of the samples below to get started.",
@@ -562,7 +567,33 @@
     "openTags": "Open Character Tags",
     "openSettings": "Open Generation Settings",
     "editPrompt": "Edit prompt",
-    "generateNow": "Generate now →"
+    "generateNow": "Generate now →",
+    "selectAspectRatio": "Select aspect ratio",
+    "aspectSquare": "Square",
+    "aspectLandscape": "Landscape",
+    "aspectPortrait": "Portrait",
+    "aspectWide": "Wide",
+    "aspectFullBody": "Full body (recommended)"
+  },
+  "inpaintTutorial": {
+    "title": "How to use Inpaint",
+    "step1Title": "Upload an image",
+    "step1Desc": "Upload a photo to the left panel",
+    "step2Title": "Paint the area to remove",
+    "step2Desc": "Tap the \"Paint & Remove\" button on the image and brush over the area you want to remove",
+    "step3Title": "Generate",
+    "step3Desc": "Press the generate button and AI will automatically remove clothing!",
+    "cta": "Got it, let's start"
+  },
+  "faceSwapTutorial": {
+    "title": "◎ How to use Face Swap",
+    "step1Title": "Upload the original image",
+    "step1Desc": "Upload the image you want to swap the face on",
+    "step2Title": "Choose a face",
+    "step2Desc": "Select a saved face from My Faces or upload a new face image",
+    "step3Title": "Generate",
+    "step3Desc": "Press the generate button and AI will automatically swap the face!",
+    "cta": "Got it, let's start"
   },
   "blog": {
     "nav": {

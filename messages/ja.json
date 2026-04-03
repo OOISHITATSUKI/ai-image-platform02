@@ -62,6 +62,11 @@
     "img2imgStrengthLow": "元画像を保持",
     "img2imgStrengthHigh": "大きく変更",
     "autoDeleteWarning": "⚠️ 生成画像は1時間後に自動削除されます。保存したい場合はダウンロードしてください。",
+    "nudeModeOnHint": "ONにすると衣類を除去します",
+    "nudeModeOffHint": "OFFの場合、衣類を変更します",
+    "inpaintGuide": "除去したい部分を塗ってください",
+    "inpaintPaint": "塗って除去",
+    "inpaintTooltip": "除去したい部分を塗ってください",
     "welcomeTitle": "さあ、始めよう",
     "welcomeOneClick": "ワンクリック生成",
     "welcomeDescription": "プロンプトを入力するか、下のサンプルをクリックして始めましょう。",
@@ -557,7 +562,33 @@
     "openTags": "キャラクタータグを開く",
     "openSettings": "生成設定を開く",
     "editPrompt": "プロンプトを入力する",
-    "generateNow": "このまま生成する →"
+    "generateNow": "このまま生成する →",
+    "selectAspectRatio": "比率を選んでください",
+    "aspectSquare": "正方形",
+    "aspectLandscape": "横型",
+    "aspectPortrait": "縦型",
+    "aspectWide": "ワイド",
+    "aspectFullBody": "全身（推奨）"
+  },
+  "inpaintTutorial": {
+    "title": "Inpaintの使い方",
+    "step1Title": "画像をアップロード",
+    "step1Desc": "左側のエリアに写真をアップロードしてください",
+    "step2Title": "除去したい部分を塗る",
+    "step2Desc": "画像右下の「塗って除去」ボタンを押して、除去したい部分をブラシで塗ってください",
+    "step3Title": "生成する",
+    "step3Desc": "塗り終わったら生成ボタンを押すだけ！AIが自動で衣類を除去します",
+    "cta": "わかった、始める"
+  },
+  "faceSwapTutorial": {
+    "title": "◎ Face Swapの使い方",
+    "step1Title": "元の画像をアップロード",
+    "step1Desc": "顔を入れ替えたい画像をアップロードしてください",
+    "step2Title": "入れ替える顔を選ぶ",
+    "step2Desc": "My Facesから保存済みの顔を選ぶか、新しい顔画像をアップロードしてください",
+    "step3Title": "生成する",
+    "step3Desc": "生成ボタンを押すとAIが自動で顔を入れ替えます",
+    "cta": "わかった、始める"
   },
   "blog": {
     "nav": {
