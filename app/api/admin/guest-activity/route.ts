@@ -74,6 +74,36 @@ export async function GET(req: NextRequest) {
         .slice(0, 30)
         .map(([word, count]) => ({ word, count }));
 
+    // ── Q&A Wizard Metrics ──
+    const qaRecords = records.filter(r => r.qaQuestions && r.qaQuestions.length > 0);
+    const qaStarted = qaRecords.length;
+    const qaCompleted = qaRecords.filter(r => r.qaCompleted).length;
+    const qaTotalSkips = qaRecords.reduce((sum, r) => sum + (r.qaSkippedCount || 0), 0);
+    const directInput = records.length - qaStarted;
+
+    // Question popularity & answer distribution
+    const questionCounts: Record<string, number> = {};
+    const answerCounts: Record<string, Record<string, number>> = {};
+    for (const r of qaRecords) {
+        if (!r.qaQuestions) continue;
+        for (const q of r.qaQuestions) {
+            questionCounts[q] = (questionCounts[q] || 0) + 1;
+            const ans = r.qaAnswers?.[q];
+            const ansKey = ans || '_skipped';
+            if (!answerCounts[q]) answerCounts[q] = {};
+            answerCounts[q][ansKey] = (answerCounts[q][ansKey] || 0) + 1;
+        }
+    }
+
+    // Format answer distribution as percentages
+    const qaAnswerDistribution: Record<string, { answer: string; count: number; pct: number }[]> = {};
+    for (const [q, counts] of Object.entries(answerCounts)) {
+        const qTotal = Object.values(counts).reduce((s, c) => s + c, 0) || 1;
+        qaAnswerDistribution[q] = Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([answer, count]) => ({ answer, count, pct: Math.round((count / qTotal) * 100) }));
+    }
+
     return NextResponse.json({
         total: records.length,
         recent,
@@ -84,5 +114,17 @@ export async function GET(req: NextRequest) {
         },
         localeBreakdown: toRanking(localeCounts),
         topKeywords,
+        qaMetrics: {
+            qaStarted,
+            qaCompleted,
+            qaCompletionRate: qaStarted > 0 ? Math.round((qaCompleted / qaStarted) * 100) : 0,
+            qaSkipRate: qaStarted > 0 ? Math.round((qaTotalSkips / (qaStarted * 3)) * 100) : 0,
+            directInputCount: directInput,
+            qaVsDirectPct: records.length > 0 ? Math.round((qaStarted / records.length) * 100) : 0,
+            questionPopularity: Object.entries(questionCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([q, count]) => ({ question: q, count })),
+            answerDistribution: qaAnswerDistribution,
+        },
     });
 }

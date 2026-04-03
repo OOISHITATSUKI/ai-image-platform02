@@ -661,6 +661,10 @@ export default function EditorPage() {
         if (success) setInputText(originalPrompt);
     };
 
+    const handleSuggestionSelect = (suggestion: string, _type: 'A' | 'B' | 'C') => {
+        setInputText(suggestion);
+    };
+
     return (
         <div className="editor-layout-v2">
             {/* Terms Agreement Modal */}
@@ -730,6 +734,7 @@ export default function EditorPage() {
                         onActionInpaint={handleActionInpaint}
                         onActionFaceSwap={handleActionFaceSwap}
                         onActionRegenerate={handleActionRegenerate}
+                        onSuggestionSelect={handleSuggestionSelect}
                         isGenerating={isGenerating}
                     />
                 </>
@@ -752,6 +757,7 @@ export default function EditorPage() {
                         isGenerating={isGenerating}
                         generationError={generationError}
                         setGenerationError={setGenerationError}
+                        onSuggestionSelect={handleSuggestionSelect}
                     />
                     <div ref={rightPanelRef} className="editor-right-wrapper">
                         <RightPanel

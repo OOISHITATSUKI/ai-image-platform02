@@ -12,6 +12,11 @@ export interface GuestGenerationRecord {
     locale: string;                      // browser locale
     registered: boolean;                 // true after guest registers
     createdAt: number;                   // Unix ms
+    // Q&A wizard data
+    qaAnswers?: Record<string, string | null>;
+    qaQuestions?: string[];
+    qaCompleted?: boolean;
+    qaSkippedCount?: number;
 }
 
 function readGuest(): Record<string, GuestGenerationRecord> {

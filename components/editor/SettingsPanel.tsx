@@ -200,23 +200,7 @@ export default function SettingsPanel() {
                     </div>
                 )}
 
-                {/* Nude Toggle (txt2img only) */}
-                {settings.generationType === 'txt2img' && (
-                    <div className="control-group">
-                        <div className="toggle-row">
-                            <label>🔞 Nude</label>
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    checked={settings.nudeMode ?? true}
-                                    onChange={(e) => updateSettings({ nudeMode: e.target.checked })}
-                                />
-                                <span className="toggle-slider" />
-                            </label>
-                        </div>
-                    </div>
-                )}
-
+                {/* Nude Toggle moved to LeftPanel top bar */}
 
                 {/* ── Style Preset (txt2img only) ── */}
                 {isImageMode && settings.generationType === 'txt2img' && (

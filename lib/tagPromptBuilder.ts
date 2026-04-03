@@ -68,6 +68,20 @@ const BREAST_POSITION_MAP: Record<string, string> = {
     pushed_together: '(breasts pushed together:1.2)',
 };
 
+const BODY_TYPE_MAP: Record<string, string> = {
+    slim: '(slim body:1.3), (slender:1.2), thin waist',
+    normal: '(average body:1.2), natural proportions',
+    glamour: '(curvy body:1.3), (voluptuous:1.2), hourglass figure',
+};
+
+const OUTFIT_MAP: Record<string, { prompt: string; negative?: string }> = {
+    lingerie: { prompt: '(wearing lingerie:1.3), (lace underwear:1.2), bra and panties' },
+    swimsuit: { prompt: '(wearing swimsuit:1.3), (bikini:1.2)' },
+    casual: { prompt: '(casual clothing:1.3), (t-shirt:1.1), everyday outfit' },
+    dress: { prompt: '(wearing elegant dress:1.3), (evening gown:1.2)' },
+    nude: { prompt: '(nude:1.4), (naked:1.3), bare skin, no clothing' },
+};
+
 const SITUATION_MAP: Record<string, string> = {
     bedroom: 'in bedroom',
     shower: 'in shower',
@@ -205,6 +219,18 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
     // Breast position
     if (tags.breastPosition && BREAST_POSITION_MAP[tags.breastPosition]) {
         characterParts.push(BREAST_POSITION_MAP[tags.breastPosition]);
+    }
+
+    // Body type
+    if (tags.bodyType && BODY_TYPE_MAP[tags.bodyType]) {
+        characterParts.push(BODY_TYPE_MAP[tags.bodyType]);
+    }
+
+    // Outfit
+    if (tags.outfit && OUTFIT_MAP[tags.outfit]) {
+        const outfitEntry = OUTFIT_MAP[tags.outfit];
+        characterParts.push(outfitEntry.prompt);
+        if (outfitEntry.negative) negativeParts.push(outfitEntry.negative);
     }
 
     // Situation / Scene

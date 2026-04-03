@@ -90,115 +90,74 @@ export default function MyFaces() {
         setShowRegisterModal(true);
     };
 
+    const SLOT_COUNT = 3;
+    const slots = Array.from({ length: SLOT_COUNT }, (_, i) => savedFaces[i] || null);
+
     return (
         <>
-            <div className="my-faces-container">
-                <div
-                    className="my-faces-header"
-                    onClick={() => setCollapsed(!collapsed)}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                >
-                    <span className="my-faces-title">
-                        <span style={{ marginRight: '6px' }}>👤</span>
-                        {t('faces.title')}
-                        <span style={{ marginLeft: '6px', fontSize: '0.7rem', opacity: 0.5 }}>
-                            {collapsed ? '▸' : '▾'}
-                        </span>
-                    </span>
+            <div className="my-faces-slots-container">
+                <div className="my-faces-slots-header">
+                    <span className="my-faces-slots-title">{t('faces.title')}</span>
                     {isLoggedIn && (
-                        <span className="my-faces-count">
-                            {savedFaces.length} / {limit}
-                        </span>
+                        <span className="my-faces-slots-count">{savedFaces.length}/{limit}</span>
                     )}
                 </div>
-
-                {!collapsed && (
-                    <>
-                        {!isLoggedIn ? (
-                            /* Guest view: show empty state with register prompt */
-                            <button
-                                className="my-faces-empty-btn"
-                                onClick={handleAddClick}
-                            >
-                                + {t('faces.emptyHint')}
-                            </button>
-                        ) : isFacesLoading ? (
-                            <div className="my-faces-loading">
-                                <div className="my-faces-spinner" />
-                            </div>
-                        ) : savedFaces.length === 0 ? (
-                            <button
-                                className="my-faces-empty-btn"
-                                onClick={() => setShowRegisterModal(true)}
-                            >
-                                + {t('faces.emptyHint')}
-                            </button>
-                        ) : (
-                            <>
-                                <div className="my-faces-list">
-                                    {savedFaces.map((face) => (
-                                        <div
-                                            key={face.id}
-                                            className={`my-faces-item ${selectedFaceId === face.id ? 'selected' : ''}`}
-                                            onClick={() => handleToggleFace(face.id)}
-                                            onContextMenu={(e) => {
-                                                e.preventDefault();
-                                                setShowDeleteConfirm(face.id);
-                                            }}
-                                        >
-                                            <div className="my-faces-thumb-wrap">
-                                                <img
-                                                    src={face.thumbnail_url || face.image_url}
-                                                    alt={face.name}
-                                                    className="my-faces-thumb"
-                                                />
-                                                {selectedFaceId === face.id && (
-                                                    <div className="my-faces-check">✓</div>
-                                                )}
-                                            </div>
-                                            <span className="my-faces-name">{face.name}</span>
-                                            <button
-                                                className="my-faces-delete-btn"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setShowDeleteConfirm(face.id);
-                                                }}
-                                                title={t('actions.delete')}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    {canAdd ? (
-                                        <button
-                                            className="my-faces-add-btn"
-                                            onClick={handleAddClick}
-                                        >
-                                            +
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="my-faces-upgrade-btn"
-                                            onClick={() => window.location.href = '/pricing'}
-                                        >
-                                            🔒
-                                        </button>
+                <div className="my-faces-slots-row">
+                    {slots.map((face, i) => (
+                        <div
+                            key={face?.id || `empty-${i}`}
+                            className={`my-faces-slot ${face && selectedFaceId === face.id ? 'selected' : ''} ${face ? 'has-face' : ''}`}
+                            onClick={() => {
+                                if (face) {
+                                    handleToggleFace(face.id);
+                                } else {
+                                    handleAddClick();
+                                }
+                            }}
+                            onContextMenu={(e) => {
+                                if (face) {
+                                    e.preventDefault();
+                                    setShowDeleteConfirm(face.id);
+                                }
+                            }}
+                        >
+                            {face ? (
+                                <>
+                                    <img
+                                        src={face.thumbnail_url || face.image_url}
+                                        alt={face.name}
+                                        className="my-faces-slot-img"
+                                    />
+                                    {selectedFaceId === face.id && (
+                                        <div className="my-faces-slot-check">✓</div>
                                     )}
-                                </div>
-                                {/* Hint when faces exist but none selected */}
-                                {!selectedFaceId && (
-                                    <p className="my-faces-hint">{t('faces.selectHint')}</p>
-                                )}
-                                {/* Active indicator */}
-                                {selectedFaceId && (
-                                    <p className="my-faces-active-label">
-                                        ✨ {t('faces.activeLabel').replace('{name}', savedFaces.find(f => f.id === selectedFaceId)?.name || '')}
-                                    </p>
-                                )}
-                            </>
-                        )}
-                    </>
+                                    <span className="my-faces-slot-name">{face.name}</span>
+                                    <button
+                                        className="my-faces-slot-delete"
+                                        onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(face.id); }}
+                                    >×</button>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="my-faces-slot-empty">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="12" cy="7" r="4"/>
+                                        </svg>
+                                    </div>
+                                    <span className="my-faces-slot-label">+</span>
+                                    <span className="my-faces-slot-add-text">{t('faces.addFace')}</span>
+                                    <div className="my-faces-slot-tooltip">{t('faces.slotTooltip')}</div>
+                                </>
+                            )}
+                        </div>
+                    ))}
+                </div>
+                <p className="my-faces-slots-desc">{t('faces.slotDesc')}</p>
+                {selectedFaceId && (
+                    <p className="my-faces-active-label">
+                        ✨ {t('faces.activeLabel').replace('{name}', savedFaces.find(f => f.id === selectedFaceId)?.name || '')}
+                    </p>
                 )}
             </div>
 
@@ -210,7 +169,7 @@ export default function MyFaces() {
                             {t('faces.title')}
                         </p>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
-                            {t('faces.loginToRegister')}
+                            {t('faces.guestSlotMessage')}
                         </p>
                         <div className="my-faces-confirm-actions">
                             <button

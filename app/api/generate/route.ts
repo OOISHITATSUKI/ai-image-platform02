@@ -887,8 +887,27 @@ export async function POST(request: NextRequest) {
             console.log('Action hint:', actionHint);
         }
 
+        // ── SFW mode: strip all NSFW tags from tagPromptFragment and actionHint ──
+        if (!nudeMode) {
+            // Remove fetish/action tags (high-weight explicit content)
+            tagPromptFragment = tagPromptFragment
+                .replace(/\([^)]*(?:fellatio|oral sex|blowjob|penis|vagina|sex|penetrat|nude|naked|nsfw|cowgirl|riding position|missionary|doggy|handjob|paizuri|titfuck|sucking|insertion|spread legs|genitalia|nipples)[^)]*:[\d.]+\),?\s*/gi, '')
+                .replace(/\b(?:fellatio|oral sex|blowjob|penis in mouth|sucking|saliva|vaginal penetration|sex|nude|naked|nsfw|riding position|sitting on penis|hips grinding|bouncing|moaning|intimate skin contact|arched back|sweat|ass up face down|stroking penis|titfuck|penis between breasts|bare skin|no clothing|topless|nipples|genitalia|cleavage)\b,?\s*/gi, '')
+                .replace(/\(1boy:[\d.]+\),?\s*/g, '')
+                .replace(/\(couple:[\d.]+\),?\s*/g, '')
+                .replace(/\(man and woman:[\d.]+\),?\s*/g, '')
+                .replace(/\(2people:[\d.]+\),?\s*/g, '')
+                .replace(/,\s*,/g, ',')
+                .replace(/^,\s*|,\s*$/g, '')
+                .trim();
+            // Clear action hint for SFW
+            actionHint = '';
+            console.log('SFW mode: stripped NSFW tags from tagPromptFragment:', tagPromptFragment);
+        }
+
         // ── Auto-detect action/pose from prompt text if not set via UI ──
-        if (!actionHint && prompt) {
+        // Skip auto-detection entirely in SFW mode
+        if (!actionHint && prompt && nudeMode) {
             const promptLower = prompt.toLowerCase();
             const autoActionMap: [RegExp, string, string][] = [
                 [/フェラ|blowjob|fellatio|oral sex|しゃぶ/, 'fellatio', 'fellatio blowjob oral sex, woman kneeling between mans legs, penis deep in mouth, sucking, tongue visible, looking up at camera, from above angle, saliva'],
@@ -1222,9 +1241,15 @@ export async function POST(request: NextRequest) {
             novitaRequest.negative_prompt = enforceLimit(finalNegative);
         } else if (!nudeMode) {
             // Nude OFF → ヌード禁止（SFW画像）
-            novitaRequest.prompt = enforceLimit(`${coupleBodyPrefix}${enhancedPrompt}`);
+            // Also strip any remaining NSFW keywords from the prompt itself
+            let sfwPrompt = enhancedPrompt
+                .replace(/\b(?:nsfw|nude|naked|bare skin|topless|nipples|genitalia|penis|vagina|sex|penetration|fellatio|blowjob|oral sex|cowgirl|missionary|doggy|handjob|paizuri|titfuck)\b,?\s*/gi, '')
+                .replace(/,\s*,/g, ',')
+                .replace(/^,\s*|,\s*$/g, '')
+                .trim();
+            novitaRequest.prompt = enforceLimit(`${coupleBodyPrefix}${sfwPrompt}`);
             novitaRequest.negative_prompt = enforceLimit(
-                `${finalNegative}, nsfw, nude, naked, nipples, genitalia`
+                `${finalNegative}, nsfw, nude, naked, nipples, genitalia, topless, bare breasts, exposed, sexual, explicit, penis, vagina, sex, penetration`
             );
         } else {
             // Nude ON + 服装指定あり → ユーザーの服装指定を優先

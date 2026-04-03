@@ -31,7 +31,15 @@ export default function HomePage() {
 
     const isGuest = !isAuthenticated;
     const isImg2Vid = settings.generationType === 'img2vid';
+
+    // Guest default: 512px resolution
+    useEffect(() => {
+        if (isGuest && settings.resolution !== '512') {
+            updateSettings({ resolution: '512' });
+        }
+    }, [isGuest]);
     const pollAbortRef = useRef<(() => void) | null>(null);
+    const qaDataRef = useRef<{ answers: Record<string, string | null>; questions: string[]; completed: boolean; skippedCount: number } | null>(null);
 
     // Guest generation count (tracked in localStorage)
     const [guestGenCount, setGuestGenCount] = useState(0);
@@ -341,6 +349,7 @@ export default function HomePage() {
             body.faceSwapMode = faceSwapMode;
             body.inpaintMode = inpaintMode;
             body.nudeMode = settings.nudeMode ?? true;
+            if (qaDataRef.current) body.qaData = qaDataRef.current;
 
             const res = await fetch('/api/demo-generate', {
                 method: 'POST',
@@ -710,6 +719,10 @@ export default function HomePage() {
         if (success) setInputText(originalPrompt);
     };
 
+    const handleSuggestionSelect = (suggestion: string, _type: 'A' | 'B' | 'C') => {
+        setInputText(suggestion);
+    };
+
     return (
         <>
             {/* SEO Header - compact one-liner */}
@@ -785,6 +798,7 @@ export default function HomePage() {
                             onActionInpaint={handleActionInpaint}
                             onActionFaceSwap={handleActionFaceSwap}
                             onActionRegenerate={handleActionRegenerate}
+                            onSuggestionSelect={handleSuggestionSelect}
                             isGenerating={isGenerating}
                         />
                     </>
@@ -807,6 +821,7 @@ export default function HomePage() {
                             isGenerating={isGenerating}
                             generationError={generationError}
                             setGenerationError={setGenerationError}
+                            onQAComplete={(data) => { qaDataRef.current = data; }}
                         />
                         <div ref={rightPanelRef} className="editor-right-wrapper">
                             <RightPanel

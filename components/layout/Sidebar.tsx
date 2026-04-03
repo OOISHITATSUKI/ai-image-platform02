@@ -99,9 +99,8 @@ export default function Sidebar() {
         }
     };
 
-    const navItems = [
-        { icon: '🏠', labelKey: 'nav.home', href: '/' },
-        { icon: '📂', labelKey: 'nav.library', href: '/library' },
+    const navItems: { icon: string; labelKey: string; href: string }[] = [
+        // Home removed — editor IS the landing page
     ];
 
     const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
@@ -168,48 +167,6 @@ export default function Sidebar() {
 
             {/* Scrollable area: nav sections + chat history */}
             <div className="sidebar-scroll-area">
-
-                {/* Main Nav */}
-                <div className="nav-section">
-                    <div className="nav-label">{t('nav.home').toUpperCase() === t('nav.home') ? 'Main' : t('nav.home')}</div>
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="nav-item"
-                            onClick={() => {
-                                closeSidebarOnMobile();
-                                // Clear badge when clicking Library
-                                if (item.href === '/library' && unlockedNewCount > 0) {
-                                    localStorage.removeItem('guest_unlocked_new');
-                                    setUnlockedNewCount(0);
-                                }
-                            }}
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && (
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
-                                    {t(item.labelKey)}
-                                    {item.href === '/library' && unlockedNewCount > 0 && (
-                                        <span style={{
-                                            background: '#ef4444',
-                                            color: '#fff',
-                                            fontSize: '0.6rem',
-                                            fontWeight: 700,
-                                            borderRadius: 10,
-                                            padding: '1px 6px',
-                                            minWidth: 18,
-                                            textAlign: 'center',
-                                            lineHeight: '16px',
-                                        }}>
-                                            {unlockedNewCount}
-                                        </span>
-                                    )}
-                                </span>
-                            )}
-                        </Link>
-                    ))}
-                </div>
 
                 {/* Generation */}
                 <div className="nav-section">
@@ -402,6 +359,34 @@ export default function Sidebar() {
                         <span>⚠</span><span>Terms not yet accepted</span>
                     </div>
                 )}
+                {/* Library link — moved to footer area */}
+                {!sidebarCollapsed && (
+                    <Link
+                        href="/library"
+                        className="nav-item"
+                        style={{ margin: '0 12px 8px', borderRadius: 8 }}
+                        onClick={() => {
+                            closeSidebarOnMobile();
+                            if (unlockedNewCount > 0) {
+                                localStorage.removeItem('guest_unlocked_new');
+                                setUnlockedNewCount(0);
+                            }
+                        }}
+                    >
+                        <span className="nav-icon">📁</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+                            {t('nav.library')}
+                            {unlockedNewCount > 0 && (
+                                <span style={{
+                                    background: '#ef4444', color: '#fff', fontSize: '0.6rem',
+                                    fontWeight: 700, borderRadius: 10, padding: '1px 6px',
+                                    minWidth: 18, textAlign: 'center', lineHeight: '16px',
+                                }}>{unlockedNewCount}</span>
+                            )}
+                        </span>
+                    </Link>
+                )}
+
                 {/* Credits - Hidden when collapsed */}
                 {!sidebarCollapsed && (
                     <div className="credits-panel" style={{ marginBottom: 12 }}>
@@ -486,6 +471,26 @@ export default function Sidebar() {
                         <Link href="/register" className="sidebar-register-btn">
                             Create Account
                         </Link>
+                    </div>
+                )}
+
+                {/* How to use */}
+                {!sidebarCollapsed && (
+                    <div style={{ padding: '0 12px', marginBottom: 4 }}>
+                        <button
+                            onClick={() => {
+                                const fn = (window as unknown as Record<string, unknown>).__openQAModal;
+                                if (typeof fn === 'function') (fn as () => void)();
+                            }}
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                width: '100%', padding: '7px 0', borderRadius: 8,
+                                border: '1px solid rgba(255,255,255,0.08)', background: 'transparent',
+                                color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', cursor: 'pointer',
+                            }}
+                        >
+                            ？ {t('qa.howToUse')}
+                        </button>
                     </div>
                 )}
 

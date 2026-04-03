@@ -47,6 +47,10 @@ next-env.d.ts
 # runtime data (managed by Supabase, not git)
 data/users.json
 data/credit_log.json
+data/guest_generations.json
+data/guest_images.json
+data/demo_stats.json
+data/images/
 data/transactions.json
 data/login_log.json
 data/trusted_devices.json

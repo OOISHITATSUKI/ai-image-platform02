@@ -299,9 +299,17 @@ export const useAppStore = create<AppState>()(
                             console.log('Supabase user upsert success:', upsertData);
                         }
 
-                        if (user.locale) {
-                            console.log('Applying locale from auth response:', user.locale);
-                            set({ locale: user.locale as Locale, localeManuallySet: true });
+                        // Only override locale from Supabase if user explicitly chose one
+                        // (i.e., localeManuallySet was already true before login).
+                        // Otherwise, keep the browser-detected locale.
+                        if (user.locale && get().localeManuallySet) {
+                            console.log('Applying locale from auth response (user previously chose):', user.locale);
+                            set({ locale: user.locale as Locale });
+                        } else if (user.locale && !get().localeManuallySet) {
+                            // First login: keep browser-detected locale, sync it to Supabase
+                            const currentLocale = get().locale;
+                            console.log('Keeping browser locale after login:', currentLocale);
+                            supabase.from('users').update({ preferred_language: currentLocale }).eq('id', user.id).then(() => {});
                         }
 
                         // Status check for debugging

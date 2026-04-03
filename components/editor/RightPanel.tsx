@@ -105,12 +105,14 @@ interface RightPanelProps {
     onActionInpaint: (imgUrl: string) => void;
     onActionFaceSwap: (imgUrl: string) => void;
     onActionRegenerate: (imgUrl: string, prompt: string) => void;
+    onSuggestionSelect?: (suggestion: string, type: 'A' | 'B' | 'C') => void;
     isGenerating: boolean;
 }
 
 export default function RightPanel({
     onOneClickGenerate, onSamplePrompt,
     onActionInpaint, onActionFaceSwap, onActionRegenerate,
+    onSuggestionSelect,
     isGenerating,
 }: RightPanelProps) {
     const {
@@ -146,6 +148,8 @@ export default function RightPanel({
     );
 
     const hasResults = resultMessages.length > 0;
+
+    // Suggestions moved to LeftPanel
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 

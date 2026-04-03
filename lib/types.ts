@@ -76,6 +76,8 @@ export type CompositionTag = 'full_body' | 'waist_up' | 'bust' | 'face_closeup';
 export type BreastPositionTag = 'cleavage' | 'asymmetric' | 'natural' | 'pushed_together';
 export type SituationTag = 'bedroom' | 'shower' | 'pool' | 'beach' | 'office' | 'gym' | 'onsen' | 'outdoor' | 'studio';
 export type FetishTag = 'fellatio' | 'cowgirl' | 'insertion' | 'kiss' | 'missionary' | 'doggy' | 'standing' | 'handjob' | 'paizuri';
+export type BodyTypeTag = 'slim' | 'normal' | 'glamour';
+export type OutfitTag = 'lingerie' | 'swimsuit' | 'casual' | 'dress' | 'nude';
 
 export interface TagSettings {
   stylePreset?: StylePresetTag;
@@ -90,6 +92,8 @@ export interface TagSettings {
   composition?: CompositionTag;
   situation?: SituationTag;
   fetish: FetishTag[];
+  bodyType?: BodyTypeTag;
+  outfit?: OutfitTag;
 }
 
 // ----- Saved Faces -----

@@ -28,7 +28,7 @@ const NOVITA_BASE_SYNC = "https://api.novita.ai/v3";
 
 // ── Rate limiting: 75-second cooldown per IP ──
 const lastGenerationTime = new Map<string, number>();
-const COOLDOWN_MS = 75 * 1000;
+const COOLDOWN_MS = 45 * 1000;
 
 function checkCooldown(ip: string): { allowed: boolean; remainingSeconds: number } {
     const now = Date.now();
@@ -97,7 +97,7 @@ async function addWatermark(imageBuffer: Buffer): Promise<Buffer> {
 }
 
 // ── Build prompt from tag settings ──
-function buildGuestPrompt(prompt: string, tagSettings?: Record<string, unknown>): { fullPrompt: string; negPrompt: string } {
+function buildGuestPrompt(prompt: string, tagSettings?: Record<string, unknown>, nudeMode: boolean = true): { fullPrompt: string; negPrompt: string } {
     const baseParts: string[] = [];
 
     if (tagSettings) {
@@ -136,10 +136,18 @@ function buildGuestPrompt(prompt: string, tagSettings?: Record<string, unknown>)
     }
 
     const userPart = prompt ? `, ${prompt}` : "";
-    const fullPrompt = `${baseParts.join(", ")}, (nsfw:1.4), completely nude, naked, bare skin, photorealistic, best quality, masterpiece, 8k${userPart}`;
-    const negPrompt = "worst quality, low quality, blurry, deformed, disfigured, bad anatomy, extra limbs, clothing, dressed, watermark, text, logo";
 
-    return { fullPrompt, negPrompt };
+    if (nudeMode) {
+        // NSFW mode
+        const fullPrompt = `${baseParts.join(", ")}, (nsfw:1.4), completely nude, naked, bare skin, photorealistic, best quality, masterpiece, 8k${userPart}`;
+        const negPrompt = "worst quality, low quality, blurry, deformed, disfigured, bad anatomy, extra limbs, clothing, dressed, watermark, text, logo";
+        return { fullPrompt, negPrompt };
+    } else {
+        // SFW mode — no nude/nsfw tags, add clothing, block explicit in negative
+        const fullPrompt = `${baseParts.join(", ")}, wearing elegant clothing, photorealistic, best quality, masterpiece, 8k${userPart}`;
+        const negPrompt = "worst quality, low quality, blurry, deformed, disfigured, bad anatomy, extra limbs, nsfw, nude, naked, nipples, genitalia, topless, bare breasts, explicit, sexual, watermark, text, logo";
+        return { fullPrompt, negPrompt };
+    }
 }
 
 export async function POST(request: NextRequest) {
@@ -157,6 +165,8 @@ export async function POST(request: NextRequest) {
             inpaintMode,
             additionalImages,
             locale = "en",
+            nudeMode = true,
+            qaData,
         } = body;
 
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -182,7 +192,7 @@ export async function POST(request: NextRequest) {
 
         if (generationType === "txt2img" || (!imageBase64 && !faceSwapMode && !inpaintMode)) {
             // Text-to-image generation
-            const { fullPrompt, negPrompt } = buildGuestPrompt(prompt, tagSettings);
+            const { fullPrompt, negPrompt } = buildGuestPrompt(prompt, tagSettings, nudeMode);
 
             const novitaBody = {
                 extra: { response_image_type: "jpeg", enable_nsfw_detection: false, nsfw_detection_level: 0 },
@@ -395,6 +405,12 @@ export async function POST(request: NextRequest) {
                 locale: typeof locale === 'string' ? locale.slice(0, 10) : 'en',
                 registered: false,
                 createdAt: Date.now(),
+                ...(qaData ? {
+                    qaAnswers: qaData.answers,
+                    qaQuestions: qaData.questions,
+                    qaCompleted: qaData.completed,
+                    qaSkippedCount: qaData.skippedCount,
+                } : {}),
             });
         } catch (err) {
             console.error("[Guest gen] Analytics record error:", err);
