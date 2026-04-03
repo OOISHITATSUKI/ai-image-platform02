@@ -77,6 +77,29 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activity, setActivity] = useState<GuestActivityData | null>(null);
+    const [sheetsExporting, setSheetsExporting] = useState(false);
+    const [sheetsMessage, setSheetsMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const handleSheetsExport = async () => {
+        setSheetsExporting(true);
+        setSheetsMessage(null);
+        try {
+            const res = await fetch('/api/admin/export-to-sheets', {
+                method: 'POST',
+                headers: { Authorization: localStorage.getItem('auth_token') ?? '' },
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setSheetsMessage({ type: 'success', text: 'スプレッドシートに書き出しました' });
+            } else {
+                setSheetsMessage({ type: 'error', text: data.error || 'エクスポートに失敗しました' });
+            }
+        } catch {
+            setSheetsMessage({ type: 'error', text: 'ネットワークエラーが発生しました' });
+        } finally {
+            setSheetsExporting(false);
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('auth_token');
@@ -108,9 +131,40 @@ export default function AdminDashboardPage() {
 
     return (
         <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '28px' }}>
-                📊 ダッシュボード
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+                    📊 ダッシュボード
+                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {sheetsMessage && (
+                        <span style={{
+                            fontSize: '0.85rem',
+                            color: sheetsMessage.type === 'success' ? '#34d399' : '#f87171',
+                            fontWeight: 500,
+                        }}>
+                            {sheetsMessage.type === 'success' ? '✓ ' : ''}{sheetsMessage.text}
+                        </span>
+                    )}
+                    <button
+                        onClick={handleSheetsExport}
+                        disabled={sheetsExporting}
+                        style={{
+                            background: sheetsExporting ? 'rgba(52,211,153,0.2)' : 'rgba(52,211,153,0.15)',
+                            color: '#34d399',
+                            border: '1px solid rgba(52,211,153,0.3)',
+                            borderRadius: '8px',
+                            padding: '8px 16px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: sheetsExporting ? 'not-allowed' : 'pointer',
+                            opacity: sheetsExporting ? 0.6 : 1,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {sheetsExporting ? '書き出し中...' : 'Sheetsに今すぐ書き出す'}
+                    </button>
+                </div>
+            </div>
 
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
