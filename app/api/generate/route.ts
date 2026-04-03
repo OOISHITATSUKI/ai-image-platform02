@@ -44,8 +44,12 @@ async function cleanupOldFiles() {
             const filePath = path.join(OUTPUT_DIR, file);
             const stats = fs.statSync(filePath);
             if (now - stats.mtimeMs > DELETION_THRESHOLD_MS) {
-                fs.unlinkSync(filePath);
-                console.log(`Deleted expired image: ${file}`);
+                if (stats.isDirectory()) {
+                    fs.rmSync(filePath, { recursive: true, force: true });
+                } else {
+                    fs.unlinkSync(filePath);
+                }
+                console.log(`Deleted expired: ${file}`);
             }
         }
     } catch (err) {

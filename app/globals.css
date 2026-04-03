@@ -7908,7 +7908,7 @@ button, a, [role="button"] {
 /* ── My Faces Slot Design ── */
 .my-faces-slots-container {
   margin: 8px 10px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   background: #191925;
@@ -7918,48 +7918,48 @@ button, a, [role="button"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .my-faces-slots-title {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
 }
 
 .my-faces-slots-count {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.4);
 }
 
 .my-faces-slots-row {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .my-faces-slot {
-  flex: 1;
-  aspect-ratio: 1;
+  width: 72px;
+  height: 72px;
   background: #22223a;
   border: 1.5px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
   cursor: pointer;
   transition: all 0.18s ease;
   position: relative;
   overflow: visible;
-  min-height: 80px;
+  flex-shrink: 0;
 }
 
 .my-faces-slot:hover {
   background: #2a2a48;
   border-color: rgba(124, 92, 252, 0.5);
-  box-shadow: 0 0 12px rgba(124, 92, 252, 0.2);
-  transform: translateY(-1px);
+  box-shadow: 0 0 10px rgba(124, 92, 252, 0.2);
 }
 
 .my-faces-slot.has-face {
@@ -7975,8 +7975,9 @@ button, a, [role="button"] {
 
 .my-faces-slot.selected {
   border-color: var(--primary);
+  border-width: 2px;
   border-style: solid;
-  box-shadow: 0 0 14px rgba(124, 92, 252, 0.35);
+  box-shadow: 0 0 12px rgba(124, 92, 252, 0.4);
 }
 
 .my-faces-slot-img {
@@ -7986,22 +7987,22 @@ button, a, [role="button"] {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .my-faces-slot-check {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
   background: var(--primary);
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   font-weight: 700;
   z-index: 2;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -8012,27 +8013,30 @@ button, a, [role="button"] {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 3px 4px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.75));
+  padding: 2px 3px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
   color: #fff;
-  font-size: 0.62rem;
+  font-size: 0.55rem;
   font-weight: 500;
   text-align: center;
   z-index: 2;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .my-faces-slot-delete {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  background: rgba(0,0,0,0.6);
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: rgba(0,0,0,0.65);
   color: #fff;
   border: none;
   border-radius: 50%;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   cursor: pointer;
   display: none;
   align-items: center;
@@ -8044,53 +8048,16 @@ button, a, [role="button"] {
   display: flex;
 }
 
-.my-faces-slot-empty {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.my-faces-slot-empty svg {
-  width: 30px;
-  height: 30px;
-}
-
 .my-faces-slot-label {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #7c5cfc;
+  line-height: 1;
 }
 
 .my-faces-slot-add-text {
-  font-size: 0.6rem;
+  font-size: 0.52rem;
   color: rgba(255, 255, 255, 0.35);
-  margin-top: -2px;
-}
-
-.my-faces-slot-tooltip {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  font-size: 0.62rem;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.85);
-  padding: 4px 10px;
-  border-radius: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 10;
-}
-
-.my-faces-slot:hover .my-faces-slot-tooltip {
-  opacity: 1;
-}
-
-.my-faces-slots-desc {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
-  text-align: center;
-  margin: 8px 0 0;
 }
 
 .my-faces-header {

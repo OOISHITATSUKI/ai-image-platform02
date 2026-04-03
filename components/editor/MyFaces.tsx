@@ -90,9 +90,6 @@ export default function MyFaces() {
         setShowRegisterModal(true);
     };
 
-    const SLOT_COUNT = 3;
-    const slots = Array.from({ length: SLOT_COUNT }, (_, i) => savedFaces[i] || null);
-
     return (
         <>
             <div className="my-faces-slots-container">
@@ -103,57 +100,41 @@ export default function MyFaces() {
                     )}
                 </div>
                 <div className="my-faces-slots-row">
-                    {slots.map((face, i) => (
+                    {savedFaces.map((face) => (
                         <div
-                            key={face?.id || `empty-${i}`}
-                            className={`my-faces-slot ${face && selectedFaceId === face.id ? 'selected' : ''} ${face ? 'has-face' : ''}`}
-                            onClick={() => {
-                                if (face) {
-                                    handleToggleFace(face.id);
-                                } else {
-                                    handleAddClick();
-                                }
-                            }}
+                            key={face.id}
+                            className={`my-faces-slot has-face ${selectedFaceId === face.id ? 'selected' : ''}`}
+                            onClick={() => handleToggleFace(face.id)}
                             onContextMenu={(e) => {
-                                if (face) {
-                                    e.preventDefault();
-                                    setShowDeleteConfirm(face.id);
-                                }
+                                e.preventDefault();
+                                setShowDeleteConfirm(face.id);
                             }}
                         >
-                            {face ? (
-                                <>
-                                    <img
-                                        src={face.thumbnail_url || face.image_url}
-                                        alt={face.name}
-                                        className="my-faces-slot-img"
-                                    />
-                                    {selectedFaceId === face.id && (
-                                        <div className="my-faces-slot-check">✓</div>
-                                    )}
-                                    <span className="my-faces-slot-name">{face.name}</span>
-                                    <button
-                                        className="my-faces-slot-delete"
-                                        onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(face.id); }}
-                                    >×</button>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="my-faces-slot-empty">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                            <circle cx="12" cy="7" r="4"/>
-                                        </svg>
-                                    </div>
-                                    <span className="my-faces-slot-label">+</span>
-                                    <span className="my-faces-slot-add-text">{t('faces.addFace')}</span>
-                                    <div className="my-faces-slot-tooltip">{t('faces.slotTooltip')}</div>
-                                </>
+                            <img
+                                src={face.thumbnail_url || face.image_url}
+                                alt={face.name}
+                                className="my-faces-slot-img"
+                            />
+                            {selectedFaceId === face.id && (
+                                <div className="my-faces-slot-check">✓</div>
                             )}
+                            <span className="my-faces-slot-name">{face.name}</span>
+                            <button
+                                className="my-faces-slot-delete"
+                                onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(face.id); }}
+                            >×</button>
                         </div>
                     ))}
+                    {canAdd && (
+                        <div
+                            className="my-faces-slot"
+                            onClick={handleAddClick}
+                        >
+                            <span className="my-faces-slot-label">+</span>
+                            <span className="my-faces-slot-add-text">{t('faces.addFace')}</span>
+                        </div>
+                    )}
                 </div>
-                <p className="my-faces-slots-desc">{t('faces.slotDesc')}</p>
                 {selectedFaceId && (
                     <p className="my-faces-active-label">
                         ✨ {t('faces.activeLabel').replace('{name}', savedFaces.find(f => f.id === selectedFaceId)?.name || '')}

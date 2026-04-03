@@ -14,7 +14,7 @@ import type {
 import InpaintModal from './InpaintModal';
 import MyFaces from './MyFaces';
 import dynamic from 'next/dynamic';
-const QAModal = dynamic(() => import('./QAModal'), { loading: () => null });
+const QAModal = dynamic(() => import('./QAModal'), { ssr: false, loading: () => null });
 import QAWizard from './QAWizard';
 import type { QAData } from './QAWizard';
 
