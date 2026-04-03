@@ -208,6 +208,18 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
     const auth = getAuthClient();
     const sheets = google.sheets({ version: 'v4', auth });
 
+    // Debug: fetch actual sheet names to verify the target sheet exists
+    const sheetInfo = await sheets.spreadsheets.get({
+        spreadsheetId: sheetId,
+    });
+    const sheetNames = sheetInfo.data.sheets?.map(s => s.properties?.title) ?? [];
+    console.log('[export-to-sheets] Available sheets:', sheetNames);
+
+    const targetSheet = sheetNames.includes('KPI_Daily') ? 'KPI_Daily' : sheetNames[0] ?? 'Sheet1';
+    if (targetSheet !== 'KPI_Daily') {
+        console.warn(`[export-to-sheets] 'KPI_Daily' not found. Using '${targetSheet}' instead.`);
+    }
+
     const row = [
         data.dateStr,
         data.totalGens,
@@ -226,7 +238,7 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
 
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
-        range: 'KPI_Daily!A:L',
+        range: `'${targetSheet}'!A:L`,
         valueInputOption: 'USER_ENTERED',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
