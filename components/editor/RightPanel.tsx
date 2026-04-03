@@ -178,11 +178,26 @@ export default function RightPanel({
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const samplePrompts = [
-        t('editor.welcomeSample1'),
-        t('editor.welcomeSample2'),
-        t('editor.welcomeSample3'),
+    const SAMPLE_IMAGES = [
+        '/hero/card2-after.webp',
+        '/hero/card4-after.webp',
+        '/hero/card5-after.webp',
+        '/hero/mihon_after.webp',
     ];
+
+    const [sampleLoadErrors, setSampleLoadErrors] = useState<Set<number>>(new Set());
+
+    const handleEmptyStateCta = useCallback(() => {
+        // Focus left panel prompt input or wizard
+        const promptInput = document.querySelector('.editor-left-panel textarea, .editor-left-panel input[type="text"]') as HTMLElement | null;
+        const wizard = document.querySelector('.editor-left-panel') as HTMLElement | null;
+        if (promptInput) {
+            promptInput.focus();
+            promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (wizard) {
+            wizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, []);
 
     return (
         <section className="editor-right-panel">
@@ -202,36 +217,42 @@ export default function RightPanel({
             {/* Results Area */}
             <div className="editor-results" ref={chatContainerRef}>
                 {!hasResults && !isGenerating ? (
-                    /* Welcome Card */
+                    /* Empty State with blurred sample images */
                     <div className="editor-welcome-card">
-                        <div className="welcome-icon">🎨</div>
-                        <h2 className="welcome-title">{t('editor.welcomeTitle')}</h2>
+                        <div className="welcome-samples-grid">
+                            {SAMPLE_IMAGES.map((src, i) => (
+                                <div key={i} className="welcome-sample-cell">
+                                    {sampleLoadErrors.has(i) ? (
+                                        <div className="welcome-sample-placeholder" />
+                                    ) : (
+                                        <img
+                                            src={src}
+                                            alt=""
+                                            className="welcome-sample-img"
+                                            onError={() => setSampleLoadErrors(prev => new Set(prev).add(i))}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                            <div className="welcome-samples-overlay">
+                                <span className="welcome-samples-badge">
+                                    {t('editor.emptyBadge')}
+                                </span>
+                                <span className="welcome-samples-sub">
+                                    {t('editor.emptySub')}
+                                </span>
+                            </div>
+                        </div>
 
                         <button
-                            className="welcome-oneclick-btn"
-                            onClick={onOneClickGenerate}
-                            disabled={isGenerating}
+                            className="welcome-cta-btn"
+                            onClick={handleEmptyStateCta}
                         >
-                            ✨ {t('editor.welcomeOneClick')}
+                            {t('editor.emptyCta')}
                         </button>
-
-                        <p className="welcome-description">{t('editor.welcomeDescription')}</p>
-
-                        <div className="welcome-divider" />
-
-                        <p className="welcome-or-try">{t('editor.welcomeOrTry')}</p>
-
-                        <div className="welcome-samples">
-                            {samplePrompts.map((prompt, i) => (
-                                <button
-                                    key={i}
-                                    className="welcome-sample-btn"
-                                    onClick={() => onSamplePrompt(prompt)}
-                                >
-                                    💡 {prompt}
-                                </button>
-                            ))}
-                        </div>
+                        <p className="welcome-cta-note">
+                            {t('editor.emptyCtaNote')}
+                        </p>
                     </div>
                 ) : (
                     /* Results Grid */
