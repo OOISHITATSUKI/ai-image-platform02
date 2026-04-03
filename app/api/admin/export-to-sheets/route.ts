@@ -35,6 +35,8 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
     const apiKey = process.env.UMAMI_API_KEY;
     const websiteId = process.env.UMAMI_WEBSITE_ID;
 
+    console.log('[umami] Config:', { apiUrl, apiKey: apiKey ? '***set***' : 'MISSING', websiteId });
+
     if (!apiUrl || !apiKey || !websiteId) {
         console.warn('[umami] Missing UMAMI_API_URL, UMAMI_API_KEY, or UMAMI_WEBSITE_ID');
         return { pageviews: 0, visitors: 0, bounceRate: 0, mobileRatio: 0, topReferrers: [] };
@@ -53,44 +55,57 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
     const startAt = startOfYesterday.getTime();
     const endAt = endOfYesterday.getTime();
 
+    console.log('[umami] Fetching stats for:', { startAt, endAt, start: new Date(startAt).toISOString(), end: new Date(endAt).toISOString() });
+
     try {
         // Fetch stats (pageviews, visitors, bounces, totaltime)
-        const statsRes = await fetch(
-            `${apiUrl}/websites/${websiteId}/stats?startAt=${startAt}&endAt=${endAt}`,
-            { headers }
-        );
-        const statsData = await statsRes.json();
+        const statsUrl = `${apiUrl}/websites/${websiteId}/stats?startAt=${startAt}&endAt=${endAt}`;
+        console.log('[umami] Stats URL:', statsUrl);
+        const statsRes = await fetch(statsUrl, { headers });
+        console.log('[umami] Stats response status:', statsRes.status);
+        const statsText = await statsRes.text();
+        console.log('[umami] Stats raw response:', statsText);
 
+        const statsData = JSON.parse(statsText);
         const pageviews = statsData?.pageviews?.value ?? 0;
         const visitors = statsData?.visitors?.value ?? 0;
         const bounces = statsData?.bounces?.value ?? 0;
         const bounceRate = pageviews > 0 ? Math.round((bounces / pageviews) * 100) : 0;
 
+        console.log('[umami] Parsed stats:', { pageviews, visitors, bounces, bounceRate });
+
         // Fetch device breakdown for mobile ratio
         let mobileRatio = 0;
         try {
-            const devicesRes = await fetch(
-                `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=device`,
-                { headers }
-            );
-            const devicesRaw = await devicesRes.json();
+            const devicesUrl = `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=device`;
+            console.log('[umami] Devices URL:', devicesUrl);
+            const devicesRes = await fetch(devicesUrl, { headers });
+            console.log('[umami] Devices response status:', devicesRes.status);
+            const devicesText = await devicesRes.text();
+            console.log('[umami] Devices raw response:', devicesText);
+
+            const devicesRaw = JSON.parse(devicesText);
             const devicesData: { x: string; y: number }[] = Array.isArray(devicesRaw) ? devicesRaw
                 : (devicesRaw?.data ?? devicesRaw?.rows ?? []);
+            console.log('[umami] Devices parsed:', devicesData);
             const totalDevices = devicesData.reduce((sum, d) => sum + d.y, 0);
             const mobileCount = devicesData.find(d => d.x === 'mobile')?.y ?? 0;
             mobileRatio = totalDevices > 0 ? Math.round((mobileCount / totalDevices) * 100) : 0;
         } catch (e) {
-            console.warn('[umami] Failed to fetch device metrics:', e);
+            console.error('[umami] Failed to fetch device metrics:', e);
         }
 
         // Fetch referrers TOP 3
         let topReferrers: string[] = [];
         try {
-            const refRes = await fetch(
-                `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=referrer`,
-                { headers }
-            );
-            const refRaw = await refRes.json();
+            const refUrl = `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=referrer`;
+            console.log('[umami] Referrers URL:', refUrl);
+            const refRes = await fetch(refUrl, { headers });
+            console.log('[umami] Referrers response status:', refRes.status);
+            const refText = await refRes.text();
+            console.log('[umami] Referrers raw response:', refText);
+
+            const refRaw = JSON.parse(refText);
             const refData: { x: string; y: number }[] = Array.isArray(refRaw) ? refRaw
                 : (refRaw?.data ?? refRaw?.rows ?? []);
             topReferrers = refData
@@ -98,7 +113,7 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
                 .slice(0, 3)
                 .map(r => `${r.x || '(direct)'}(${r.y})`);
         } catch (e) {
-            console.warn('[umami] Failed to fetch referrer metrics:', e);
+            console.error('[umami] Failed to fetch referrer metrics:', e);
         }
 
         return { pageviews, visitors, bounceRate, mobileRatio, topReferrers };
@@ -183,8 +198,13 @@ export async function collectKpiData() {
         } catch { /* ignore */ }
     }
 
-    // ── Umami analytics ──
-    const umami = await fetchUmamiStats();
+    // ── Umami analytics (isolated – failure won't block Sheets export) ──
+    let umami: UmamiStats = { pageviews: 0, visitors: 0, bounceRate: 0, mobileRatio: 0, topReferrers: [] };
+    try {
+        umami = await fetchUmamiStats();
+    } catch (e) {
+        console.error('[collectKpiData] Umami fetch failed, continuing without Umami data:', e);
+    }
 
     return {
         dateStr,
@@ -224,25 +244,66 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
         console.warn(`[export-to-sheets] 'KPI_Daily' not found. Using '${targetSheet}' instead.`);
     }
 
+    // Ensure header row (row 2) has Umami column names in O-U
+    try {
+        const headerRes = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: `'${targetSheet}'!O2:U2`,
+        });
+        const existing = headerRes.data.values?.[0] ?? [];
+        if (!existing[0]) {
+            await sheets.spreadsheets.values.update({
+                spreadsheetId: sheetId,
+                range: `'${targetSheet}'!O2:U2`,
+                valueInputOption: 'RAW',
+                requestBody: {
+                    values: [['ページビュー数', 'ユニークビジター数', '直帰率', 'モバイル比率', '流入元TOP1', '流入元TOP2', '流入元TOP3']],
+                },
+            });
+            console.log('[export-to-sheets] Added Umami header columns O2:U2');
+        }
+    } catch (e) {
+        console.warn('[export-to-sheets] Failed to update Umami headers:', e);
+    }
+
+    // Split referrers into 3 separate columns
+    const ref1 = data.topReferrers[0] ?? '';
+    const ref2 = data.topReferrers[1] ?? '';
+    const ref3 = data.topReferrers[2] ?? '';
+
+    // A:日付 B:バージョン C:全生成数 D:プロンプト入力率 E:サジェストタップ率
+    // F:ゲスト再生成率 G:ゲスト→登録転換率 H:モーダル①登録転換率
+    // I:顔保存率 J:顔モーダル課金転換 K:無料→有料転換率
+    // L:平均生成数/ゲスト M:NSFW ON率 N:メモ
+    // O:ページビュー数 P:ユニークビジター数 Q:直帰率 R:モバイル比率
+    // S:流入元TOP1 T:流入元TOP2 U:流入元TOP3
     const row = [
-        data.dateStr,
-        data.totalGens,
-        `${data.promptInputRate}%`,
-        `${data.guestRegenerationRate}%`,
-        `${data.guestConversionRate}%`,
-        `${data.qaCompletionRate}%`,
-        `${data.nsfwOnRate}%`,
-        // Umami columns
-        data.pageviews,
-        data.visitors,
-        `${data.bounceRate}%`,
-        `${data.mobileRatio}%`,
-        data.topReferrers.join(', '),
+        data.dateStr,                     // A: 日付
+        'v2.0',                           // B: バージョン
+        data.totalGens,                   // C: 全生成数
+        `${data.promptInputRate}%`,       // D: プロンプト入力率
+        '',                               // E: サジェストタップ率（未実装）
+        `${data.guestRegenerationRate}%`, // F: ゲスト再生成率
+        `${data.guestConversionRate}%`,   // G: ゲスト→登録転換率
+        '',                               // H: モーダル①登録転換率（未実装）
+        '',                               // I: 顔保存率（未実装）
+        '',                               // J: 顔モーダル課金転換（未実装）
+        '',                               // K: 無料→有料転換率（未実装）
+        '',                               // L: 平均生成数/ゲスト（未実装）
+        `${data.nsfwOnRate}%`,            // M: NSFW ON率
+        '',                               // N: メモ
+        data.pageviews,                   // O: ページビュー数
+        data.visitors,                    // P: ユニークビジター数
+        `${data.bounceRate}%`,            // Q: 直帰率
+        `${data.mobileRatio}%`,           // R: モバイル比率
+        ref1,                             // S: 流入元TOP1
+        ref2,                             // T: 流入元TOP2
+        ref3,                             // U: 流入元TOP3
     ];
 
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
-        range: `'${targetSheet}'!A:L`,
+        range: `'${targetSheet}'!A:U`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
