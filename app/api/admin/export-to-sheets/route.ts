@@ -73,7 +73,9 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
                 `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=device`,
                 { headers }
             );
-            const devicesData: { x: string; y: number }[] = await devicesRes.json();
+            const devicesRaw = await devicesRes.json();
+            const devicesData: { x: string; y: number }[] = Array.isArray(devicesRaw) ? devicesRaw
+                : (devicesRaw?.data ?? devicesRaw?.rows ?? []);
             const totalDevices = devicesData.reduce((sum, d) => sum + d.y, 0);
             const mobileCount = devicesData.find(d => d.x === 'mobile')?.y ?? 0;
             mobileRatio = totalDevices > 0 ? Math.round((mobileCount / totalDevices) * 100) : 0;
@@ -88,7 +90,9 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
                 `${apiUrl}/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=referrer`,
                 { headers }
             );
-            const refData: { x: string; y: number }[] = await refRes.json();
+            const refRaw = await refRes.json();
+            const refData: { x: string; y: number }[] = Array.isArray(refRaw) ? refRaw
+                : (refRaw?.data ?? refRaw?.rows ?? []);
             topReferrers = refData
                 .sort((a, b) => b.y - a.y)
                 .slice(0, 3)
@@ -239,7 +243,7 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
         range: `'${targetSheet}'!A:L`,
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
             values: [row],
