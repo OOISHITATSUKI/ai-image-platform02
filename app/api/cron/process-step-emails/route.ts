@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
                 const step = steps[currentStepIndex];
 
                 // Send the email
-                const success = await sendCustomEmail(user.email, step.subject, step.body);
+                const success = await sendCustomEmail(user.email, step.subject, step.body, 'step_email');
 
                 if (!success) {
                     console.error(`[Cron] failed to send email for entry ${entry.id}`);

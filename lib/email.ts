@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import fs from 'fs';
 import path from 'path';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 let resendInstance: Resend | null = null;
 const getResend = () => {
@@ -14,6 +15,29 @@ const getResend = () => {
   return resendInstance;
 };
 const FROM = process.env.RESEND_FROM || 'Image Nude <noreply@imagenude.com>';
+
+// ── Email Log Helper ──────────────────────────────────────────
+async function logEmail(params: {
+  userId?: string | null;
+  emailTo: string;
+  emailType: string;
+  subject: string;
+  status: 'sent' | 'failed';
+  errorMessage?: string | null;
+}) {
+  try {
+    await supabaseAdmin.from('email_logs').insert({
+      user_id: params.userId ?? null,
+      email_to: params.emailTo,
+      email_type: params.emailType,
+      subject: params.subject,
+      status: params.status,
+      error_message: params.errorMessage ?? null,
+    });
+  } catch (e) {
+    console.error('[Email] Failed to log email:', e);
+  }
+}
 
 export async function sendOTPEmail(to: string, otp: string, type: 'register' | 'login' | 'reset' | 'verify' = 'register') {
   const subjects: Record<string, string> = {
@@ -60,12 +84,15 @@ export async function sendOTPEmail(to: string, otp: string, type: 'register' | '
     });
     if (error) {
       console.error('[Email] Send failed:', error);
+      await logEmail({ emailTo: to, emailType: type === 'reset' ? 'reset_password' : 'verify', subject: subjects[type], status: 'failed', errorMessage: error.message });
       return false;
     }
     console.log(`[Email] OTP sent to ${to} (type: ${type}, id: ${data?.id})`);
+    await logEmail({ emailTo: to, emailType: type === 'reset' ? 'reset_password' : 'verify', subject: subjects[type], status: 'sent' });
     return true;
   } catch (err) {
     console.error('[Email] Error:', err);
+    await logEmail({ emailTo: to, emailType: type === 'reset' ? 'reset_password' : 'verify', subject: subjects[type], status: 'failed', errorMessage: String(err) });
     return false;
   }
 }
@@ -200,12 +227,15 @@ export async function sendWelcomeEmail(to: string, locale: string): Promise<bool
     });
     if (error) {
       console.error('[Email] Welcome email failed:', error);
+      await logEmail({ emailTo: to, emailType: 'welcome', subject: content.subject, status: 'failed', errorMessage: error.message });
       return false;
     }
     console.log(`[Email] Welcome email sent to ${to} (locale: ${locale}, id: ${data?.id})`);
+    await logEmail({ emailTo: to, emailType: 'welcome', subject: content.subject, status: 'sent' });
     return true;
   } catch (err) {
     console.error('[Email] Welcome email error:', err);
+    await logEmail({ emailTo: to, emailType: 'welcome', subject: content.subject, status: 'failed', errorMessage: String(err) });
     return false;
   }
 }
@@ -377,7 +407,7 @@ export async function sendWeeklyBackupReport(report: {
 }
 
 // ── Admin → User Custom Email ──────────────────────────────
-export async function sendCustomEmail(to: string, subject: string, body: string): Promise<boolean> {
+export async function sendCustomEmail(to: string, subject: string, body: string, emailType: string = 'manual'): Promise<boolean> {
     try {
         const resend = getResend();
         if (!resend) {
@@ -409,13 +439,16 @@ export async function sendCustomEmail(to: string, subject: string, body: string)
 
         if (error) {
             console.error('[Email] Custom email send failed:', error);
+            await logEmail({ emailTo: to, emailType, subject, status: 'failed', errorMessage: error.message });
             return false;
         }
 
         console.log(`[Email] Custom email sent to ${to} (id: ${data?.id})`);
+        await logEmail({ emailTo: to, emailType, subject, status: 'sent' });
         return true;
     } catch (err) {
         console.error('[Email] Custom email error:', err);
+        await logEmail({ emailTo: to, emailType, subject, status: 'failed', errorMessage: String(err) });
         return false;
     }
 }

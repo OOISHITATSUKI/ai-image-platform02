@@ -267,80 +267,47 @@ export default function RightPanel({
                                             style={{ cursor: 'pointer' }}
                                             onClick={() => setLightboxUrl(msg.imageUrl!)}
                                         />
-                                        <div
-                                            className="result-overlay"
-                                            onClick={isMobile ? undefined : () => setLightboxUrl(msg.imageUrl!)}
-                                        >
-                                            <div className="result-actions">
+                                        <div className="result-action-bar">
                                                 <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLightboxUrl(msg.imageUrl!); }}
-                                                    title={t('actions.expand') || 'Expand'}
+                                                    className="result-action-bar-btn"
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionInpaint(msg.imageUrl!); }}
                                                 >
-                                                    🔍
+                                                    <span className="result-action-bar-icon">🔞</span>
+                                                    <span className="result-action-bar-label">脱衣</span>
                                                 </button>
                                                 <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); activeChatId && toggleFavorite(activeChatId, msg.id); }}
-                                                    title={t('actions.favorite')}
+                                                    className="result-action-bar-btn"
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionFaceSwap(msg.imageUrl!); }}
                                                 >
-                                                    {msg.isFavorite ? '❤️' : '🤍'}
+                                                    <span className="result-action-bar-icon">👤</span>
+                                                    <span className="result-action-bar-label">顔変え</span>
                                                 </button>
-                                                {isAuthenticated ? (
-                                                    <button
-                                                        className="result-action-btn"
-                                                        onPointerDown={(e) => e.stopPropagation()}
-                                                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDownload(msg.imageUrl!); }}
-                                                        title={t('actions.download')}
-                                                    >
-                                                        ⬇
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        className="result-action-btn"
-                                                        onPointerDown={(e) => e.stopPropagation()}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); e.preventDefault();
+                                                <button
+                                                    className="result-action-bar-btn"
+                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionRegenerate(msg.imageUrl!, msg.content.replace(/^Generated from: "(.*)"$/, '$1')); }}
+                                                >
+                                                    <span className="result-action-bar-icon">🔄</span>
+                                                    <span className="result-action-bar-label">再生成</span>
+                                                </button>
+                                                <button
+                                                    className="result-action-bar-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); e.preventDefault();
+                                                        if (isAuthenticated) {
+                                                            handleDownload(msg.imageUrl!);
+                                                        } else {
                                                             fetch('/api/guest/event', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ eventType: 'unlock_click' }),
                                                             }).catch(() => {});
                                                             window.location.href = '/register';
-                                                        }}
-                                                        title="Unlock to download"
-                                                        style={{ fontSize: '0.65rem' }}
-                                                    >
-                                                        🔓
-                                                    </button>
-                                                )}
-                                                <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionInpaint(msg.imageUrl!); }}
-                                                    title={t('chat.actionInpaint')}
+                                                        }
+                                                    }}
                                                 >
-                                                    🖌
+                                                    <span className="result-action-bar-icon">⭐</span>
+                                                    <span className="result-action-bar-label">保存</span>
                                                 </button>
-                                                <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionFaceSwap(msg.imageUrl!); }}
-                                                    title={t('chat.actionFaceSwap')}
-                                                >
-                                                    🔄
-                                                </button>
-                                                <button
-                                                    className="result-action-btn"
-                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onActionRegenerate(msg.imageUrl!, msg.content.replace(/^Generated from: "(.*)"$/, '$1')); }}
-                                                    title={t('actions.regenerate')}
-                                                >
-                                                    🔃
-                                                </button>
-                                            </div>
                                         </div>
                                         <div
   className="result-time"
