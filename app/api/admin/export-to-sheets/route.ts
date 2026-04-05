@@ -44,16 +44,27 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
 
     const headers = { 'x-umami-api-key': apiKey };
 
-    // Yesterday's date range (full day UTC)
+    // Yesterday's date range in JST (UTC+9)
+    // JST midnight = UTC 15:00 of the previous day
     const now = new Date();
-    const startOfYesterday = new Date(now);
-    startOfYesterday.setUTCDate(now.getUTCDate() - 1);
-    startOfYesterday.setUTCHours(0, 0, 0, 0);
-    const endOfYesterday = new Date(startOfYesterday);
-    endOfYesterday.setUTCHours(23, 59, 59, 999);
+    const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const jstYesterday = new Date(jstNow);
+    jstYesterday.setUTCDate(jstNow.getUTCDate() - 1);
 
-    const startAt = startOfYesterday.getTime();
-    const endAt = endOfYesterday.getTime();
+    // Start of yesterday JST = yesterday 00:00 JST = yesterday -9h UTC
+    const startOfYesterdayJST = new Date(Date.UTC(
+        jstYesterday.getUTCFullYear(),
+        jstYesterday.getUTCMonth(),
+        jstYesterday.getUTCDate(),
+        0, 0, 0, 0
+    ));
+    startOfYesterdayJST.setTime(startOfYesterdayJST.getTime() - 9 * 60 * 60 * 1000);
+
+    // End of yesterday JST = yesterday 23:59:59.999 JST
+    const endOfYesterdayJST = new Date(startOfYesterdayJST.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+    const startAt = startOfYesterdayJST.getTime();
+    const endAt = endOfYesterdayJST.getTime();
 
     console.log('[umami] Fetching stats for:', { startAt, endAt, start: new Date(startAt).toISOString(), end: new Date(endAt).toISOString() });
 

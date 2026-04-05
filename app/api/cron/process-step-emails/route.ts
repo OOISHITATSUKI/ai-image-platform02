@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 function verifyCronSecret(req: NextRequest): boolean {
-    const headerSecret = req.headers.get('x-cron-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
+    const headerSecret = req.headers.get('x-vercel-cron-auth') || req.headers.get('x-cron-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
     return !!CRON_SECRET && headerSecret === CRON_SECRET;
 }
 
@@ -131,4 +131,9 @@ export async function POST(req: NextRequest) {
         console.error('[Cron] process-step-emails error:', err);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
+}
+
+// Support GET for Vercel Cron
+export async function GET(req: NextRequest) {
+    return POST(req);
 }

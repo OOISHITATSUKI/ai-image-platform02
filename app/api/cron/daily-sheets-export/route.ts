@@ -3,9 +3,12 @@ import type { NextRequest } from 'next/server';
 import { collectKpiData, writeToSheets } from '@/app/api/admin/export-to-sheets/route';
 
 export async function GET(req: NextRequest) {
-    // Authenticate via CRON_SECRET
+    // Authenticate via CRON_SECRET (support both Vercel cron header and Bearer token)
     const authHeader = req.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const bearerToken = authHeader?.replace('Bearer ', '');
+    const vercelCronToken = req.headers.get('x-vercel-cron-auth');
+
+    const token = vercelCronToken || bearerToken;
 
     if (!process.env.CRON_SECRET || token !== process.env.CRON_SECRET) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

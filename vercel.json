@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-sheets-export",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-guest-images",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/process-step-emails",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
