@@ -482,6 +482,7 @@
   "guest": {
     "unlockImage": "この画像をアンロック — 無料、10秒",
     "rateLimitReached": "次の生成までお待ちください。",
+    "dailyLimitReached": "本日の無料枠（5回/日）に達しました。アカウント登録で20クレジットプレゼント！（txt2img 20回分 or Face Swap 4回分）ゲスト生成は24時間後にまた使えます。",
     "bannerTitle": "結果が気に入りましたか？",
     "bannerBenefitUnlock": "透かしなしで画像をアンロック",
     "bannerBenefitDownload": "高画質でダウンロード",

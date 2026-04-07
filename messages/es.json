@@ -422,6 +422,7 @@
   "guest": {
     "unlockImage": "Desbloquear esta imagen — Gratis, 10 segundos",
     "rateLimitReached": "Espera antes de generar de nuevo.",
+    "dailyLimitReached": "Has alcanzado el límite diario gratuito (5/día). Regístrate y obtén 20 créditos gratis — ¡20 txt2img o 4 face swaps! La generación de invitados se restablece en 24 horas.",
     "bannerTitle": "¿Te gusta el resultado?",
     "bannerBenefitUnlock": "Desbloquea sin marca de agua",
     "bannerBenefitDownload": "Descarga en alta calidad",

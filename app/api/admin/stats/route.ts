@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { countDailyLimitHits } from '@/lib/db/guest_generations';
 
 export async function checkAdmin() {
     const cookieStore = await cookies();
@@ -170,5 +171,6 @@ export async function GET(req: NextRequest) {
         guestGenByType,
         guestUnlockClicks,
         guestUnlockedTotal,
+        guestDailyLimitHitsToday: countDailyLimitHits(5),
     });
 }

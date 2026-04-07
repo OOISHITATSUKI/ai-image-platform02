@@ -56,3 +56,25 @@ export function markGuestGenerationsRegistered(guestId: string): void {
 export function getAllGuestGenerations(): GuestGenerationRecord[] {
     return Object.values(readGuest()).sort((a, b) => b.createdAt - a.createdAt);
 }
+
+/** Count generations for a specific IP in the last 24 hours */
+export function countGuestGenerationsLast24h(guestId: string): number {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return Object.values(readGuest()).filter(
+        r => r.guestId === guestId && r.createdAt >= cutoff
+    ).length;
+}
+
+/** Count how many unique IPs hit the daily limit today */
+export function countDailyLimitHits(dailyLimit: number): number {
+    const now = new Date();
+    const msToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const records = Object.values(readGuest());
+    const ipCounts: Record<string, number> = {};
+    for (const r of records) {
+        if (r.createdAt >= msToday) {
+            ipCounts[r.guestId] = (ipCounts[r.guestId] || 0) + 1;
+        }
+    }
+    return Object.values(ipCounts).filter(c => c >= dailyLimit).length;
+}

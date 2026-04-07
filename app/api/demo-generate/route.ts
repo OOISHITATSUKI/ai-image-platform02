@@ -4,7 +4,7 @@ import path from "path";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { saveGuestImage } from "@/lib/db/guest_images";
-import { saveGuestGeneration } from "@/lib/db/guest_generations";
+import { saveGuestGeneration, countGuestGenerationsLast24h } from "@/lib/db/guest_generations";
 
 const DEMO_STATS_FILE = path.join(process.cwd(), "data", "demo_stats.json");
 const IMAGES_DIR = path.join(process.cwd(), "data", "images");
@@ -29,6 +29,7 @@ const NOVITA_BASE_SYNC = "https://api.novita.ai/v3";
 // ── Rate limiting: 75-second cooldown per IP ──
 const lastGenerationTime = new Map<string, number>();
 const COOLDOWN_MS = 45 * 1000;
+const GUEST_DAILY_LIMIT = 5;
 
 function checkCooldown(ip: string): { allowed: boolean; remainingSeconds: number } {
     const now = Date.now();
@@ -179,6 +180,21 @@ export async function POST(request: NextRequest) {
                 {
                     error: `Please wait ${cooldownCheck.remainingSeconds} seconds before generating again.`,
                     remainingSeconds: cooldownCheck.remainingSeconds,
+                },
+                { status: 429 }
+            );
+        }
+
+        // ── Daily limit check: 5 generations per 24h ──
+        const todayCount = countGuestGenerationsLast24h(ip);
+        if (todayCount >= GUEST_DAILY_LIMIT) {
+            recordDemoEvent("daily_limit", ip);
+            return NextResponse.json(
+                {
+                    error: "daily_limit_reached",
+                    dailyLimitReached: true,
+                    dailyLimit: GUEST_DAILY_LIMIT,
+                    todayCount,
                 },
                 { status: 429 }
             );

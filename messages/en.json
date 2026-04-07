@@ -487,6 +487,7 @@
   "guest": {
     "unlockImage": "Unlock This Image — Free, 10 seconds",
     "rateLimitReached": "Please wait before generating again.",
+    "dailyLimitReached": "You've reached today's free limit (5/day). Sign up to get 20 free credits — that's 20 txt2img or 4 face swaps! Guest generation resets in 24 hours.",
     "bannerTitle": "Like the result?",
     "bannerBenefitUnlock": "Unlock this image without watermark",
     "bannerBenefitDownload": "Download in full quality",

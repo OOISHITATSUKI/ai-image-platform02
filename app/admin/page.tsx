@@ -49,6 +49,7 @@ interface Stats {
     guestGenByType: { txt2img: number; faceswap: number; inpaint: number };
     guestUnlockClicks: number;
     guestUnlockedTotal: number;
+    guestDailyLimitHitsToday: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -231,6 +232,10 @@ export default function AdminDashboardPage() {
                 <div style={cardStyle}>
                     <div style={labelStyle}>Unlockクリック数</div>
                     <div style={valueStyle('#fb923c')}>{stats.guestUnlockClicks?.toLocaleString() || 0}</div>
+                </div>
+                <div style={cardStyle}>
+                    <div style={labelStyle}>本日の上限到達数</div>
+                    <div style={valueStyle('#f87171')}>{stats.guestDailyLimitHitsToday?.toLocaleString() || 0}</div>
                 </div>
             </div>
             {stats.guestGenByType && (

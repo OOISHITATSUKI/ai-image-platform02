@@ -359,6 +359,11 @@ export default function HomePage() {
 
             if (res.status === 429) {
                 const data = await res.json();
+                if (data.dailyLimitReached) {
+                    setGenerationError(t('guest.dailyLimitReached'));
+                    setIsGenerating(false);
+                    return;
+                }
                 const remaining = data.remainingSeconds || 75;
                 setGuestCooldown(remaining);
                 setGenerationError(data.error || t('guest.rateLimitReached'));

@@ -415,6 +415,7 @@
   "guest": {
     "unlockImage": "解锁此图片 — 免费，10秒",
     "rateLimitReached": "请等待后再次生成。",
+    "dailyLimitReached": "已达到今日免费限额（5次/天）。注册即送20免费积分——可生成20张txt2img或4次换脸！访客生成将在24小时后重置。",
     "bannerTitle": "喜欢这个结果吗？",
     "bannerBenefitUnlock": "无水印解锁图片",
     "bannerBenefitDownload": "高清下载",

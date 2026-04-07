@@ -425,6 +425,7 @@
   "guest": {
     "unlockImage": "이 이미지 잠금 해제 — 무료, 10초",
     "rateLimitReached": "다시 생성하기 전에 잠시 기다려 주세요.",
+    "dailyLimitReached": "오늘의 무료 한도(5회/일)에 도달했습니다. 가입하면 20크레딧 무료 제공 — txt2img 20회 또는 페이스 스왑 4회! 게스트 생성은 24시간 후 초기화됩니다.",
     "bannerTitle": "결과가 마음에 드시나요?",
     "bannerBenefitUnlock": "워터마크 없이 이미지 잠금 해제",
     "bannerBenefitDownload": "고화질로 다운로드",
