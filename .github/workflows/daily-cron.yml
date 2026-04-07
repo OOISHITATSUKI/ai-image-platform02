@@ -1,0 +1,32 @@
+name: Daily Cron Jobs
+
+on:
+  schedule:
+    # Daily Sheets Export - 00:00 UTC (09:00 JST)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  daily-sheets-export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sheets Export
+        run: |
+          curl -sf "https://imagenude.com/api/cron/daily-sheets-export" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+
+  process-step-emails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process Step Emails
+        run: |
+          curl -sf "https://imagenude.com/api/cron/process-step-emails" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+
+  cleanup-guest-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup Guest Images
+        run: |
+          curl -sf "https://imagenude.com/api/cron/cleanup-guest-images" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
