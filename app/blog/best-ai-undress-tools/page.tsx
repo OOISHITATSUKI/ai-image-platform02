@@ -6,12 +6,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'I Tested 3 AI Undress Tools So You Don\'t Have To — Here\'s What Actually Works (2026) | Image Nude',
-  description: 'Honest comparison of SoulGen, Promptchan AI, and Undress.app. Real screenshots, real prices, real opinions.',
+  title: 'Best AI Undress Tools in 2025 (Free & Paid) | ImageNude',
+  description: 'Honest comparison of the top AI undress tools. Find the best free options with no watermark and no login required.',
   alternates: { canonical: 'https://imagenude.com/blog/best-ai-undress-tools' },
   openGraph: {
-    title: 'I Tested 3 AI Undress Tools — Here\'s What Actually Works (2026) | Image Nude',
-    description: 'I signed up, paid, and tested SoulGen, Promptchan AI, and Undress.app myself. Honest comparison of features, pricing, and quality.',
+    title: 'Best AI Undress Tools in 2025 (Free & Paid) | ImageNude',
+    description: 'Honest comparison of the top AI undress tools. Find the best free options with no watermark and no login required.',
     url: 'https://imagenude.com/blog/best-ai-undress-tools',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],

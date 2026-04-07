@@ -5,12 +5,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'AI Face Swap for Adults — What I Learned After 1,000+ Swaps | Image Nude',
-  description: 'The angle problem, the lighting trick, and why 90% of face swap failures come from the same mistake. Real tips from hands-on testing.',
+  title: 'AI Face Swap for Adults — Free, Fast & Private | ImageNude',
+  description: 'The best AI face swap tool for adult content. Free to try, no login needed, results in under 10 seconds.',
   alternates: { canonical: 'https://imagenude.com/blog/ai-face-swap-adults' },
   openGraph: {
-    title: 'AI Face Swap for Adults — What I Learned After 1,000+ Swaps | Image Nude',
-    description: 'The angle problem, the lighting trick, and why 90% of face swap failures come from the same mistake. Real tips from hands-on testing.',
+    title: 'AI Face Swap for Adults — Free, Fast & Private | ImageNude',
+    description: 'The best AI face swap tool for adult content. Free to try, no login needed, results in under 10 seconds.',
     url: 'https://imagenude.com/blog/ai-face-swap-adults',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],

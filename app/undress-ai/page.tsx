@@ -6,12 +6,12 @@ import FaqSection from './FaqSection';
 import LangSelector from '@/components/blog/LangSelector';
 
 export const metadata: Metadata = {
-  title: 'AI Undress Tool — Free, No Login Required | Image Nude',
-  description: 'Remove clothing from any photo with AI. Free to try, no login needed. No sign up. Photorealistic results in 8 seconds.',
+  title: 'AI Undress Free — No Login Required | ImageNude',
+  description: 'Undress AI images instantly. 100% free to try, no account needed. Powered by advanced AI. Results in seconds.',
   alternates: { canonical: 'https://imagenude.com/undress-ai' },
   openGraph: {
-    title: 'AI Undress Tool — Free, No Login Required | Image Nude',
-    description: 'Remove clothing from any photo with AI. Free to try, no login needed. No sign up. Photorealistic results in 8 seconds.',
+    title: 'AI Undress Free — No Login Required | ImageNude',
+    description: 'Undress AI images instantly. 100% free to try, no account needed. Powered by advanced AI. Results in seconds.',
     url: 'https://imagenude.com/undress-ai',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -67,11 +67,16 @@ export default function UndressAiPage() {
                 #1 AI Undress Tool Online
               </div>
               <h1 className={styles['lp-h1']}>
-                AI Undress Tool<br /><span className={styles['lp-h1-accent']}>Free, No Login Required</span>
+                AI Undress —<br /><span className={styles['lp-h1-accent']}>Free, No Login Required</span>
               </h1>
               <p className={styles['lp-hero-desc']}>
                 Upload any photo and let our advanced AI undress tool generate a photorealistic nude version in seconds.
                 Free to use — no login required, no sign up needed. Just upload, paint, and generate.
+              </p>
+              <p className={styles['lp-trust-badges']} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: 14, color: '#10b981', fontWeight: 600, margin: '12px 0 20px' }}>
+                <span>&#x2713; Free to try</span>
+                <span>&#x2713; No account needed</span>
+                <span>&#x2713; Results in seconds</span>
               </p>
               <div className={styles['lp-cta-group']}>
                 <Link href="/register" className={styles['lp-btn-primary']}>&#x2726; Try for Free</Link>
@@ -251,6 +256,23 @@ export default function UndressAiPage() {
               &#x2726; Start Free — 20 Credits Included
             </Link>
             <p style={{ marginTop: 16, fontSize: 13, color: '#444444' }}>18+ only &middot; All images AI-generated &middot; Images deleted within 1 hour</p>
+          </div>
+        </section>
+
+        {/* SEO Keyword Section */}
+        <section className={styles['lp-section']}>
+          <div className={styles['lp-section-inner']}>
+            <h2 className={styles['lp-h2']}>Free AI Undress — No Login, No Sign Up</h2>
+            <p className={styles['lp-section-sub']} style={{ margin: '0 auto 24px', maxWidth: 640 }}>
+              ImageNude is the only AI undress tool that&apos;s completely free with no login required.
+              No account, no credit card, no registration. Just upload and generate.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, maxWidth: 480, margin: '0 auto', textAlign: 'left', fontSize: 16, lineHeight: 2, color: '#ccc' }}>
+              <li>&#x2713; Free to try — no credit card required</li>
+              <li>&#x2713; No login or sign up needed</li>
+              <li>&#x2713; Works on mobile and desktop</li>
+              <li>&#x2713; Results in under 10 seconds</li>
+            </ul>
           </div>
         </section>
 

@@ -6,12 +6,12 @@ import FaqSection from './FaqSection';
 import LangSelector from '@/components/blog/LangSelector';
 
 export const metadata: Metadata = {
-  title: 'AI Face Swap — Free Online Tool, No Sign Up | Image Nude',
-  description: 'Swap faces in any photo with AI. Free to try, no login required. Realistic results in seconds. NSFW supported.',
+  title: 'AI Face Swap Adults — Free & Instant | ImageNude',
+  description: 'Swap faces in any image with AI. Free to use, no registration required. Realistic results in seconds.',
   alternates: { canonical: 'https://imagenude.com/face-swap' },
   openGraph: {
-    title: 'AI Face Swap — Free Online Tool, No Sign Up | Image Nude',
-    description: 'Swap faces in any photo with AI. Free to try, no login required. Realistic results in seconds. NSFW supported.',
+    title: 'AI Face Swap Adults — Free & Instant | ImageNude',
+    description: 'Swap faces in any image with AI. Free to use, no registration required. Realistic results in seconds.',
     url: 'https://imagenude.com/face-swap',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -77,10 +77,15 @@ export default function FaceSwapPage() {
                 </div>
                 <h1 className={styles['fs-h1']}>
                   AI Face Swap —<br />
-                  <span className={styles['fs-accent']}>Free Online Tool, No Sign Up</span>
+                  <span className={styles['fs-accent']}>Free, Instant, No Sign Up</span>
                 </h1>
                 <p className={styles['fs-hero-desc']}>
                   Swap any face into any image with our free AI face swap tool. No sign up required — just upload two photos and get photorealistic results in seconds. NSFW supported.
+                </p>
+                <p style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: 14, color: '#10b981', fontWeight: 600, margin: '12px 0 20px' }}>
+                  <span>&#x2713; Free to use</span>
+                  <span>&#x2713; No registration</span>
+                  <span>&#x2713; Swap in seconds</span>
                 </p>
                 <div className={styles['fs-hero-actions']}>
                   <Link href="/register" className={styles['fs-btn-primary']}>

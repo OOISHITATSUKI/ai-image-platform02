@@ -6,12 +6,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations | Image Nude',
-  description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
+  title: 'How to Generate NSFW AI Images Free — No Sign Up | ImageNude',
+  description: 'Step-by-step guide to generating NSFW AI images for free. No account required. Works on mobile and desktop.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images' },
   openGraph: {
-    title: 'How to Generate NSFW AI Images — What I Learned After 10,000+ Generations | Image Nude',
-    description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
+    title: 'How to Generate NSFW AI Images Free — No Sign Up | ImageNude',
+    description: 'Step-by-step guide to generating NSFW AI images for free. No account required. Works on mobile and desktop.',
     url: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],

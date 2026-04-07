@@ -1,0 +1,207 @@
+/* === AI Nude Generator Free — Blog Article === */
+
+.ang-root {
+  background: var(--bg-base, #1a1a2e);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* LAYOUT */
+.ang-wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding: 60px 32px;
+  display: grid; grid-template-columns: 1fr 280px; gap: 60px;
+  align-items: start;
+}
+
+.ang-article { max-width: 760px; }
+
+/* HEADER */
+.ang-meta {
+  display: flex; gap: 16px; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.ang-cat-tag {
+  background: rgba(229, 52, 42, 0.12);
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  color: #e5342a;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.ang-meta-date, .ang-meta-read {
+  font-size: 13px; color: #444444;
+}
+
+.ang-h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700; line-height: 1.2;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.ang-intro-box {
+  background: #111111;
+  border-left: 4px solid #e5342a;
+  border-radius: 0 12px 12px 0;
+  padding: 20px 24px; margin-bottom: 40px;
+  font-size: 16px; color: #888888;
+  line-height: 1.7;
+}
+
+/* BODY TYPOGRAPHY */
+.ang-article h2 {
+  font-size: 26px; font-weight: 700;
+  margin: 48px 0 16px;
+  color: #ffffff;
+}
+.ang-article h3 {
+  font-size: 20px; font-weight: 600;
+  margin: 32px 0 12px; color: #ffffff;
+}
+.ang-article p {
+  margin-bottom: 20px; color: #888888;
+}
+.ang-article a { color: #e5342a; text-decoration: none; }
+.ang-article a:hover { text-decoration: underline; }
+.ang-article ul, .ang-article ol {
+  margin: 0 0 20px 24px; color: #888888;
+}
+.ang-article li { margin-bottom: 8px; }
+.ang-article strong { color: #cccccc; }
+
+/* DIVIDER */
+.ang-divider {
+  border: none;
+  border-top: 1px solid #2a1515;
+  margin: 48px 0;
+}
+
+/* TOOL CARD */
+.ang-tool-card {
+  margin: 28px 0;
+  padding: 24px;
+  background: #111111;
+  border: 1px solid #2a1515;
+  border-radius: 14px;
+}
+.ang-tool-card h3 {
+  margin-top: 0;
+  font-size: 22px;
+}
+.ang-tool-rank {
+  display: inline-block;
+  background: rgba(229, 52, 42, 0.12);
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  color: #e5342a;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.ang-tool-pros {
+  margin: 12px 0 0 20px;
+  color: #888888;
+}
+.ang-tool-pros li { margin-bottom: 6px; }
+
+/* FAQ */
+.ang-faq {
+  margin: 32px 0;
+}
+.ang-faq-item {
+  margin-bottom: 24px;
+}
+.ang-faq-q {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+.ang-faq-a {
+  color: #888888;
+  font-size: 16px;
+}
+
+/* CTA */
+.ang-cta-large {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #e5342a;
+  color: white !important; font-size: 16px; font-weight: 600;
+  padding: 14px 28px; border-radius: 8px;
+  text-decoration: none; margin-top: 12px;
+  transition: background 0.2s;
+}
+.ang-cta-large:hover { background: #c62920; text-decoration: none; }
+
+/* CLOSING */
+.ang-closing {
+  font-style: italic;
+  color: #555555;
+}
+
+/* SIDEBAR */
+.ang-sidebar { position: sticky; top: 32px; }
+.ang-toc {
+  background: #111111;
+  border: 1px solid #2a1515;
+  border-radius: 14px; padding: 24px;
+  margin-bottom: 24px;
+}
+.ang-toc h4 {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #888888; margin-bottom: 16px;
+}
+.ang-toc ol { margin: 0; padding-left: 16px; }
+.ang-toc li { margin-bottom: 10px; font-size: 14px; }
+.ang-toc a { color: #888888; text-decoration: none; }
+.ang-toc a:hover { color: #e5342a; }
+
+.ang-sidebar-cta {
+  background: linear-gradient(135deg, rgba(229, 52, 42, 0.15), #111111);
+  border: 1px solid rgba(229, 52, 42, 0.3);
+  border-radius: 14px; padding: 24px; text-align: center;
+}
+.ang-sidebar-cta h4 { font-size: 18px; margin-bottom: 10px; color: #ffffff; }
+.ang-sidebar-cta p { font-size: 14px; color: #888888; margin-bottom: 16px; }
+.ang-sidebar-cta-link {
+  display: block; background: #e5342a; color: white !important;
+  padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px;
+  text-decoration: none; transition: background 0.2s;
+}
+.ang-sidebar-cta-link:hover { background: #c62920; }
+.ang-sidebar-note { font-size: 12px; color: #444444; margin-top: 8px; }
+
+/* FOOTER */
+.ang-footer {
+  border-top: 1px solid #2a1515;
+  padding: 32px;
+  text-align: center;
+  font-size: 13px; color: #444444;
+}
+.ang-footer a { color: #444444; text-decoration: none; }
+.ang-footer a:hover { color: #888888; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .ang-wrap { grid-template-columns: 1fr; padding: 40px 20px; }
+  .ang-sidebar { display: none; }
+  .ang-article { max-width: 100%; }
+}
+
+@media (max-width: 768px) {
+  .ang-root { font-size: 15px; line-height: 1.7; }
+  .ang-wrap { padding: 24px 16px; }
+  .ang-h1 { font-size: clamp(22px, 5vw, 32px); margin-bottom: 16px; }
+  .ang-intro-box { padding: 16px 18px; font-size: 14px; margin-bottom: 28px; }
+  .ang-article h2 { font-size: 20px; margin: 32px 0 12px; }
+  .ang-article p { font-size: 14px; margin-bottom: 16px; }
+  .ang-article ul, .ang-article ol { font-size: 14px; margin-left: 16px; }
+  .ang-divider { margin: 32px 0; }
+  .ang-tool-card { padding: 18px; }
+  .ang-cta-large { display: flex; justify-content: center; width: 100%; box-sizing: border-box; padding: 14px; font-size: 15px; }
+  .ang-footer { padding: 24px 16px; }
+}
