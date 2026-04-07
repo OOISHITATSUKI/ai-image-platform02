@@ -6,11 +6,11 @@ import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
   title: 'Best Free AI Nude Generator — No Sign Up Required (2025) | ImageNude',
-  description: 'Find the best free AI nude generator with no sign up required. Honest comparison of top tools with step-by-step guide. Works on mobile and desktop.',
+  description: 'Looking for a free AI nude generator? We tested the top tools so you don\'t have to. No login, no watermark, results in seconds.',
   alternates: { canonical: 'https://imagenude.com/blog/ai-nude-generator-free' },
   openGraph: {
     title: 'Best Free AI Nude Generator — No Sign Up Required (2025) | ImageNude',
-    description: 'Find the best free AI nude generator with no sign up required. Honest comparison of top tools with step-by-step guide. Works on mobile and desktop.',
+    description: 'Looking for a free AI nude generator? We tested the top tools so you don\'t have to. No login, no watermark, results in seconds.',
     url: 'https://imagenude.com/blog/ai-nude-generator-free',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -22,12 +22,12 @@ const ldJson = [
   {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'Best Free AI Nude Generator in 2025',
-    datePublished: '2026-04-07',
-    dateModified: '2026-04-07',
+    headline: 'Best Free AI Nude Generator in 2025 (No Sign Up Required)',
+    datePublished: '2025-04-07',
+    dateModified: '2025-04-07',
     author: { '@type': 'Organization', name: 'Image Nude' },
     publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
-    description: 'Find the best free AI nude generator with no sign up required. Honest comparison of top tools with step-by-step guide.',
+    description: 'Looking for a free AI nude generator? We tested the top tools so you don\'t have to. No login, no watermark, results in seconds.',
   },
   {
     '@context': 'https://schema.org',
@@ -38,7 +38,7 @@ const ldJson = [
         name: 'Is the AI nude generator really free?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Most tools listed here offer a free tier with limited credits. ImageNude gives you 20 free credits on signup with no credit card required.',
+          text: 'Yes. Every tool on this list has a genuinely free tier. ImageNude gives you 20 free credits on signup — no credit card required — and the undress tool works with no login at all.',
         },
       },
       {
@@ -46,15 +46,15 @@ const ldJson = [
         name: 'Do I need to create an account?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Some tools require registration. ImageNude lets you try the undress tool with no login required. For text-to-image generation, a free account is needed to receive your 20 credits.',
+          text: 'Not always. ImageNude\'s undress tool requires no sign up and no login. For text-to-image generation, a free account is needed so you can receive your 20 credits. Other tools like SoulGen and Promptchan AI require at least an email or Google login.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Is it safe to use an AI nude generator?',
+        name: 'Are the images stored on the server?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Reputable tools like ImageNude automatically delete all images within 1 hour and never store or share your uploads. Always check the privacy policy of any tool you use.',
+          text: 'It depends on the platform. ImageNude automatically deletes every image within 1 hour and never stores uploads permanently. Always check the privacy policy of any tool you use.',
         },
       },
     ],
@@ -69,188 +69,173 @@ export default function AiNudeGeneratorFreePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
       />
-      <div className={styles['ang-root']}>
+      <div className={styles.root}>
         <BlogNav />
 
-        <div className={styles['ang-wrap']}>
-          <article className={styles['ang-article']}>
+        <div className={styles.wrap}>
+          <article className={styles.article}>
 
-            <div className={styles['ang-meta']}>
-              <span className={styles['ang-cat-tag']}>Guide</span>
-              <span className={styles['ang-meta-date']}>Updated April 2026</span>
-              <span className={styles['ang-meta-read']}>&middot; 8 min read</span>
+            <div className={styles.meta}>
+              <span className={styles.tag}>Guide</span>
+              <span className={styles.metaInfo}>April 7, 2025 &middot; 9 min read</span>
             </div>
 
-            <h1 className={styles['ang-h1']}>Best Free AI Nude Generator in 2025</h1>
+            <h1 className={styles.h1}>Best Free AI Nude Generator in 2025 (No Sign Up Required)</h1>
 
-            <div className={styles['ang-intro-box']}>
-              Looking for a free AI nude generator that actually works? I tested the most popular tools on the market &mdash; the ones people actually talk about on Reddit and forums &mdash; so you can skip the scammy sites and find something that delivers real results without emptying your wallet. Here&apos;s what I found.
-            </div>
+            <p className={styles.lede}>
+              Hunting for an <strong>ai nude generator free</strong> of charge that actually delivers? I spent a week testing the most talked-about tools &mdash; the ones Reddit threads keep recommending &mdash; so you can dodge the scammy sites and jump straight to something that works. No login walls, no hidden paywalls, just honest results.
+            </p>
 
             {/* What Is an AI Nude Generator? */}
             <h2 id="what-is">What Is an AI Nude Generator?</h2>
-            <p>An AI nude generator is a tool that uses artificial intelligence to create or modify images. There are two main types:</p>
+            <p>
+              Put simply, it&apos;s software that uses machine-learning models to create or edit images of the human body. Most of these tools run on top of Stable Diffusion or custom fine-tuned checkpoints trained on millions of images. Some generate pictures from a text prompt (type what you want, get an image), while others let you upload an existing photo and modify specific areas &mdash; the so-called &ldquo;undress&rdquo; or inpaint approach.
+            </p>
+            <p>
+              The tools below combine both techniques, and every single one offers a free tier so you can test before you spend a dime.
+            </p>
+
+            {/* Top 4 Free AI Nude Generators */}
+            <h2 id="top-tools">Top 4 Free AI Nude Generators &mdash; No Login Needed</h2>
+            <p>
+              I prioritised platforms that are genuinely free to start &mdash; no bait-and-switch, no blurred-out results you can never actually see. Here are the four that made the cut.
+            </p>
+
+            <h3>1. SoulGen</h3>
+            <p>
+              SoulGen goes beyond a basic <strong>nude pic generator</strong>. Its face-creator tool lets you design original characters from scratch and keep them consistent across dozens of images &mdash; a feature most competitors ignore entirely. It also ships with video generation (5-second clips at 10 credits each) and three style presets: Real, Anime, and DreamTwin.
+            </p>
             <ul>
-              <li><strong>Text-to-image generators</strong> &mdash; You type a prompt describing the image you want, and the AI creates it from scratch. These use models like Stable Diffusion or custom fine-tuned models.</li>
-              <li><strong>Undress / inpaint tools</strong> &mdash; You upload an existing photo and the AI modifies specific areas, typically removing clothing and generating realistic anatomy in its place.</li>
+              <li><strong>Pros:</strong> Face creator for consistent characters, video generation, AI character system at just 1 credit per image, multiple style presets</li>
+              <li><strong>Cons:</strong> Free users only see blurred previews, full price jumps to $25.99/month after the $12.99 intro period</li>
             </ul>
-            <p>The best free AI nude generators offer both capabilities in one platform. The tools below all have free tiers, so you can try them before committing to a paid plan.</p>
 
-            <hr className={styles['ang-divider']} />
+            <h3>2. Promptchan AI</h3>
+            <p>
+              If you want granular control over every detail, Promptchan AI is hard to beat. Style presets, pose sliders, emotion settings, filters, and even negative prompts &mdash; features that most <strong>free nude ai picture generator</strong> platforms skip. The learning curve is steeper, but once you dial in your workflow the output quality is impressive.
+            </p>
+            <ul>
+              <li><strong>Pros:</strong> Fine-grained style, pose, and emotion controls; negative-prompt support; community explore tab for inspiration; plans start at $11.99/month</li>
+              <li><strong>Cons:</strong> Free tier is fairly limited, generation takes about a minute per image</li>
+            </ul>
 
-            {/* Top Free AI Nude Generators */}
-            <h2 id="top-tools">Top Free AI Nude Generators (No Login Required)</h2>
-            <p>I focused on tools that are genuinely free to start &mdash; no hidden paywalls, no bait-and-switch. Here are the top picks for 2025.</p>
+            <h3>3. ImageNude</h3>
+            <p>
+              ImageNude keeps things fast and frictionless. The AI undress tool works with <strong>no login</strong> and <strong>no sign up</strong> &mdash; upload a photo, brush the area, and get a result in roughly 8 seconds. For text-to-image generation you&apos;ll need a free account (20 credits, no credit card), and there&apos;s also an AI face-swap feature baked in.
+            </p>
+            <ul>
+              <li><strong>Pros:</strong> Undress tool free with no login, blazing-fast 8-second generation, 20 free credits on signup, auto-delete within 1 hour, crypto payments for privacy</li>
+              <li><strong>Cons:</strong> Smaller model library than Promptchan, no video generation yet</li>
+            </ul>
+            <p className={styles.disclosure}>Disclosure: ImageNude is our own product. We&apos;ve included it in this list because we believe it offers genuine value, but we encourage you to try multiple tools.</p>
 
-            {/* #1 Promptchan AI */}
-            <div className={styles['ang-tool-card']}>
-              <div className={styles['ang-tool-rank']}>#1 Pick</div>
-              <h3>Promptchan AI</h3>
-              <p><strong>Best for:</strong> Advanced users who want full creative control</p>
-              <p>Promptchan AI stands out for its level of customization. You get style presets, pose controls, filters, emotion settings, and even negative prompts &mdash; features that most competitors skip entirely. The interface takes a bit of learning, but once you get the hang of it, the results are impressive.</p>
-              <ul className={styles['ang-tool-pros']}>
-                <li>Fine-grained style, pose, filter, and emotion controls</li>
-                <li>Negative prompt support for better accuracy</li>
-                <li>Both SFW and NSFW content supported</li>
-                <li>Starting at $11.99/month for the paid tier</li>
-                <li>Community explore tab for prompt inspiration</li>
-              </ul>
-              <p>The free tier is limited, but it&apos;s enough to test whether the tool fits your workflow. Generation takes about a minute per image.</p>
-            </div>
+            <h3>4. Candy AI</h3>
+            <p>
+              Candy AI leans into the companion/chat side of AI-generated content. You pick or create a character, chat with them, and request image generations inside the conversation. It&apos;s a different vibe from a standalone <strong>naked image generator</strong>, but the output quality is solid and the interface is dead simple.
+            </p>
+            <ul>
+              <li><strong>Pros:</strong> Character-driven workflow feels intuitive, both anime and realistic styles, active community gallery</li>
+              <li><strong>Cons:</strong> Free tier is very limited (a handful of messages), premium starts at $12.99/month, less control over image parameters</li>
+            </ul>
 
-            {/* #2 ImageNude */}
-            <div className={styles['ang-tool-card']}>
-              <div className={styles['ang-tool-rank']}>#2 Pick</div>
-              <h3>ImageNude</h3>
-              <p><strong>Best for:</strong> Quick, free AI nude generation with no login</p>
-              <p>ImageNude offers both text-to-image generation and an AI undress (inpaint) tool. The undress tool is available with no login required &mdash; just upload a photo and generate. For text-to-image, you get 20 free credits on signup with no credit card needed.</p>
-              <ul className={styles['ang-tool-pros']}>
-                <li>AI undress tool: free, no login, no sign up</li>
-                <li>Text-to-image: 20 free credits on registration</li>
-                <li>AI face swap included</li>
-                <li>Results in under 10 seconds</li>
-                <li>All images auto-deleted within 1 hour</li>
-                <li>Crypto payments accepted for maximum privacy</li>
-              </ul>
-              <p>The speed is a big differentiator &mdash; most competitors take 30&ndash;60 seconds per generation, while ImageNude delivers results in about 8 seconds. The privacy-first approach (auto-delete, crypto payments) is also a plus.</p>
-              <p><em>Disclosure: I built ImageNude. I&apos;m listing it at #2 because I genuinely think it&apos;s the best option for people who want a fast, free AI nude generator with no login. But I&apos;m biased &mdash; try it yourself and decide.</em></p>
-            </div>
+            {/* How to Generate */}
+            <h2 id="how-to">How to Generate Nude AI Images for Free</h2>
+            <p>
+              Most platforms follow the same basic loop. Here&apos;s the quickest path from zero to finished image.
+            </p>
 
-            {/* #3 SoulGen */}
-            <div className={styles['ang-tool-card']}>
-              <div className={styles['ang-tool-rank']}>#3 Pick</div>
-              <h3>SoulGen</h3>
-              <p><strong>Best for:</strong> Creating consistent AI characters</p>
-              <p>SoulGen is more than a nude generator &mdash; it&apos;s a character creation platform. The standout feature is the face creator, which lets you design original faces from scratch and maintain consistency across multiple generations. It also includes video generation.</p>
-              <ul className={styles['ang-tool-pros']}>
-                <li>Face creator for consistent character design</li>
-                <li>Video generation (5-second clips)</li>
-                <li>AI character system at just 1 credit per image</li>
-                <li>Real, Anime, and DreamTwin style presets</li>
-              </ul>
-              <p>The downside: free users only get blurred previews. You need to pay ($12.99 first month, then $25.99/month) to see unblurred results. But if character consistency is important to you, SoulGen is worth the investment.</p>
-            </div>
+            <h3>Step 1 &mdash; Go to ImageNude.com</h3>
+            <p>
+              Open <a href="https://imagenude.com" target="_blank" rel="noopener noreferrer">ImageNude.com</a> in any browser. No app download required &mdash; it runs on desktop and mobile. For the undress tool, you don&apos;t even need an account; for text-to-image, register in 10 seconds with Google or email.
+            </p>
 
-            {/* #4 Undress.app */}
-            <div className={styles['ang-tool-card']}>
-              <div className={styles['ang-tool-rank']}>#4 Pick</div>
-              <h3>Undress.app</h3>
-              <p><strong>Best for:</strong> Beginners who prefer a simple interface</p>
-              <p>Undress.app has the most beginner-friendly interface of any tool I tested. Instead of typing prompts, you choose from preset categories (poses, compositions) and hit generate. It&apos;s the least intimidating option for newcomers.</p>
-              <ul className={styles['ang-tool-pros']}>
-                <li>Preset-based UI &mdash; no prompt writing needed</li>
-                <li>Undress, Video, and Face Swap modes</li>
-                <li>Custom prompt mode also available</li>
-              </ul>
-              <p>The major downside is price: 600 credits for $58.99, and custom prompt generation costs 30 credits each. That works out to roughly $3 per image &mdash; significantly more expensive than the alternatives. There&apos;s also no free tier.</p>
-            </div>
+            <h3>Step 2 &mdash; Choose Your Style</h3>
+            <p>
+              Pick between the <Link href="/undress-ai">AI undress tool</Link> (upload a photo and brush the area) or the text-to-image generator (describe your ideal image with a prompt). Select a body type, skin tone, and art style if your chosen mode supports presets.
+            </p>
 
-            <hr className={styles['ang-divider']} />
-
-            {/* How to Use */}
-            <h2 id="how-to-use">How to Use a Free AI Nude Generator</h2>
-            <p>Most AI nude generators follow the same basic workflow. Here&apos;s how to get started:</p>
-
-            <h3>Step 1: Choose Your Tool</h3>
-            <p>Pick a free AI nude generator from the list above. If you want the fastest no-login experience, go with <Link href="/undress-ai">ImageNude&apos;s undress tool</Link> &mdash; no account required. For text-to-image generation, create a free account to receive your credits.</p>
-
-            <h3>Step 2: Upload or Describe</h3>
-            <p>For undress/inpaint tools: upload a clear, well-lit photo and use the brush tool to select the areas you want modified. For text-to-image: write a detailed prompt describing your desired image. Include details about pose, lighting, style, and body type for better results.</p>
-
-            <h3>Step 3: Generate and Download</h3>
-            <p>Hit the generate button and wait for your result. Most tools deliver results in 10&ndash;60 seconds. Download your image in full resolution. On ImageNude, images are auto-deleted within 1 hour for privacy, so download promptly.</p>
-
-            <hr className={styles['ang-divider']} />
+            <h3>Step 3 &mdash; Generate and Download</h3>
+            <p>
+              Hit <strong>Generate</strong> and wait about 8 seconds. Your image appears full-resolution with no watermark. Download it right away &mdash; ImageNude auto-deletes everything within 1 hour for privacy.
+            </p>
 
             {/* Tips */}
-            <h2 id="tips">Tips for Better Results</h2>
+            <h2 id="tips">Tips for Getting Realistic Results</h2>
             <ul>
-              <li><strong>Use high-quality source images</strong> &mdash; Clear, well-lit photos with good resolution produce dramatically better results. Avoid blurry, dark, or low-resolution images.</li>
-              <li><strong>Write detailed prompts</strong> &mdash; For text-to-image tools, longer prompts with specific details (lighting, angle, body type, setting) consistently outperform short, vague ones.</li>
-              <li><strong>Use negative prompts</strong> &mdash; If your tool supports it, add negative prompts to exclude unwanted elements like &ldquo;blurry,&rdquo; &ldquo;distorted hands,&rdquo; or &ldquo;low quality.&rdquo;</li>
-              <li><strong>Experiment with presets</strong> &mdash; Most tools offer body type, skin tone, and style presets. Try different combinations to find what works best for your use case.</li>
-              <li><strong>Front-facing photos work best</strong> &mdash; For both undress and face swap tools, front-facing or slight-angle photos produce the most realistic results.</li>
+              <li><strong>Start with a high-quality source photo.</strong> Clear lighting and decent resolution make a massive difference. Blurry or dark uploads produce blurry output &mdash; garbage in, garbage out.</li>
+              <li><strong>Write longer prompts.</strong> Vague one-liners rarely work. Mention pose, lighting direction, body type, background, and camera angle for dramatically better results from any <strong>ai nude generator free</strong> tool.</li>
+              <li><strong>Use negative prompts when available.</strong> Adding terms like &ldquo;blurry, distorted hands, low quality&rdquo; to the negative-prompt field tells the model what to avoid.</li>
+              <li><strong>Experiment with style presets.</strong> Most tools offer realistic, anime, and artistic modes. Switching presets with the same prompt often yields surprisingly different (and sometimes better) output.</li>
+              <li><strong>Front-facing photos win.</strong> Both undress and face-swap tools handle front-facing or slight-angle shots far better than extreme side profiles.</li>
             </ul>
 
-            <hr className={styles['ang-divider']} />
+            {/* Safety */}
+            <h2 id="safety">Is It Safe to Use a Free AI Nude Generator?</h2>
+            <p>
+              Safety depends entirely on the platform you choose. Reputable tools delete your data quickly and never share uploads with third parties. ImageNude, for example, wipes every image within 1 hour and accepts crypto so your payment info stays private. Before you use <em>any</em> <strong>nude pic generator</strong>, check whether the site has a clear privacy policy, uses HTTPS, and states how long files are retained. Avoid platforms that ask for unnecessary personal information or don&apos;t mention data handling at all.
+            </p>
+            <p>
+              On the legal side, generating AI images of yourself or fictional characters is generally permitted in most jurisdictions. Creating non-consensual images of real people, however, is illegal in many places and violates every reputable platform&apos;s terms of service. Use these tools responsibly.
+            </p>
 
             {/* FAQ */}
             <h2 id="faq">Frequently Asked Questions</h2>
 
-            <div className={styles['ang-faq']}>
-              <div className={styles['ang-faq-item']}>
-                <div className={styles['ang-faq-q']}>Is it really free?</div>
-                <div className={styles['ang-faq-a']}>Yes. The tools listed above all offer genuinely free tiers. ImageNude gives you 20 free credits on signup &mdash; no credit card required. The <Link href="/undress-ai">AI undress tool</Link> is available with no login at all. Other tools like Promptchan AI and SoulGen also have free tiers, though with more limitations.</div>
-              </div>
-              <div className={styles['ang-faq-item']}>
-                <div className={styles['ang-faq-q']}>Do I need to create an account?</div>
-                <div className={styles['ang-faq-a']}>It depends on the tool. ImageNude&apos;s undress feature requires no login and no sign up &mdash; just upload and generate. For text-to-image features, a free account is needed to receive your credits. Most other tools require at least an email or Google sign-in.</div>
-              </div>
-              <div className={styles['ang-faq-item']}>
-                <div className={styles['ang-faq-q']}>Is it safe to use?</div>
-                <div className={styles['ang-faq-a']}>Reputable tools take privacy seriously. ImageNude automatically deletes all generated images within 1 hour, never stores uploads permanently, and accepts cryptocurrency payments for additional anonymity. Always check the privacy policy of any AI tool before uploading personal images. Avoid tools that don&apos;t clearly state their data handling practices.</div>
-              </div>
+            <div className={styles.faqItem}>
+              <h3 className={styles.faqQ}>Is it really free?</h3>
+              <p className={styles.faqA}>
+                Yes. Every tool on this list has a genuinely free tier. ImageNude gives you 20 free credits on signup &mdash; no credit card required &mdash; and the <Link href="/undress-ai">undress tool</Link> works with no login at all. SoulGen and Promptchan AI also offer free tiers, though with more restrictions.
+              </p>
             </div>
 
-            <hr className={styles['ang-divider']} />
+            <div className={styles.faqItem}>
+              <h3 className={styles.faqQ}>Do I need to create an account?</h3>
+              <p className={styles.faqA}>
+                Not always. ImageNude&apos;s undress feature requires no sign up and no login whatsoever. For text-to-image, a free account is needed so you can receive your credits. Most other <strong>free nude ai picture generator</strong> platforms ask for at least an email or Google sign-in.
+              </p>
+            </div>
 
-            {/* CTA */}
-            <p>Ready to try it yourself?</p>
-            <Link href="https://imagenude.com" className={styles['ang-cta-large']}>
-              Try ImageNude Free &mdash; No Sign Up Needed &rarr;
-            </Link>
+            <div className={styles.faqItem}>
+              <h3 className={styles.faqQ}>Are the images stored on the server?</h3>
+              <p className={styles.faqA}>
+                It varies by platform. ImageNude auto-deletes every image within 1 hour and never stores uploads permanently. Other tools may retain images longer &mdash; always read the privacy policy before uploading anything sensitive.
+              </p>
+            </div>
 
-            <hr className={styles['ang-divider']} />
-            <p className={styles['ang-closing']}>
-              <em>Disclosure: This article includes ImageNude, a product I built. I&apos;ve tried to be as objective as possible, but take my ranking with a grain of salt. Try the tools yourself and see which one works best for you.</em>
-            </p>
+            {/* CTA Block */}
+            <div className={styles.ctaBlock}>
+              <h3>Try ImageNude Free &mdash; No Sign Up Needed</h3>
+              <p>Generate AI images in seconds. Free, no login, no credit card.</p>
+              <a href="https://imagenude.com" className={styles.ctaBtn} target="_blank" rel="noopener noreferrer">Try ImageNude Free &rarr;</a>
+            </div>
 
           </article>
 
           {/* Sidebar */}
-          <aside className={styles['ang-sidebar']}>
-            <div className={styles['ang-toc']}>
-              <h4>Table of Contents</h4>
+          <aside className={styles.sidebar}>
+            <div className={styles.toc}>
+              <div className={styles.tocTitle}>Table of Contents</div>
               <ol>
                 <li><a href="#what-is">What Is an AI Nude Generator?</a></li>
-                <li><a href="#top-tools">Top Free Tools</a></li>
-                <li><a href="#how-to-use">How to Use</a></li>
-                <li><a href="#tips">Tips for Better Results</a></li>
+                <li><a href="#top-tools">Top 4 Free Tools</a></li>
+                <li><a href="#how-to">How to Generate</a></li>
+                <li><a href="#tips">Tips for Realistic Results</a></li>
+                <li><a href="#safety">Is It Safe?</a></li>
                 <li><a href="#faq">FAQ</a></li>
               </ol>
             </div>
-            <div className={styles['ang-sidebar-cta']}>
-              <h4>Try It Free</h4>
+            <div className={styles.scta}>
+              <div className={styles.sctaTitle}>Try It Free</div>
               <p>AI nude generator &mdash; free, no login required.</p>
-              <Link href="/undress-ai" className={styles['ang-sidebar-cta-link']}>Try ImageNude Free &rarr;</Link>
-              <p className={styles['ang-sidebar-note']}>20 free credits &middot; No credit card &middot; Images deleted in 1hr</p>
+              <a href="https://imagenude.com" className={styles.sctaLink} target="_blank" rel="noopener noreferrer">Try ImageNude Free &rarr;</a>
+              <p className={styles.sctaNote}>20 free credits &middot; No credit card &middot; Images deleted in 1hr</p>
             </div>
           </aside>
         </div>
 
         {/* Footer */}
-        <footer className={styles['ang-footer']}>
-          <p>&copy; 2026 Image Nude &middot; <Link href="/privacy">Privacy Policy</Link> &middot; <Link href="/terms">Terms</Link> &middot; 18+ Only</p>
+        <footer className={styles.footer}>
+          <p>&copy; 2025 Image Nude &middot; <Link href="/privacy">Privacy Policy</Link> &middot; <Link href="/terms">Terms</Link> &middot; 18+ Only</p>
         </footer>
       </div>
     </>

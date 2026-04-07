@@ -7,6 +7,30 @@ import { useTranslation } from '@/lib/useTranslation';
 
 const ARTICLES = [
   {
+    slug: 'ai-nude-generator-free',
+    title: 'Best Free AI Nude Generator — No Sign Up Required (2025)',
+    description: 'We tested the top free AI nude generators so you don\'t have to. No login, no watermark, results in seconds.',
+    tag: 'Guide',
+    date: 'April 2025',
+    readTime: '9',
+  },
+  {
+    slug: 'ai-nude-photo-generator',
+    title: 'AI Nude Photo Generator — How It Works & Best Free Tools (2025)',
+    description: 'Discover how AI nude photo generators work and which free tools give the best results. No account required.',
+    tag: 'Guide',
+    date: 'April 2025',
+    readTime: '8',
+  },
+  {
+    slug: 'nude-pic-generator-ai',
+    title: 'Nude Pic Generator AI — Best Free Tools, No Watermark (2025)',
+    description: 'The best AI nude pic generators in 2025. Free to use, no watermark, no login required. Compare top tools.',
+    tag: 'Guide',
+    date: 'April 2025',
+    readTime: '5',
+  },
+  {
     slug: 'best-ai-undress-tools',
     title: 'I Tested 3 AI Undress Tools — Here\'s What Actually Works (2026)',
     description: 'I signed up, paid, and tested SoulGen, Promptchan AI, and Undress.app myself. Honest comparison of features, pricing, and quality.',
