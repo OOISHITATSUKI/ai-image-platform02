@@ -10,9 +10,24 @@ export async function GET(req: NextRequest) {
     const records = getAllGuestGenerations(); // sorted newest first
 
     // ── Recent 50 for display ──
-    const recent = records.slice(0, 50).map(r => ({
+    // Build a stable short label for each unique guestId (IP)
+    const recentRaw = records.slice(0, 50);
+    const uniqueIPs = [...new Set(recentRaw.map(r => r.guestId))];
+    const ipLabelMap: Record<string, string> = {};
+    const ipCountMap: Record<string, number> = {};
+    // Count total generations per IP (across ALL records, not just recent 50)
+    for (const r of records) {
+        ipCountMap[r.guestId] = (ipCountMap[r.guestId] || 0) + 1;
+    }
+    uniqueIPs.forEach((ip, i) => {
+        ipLabelMap[ip] = `Guest ${String.fromCharCode(65 + (i % 26))}${i >= 26 ? Math.floor(i / 26) : ''}`;
+    });
+
+    const recent = recentRaw.map(r => ({
         id: r.id,
         guestId: r.guestId.replace(/(\d+\.\d+)\.\d+\.\d+/, '$1.xxx.xxx'), // partially mask IP
+        guestLabel: ipLabelMap[r.guestId],
+        guestTotalGens: ipCountMap[r.guestId] || 1,
         generationType: r.generationType,
         prompt: r.prompt,
         tags: r.tags,

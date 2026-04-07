@@ -7,6 +7,8 @@ interface GuestActivityData {
     recent: {
         id: string;
         guestId: string;
+        guestLabel: string;
+        guestTotalGens: number;
         generationType: string;
         prompt: string;
         tags: Record<string, unknown>;
@@ -344,19 +346,48 @@ export default function AdminDashboardPage() {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                                        {['日時', 'Type', 'Locale', 'Prompt', 'Tags', '登録'].map(h => (
+                                        {['日時', 'ゲスト', '回数', 'Type', 'Locale', 'Prompt', 'Tags', '登録'].map(h => (
                                             <th key={h} style={{ padding: '8px 16px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 500, whiteSpace: 'nowrap' }}>{h}</th>
                                         ))}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {activity.recent.length === 0 && (
-                                        <tr><td colSpan={6} style={{ padding: '20px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>データなし</td></tr>
+                                        <tr><td colSpan={8} style={{ padding: '20px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>データなし</td></tr>
                                     )}
-                                    {activity.recent.map(r => (
+                                    {activity.recent.map(r => {
+                                        // Consistent color per guest label
+                                        const labelColors = ['#a78bfa', '#f472b6', '#34d399', '#60a5fa', '#f59e0b', '#fb923c', '#38bdf8', '#e879f9', '#4ade80', '#facc15', '#f87171', '#22d3ee'];
+                                        const labelIndex = r.guestLabel.charCodeAt(r.guestLabel.length - 1) % labelColors.length;
+                                        const guestColor = labelColors[labelIndex] || '#a78bfa';
+                                        return (
                                         <tr key={r.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                             <td style={{ padding: '8px 16px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                                                 {new Date(r.createdAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    background: `${guestColor}22`,
+                                                    border: `1px solid ${guestColor}55`,
+                                                    borderRadius: 6,
+                                                    padding: '2px 8px',
+                                                    fontSize: '0.78rem',
+                                                    fontWeight: 600,
+                                                    color: guestColor,
+                                                }}>
+                                                    {r.guestLabel}
+                                                </span>
+                                                <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: 2 }}>{r.guestId}</div>
+                                            </td>
+                                            <td style={{ padding: '8px 16px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                                                <span style={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.9rem',
+                                                    color: r.guestTotalGens >= 3 ? '#f59e0b' : r.guestTotalGens >= 2 ? '#60a5fa' : 'var(--text-secondary)',
+                                                }}>
+                                                    {r.guestTotalGens}
+                                                </span>
                                             </td>
                                             <td style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
                                                 <span style={{ color: r.generationType === 'txt2img' ? '#a78bfa' : r.generationType === 'faceswap' ? '#f472b6' : '#fb923c' }}>
@@ -376,7 +407,8 @@ export default function AdminDashboardPage() {
                                                     : <span style={{ color: 'var(--text-secondary)' }}>—</span>}
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
