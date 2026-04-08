@@ -12,7 +12,7 @@ interface EmailLog {
     status: string;
     error_message: string | null;
     sent_at: string;
-    users: { email: string; name: string | null } | null;
+    users: { email: string } | null;
 }
 
 const EMAIL_TYPE_LABELS: Record<string, string> = {
@@ -259,7 +259,7 @@ export default function AdminEmailLogsPage() {
                                                     href={`/admin/users?search=${encodeURIComponent(log.users?.email || log.email_to)}`}
                                                     style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '0.82rem' }}
                                                 >
-                                                    {log.users?.name || log.users?.email || '—'}
+                                                    {log.users?.email || '—'}
                                                 </Link>
                                             ) : (
                                                 <span style={{ color: '#6b6b85', fontSize: '0.82rem' }}>—</span>

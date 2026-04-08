@@ -26,6 +26,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     useEffect(() => {
         setMounted(true);
 
+        // ── Auto-detect browser language (runs synchronously before async session restore) ──
+        // Priority: 1) manually chosen (localStorage) 2) browser lang 3) 'en'
+        const { localeManuallySet } = useAppStore.getState();
+        if (!localeManuallySet) {
+            const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+            const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
+            const detected = supported.includes(browserLang) ? browserLang : 'en';
+            useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });
+        }
+
         // ── Restore session: invoke /api/auth/me if auth_token exists ──
         const restoreSession = async () => {
             const token = localStorage.getItem('auth_token');
@@ -53,17 +63,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 } catch (err) {
                     console.error('Session restore failed:', err);
                 }
-            }
-
-            // ── Auto-detect browser language (runs every visit) ──
-            // Priority: 1) manually chosen (localStorage) 2) browser lang 3) 'en'
-            const { localeManuallySet } = useAppStore.getState();
-            if (!localeManuallySet) {
-                const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
-                const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
-                const detected = supported.includes(browserLang) ? browserLang : 'en';
-                // Use setState directly to skip Supabase sync (auto-detect only)
-                useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });
             }
         };
 
