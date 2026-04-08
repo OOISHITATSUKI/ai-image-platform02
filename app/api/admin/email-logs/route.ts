@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
         let query = supabaseAdmin
             .from('email_logs')
-            .select('*, users:user_id(email, name)', { count: 'exact' })
+            .select('*, users:user_id(email)', { count: 'exact' })
             .order('sent_at', { ascending: false });
 
         if (emailType) {
