@@ -1,23 +1,11 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Script from 'next/script';
 import Link from 'next/link';
 import styles from './page.module.css';
 import FaqSection from './FaqSection';
 import LangSelector from '@/components/blog/LangSelector';
-
-export const metadata: Metadata = {
-  title: 'AI Face Swap Adults — Free & Instant | ImageNude',
-  description: 'Swap faces in any image with AI. Free to use, no registration required. Realistic results in seconds.',
-  alternates: { canonical: 'https://imagenude.com/face-swap' },
-  openGraph: {
-    title: 'AI Face Swap Adults — Free & Instant | ImageNude',
-    description: 'Swap faces in any image with AI. Free to use, no registration required. Realistic results in seconds.',
-    url: 'https://imagenude.com/face-swap',
-    siteName: 'Image Nude',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
-    type: 'website',
-  },
-};
+import { useTranslation } from '@/lib/useTranslation';
 
 const ldJson = {
   '@context': 'https://schema.org',
@@ -39,6 +27,8 @@ const ldJson = {
 };
 
 export default function FaceSwapPage() {
+  const { t } = useTranslation();
+
   return (
     <>
       <Script
@@ -55,11 +45,11 @@ export default function FaceSwapPage() {
               <span>ImageNude</span>
             </Link>
             <div className={styles['fs-nav-links']}>
-              <Link href="/undress-ai">AI Undress</Link>
-              <Link href="/blog/ai-face-swap-adults">Blog</Link>
-              <Link href="/pricing">Pricing</Link>
+              <Link href="/undress-ai">{t('faceSwapLp.nav.aiUndress')}</Link>
+              <Link href="/blog/ai-face-swap-adults">{t('faceSwapLp.nav.blog')}</Link>
+              <Link href="/pricing">{t('faceSwapLp.nav.pricing')}</Link>
               <LangSelector />
-              <Link href="/register" className={styles['fs-nav-cta']}>Get Started Free</Link>
+              <Link href="/register" className={styles['fs-nav-cta']}>{t('faceSwapLp.nav.getStarted')}</Link>
             </div>
           </div>
         </nav>
@@ -73,25 +63,25 @@ export default function FaceSwapPage() {
               <div>
                 <div className={styles['fs-hero-eyebrow']}>
                   <span className={styles['fs-eyebrow-dot']} />
-                  #1 AI Face Swap Tool Online
+                  {t('faceSwapLp.hero.eyebrow')}
                 </div>
                 <h1 className={styles['fs-h1']}>
-                  AI Face Swap —<br />
-                  <span className={styles['fs-accent']}>Free, Instant, No Sign Up</span>
+                  {t('faceSwapLp.hero.h1')}<br />
+                  <span className={styles['fs-accent']}>{t('faceSwapLp.hero.h1Accent')}</span>
                 </h1>
                 <p className={styles['fs-hero-desc']}>
-                  Swap any face into any image with our free AI face swap tool. No sign up required — just upload two photos and get photorealistic results in seconds. NSFW supported.
+                  {t('faceSwapLp.hero.desc')}
                 </p>
                 <p style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: 14, color: '#10b981', fontWeight: 600, margin: '12px 0 20px' }}>
-                  <span>&#x2713; Free to use</span>
-                  <span>&#x2713; No registration</span>
-                  <span>&#x2713; Swap in seconds</span>
+                  <span>&#x2713; {t('faceSwapLp.hero.trustFree')}</span>
+                  <span>&#x2713; {t('faceSwapLp.hero.trustNoReg')}</span>
+                  <span>&#x2713; {t('faceSwapLp.hero.trustSpeed')}</span>
                 </p>
                 <div className={styles['fs-hero-actions']}>
                   <Link href="/register" className={styles['fs-btn-primary']}>
-                    &#x2726; Try for Free
+                    &#x2726; {t('faceSwapLp.hero.tryFree')}
                   </Link>
-                  <a href="#how-it-works" className={styles['fs-btn-ghost']}>See How It Works</a>
+                  <a href="#how-it-works" className={styles['fs-btn-ghost']}>{t('faceSwapLp.hero.seeHow')}</a>
                 </div>
                 <div className={styles['fs-social-proof']}>
                   <div className={styles['fs-avatars']}>
@@ -101,7 +91,7 @@ export default function FaceSwapPage() {
                     <div className={styles['fs-avatar']}>D</div>
                   </div>
                   <span className={styles['fs-social-stars']}>&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                  <span>Rated 4.8/5 by 1,964 users</span>
+                  <span>{t('faceSwapLp.hero.socialProof')}</span>
                 </div>
               </div>
 
@@ -111,26 +101,26 @@ export default function FaceSwapPage() {
                   <div className={`${styles['fs-demo-dot']} ${styles['fs-demo-dot-r']}`} />
                   <div className={`${styles['fs-demo-dot']} ${styles['fs-demo-dot-y']}`} />
                   <div className={`${styles['fs-demo-dot']} ${styles['fs-demo-dot-g']}`} />
-                  <span>face-swap.app</span>
+                  <span>{t('faceSwapLp.demo.title')}</span>
                 </div>
                 <div className={styles['fs-demo-body']}>
-                  <div className={styles['fs-demo-label']}>Upload images</div>
+                  <div className={styles['fs-demo-label']}>{t('faceSwapLp.demo.uploadLabel')}</div>
                   <div className={styles['fs-demo-uploads']}>
                     <div className={styles['fs-demo-upload-slot']}>
                       <div className={styles['fs-demo-upload-icon']}>&#x1F5BC;</div>
-                      <div className={styles['fs-demo-upload-text']}>Body Image</div>
-                      <div className={styles['fs-demo-upload-sub']}>Target photo</div>
+                      <div className={styles['fs-demo-upload-text']}>{t('faceSwapLp.demo.bodyImage')}</div>
+                      <div className={styles['fs-demo-upload-sub']}>{t('faceSwapLp.demo.bodyImageSub')}</div>
                     </div>
                     <div className={styles['fs-demo-upload-slot']}>
                       <div className={styles['fs-demo-upload-icon']}>&#x1F464;</div>
-                      <div className={styles['fs-demo-upload-text']}>Face Image</div>
-                      <div className={styles['fs-demo-upload-sub']}>Source face</div>
+                      <div className={styles['fs-demo-upload-text']}>{t('faceSwapLp.demo.faceImage')}</div>
+                      <div className={styles['fs-demo-upload-sub']}>{t('faceSwapLp.demo.faceImageSub')}</div>
                     </div>
                   </div>
-                  <button className={styles['fs-demo-generate']}>&#x2728; Generate Face Swap</button>
+                  <button className={styles['fs-demo-generate']}>&#x2728; {t('faceSwapLp.demo.generateBtn')}</button>
                   <div className={styles['fs-demo-meta']}>
-                    <span>&#x26A1; ~8s processing</span>
-                    <span>&#x1F512; Auto-delete in 1hr</span>
+                    <span>&#x26A1; {t('faceSwapLp.demo.processing')}</span>
+                    <span>&#x1F512; {t('faceSwapLp.demo.autoDelete')}</span>
                   </div>
                 </div>
               </div>
@@ -142,25 +132,25 @@ export default function FaceSwapPage() {
         <section id="how-it-works" className={styles['fs-section']}>
           <div className={styles['fs-container']}>
             <div className={styles['fs-section-header']}>
-              <span className={styles['fs-label']}>How It Works</span>
-              <h2 className={styles['fs-h2']}>Three simple steps to<br /><span className={styles['fs-accent']}>perfect results</span></h2>
-              <p className={styles['fs-subtext']}>No technical skills required. Upload, swap, download.</p>
+              <span className={styles['fs-label']}>{t('faceSwapLp.howItWorks.label')}</span>
+              <h2 className={styles['fs-h2']}>{t('faceSwapLp.howItWorks.h2')}<br /><span className={styles['fs-accent']}>{t('faceSwapLp.howItWorks.h2Accent')}</span></h2>
+              <p className={styles['fs-subtext']}>{t('faceSwapLp.howItWorks.sub')}</p>
             </div>
             <div className={styles['fs-timeline']}>
               <div className={styles['fs-timeline-step']}>
                 <div className={styles['fs-timeline-num']}>1</div>
-                <h3>Upload Base Image</h3>
-                <p>Choose the target image where you want the face to appear. Any pose, any scene — our AI handles it all.</p>
+                <h3>{t('faceSwapLp.howItWorks.step1Title')}</h3>
+                <p>{t('faceSwapLp.howItWorks.step1Desc')}</p>
               </div>
               <div className={styles['fs-timeline-step']}>
                 <div className={styles['fs-timeline-num']}>2</div>
-                <h3>Upload Face Photo</h3>
-                <p>Provide a clear face photo. Front-facing works best for maximum accuracy. Supports JPG, PNG, and WebP.</p>
+                <h3>{t('faceSwapLp.howItWorks.step2Title')}</h3>
+                <p>{t('faceSwapLp.howItWorks.step2Desc')}</p>
               </div>
               <div className={styles['fs-timeline-step']}>
                 <div className={styles['fs-timeline-num']}>3</div>
-                <h3>Swap &amp; Download</h3>
-                <p>Hit generate and the AI blends the face seamlessly in seconds. Download your result in full HD resolution.</p>
+                <h3>{t('faceSwapLp.howItWorks.step3Title')}</h3>
+                <p>{t('faceSwapLp.howItWorks.step3Desc')}</p>
               </div>
             </div>
           </div>
@@ -170,24 +160,24 @@ export default function FaceSwapPage() {
         <section className={`${styles['fs-section']} ${styles['fs-section-alt']}`}>
           <div className={styles['fs-container']}>
             <div className={styles['fs-section-header']}>
-              <span className={styles['fs-label']}>Use Cases</span>
-              <h2 className={styles['fs-h2']}>What you can <span className={styles['fs-accent']}>create</span></h2>
+              <span className={styles['fs-label']}>{t('faceSwapLp.useCases.label')}</span>
+              <h2 className={styles['fs-h2']}>{t('faceSwapLp.useCases.h2')} <span className={styles['fs-accent']}>{t('faceSwapLp.useCases.h2Accent')}</span></h2>
             </div>
             <div className={styles['fs-usecases']}>
               <div className={styles['fs-usecase-card']}>
                 <div className={styles['fs-usecase-num']}>01</div>
-                <h3>Fantasy Scenarios</h3>
-                <p>Place any face into creative, imaginative scenes and scenarios. Build the exact visuals you have in mind.</p>
+                <h3>{t('faceSwapLp.useCases.case1Title')}</h3>
+                <p>{t('faceSwapLp.useCases.case1Desc')}</p>
               </div>
               <div className={styles['fs-usecase-card']}>
                 <div className={styles['fs-usecase-num']}>02</div>
-                <h3>Character Creation</h3>
-                <p>Build unique characters by combining different face and body references. Maintain consistent identity across images.</p>
+                <h3>{t('faceSwapLp.useCases.case2Title')}</h3>
+                <p>{t('faceSwapLp.useCases.case2Desc')}</p>
               </div>
               <div className={styles['fs-usecase-card']}>
                 <div className={styles['fs-usecase-num']}>03</div>
-                <h3>Content Creation</h3>
-                <p>Create personalized adult content with consistent face identity. Perfect for creators who need varied scenes.</p>
+                <h3>{t('faceSwapLp.useCases.case3Title')}</h3>
+                <p>{t('faceSwapLp.useCases.case3Desc')}</p>
               </div>
             </div>
           </div>
@@ -197,59 +187,59 @@ export default function FaceSwapPage() {
         <section className={styles['fs-section']}>
           <div className={styles['fs-container']}>
             <div className={styles['fs-section-header']}>
-              <span className={styles['fs-label']}>Comparison</span>
-              <h2 className={styles['fs-h2']}>How we <span className={styles['fs-accent']}>compare</span></h2>
-              <p className={styles['fs-subtext']}>See why Image Nude is the top choice for AI face swap.</p>
+              <span className={styles['fs-label']}>{t('faceSwapLp.comparison.label')}</span>
+              <h2 className={styles['fs-h2']}>{t('faceSwapLp.comparison.h2')} <span className={styles['fs-accent']}>{t('faceSwapLp.comparison.h2Accent')}</span></h2>
+              <p className={styles['fs-subtext']}>{t('faceSwapLp.comparison.sub')}</p>
             </div>
             <div className={styles['fs-table-wrap']}>
               <table className={styles['fs-table']}>
                 <thead>
                   <tr>
-                    <th>Feature</th>
-                    <th>Image Nude</th>
-                    <th>SoulGen</th>
-                    <th>Promptchan</th>
+                    <th>{t('faceSwapLp.comparison.feature')}</th>
+                    <th>{t('faceSwapLp.comparison.imageNude')}</th>
+                    <th>{t('faceSwapLp.comparison.soulgen')}</th>
+                    <th>{t('faceSwapLp.comparison.promptchan')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className={styles['fs-table-highlight']}>
-                    <td>NSFW Face Swap</td>
+                    <td>{t('faceSwapLp.comparison.nsfwFaceSwap')}</td>
                     <td><span className={styles['fs-check']}>&#10003;</span></td>
                     <td><span className={styles['fs-check']}>&#10003;</span></td>
                     <td><span className={styles['fs-cross']}>&#10007;</span></td>
                   </tr>
                   <tr>
-                    <td>Processing Speed</td>
+                    <td>{t('faceSwapLp.comparison.processingSpeed')}</td>
                     <td><span className={styles['fs-check']}>&lt;10s</span></td>
                     <td>15-30s</td>
                     <td>20-45s</td>
                   </tr>
                   <tr className={styles['fs-table-highlight']}>
-                    <td>Free Credits</td>
+                    <td>{t('faceSwapLp.comparison.freeCredits')}</td>
                     <td><span className={styles['fs-check']}>20</span></td>
                     <td>5</td>
                     <td>3</td>
                   </tr>
                   <tr>
-                    <td>Auto-Delete Images</td>
-                    <td><span className={styles['fs-check']}>1 hour</span></td>
+                    <td>{t('faceSwapLp.comparison.autoDeleteImages')}</td>
+                    <td><span className={styles['fs-check']}>{t('faceSwapLp.comparison.hour1')}</span></td>
                     <td><span className={styles['fs-cross']}>&#10007;</span></td>
                     <td><span className={styles['fs-cross']}>&#10007;</span></td>
                   </tr>
                   <tr className={styles['fs-table-highlight']}>
-                    <td>Crypto Payments</td>
+                    <td>{t('faceSwapLp.comparison.cryptoPayments')}</td>
                     <td><span className={styles['fs-check']}>50+</span></td>
                     <td><span className={styles['fs-cross']}>&#10007;</span></td>
                     <td><span className={styles['fs-check']}>&#10003;</span></td>
                   </tr>
                   <tr>
-                    <td>HD Output</td>
+                    <td>{t('faceSwapLp.comparison.hdOutput')}</td>
                     <td><span className={styles['fs-check']}>&#10003;</span></td>
                     <td><span className={styles['fs-check']}>&#10003;</span></td>
-                    <td>SD only</td>
+                    <td>{t('faceSwapLp.comparison.sdOnly')}</td>
                   </tr>
                   <tr className={styles['fs-table-highlight']}>
-                    <td>User Rating</td>
+                    <td>{t('faceSwapLp.comparison.userRating')}</td>
                     <td><span className={styles['fs-check']}>4.8&#9733;</span></td>
                     <td>4.3&#9733;</td>
                     <td>3.9&#9733;</td>
@@ -264,52 +254,52 @@ export default function FaceSwapPage() {
         <section className={`${styles['fs-section']} ${styles['fs-section-alt']}`}>
           <div className={styles['fs-container']} style={{ textAlign: 'center' }}>
             <div className={styles['fs-section-header']}>
-              <span className={styles['fs-label']}>Pricing</span>
-              <h2 className={styles['fs-h2']}>Simple, transparent <span className={styles['fs-accent']}>pricing</span></h2>
-              <p className={styles['fs-subtext']}>Start free. Upgrade when you&apos;re ready.</p>
+              <span className={styles['fs-label']}>{t('faceSwapLp.pricing.label')}</span>
+              <h2 className={styles['fs-h2']}>{t('faceSwapLp.pricing.h2')} <span className={styles['fs-accent']}>{t('faceSwapLp.pricing.h2Accent')}</span></h2>
+              <p className={styles['fs-subtext']}>{t('faceSwapLp.pricing.sub')}</p>
             </div>
             <div className={styles['fs-pricing-grid']}>
               <div className={styles['fs-plan']}>
-                <div className={styles['fs-plan-name']}>Free</div>
+                <div className={styles['fs-plan-name']}>{t('faceSwapLp.pricing.freeName')}</div>
                 <div className={styles['fs-plan-price']}><sup>$</sup>0</div>
-                <div className={styles['fs-plan-price-note']}>Free forever</div>
+                <div className={styles['fs-plan-price-note']}>{t('faceSwapLp.pricing.freeForever')}</div>
                 <ul className={styles['fs-plan-features']}>
-                  <li>20 credits on signup</li>
-                  <li>Standard quality output</li>
-                  <li>720p resolution</li>
-                  <li>10 face swaps included</li>
+                  <li>{t('faceSwapLp.pricing.freeFeature1')}</li>
+                  <li>{t('faceSwapLp.pricing.freeFeature2')}</li>
+                  <li>{t('faceSwapLp.pricing.freeFeature3')}</li>
+                  <li>{t('faceSwapLp.pricing.freeFeature4')}</li>
                 </ul>
-                <Link href="/register" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-secondary']}`}>Get Started Free</Link>
+                <Link href="/register" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-secondary']}`}>{t('faceSwapLp.pricing.getStartedFree')}</Link>
               </div>
 
               <div className={`${styles['fs-plan']} ${styles['fs-plan-popular']}`}>
-                <div className={styles['fs-popular-badge']}>Most Popular</div>
-                <div className={styles['fs-plan-name']}>Basic</div>
+                <div className={styles['fs-popular-badge']}>{t('faceSwapLp.pricing.mostPopular')}</div>
+                <div className={styles['fs-plan-name']}>{t('faceSwapLp.pricing.basicName')}</div>
                 <div className={styles['fs-plan-price']}><sup>$</sup>14<span style={{ fontSize: 24 }}>.99</span></div>
-                <div className={styles['fs-plan-price-note']}>100 credits</div>
+                <div className={styles['fs-plan-price-note']}>{t('faceSwapLp.pricing.basicNote')}</div>
                 <ul className={styles['fs-plan-features']}>
-                  <li>100 generation credits</li>
-                  <li>HD quality output</li>
-                  <li>1080p resolution</li>
-                  <li>50 face swaps</li>
-                  <li>Priority queue</li>
+                  <li>{t('faceSwapLp.pricing.basicFeature1')}</li>
+                  <li>{t('faceSwapLp.pricing.basicFeature2')}</li>
+                  <li>{t('faceSwapLp.pricing.basicFeature3')}</li>
+                  <li>{t('faceSwapLp.pricing.basicFeature4')}</li>
+                  <li>{t('faceSwapLp.pricing.basicFeature5')}</li>
                 </ul>
-                <Link href="/pricing" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-primary']}`}>Get Basic</Link>
+                <Link href="/pricing" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-primary']}`}>{t('faceSwapLp.pricing.getBasic')}</Link>
               </div>
 
               <div className={styles['fs-plan']}>
-                <div className={styles['fs-plan-name']}>Unlimited</div>
+                <div className={styles['fs-plan-name']}>{t('faceSwapLp.pricing.unlimitedName')}</div>
                 <div className={styles['fs-plan-price']}><sup>$</sup>29<span style={{ fontSize: 24 }}>.99</span></div>
-                <div className={styles['fs-plan-price-note']}>300 credits</div>
+                <div className={styles['fs-plan-price-note']}>{t('faceSwapLp.pricing.unlimitedNote')}</div>
                 <ul className={styles['fs-plan-features']}>
-                  <li>300 generation credits</li>
-                  <li>Ultra HD quality</li>
-                  <li>Max resolution output</li>
-                  <li>150 face swaps</li>
-                  <li>Fastest priority queue</li>
-                  <li>Early access to new features</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature1')}</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature2')}</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature3')}</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature4')}</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature5')}</li>
+                  <li>{t('faceSwapLp.pricing.unlimitedFeature6')}</li>
                 </ul>
-                <Link href="/pricing" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-secondary']}`}>Get Unlimited</Link>
+                <Link href="/pricing" className={`${styles['fs-plan-btn']} ${styles['fs-plan-btn-secondary']}`}>{t('faceSwapLp.pricing.getUnlimited')}</Link>
               </div>
             </div>
           </div>
@@ -323,15 +313,15 @@ export default function FaceSwapPage() {
           <div className={styles['fs-cta-glow']} />
           <div className={styles['fs-container']} style={{ position: 'relative', zIndex: 1 }}>
             <h2 className={styles['fs-cta-heading']}>
-              Ready to try the best<br /><span className={styles['fs-accent']}>AI Face Swap Tool?</span>
+              {t('faceSwapLp.cta.h2')}<br /><span className={styles['fs-accent']}>{t('faceSwapLp.cta.h2Accent')}</span>
             </h2>
             <p className={styles['fs-subtext']} style={{ marginBottom: 40 }}>
-              Join 180,000+ users. Start for free — no credit card needed.
+              {t('faceSwapLp.cta.sub')}
             </p>
             <Link href="/register" className={styles['fs-btn-primary']} style={{ fontSize: 18, padding: '20px 48px' }}>
-              &#x2726; Start Free — 20 Credits Included
+              &#x2726; {t('faceSwapLp.cta.btn')}
             </Link>
-            <p style={{ marginTop: 16, fontSize: 13, color: '#444444' }}>18+ only &middot; All images AI-generated &middot; Images deleted within 1 hour</p>
+            <p style={{ marginTop: 16, fontSize: 13, color: '#444444' }}>{t('faceSwapLp.cta.disclaimer')}</p>
           </div>
         </section>
 
@@ -343,34 +333,33 @@ export default function FaceSwapPage() {
                 <span className={styles['fs-logo-icon']}>N</span>
                 <span>ImageNude</span>
               </div>
-              <p>AI-powered image generation platform.</p>
+              <p>{t('faceSwapLp.footer.tagline')}</p>
             </div>
             <div className={styles['fs-footer-links']}>
               <div>
-                <h4>Tools</h4>
-                <Link href="/undress-ai">AI Undress</Link>
-                <Link href="/face-swap">Face Swap</Link>
-                <Link href="/editor">Editor</Link>
+                <h4>{t('faceSwapLp.footer.tools')}</h4>
+                <Link href="/undress-ai">{t('faceSwapLp.footer.aiUndress')}</Link>
+                <Link href="/face-swap">{t('faceSwapLp.footer.faceSwap')}</Link>
+                <Link href="/editor">{t('faceSwapLp.footer.editor')}</Link>
               </div>
               <div>
-                <h4>Blog</h4>
-                <Link href="/blog/best-ai-undress-tools">Best AI Undress Tools</Link>
-                <Link href="/blog/how-to-generate-nsfw-ai-images">NSFW AI Guide</Link>
-                <Link href="/blog/ai-face-swap-adults">Face Swap Guide</Link>
+                <h4>{t('faceSwapLp.footer.blog')}</h4>
+                <Link href="/blog/best-ai-undress-tools">{t('faceSwapLp.footer.bestAiUndress')}</Link>
+                <Link href="/blog/how-to-generate-nsfw-ai-images">{t('faceSwapLp.footer.nsfwGuide')}</Link>
+                <Link href="/blog/ai-face-swap-adults">{t('faceSwapLp.footer.faceSwapGuide')}</Link>
               </div>
               <div>
-                <h4>Legal</h4>
-                <Link href="/terms">Terms</Link>
-                <Link href="/privacy">Privacy</Link>
-                <Link href="/2257">2257 Statement</Link>
+                <h4>{t('faceSwapLp.footer.legal')}</h4>
+                <Link href="/terms">{t('faceSwapLp.footer.terms')}</Link>
+                <Link href="/privacy">{t('faceSwapLp.footer.privacy')}</Link>
+                <Link href="/2257">{t('faceSwapLp.footer.statement2257')}</Link>
               </div>
             </div>
           </div>
           <div className={styles['fs-footer-bottom']}>
             <p className={styles['fs-footer-note']}>
-              Image Nude is an AI-powered image generation platform. All generated images are fictional and AI-created.
-              This service is intended for adults aged 18 and over. Generating content depicting minors or real individuals without consent is strictly prohibited.
-              &copy; 2025 Image Nude. All rights reserved.
+              {t('faceSwapLp.footer.disclaimer')}
+              {' '}&copy; 2025 Image Nude. {t('faceSwapLp.footer.copyright')}
             </p>
           </div>
         </footer>

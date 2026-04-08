@@ -2,24 +2,26 @@
 
 import { useState } from 'react';
 import styles from './page.module.css';
-
-const FAQS = [
-  { q: 'How realistic is the AI face swap?', a: 'Our AI uses advanced face blending technology that matches skin tone, lighting, shadows, and facial proportions. The results are virtually indistinguishable from real photos in most cases.' },
-  { q: 'What kind of photos work best?', a: 'For best results, use clear, well-lit face photos where the face is front-facing or at a slight angle. The base image can be any pose or scene — our AI handles complex angles and lighting.' },
-  { q: 'Is my data secure?', a: 'Yes. All uploaded images are automatically deleted within 1 hour. We use end-to-end encryption and never store or share your photos. Your sessions are fully private.' },
-  { q: 'How many credits does a face swap cost?', a: 'Each face swap costs 2 credits. You get 20 free credits on sign up, enough for 10 face swaps to try the tool. No credit card required.' },
-  { q: 'Can I pay anonymously?', a: 'Yes. We accept 50+ cryptocurrencies including Bitcoin, Ethereum, and USDT. No personal payment information is required.' },
-];
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function FaqSection() {
+  const { t } = useTranslation();
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  const FAQS = [
+    { q: t('faceSwapLp.faq.q1'), a: t('faceSwapLp.faq.a1') },
+    { q: t('faceSwapLp.faq.q2'), a: t('faceSwapLp.faq.a2') },
+    { q: t('faceSwapLp.faq.q3'), a: t('faceSwapLp.faq.a3') },
+    { q: t('faceSwapLp.faq.q4'), a: t('faceSwapLp.faq.a4') },
+    { q: t('faceSwapLp.faq.q5'), a: t('faceSwapLp.faq.a5') },
+  ];
 
   return (
     <section className={styles['fs-section']}>
       <div className={styles['fs-container']}>
         <div className={styles['fs-section-header']}>
-          <span className={styles['fs-label']}>FAQ</span>
-          <h2 className={styles['fs-h2']}>Common questions</h2>
+          <span className={styles['fs-label']}>{t('faceSwapLp.faq.label')}</span>
+          <h2 className={styles['fs-h2']}>{t('faceSwapLp.faq.h2')}</h2>
         </div>
         <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {FAQS.map((faq, i) => (

@@ -1,23 +1,11 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Script from 'next/script';
 import Link from 'next/link';
 import styles from './page.module.css';
 import FaqSection from './FaqSection';
 import LangSelector from '@/components/blog/LangSelector';
-
-export const metadata: Metadata = {
-  title: 'AI Undress Free — No Login Required | ImageNude',
-  description: 'Undress AI images instantly. 100% free to try, no account needed. Powered by advanced AI. Results in seconds.',
-  alternates: { canonical: 'https://imagenude.com/undress-ai' },
-  openGraph: {
-    title: 'AI Undress Free — No Login Required | ImageNude',
-    description: 'Undress AI images instantly. 100% free to try, no account needed. Powered by advanced AI. Results in seconds.',
-    url: 'https://imagenude.com/undress-ai',
-    siteName: 'Image Nude',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
-    type: 'website',
-  },
-};
+import { useTranslation } from '@/lib/useTranslation';
 
 const ldJson = {
   '@context': 'https://schema.org',
@@ -39,6 +27,8 @@ const ldJson = {
 };
 
 export default function UndressAiPage() {
+  const { t } = useTranslation();
+
   return (
     <>
       <Script
@@ -52,7 +42,7 @@ export default function UndressAiPage() {
           <Link href="/" className={styles['lp-logo']}>Image Nude</Link>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <LangSelector />
-            <Link href="/register" className={styles['lp-nav-cta']}>Try Free &rarr;</Link>
+            <Link href="/register" className={styles['lp-nav-cta']}>{t('undressLp.nav.tryFree')} &rarr;</Link>
           </div>
         </nav>
 
@@ -64,33 +54,32 @@ export default function UndressAiPage() {
             <div>
               <div className={styles['lp-badge']}>
                 <span className={styles['lp-badge-dot']} />
-                #1 AI Undress Tool Online
+                {t('undressLp.hero.badge')}
               </div>
               <h1 className={styles['lp-h1']}>
-                AI Undress —<br /><span className={styles['lp-h1-accent']}>Free, No Login Required</span>
+                {t('undressLp.hero.h1')}<br /><span className={styles['lp-h1-accent']}>{t('undressLp.hero.h1Accent')}</span>
               </h1>
               <p className={styles['lp-hero-desc']}>
-                Upload any photo and let our advanced AI undress tool generate a photorealistic nude version in seconds.
-                Free to use — no login required, no sign up needed. Just upload, paint, and generate.
+                {t('undressLp.hero.desc')}
               </p>
               <p className={styles['lp-trust-badges']} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: 14, color: '#10b981', fontWeight: 600, margin: '12px 0 20px' }}>
-                <span>&#x2713; Free to try</span>
-                <span>&#x2713; No account needed</span>
-                <span>&#x2713; Results in seconds</span>
+                <span>&#x2713; {t('undressLp.hero.trustFree')}</span>
+                <span>&#x2713; {t('undressLp.hero.trustNoAccount')}</span>
+                <span>&#x2713; {t('undressLp.hero.trustSpeed')}</span>
               </p>
               <div className={styles['lp-cta-group']}>
-                <Link href="/register" className={styles['lp-btn-primary']}>&#x2726; Try for Free</Link>
-                <a href="#how-it-works" className={styles['lp-btn-secondary']}>See How It Works</a>
+                <Link href="/register" className={styles['lp-btn-primary']}>&#x2726; {t('undressLp.hero.tryFree')}</Link>
+                <a href="#how-it-works" className={styles['lp-btn-secondary']}>{t('undressLp.hero.seeHow')}</a>
               </div>
               <p className={styles['lp-trust-line']}>
-                &#x2B50; Rated <span className={styles['lp-trust-gold']}>4.7/5</span> by 2,841 users &nbsp;&middot;&nbsp; &#x1F512; 100% Private &nbsp;&middot;&nbsp; &#x1F381; 20 Free Credits on Sign Up
+                &#x2B50; {t('undressLp.hero.trustLine')} <span className={styles['lp-trust-gold']}>{t('undressLp.hero.trustRating')}</span> {t('undressLp.hero.trustByUsers')} &nbsp;&middot;&nbsp; &#x1F512; {t('undressLp.hero.trustPrivate')} &nbsp;&middot;&nbsp; &#x1F381; {t('undressLp.hero.trustCredits')}
               </p>
             </div>
 
             <div className={styles['lp-hero-visual']}>
               <div className={styles['lp-before-after']}>
-                <span className={styles['lp-ba-label']}>Before</span>
-                <span className={`${styles['lp-ba-label']} ${styles['lp-ba-after-label']}`}>After</span>
+                <span className={styles['lp-ba-label']}>{t('undressLp.beforeAfter.before')}</span>
+                <span className={`${styles['lp-ba-label']} ${styles['lp-ba-after-label']}`}>{t('undressLp.beforeAfter.after')}</span>
                 <div className={styles['lp-ba-images']}>
                   <div className={`${styles['lp-ba-img']} ${styles['lp-ba-img-before']}`}>
                     <div className={`${styles['lp-figure']} ${styles['lp-figure-before']}`} />
@@ -104,7 +93,7 @@ export default function UndressAiPage() {
                 </div>
                 <div className={styles['lp-processing-badge']}>
                   <div className={styles['lp-spinner']} />
-                  Generating realistic result...
+                  {t('undressLp.beforeAfter.processing')}
                 </div>
               </div>
             </div>
@@ -114,35 +103,35 @@ export default function UndressAiPage() {
         {/* Stats */}
         <div className={styles['lp-stats-strip']}>
           <div className={styles['lp-stats-inner']}>
-            <div><div className={styles['lp-stat-num']}>2.4M+</div><div className={styles['lp-stat-label']}>Images Generated</div></div>
-            <div><div className={styles['lp-stat-num']}>180K+</div><div className={styles['lp-stat-label']}>Active Users</div></div>
-            <div><div className={styles['lp-stat-num']}>4.7&#x2605;</div><div className={styles['lp-stat-label']}>Average Rating</div></div>
-            <div><div className={styles['lp-stat-num']}>8s</div><div className={styles['lp-stat-label']}>Avg. Generation Time</div></div>
+            <div><div className={styles['lp-stat-num']}>{t('undressLp.stats.images')}</div><div className={styles['lp-stat-label']}>{t('undressLp.stats.imagesLabel')}</div></div>
+            <div><div className={styles['lp-stat-num']}>{t('undressLp.stats.users')}</div><div className={styles['lp-stat-label']}>{t('undressLp.stats.usersLabel')}</div></div>
+            <div><div className={styles['lp-stat-num']}>{t('undressLp.stats.rating')}</div><div className={styles['lp-stat-label']}>{t('undressLp.stats.ratingLabel')}</div></div>
+            <div><div className={styles['lp-stat-num']}>{t('undressLp.stats.speed')}</div><div className={styles['lp-stat-label']}>{t('undressLp.stats.speedLabel')}</div></div>
           </div>
         </div>
 
         {/* How It Works */}
         <section id="how-it-works" className={styles['lp-section']}>
           <div className={styles['lp-section-inner']}>
-            <div className={styles['lp-section-tag']}>How It Works</div>
-            <h2 className={styles['lp-h2']}>Three steps to<br />photorealistic results</h2>
-            <p className={styles['lp-section-sub']}>No technical knowledge required. Our AI does the hard work for you.</p>
+            <div className={styles['lp-section-tag']}>{t('undressLp.howItWorks.label')}</div>
+            <h2 className={styles['lp-h2']}>{t('undressLp.howItWorks.h2')}<br />{t('undressLp.howItWorks.h2Sub')}</h2>
+            <p className={styles['lp-section-sub']}>{t('undressLp.howItWorks.sub')}</p>
 
             <div className={styles['lp-steps']}>
               <div className={styles['lp-step']}>
                 <div className={styles['lp-step-icon']}>&#x1F4E4;</div>
-                <h3>Upload Your Photo</h3>
-                <p>Upload any portrait photo. Our AI works best with clear, well-lit photos. Supports JPG, PNG, and WebP up to 10MB.</p>
+                <h3>{t('undressLp.howItWorks.step1Title')}</h3>
+                <p>{t('undressLp.howItWorks.step1Desc')}</p>
               </div>
               <div className={styles['lp-step']}>
                 <div className={styles['lp-step-icon']}>&#x1F3A8;</div>
-                <h3>Paint the Area</h3>
-                <p>Use our intuitive brush tool to paint over the clothing areas you want removed. You control exactly what gets processed.</p>
+                <h3>{t('undressLp.howItWorks.step2Title')}</h3>
+                <p>{t('undressLp.howItWorks.step2Desc')}</p>
               </div>
               <div className={styles['lp-step']}>
                 <div className={styles['lp-step-icon']}>&#x2728;</div>
-                <h3>Generate &amp; Download</h3>
-                <p>Hit generate and receive your photorealistic result in under 10 seconds. Download in full resolution instantly.</p>
+                <h3>{t('undressLp.howItWorks.step3Title')}</h3>
+                <p>{t('undressLp.howItWorks.step3Desc')}</p>
               </div>
             </div>
           </div>
@@ -151,40 +140,40 @@ export default function UndressAiPage() {
         {/* Features */}
         <section className={`${styles['lp-section']} ${styles['lp-features-bg']}`}>
           <div className={styles['lp-section-inner']}>
-            <div className={styles['lp-section-tag']}>Features</div>
-            <h2 className={styles['lp-h2']}>Why Image Nude is different</h2>
-            <p className={styles['lp-section-sub']}>Built for quality. Designed for ease of use.</p>
+            <div className={styles['lp-section-tag']}>{t('undressLp.features.label')}</div>
+            <h2 className={styles['lp-h2']}>{t('undressLp.features.h2')}</h2>
+            <p className={styles['lp-section-sub']}>{t('undressLp.features.sub')}</p>
 
             <div className={styles['lp-features-grid']}>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x1F52C;</div>
-                <h3>Photorealistic AI Engine</h3>
-                <p>Powered by the latest SDXL models with custom fine-tuning for anatomy accuracy. Results that look genuinely realistic, not obviously AI-generated.</p>
+                <h3>{t('undressLp.features.feat1Title')}</h3>
+                <p>{t('undressLp.features.feat1Desc')}</p>
               </div>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x1F3AD;</div>
-                <h3>Full Body Control</h3>
-                <p>Adjust body type, skin tone, age, and style with simple preset controls. Create exactly the result you envision.</p>
+                <h3>{t('undressLp.features.feat2Title')}</h3>
+                <p>{t('undressLp.features.feat2Desc')}</p>
               </div>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x1F512;</div>
-                <h3>Complete Privacy</h3>
-                <p>All images are automatically deleted within 1 hour of generation. No images are stored, shared, or used for training. Your sessions are fully private.</p>
+                <h3>{t('undressLp.features.feat3Title')}</h3>
+                <p>{t('undressLp.features.feat3Desc')}</p>
               </div>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x26A1;</div>
-                <h3>Lightning Fast</h3>
-                <p>Average generation time of 8 seconds. Built on dedicated GPU infrastructure for consistent performance even during peak hours.</p>
+                <h3>{t('undressLp.features.feat4Title')}</h3>
+                <p>{t('undressLp.features.feat4Desc')}</p>
               </div>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x1F4B0;</div>
-                <h3>Free to Start</h3>
-                <p>Get 20 free credits on signup — enough to generate 4 high-quality images. No credit card required to start.</p>
+                <h3>{t('undressLp.features.feat5Title')}</h3>
+                <p>{t('undressLp.features.feat5Desc')}</p>
               </div>
               <div className={styles['lp-feature-card']}>
                 <div className={styles['lp-feature-icon']}>&#x1F310;</div>
-                <h3>Crypto Payments Accepted</h3>
-                <p>Pay anonymously with Bitcoin, Ethereum, USDT and 50+ cryptocurrencies. Maximum privacy for sensitive purchases.</p>
+                <h3>{t('undressLp.features.feat6Title')}</h3>
+                <p>{t('undressLp.features.feat6Desc')}</p>
               </div>
             </div>
           </div>
@@ -193,52 +182,52 @@ export default function UndressAiPage() {
         {/* Pricing */}
         <section className={styles['lp-section']}>
           <div className={styles['lp-section-inner']} style={{ textAlign: 'center' }}>
-            <div className={styles['lp-section-tag']}>Pricing</div>
-            <h2 className={styles['lp-h2']}>Simple, transparent pricing</h2>
-            <p className={styles['lp-section-sub']} style={{ margin: '0 auto 60px' }}>Start free. Upgrade when you&apos;re ready.</p>
+            <div className={styles['lp-section-tag']}>{t('undressLp.pricing.label')}</div>
+            <h2 className={styles['lp-h2']}>{t('undressLp.pricing.h2')}</h2>
+            <p className={styles['lp-section-sub']} style={{ margin: '0 auto 60px' }}>{t('undressLp.pricing.sub')}</p>
 
             <div className={styles['lp-pricing-grid']}>
               <div className={styles['lp-plan']}>
-                <div className={styles['lp-plan-name']}>Starter</div>
+                <div className={styles['lp-plan-name']}>{t('undressLp.pricing.starterName')}</div>
                 <div className={styles['lp-plan-price']}><sup>$</sup>0</div>
-                <div className={styles['lp-plan-price-note']}>Free forever</div>
+                <div className={styles['lp-plan-price-note']}>{t('undressLp.pricing.starterNote')}</div>
                 <ul className={styles['lp-plan-features']}>
-                  <li>20 credits on signup</li>
-                  <li>Standard quality output</li>
-                  <li>720p resolution</li>
-                  <li>Basic body presets</li>
+                  <li>{t('undressLp.pricing.starterFeat1')}</li>
+                  <li>{t('undressLp.pricing.starterFeat2')}</li>
+                  <li>{t('undressLp.pricing.starterFeat3')}</li>
+                  <li>{t('undressLp.pricing.starterFeat4')}</li>
                 </ul>
-                <Link href="/register" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-secondary']}`}>Get Started Free</Link>
+                <Link href="/register" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-secondary']}`}>{t('undressLp.pricing.starterBtn')}</Link>
               </div>
 
               <div className={`${styles['lp-plan']} ${styles['lp-plan-popular']}`}>
-                <div className={styles['lp-popular-badge']}>Most Popular</div>
-                <div className={styles['lp-plan-name']}>Basic</div>
+                <div className={styles['lp-popular-badge']}>{t('undressLp.pricing.mostPopular')}</div>
+                <div className={styles['lp-plan-name']}>{t('undressLp.pricing.basicName')}</div>
                 <div className={styles['lp-plan-price']}><sup>$</sup>14<span style={{ fontSize: 24 }}>.99</span></div>
-                <div className={styles['lp-plan-price-note']}>100 credits</div>
+                <div className={styles['lp-plan-price-note']}>{t('undressLp.pricing.basicNote')}</div>
                 <ul className={styles['lp-plan-features']}>
-                  <li>100 generation credits</li>
-                  <li>HD quality output</li>
-                  <li>1080p resolution</li>
-                  <li>All body presets</li>
-                  <li>Priority generation queue</li>
+                  <li>{t('undressLp.pricing.basicFeat1')}</li>
+                  <li>{t('undressLp.pricing.basicFeat2')}</li>
+                  <li>{t('undressLp.pricing.basicFeat3')}</li>
+                  <li>{t('undressLp.pricing.basicFeat4')}</li>
+                  <li>{t('undressLp.pricing.basicFeat5')}</li>
                 </ul>
-                <Link href="/pricing" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-primary']}`}>Get Basic</Link>
+                <Link href="/pricing" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-primary']}`}>{t('undressLp.pricing.basicBtn')}</Link>
               </div>
 
               <div className={styles['lp-plan']}>
-                <div className={styles['lp-plan-name']}>Unlimited</div>
+                <div className={styles['lp-plan-name']}>{t('undressLp.pricing.unlimitedName')}</div>
                 <div className={styles['lp-plan-price']}><sup>$</sup>29<span style={{ fontSize: 24 }}>.99</span></div>
-                <div className={styles['lp-plan-price-note']}>300 credits</div>
+                <div className={styles['lp-plan-price-note']}>{t('undressLp.pricing.unlimitedNote')}</div>
                 <ul className={styles['lp-plan-features']}>
-                  <li>300 generation credits</li>
-                  <li>Ultra HD quality</li>
-                  <li>Max resolution output</li>
-                  <li>All features unlocked</li>
-                  <li>Fastest priority queue</li>
-                  <li>Early access to new features</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat1')}</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat2')}</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat3')}</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat4')}</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat5')}</li>
+                  <li>{t('undressLp.pricing.unlimitedFeat6')}</li>
                 </ul>
-                <Link href="/pricing" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-secondary']}`}>Get Unlimited</Link>
+                <Link href="/pricing" className={`${styles['lp-plan-btn']} ${styles['lp-plan-btn-secondary']}`}>{t('undressLp.pricing.unlimitedBtn')}</Link>
               </div>
             </div>
           </div>
@@ -250,28 +239,27 @@ export default function UndressAiPage() {
         {/* Bottom CTA */}
         <section className={`${styles['lp-section']} ${styles['lp-cta-section']}`}>
           <div className={styles['lp-section-inner']} style={{ textAlign: 'center' }}>
-            <h2 className={styles['lp-h2']}>Ready to try it yourself?</h2>
-            <p className={styles['lp-section-sub']} style={{ margin: '0 auto 40px' }}>Join 180,000+ users. Start for free — no credit card needed.</p>
+            <h2 className={styles['lp-h2']}>{t('undressLp.cta.h2')}</h2>
+            <p className={styles['lp-section-sub']} style={{ margin: '0 auto 40px' }}>{t('undressLp.cta.sub')}</p>
             <Link href="/register" className={styles['lp-btn-primary']} style={{ fontSize: 18, padding: '20px 48px' }}>
-              &#x2726; Start Free — 20 Credits Included
+              &#x2726; {t('undressLp.cta.btn')}
             </Link>
-            <p style={{ marginTop: 16, fontSize: 13, color: '#444444' }}>18+ only &middot; All images AI-generated &middot; Images deleted within 1 hour</p>
+            <p style={{ marginTop: 16, fontSize: 13, color: '#444444' }}>{t('undressLp.cta.note')}</p>
           </div>
         </section>
 
         {/* SEO Keyword Section */}
         <section className={styles['lp-section']}>
           <div className={styles['lp-section-inner']}>
-            <h2 className={styles['lp-h2']}>Free AI Undress — No Login, No Sign Up</h2>
+            <h2 className={styles['lp-h2']}>{t('undressLp.seo.h2')}</h2>
             <p className={styles['lp-section-sub']} style={{ margin: '0 auto 24px', maxWidth: 640 }}>
-              ImageNude is the only AI undress tool that&apos;s completely free with no login required.
-              No account, no credit card, no registration. Just upload and generate.
+              {t('undressLp.seo.desc')}
             </p>
             <ul style={{ listStyle: 'none', padding: 0, maxWidth: 480, margin: '0 auto', textAlign: 'left', fontSize: 16, lineHeight: 2, color: '#ccc' }}>
-              <li>&#x2713; Free to try — no credit card required</li>
-              <li>&#x2713; No login or sign up needed</li>
-              <li>&#x2713; Works on mobile and desktop</li>
-              <li>&#x2713; Results in under 10 seconds</li>
+              <li>&#x2713; {t('undressLp.seo.feat1')}</li>
+              <li>&#x2713; {t('undressLp.seo.feat2')}</li>
+              <li>&#x2713; {t('undressLp.seo.feat3')}</li>
+              <li>&#x2713; {t('undressLp.seo.feat4')}</li>
             </ul>
           </div>
         </section>
@@ -279,18 +267,17 @@ export default function UndressAiPage() {
         {/* Footer */}
         <footer className={styles['lp-footer']}>
           <div className={styles['lp-footer-links']}>
-            <Link href="/">Home</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/face-swap">Face Swap</Link>
-            <Link href="/blog/best-ai-undress-tools">Blog</Link>
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms of Service</Link>
-            <Link href="/2257">2257 Statement</Link>
+            <Link href="/">{t('undressLp.footer.home')}</Link>
+            <Link href="/pricing">{t('undressLp.footer.pricing')}</Link>
+            <Link href="/face-swap">{t('undressLp.footer.faceSwap')}</Link>
+            <Link href="/blog/best-ai-undress-tools">{t('undressLp.footer.blog')}</Link>
+            <Link href="/privacy">{t('undressLp.footer.privacy')}</Link>
+            <Link href="/terms">{t('undressLp.footer.terms')}</Link>
+            <Link href="/2257">{t('undressLp.footer.statement')}</Link>
           </div>
           <p className={styles['lp-footer-note']}>
-            Image Nude is an AI-powered image generation platform. All generated images are fictional and AI-created.
-            This service is intended for adults aged 18 and over. Generating content depicting minors or real individuals without consent is strictly prohibited.
-            &copy; 2025 Image Nude. All rights reserved.
+            {t('undressLp.footer.disclaimer')}
+            {' '}{t('undressLp.footer.copyright')}
           </p>
         </footer>
       </div>
