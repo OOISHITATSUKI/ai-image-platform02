@@ -252,9 +252,11 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
     const sheetNames = sheetInfo.data.sheets?.map(s => s.properties?.title) ?? [];
     console.log('[export-to-sheets] Available sheets:', sheetNames);
 
-    const targetSheet = sheetNames.includes('KPI_Daily') ? 'KPI_Daily' : sheetNames[0] ?? 'Sheet1';
-    if (targetSheet !== 'KPI_Daily') {
-        console.warn(`[export-to-sheets] 'KPI_Daily' not found. Using '${targetSheet}' instead.`);
+    const targetSheet = sheetNames.includes('imagenude_kpi_tracker01') ? 'imagenude_kpi_tracker01'
+        : sheetNames.includes('KPI_Daily') ? 'KPI_Daily'
+        : sheetNames[0] ?? 'Sheet1';
+    if (targetSheet !== 'imagenude_kpi_tracker01') {
+        console.warn(`[export-to-sheets] 'imagenude_kpi_tracker01' not found. Using '${targetSheet}' instead.`);
     }
 
     // Ensure header row (row 2) has Umami column names in O-U
