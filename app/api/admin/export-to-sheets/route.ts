@@ -31,21 +31,21 @@ interface UmamiStats {
 }
 
 async function fetchUmamiStats(): Promise<UmamiStats> {
-    const apiUrl = process.env.UMAMI_API_URL;
     const apiKey = process.env.UMAMI_API_KEY;
     const websiteId = process.env.UMAMI_WEBSITE_ID;
+    // Use the new Umami Cloud API endpoint (api.umami.is/v1)
+    const apiUrl = 'https://api.umami.is/v1';
 
     console.log('[umami] Config:', { apiUrl, apiKey: apiKey ? '***set***' : 'MISSING', websiteId });
 
-    if (!apiUrl || !apiKey || !websiteId) {
-        console.warn('[umami] Missing UMAMI_API_URL, UMAMI_API_KEY, or UMAMI_WEBSITE_ID');
+    if (!apiKey || !websiteId) {
+        console.warn('[umami] Missing UMAMI_API_KEY or UMAMI_WEBSITE_ID');
         return { pageviews: 0, visitors: 0, bounceRate: 0, mobileRatio: 0, topReferrers: [] };
     }
 
     const headers = { 'x-umami-api-key': apiKey };
 
     // Yesterday's date range in JST (UTC+9)
-    // JST midnight = UTC 15:00 of the previous day
     const now = new Date();
     const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const jstYesterday = new Date(jstNow);
@@ -78,9 +78,11 @@ async function fetchUmamiStats(): Promise<UmamiStats> {
         console.log('[umami] Stats raw response:', statsText);
 
         const statsData = JSON.parse(statsText);
-        const pageviews = statsData?.pageviews?.value ?? 0;
-        const visitors = statsData?.visitors?.value ?? 0;
-        const bounces = statsData?.bounces?.value ?? 0;
+        // New API returns flat values (e.g. { pageviews: 3, visitors: 2, ... })
+        // Old API returned nested { pageviews: { value: 3 }, ... }
+        const pageviews = statsData?.pageviews?.value ?? statsData?.pageviews ?? 0;
+        const visitors = statsData?.visitors?.value ?? statsData?.visitors ?? 0;
+        const bounces = statsData?.bounces?.value ?? statsData?.bounces ?? 0;
         const bounceRate = pageviews > 0 ? Math.round((bounces / pageviews) * 100) : 0;
 
         console.log('[umami] Parsed stats:', { pageviews, visitors, bounces, bounceRate });
