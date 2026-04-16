@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import type { GenerationType, Locale } from '@/lib/types';
+import HowToUseModal from '@/components/companions/HowToUseModal';
 
 export default function Sidebar() {
     const {
@@ -35,9 +36,8 @@ export default function Sidebar() {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Stay on current page when switching modes — both / and /editor are editors
-    // Guests always stay on /; authenticated users stay where they are
-    const editorHref = !isAuthenticated ? '/' : (pathname === '/' ? '/' : '/editor');
+    // / is now a redirect to /companions, so the image editor lives only at /editor.
+    const editorHref = '/editor';
 
     const closeSidebarOnMobile = () => {
         if (typeof window !== 'undefined' && window.innerWidth <= 768) {
@@ -84,8 +84,8 @@ export default function Sidebar() {
         setEditingChatId(null);
     };
 
-    // Whether we're already on an editor page (/ or /editor)
-    const isOnEditor = pathname === '/' || pathname === '/editor';
+    // / is a redirect now; the editor page is /editor only.
+    const isOnEditor = pathname === '/editor';
 
     const handleGenTypeClick = (type: GenerationType, e?: React.MouseEvent) => {
         setGenerationType(type);
@@ -99,15 +99,42 @@ export default function Sidebar() {
         }
     };
 
-    const navItems: { icon: string; labelKey: string; href: string }[] = [
-        // Home removed — editor IS the landing page
+    const isPremiumUser = !!user && user.plan !== 'free';
+
+    type GirlfriendNav = {
+        icon: string;
+        label: string;
+        href: string;
+        isPremium?: boolean;
+        isActive: (p: string | null) => boolean;
+    };
+
+    const girlfriendNavItems: GirlfriendNav[] = [
+        {
+            icon: '🏠',
+            label: 'Home',
+            href: '/companions',
+            isActive: (p) => p === '/companions',
+        },
+        {
+            icon: '🔴',
+            label: 'Live Action',
+            href: '/companions#live-action',
+            isActive: (p) => !!p && p.endsWith('/live'),
+        },
+        {
+            icon: '✨',
+            label: 'Nude Assistant',
+            href: '/companions/assistant',
+            isActive: (p) => p === '/companions/assistant',
+        },
     ];
 
-    const generationItems: { icon: string; labelKey: string; type: GenerationType; isPaid?: boolean }[] = [
-        { icon: '🖼️', labelKey: 'create.imageGen', type: 'txt2img' },
-        { icon: '🔄', labelKey: 'create.faceSwap', type: 'face_swap', isPaid: true },
-        { icon: '🖌️', labelKey: 'create.undress', type: 'inpaint', isPaid: true },
-        { icon: '🎬', labelKey: 'create.videoGen', type: 'img2vid', isPaid: true },
+    const createNavItems: { icon: string; label: string; type: GenerationType }[] = [
+        { icon: '🖼️', label: 'Image',     type: 'txt2img' },
+        { icon: '👤', label: 'Face Swap', type: 'face_swap' },
+        { icon: '✂️', label: 'Undress',   type: 'inpaint' },
+        { icon: '🎬', label: 'Video',     type: 'img2vid' },
     ];
 
     const languages: { value: Locale; label: string }[] = [
@@ -122,6 +149,30 @@ export default function Sidebar() {
     const [showAccountMenu, setShowAccountMenu] = useState(false);
     const accountMenuRef = useRef<HTMLDivElement>(null);
     const [unlockedNewCount, setUnlockedNewCount] = useState(0);
+    const [showHowToUse, setShowHowToUse] = useState(false);
+
+    const isCompanionsPage = !!pathname && pathname.startsWith('/companions');
+
+    const handleAssistantClick = () => {
+        // Always navigate to /companions/assistant; the page shows a teaser + CTA
+        // for free users instead of blocking with a modal.
+        closeSidebarOnMobile();
+    };
+
+    const handleHowToUseClick = () => {
+        if (isCompanionsPage) {
+            setShowHowToUse(true);
+            return;
+        }
+        const w = window as unknown as Record<string, unknown>;
+        const key = settings.generationType === 'inpaint'
+            ? '__openInpaintTutorial'
+            : settings.generationType === 'face_swap'
+                ? '__openFaceSwapTutorial'
+                : '__openQAModal';
+        const fn = w[key];
+        if (typeof fn === 'function') (fn as () => void)();
+    };
 
     // Check for newly unlocked guest images badge
     React.useEffect(() => {
@@ -147,7 +198,7 @@ export default function Sidebar() {
         <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
             {/* Logo */}
             <div className="sidebar-header">
-                <Link href="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
+                <Link href="/companions" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
                     {!sidebarCollapsed ? (
                         <>
                             <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" />
@@ -168,10 +219,41 @@ export default function Sidebar() {
             {/* Scrollable area: nav sections + chat history */}
             <div className="sidebar-scroll-area">
 
-                {/* Generation */}
-                <div className="nav-section">
-                    <div className="nav-label">{t('nav.create')}</div>
-                    {generationItems.map((item) => {
+                {/* 💕 GIRLFRIENDS (main) */}
+                <div className="nav-section nav-section-girlfriends">
+                    {!sidebarCollapsed && <div className="nav-section-label">💕 GIRLFRIENDS</div>}
+                    {girlfriendNavItems.map((item) => {
+                        const active = item.isActive(pathname);
+                        const locked = !!item.isPremium && !isPremiumUser;
+                        return (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                className={`nav-item ${active ? 'active' : ''}`}
+                                onClick={() => {
+                                    if (item.isPremium) {
+                                        handleAssistantClick();
+                                    } else {
+                                        closeSidebarOnMobile();
+                                    }
+                                }}
+                            >
+                                <span className="nav-icon">{item.icon}</span>
+                                {!sidebarCollapsed && (
+                                    <span className="nav-label-text">
+                                        {item.label}
+                                        {locked && <span className="nav-lock-badge">🔒</span>}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* 🎨 CREATE (sub) */}
+                <div className="nav-section nav-section-create">
+                    {!sidebarCollapsed && <div className="nav-section-label">🎨 CREATE</div>}
+                    {createNavItems.map((item) => {
                         const isActive = item.type === 'img2vid'
                             ? ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType)
                             : settings.generationType === item.type;
@@ -183,11 +265,7 @@ export default function Sidebar() {
                                 onClick={(e) => handleGenTypeClick(item.type, e)}
                             >
                                 <span className="nav-icon">{item.icon}</span>
-                                {!sidebarCollapsed && (
-                                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                        {t(item.labelKey)}
-                                    </span>
-                                )}
+                                {!sidebarCollapsed && <span>{item.label}</span>}
                             </Link>
                         );
                     })}
@@ -478,16 +556,7 @@ export default function Sidebar() {
                 {!sidebarCollapsed && (
                     <div style={{ padding: '0 12px', marginBottom: 4 }}>
                         <button
-                            onClick={() => {
-                                const w = window as unknown as Record<string, unknown>;
-                                const key = settings.generationType === 'inpaint'
-                                    ? '__openInpaintTutorial'
-                                    : settings.generationType === 'face_swap'
-                                        ? '__openFaceSwapTutorial'
-                                        : '__openQAModal';
-                                const fn = w[key];
-                                if (typeof fn === 'function') (fn as () => void)();
-                            }}
+                            onClick={handleHowToUseClick}
                             style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                 width: '100%', padding: '7px 0', borderRadius: 8,
@@ -520,6 +589,12 @@ export default function Sidebar() {
                     </div>
                 )}
             </div>
+
+            {/* How to use modal (Companions version or legacy trigger) */}
+            {showHowToUse && (
+                <HowToUseModal onClose={() => setShowHowToUse(false)} />
+            )}
+
         </nav>
     );
 }

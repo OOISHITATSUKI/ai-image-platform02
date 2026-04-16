@@ -44,6 +44,15 @@ next-env.d.ts
 # backups
 /backups/
 
+# Companion Live Action videos — large binary assets managed outside git.
+# Sync to VPS via rsync; Admin upload writes directly on each environment.
+public/companions/videos/
+# User-uploaded companion avatars (timestamped filenames). The shipped
+# placeholder defaults (name-1.jpg ... name-3.jpg) stay committed.
+public/companions/avatars/*-17*.png
+public/companions/avatars/*-17*.jpg
+public/companions/avatars/*-17*.webp
+
 # runtime data (managed by Supabase, not git)
 data/users.json
 data/credit_log.json

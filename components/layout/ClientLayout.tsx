@@ -28,12 +28,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
         // ── Auto-detect browser language (runs synchronously before async session restore) ──
         // Priority: 1) manually chosen (localStorage) 2) browser lang 3) 'en'
-        const { localeManuallySet } = useAppStore.getState();
-        if (!localeManuallySet) {
-            const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
-            const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
-            const detected = supported.includes(browserLang) ? browserLang : 'en';
-            useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });
+        try {
+            const { localeManuallySet } = useAppStore.getState();
+            if (!localeManuallySet) {
+                const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+                const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
+                const detected = supported.includes(browserLang) ? browserLang : 'en';
+                useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });
+            }
+        } catch (e) {
+            console.error('Locale detection failed:', e);
         }
 
         // ── Restore session: invoke /api/auth/me if auth_token exists ──

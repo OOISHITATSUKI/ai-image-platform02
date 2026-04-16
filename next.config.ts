@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Large multipart uploads bypass the 10MB middleware limit via a matcher
+  // exclusion in middleware.ts (/api/admin/upload-companion-*).
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '520mb',
+    },
+  },
   async redirects() {
     return [
       {

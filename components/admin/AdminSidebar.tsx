@@ -9,6 +9,7 @@ export default function AdminSidebar() {
     const navItems = [
         { path: '/admin', label: '📊 ダッシュボード (Dashboard)' },
         { path: '/admin/users', label: '👤 ユーザー管理 (Users)' },
+        { path: '/admin/companions', label: '🧑‍🤝‍🧑 キャラクター管理 (Companions)' },
         { path: '/admin/blocks', label: '🚫 ブロックログ (Blocks)' },
         { path: '/admin/payments', label: '💰 決済管理 (Payments)' },
         { path: '/admin/email', label: '✉️ メール管理 (Email)' },

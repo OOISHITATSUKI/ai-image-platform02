@@ -5,8 +5,10 @@ import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 import { AVAILABLE_MODELS } from '@/lib/types';
 import type { MediaFilter, AspectRatio } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 import InpaintModal from './InpaintModal';
 import MyFaces from './MyFaces';
+import CreateCompanionModal from '@/components/companions/CreateCompanionModal';
 
 // ── Uploaded image slot ──
 interface UploadSlot {
@@ -64,6 +66,8 @@ export default function ChatArea() {
     const [pendingGenerate, setPendingGenerate] = useState(false);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+    const [chatWithHerImageUrl, setChatWithHerImageUrl] = useState<string | null>(null);
+    const router = useRouter();
 
     // Security: Img2Img Consent
 
@@ -1201,6 +1205,12 @@ export default function ChatArea() {
                                             >
                                                 🎯 Change Pose
                                             </button>
+                                            <button
+                                                className="msg-action-btn msg-action-chat"
+                                                onClick={() => setChatWithHerImageUrl(msg.imageUrl!)}
+                                            >
+                                                💬 Chat with her
+                                            </button>
                                         </>
                                     )}
                                 </div>
@@ -1620,6 +1630,16 @@ export default function ChatArea() {
                     />
                 )
             }
+            {chatWithHerImageUrl && (
+                <CreateCompanionModal
+                    imageUrl={chatWithHerImageUrl}
+                    onClose={() => setChatWithHerImageUrl(null)}
+                    onCreated={(companionId) => {
+                        setChatWithHerImageUrl(null);
+                        router.push(`/companions/${companionId}`);
+                    }}
+                />
+            )}
         </section >
     );
 }
