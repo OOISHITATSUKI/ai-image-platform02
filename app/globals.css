@@ -9735,70 +9735,150 @@ button, a, [role="button"] {
 }
 .paywall-btn-secondary:hover { border-color: var(--text-secondary); }
 
-/* ── Responsive ── */
+/* ── Responsive: Companion / Girlfriend Mode ── */
+
+/* Tablet */
 @media (max-width: 1024px) {
   .comp-chat-sidebar { display: none; }
   .comp-live-panel { width: 280px; }
   .comp-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .comp-live-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
 }
+
+/* Mobile */
 @media (max-width: 768px) {
-  .comp-home { padding: 12px 12px 40px; }
-  .comp-hero { padding: 20px 12px 16px; }
-  .comp-hero-title { font-size: 1.4rem; }
-  .comp-hero-sub { font-size: 0.88rem; }
-  .comp-hero-cta { padding: 8px 20px; font-size: 0.85rem; }
+  /* ── Home ── */
+  .comp-home { padding: 0 0 60px; }
+  .comp-hero { padding: 24px 16px 16px; }
+  .comp-hero-title { font-size: 1.5rem; letter-spacing: -0.02em; }
+  .comp-hero-sub { font-size: 0.85rem; margin-bottom: 14px; }
+  .comp-hero-cta { padding: 10px 24px; font-size: 0.85rem; }
+
+  /* Icon row — full bleed scroll */
+  .comp-icon-row {
+    gap: 14px; padding: 10px 16px 18px;
+    scroll-snap-type: x mandatory;
+  }
+  .comp-icon-item { scroll-snap-align: center; }
+
+  /* Sections */
+  .comp-section { margin-bottom: 24px; padding: 0 12px; }
+  .comp-section-title { font-size: 1.05rem; margin-bottom: 10px; }
+
+  /* Card grid — 2 columns, tighter */
   .comp-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .comp-live-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .comp-card { border-radius: 10px; }
+  .comp-card-img { aspect-ratio: 3/4; }
   .comp-card-bottom { padding: 8px 10px; }
+  .comp-card-meta { gap: 2px; }
   .comp-card-name { font-size: 0.82rem; }
+  .comp-card-personality { font-size: 0.68rem; }
   .comp-card-tagline { font-size: 0.72rem; -webkit-line-clamp: 1; }
   .comp-card-play { padding: 5px 10px; font-size: 0.72rem; }
-  .comp-card-placeholder span { font-size: 2.5rem; }
-  .comp-section { margin-bottom: 24px; }
-  .comp-section-title { font-size: 1rem; }
-  .comp-icon-row { gap: 12px; padding: 8px 0 16px; }
-  .comp-msg { max-width: 90%; }
+  .comp-card-placeholder span { font-size: 2rem; }
+  .comp-badge-new { font-size: 0.6rem; padding: 2px 6px; top: 6px; right: 6px; }
+  .comp-badge-live-available { font-size: 0.58rem; padding: 2px 6px; bottom: 6px; left: 6px; }
+
+  /* Promo card */
+  .comp-promo-card { min-height: auto; aspect-ratio: auto; border-radius: 10px; }
+  .comp-promo-inner { padding: 20px 16px; }
+  .comp-promo-badge { font-size: 1rem; margin-bottom: 8px; }
+  .comp-promo-inner p { font-size: 0.78rem; margin-bottom: 8px; }
+  .comp-promo-cta { font-size: 0.75rem; }
+
+  /* Live grid */
+  .comp-live-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  /* Assistant promo */
+  .assistant-home-section { margin: 8px 12px 16px; }
+  .assistant-home-promo { padding: 14px 16px; gap: 12px; border-radius: 12px; }
+  .assistant-home-promo-icon { width: 42px; height: 42px; font-size: 1.8rem; border-radius: 10px; }
+  .assistant-home-promo-text h3 { font-size: 0.95rem; }
+  .assistant-home-promo-text p { font-size: 0.78rem; }
+  .assistant-home-promo-cta { padding: 8px 14px; font-size: 0.8rem; }
+
+  /* ── Chat Page ── */
+  .comp-chat-page { height: 100dvh; } /* dvh for mobile address bar */
   .comp-chat-header { padding: 8px 12px; gap: 8px; }
+  .comp-chat-header-avatar { width: 30px; height: 30px; font-size: 0.8rem; }
   .comp-chat-header-name { font-size: 0.88rem; }
   .mode-toggle-btn { padding: 5px 10px; font-size: 0.75rem; }
-  .comp-chat-messages { padding: 12px; }
-  .comp-chat-input-row { padding: 8px 12px; }
-  .comp-chat-input { padding: 9px 14px; font-size: 0.85rem; }
-  .comp-presets { padding: 6px 12px; gap: 6px; }
-  .comp-preset-btn { padding: 5px 12px; font-size: 0.75rem; }
-  .comp-limit-bar { padding: 4px 12px; }
+  .comp-chat-call-btn { padding: 5px 8px; font-size: 0.82rem; }
+
+  .comp-chat-messages { padding: 12px 10px; gap: 8px; }
+  .comp-msg { max-width: 88%; }
+  .comp-msg-avatar { width: 26px; height: 26px; font-size: 0.65rem; }
+  .comp-msg-bubble { padding: 9px 13px; font-size: 0.88rem; line-height: 1.45; }
+
+  .comp-chat-intro { padding: 20px 12px; }
+  .comp-chat-intro-avatar { width: 60px; height: 60px; font-size: 1.6rem; }
+  .comp-chat-intro h3 { font-size: 1.15rem; }
+  .comp-chat-intro-tagline { font-size: 0.82rem; max-width: 280px; }
+
+  .comp-presets { padding: 6px 10px; gap: 6px; }
+  .comp-preset-btn { padding: 6px 12px; font-size: 0.75rem; }
+  .comp-limit-bar { padding: 4px 10px; font-size: 0.68rem; }
+
+  .comp-chat-input-row { padding: 8px 10px; gap: 6px; }
+  .comp-chat-input { padding: 10px 14px; font-size: 0.88rem; border-radius: 22px; }
+  .comp-chat-send { width: 38px; height: 38px; font-size: 1rem; }
+
+  /* Paywall modal */
+  .paywall-modal { padding: 24px 20px; margin: 0 16px; max-width: 360px; }
+
+  /* ── Live Action ── */
   .comp-live-layout { flex-direction: column; }
   .comp-live-panel {
     width: 100%; border-left: none; border-top: 1px solid var(--border);
     max-height: 40vh;
   }
-  .live-video-wrap { max-height: 50vh; }
-  .comp-promo-card { min-height: auto; }
-  .comp-promo-inner { padding: 16px; }
-  .comp-promo-badge { font-size: 0.7rem; }
-  .comp-promo-inner p { font-size: 0.78rem; }
-  .comp-promo-cta { font-size: 0.75rem; }
-  .paywall-modal { padding: 24px 20px; margin: 0 16px; }
-  .story-caption { bottom: 110px; font-size: 0.82rem; }
-  .story-stats { bottom: 80px; }
+  .live-video-wrap { max-height: 55vh; }
+
+  /* ── Stories ── */
+  .story-caption { bottom: 115px; font-size: 0.82rem; left: 14px; right: 14px; }
+  .story-stats { bottom: 82px; left: 14px; }
+  .story-like-btn { font-size: 0.82rem; }
+  .story-comment-count { font-size: 0.82rem; }
   .story-comment-input-wrap { padding: 8px 12px 16px; }
-  .story-comment-input { padding: 8px 14px; font-size: 0.82rem; }
+  .story-comment-input { padding: 9px 14px; font-size: 0.85rem; }
+  .story-comment-send { width: 34px; height: 34px; }
 }
+
+/* Small phones */
 @media (max-width: 480px) {
-  .comp-home { padding: 8px 8px 32px; }
-  .comp-hero { padding: 16px 8px 12px; }
-  .comp-hero-title { font-size: 1.2rem; }
-  .comp-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .comp-card-img { aspect-ratio: 2/3; }
+  .comp-hero { padding: 20px 12px 12px; }
+  .comp-hero-title { font-size: 1.25rem; }
+  .comp-hero-sub { font-size: 0.8rem; }
+  .comp-hero-cta { padding: 9px 20px; font-size: 0.82rem; }
+
+  .comp-grid { gap: 8px; }
   .comp-card-bottom { padding: 6px 8px; }
   .comp-card-name { font-size: 0.78rem; }
   .comp-card-tagline { display: none; }
-  .comp-card-play { padding: 4px 8px; font-size: 0.7rem; }
-  .comp-icon-row { gap: 10px; }
-  .comp-chat-header { padding: 6px 10px; }
+  .comp-card-play { padding: 4px 8px; font-size: 0.68rem; }
+
+  .comp-icon-row { gap: 10px; padding: 8px 12px 14px; }
+
+  .comp-chat-header { padding: 6px 8px; }
   .comp-chat-messages { padding: 10px 8px; }
   .comp-chat-input-row { padding: 6px 8px; }
-  .comp-msg-bubble { padding: 8px 12px; font-size: 0.85rem; }
+  .comp-msg { max-width: 92%; }
+  .comp-msg-bubble { padding: 8px 11px; font-size: 0.85rem; }
+  .comp-msg-avatar { width: 24px; height: 24px; }
+
+  .comp-presets { padding: 4px 8px; }
+  .comp-preset-btn { padding: 5px 10px; font-size: 0.72rem; }
+
+  /* Assistant promo — stack vertical */
+  .assistant-home-promo { flex-direction: column; text-align: center; padding: 14px; }
+  .assistant-home-promo-cta { width: 100%; text-align: center; }
+
+  /* Paywall */
+  .paywall-modal { padding: 20px 16px; margin: 0 12px; }
+
+  /* Stories */
+  .story-caption { bottom: 105px; font-size: 0.78rem; }
+  .story-stats { bottom: 75px; }
 }
 
 /* ── Create Companion Modal ── */
@@ -10325,8 +10405,6 @@ button, a, [role="button"] {
 .assistant-floating-cta:hover { transform: scale(1.03); }
 
 @media (max-width: 768px) {
-  .assistant-home-promo { flex-direction: column; text-align: center; }
-  .assistant-home-promo-cta { width: 100%; text-align: center; }
   .assistant-teaser-sidebar { display: none !important; }
   .assistant-floating-inner { gap: 10px; padding: 10px 14px; }
   .assistant-floating-sub { display: none; }
