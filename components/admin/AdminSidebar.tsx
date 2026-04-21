@@ -17,6 +17,7 @@ export default function AdminSidebar() {
         { path: '/admin/filters', label: '🔧 フィルター管理 (Filters)' },
         { path: '/admin/content', label: '🖼️ コンテンツ管理 (Content)' },
         { path: '/admin/terms', label: '📄 規約管理 (Terms)' },
+        { path: '/admin/feedback', label: '📩 フィードバック (Feedback)' },
     ];
 
     return (

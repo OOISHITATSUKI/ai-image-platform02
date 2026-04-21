@@ -162,7 +162,7 @@ export default function LeftPanel({
     let creditCost = settings.count * 1;
     if (isVideoMode) creditCost = settings.count * 5;
     else if (faceSwapMode) creditCost = settings.count * 5;
-    else if (inpaintMode) creditCost = settings.count * 3;
+    else if (inpaintMode) creditCost = 3;
     else if (settings.generationType === 'img2img') creditCost = settings.count * 2;
 
     const showAttach = !['txt2img', 'txt2vid'].includes(settings.generationType);
@@ -713,7 +713,8 @@ export default function LeftPanel({
                                 </div>
                             )}
 
-                            {/* Count */}
+                            {/* Count — hidden for inpaint mode */}
+                            {!inpaintMode && (
                             <div className="control-group">
                                 <label>{t('editor.count')} (1-4)</label>
                                 <div className="counter-control">
@@ -722,6 +723,7 @@ export default function LeftPanel({
                                     <button className="counter-btn" onClick={() => updateSettings({ count: Math.min(4, settings.count + 1) })}>＋</button>
                                 </div>
                             </div>
+                            )}
                         </div>
                     )}
                 </div>

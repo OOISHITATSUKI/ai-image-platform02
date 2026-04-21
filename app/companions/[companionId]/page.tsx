@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import {
   getCompanionById,
   FREE_MESSAGE_LIMIT,
-  PRESET_MESSAGES,
   XP_PER_MESSAGE,
   isLiveActionAvailable,
   type Companion,
 } from '@/lib/companions';
 import { getUserCompanionById } from '@/lib/userCompanions';
 import PaywallModal from '@/components/companions/PaywallModal';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -70,7 +70,9 @@ function GalleryImage({ src, fallback, alt }: { src?: string; fallback: string; 
 export default function CompanionChatPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const companionId = params.companionId as string;
+  const { t, locale } = useTranslation();
 
   // Support default, user-created, and the Nude Assistant
   const [companion, setCompanion] = useState<Companion | null | undefined>(() => {
@@ -101,6 +103,8 @@ export default function CompanionChatPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [paywallType, setPaywallType] = useState<'chat_limit' | 'photo' | 'call' | 'nude_assistant' | null>(null);
+  const [showCallComingSoon, setShowCallComingSoon] = useState(false);
+  const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -144,20 +148,36 @@ export default function CompanionChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companion?.id]);
 
+  // Auto-send story comment if arriving from Stories
+  const storyCommentSent = useRef(false);
+  const pendingStoryComment = searchParams.get('storyComment');
+  const pendingRef = useRef(pendingStoryComment);
+  pendingRef.current = pendingStoryComment;
+
   if (!companion) {
     return (
       <div className="comp-chat-page">
         <div className="comp-chat-notfound">
-          <h2>Companion not found</h2>
-          <Link href="/companions" className="comp-btn-primary">Browse Companions</Link>
+          <h2>{t('companions.notFound')}</h2>
+          <Link href="/companions" className="comp-btn-primary">{t('companions.browse')}</Link>
         </div>
       </div>
     );
   }
 
-  // Nude Assistant is now open to everyone; free users hit the normal
-  // FREE_MESSAGE_LIMIT gate after 10 turns, and the system prompt naturally
-  // nudges them toward upgrading during the conversation.
+  // Preset messages — assistant gets customer-service presets, companions get flirty ones
+  const presetMessages = isAssistant ? [
+    { label: t('companions.assistPresetRequest'), message: t('companions.assistPresetRequestMsg') },
+    { label: t('companions.assistPresetHow'), message: t('companions.assistPresetHowMsg') },
+    { label: t('companions.assistPresetIssue'), message: t('companions.assistPresetIssueMsg') },
+    { label: t('companions.assistPresetFeature'), message: t('companions.assistPresetFeatureMsg') },
+  ] : [
+    { label: t('companions.presetSecret'), message: t('companions.presetSecretMsg') },
+    { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
+    { label: t('companions.presetMiss'), message: t('companions.presetMissMsg') },
+    { label: t('companions.presetBold'), message: t('companions.presetBoldMsg') },
+    { label: t('companions.presetPhoto'), message: t('companions.presetPhotoMsg'), isPaywalled: true },
+  ];
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -183,12 +203,22 @@ export default function CompanionChatPage() {
           messages: updated.slice(-20),
           userMessage: text.trim(),
           recentMessages: recent,
+          locale,
         }),
       });
 
-      if (!res.ok) throw new Error('API error');
-
       const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === 'guest_limit') {
+          setShowGuestLimit(true);
+          // Remove the user message we optimistically added
+          setMessages((prev) => prev.slice(0, -1));
+          return;
+        }
+        throw new Error(data.error || 'API error');
+      }
+
       setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
       pushRecentMessage(text.trim());
 
@@ -198,7 +228,7 @@ export default function CompanionChatPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: "Sorry, I'm having trouble responding right now. Try again! 💕" },
+        { role: 'assistant', content: t('companions.errorReply') },
       ]);
     } finally {
       setIsLoading(false);
@@ -206,13 +236,23 @@ export default function CompanionChatPage() {
     }
   };
 
-  const handlePreset = (preset: typeof PRESET_MESSAGES[number]) => {
+  const handlePreset = (preset: typeof presetMessages[number]) => {
     if ('isPaywalled' in preset && preset.isPaywalled) {
       setPaywallType('photo');
       return;
     }
     sendMessage(preset.message);
   };
+
+  // Auto-send story comment after sendMessage is available
+  useEffect(() => {
+    const comment = pendingRef.current;
+    if (!comment || storyCommentSent.current) return;
+    storyCommentSent.current = true;
+    router.replace(`/companions/${companionId}`, { scroll: false });
+    setTimeout(() => sendMessage(comment), 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companion?.id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,13 +279,13 @@ export default function CompanionChatPage() {
         <AvatarFace companion={companion} className="comp-chat-header-avatar" />
         <span className="comp-chat-header-name">{companion.name}</span>
         <div className="comp-mode-toggle">
-          <span className="mode-toggle-btn active">💬 Chat</span>
+          <span className="mode-toggle-btn active">{t('companions.modeChat')}</span>
           {isLiveActionAvailable(companion) && (
-            <Link href={`/companions/${companionId}/live`} className="mode-toggle-btn">🔴 Live</Link>
+            <Link href={`/companions/${companionId}/live`} className="mode-toggle-btn">{t('companions.modeLive')}</Link>
           )}
         </div>
         {!isAssistant && (
-          <button className="comp-chat-call-btn" onClick={() => setPaywallType('call')}>📞</button>
+          <button className="comp-chat-call-btn" onClick={() => setShowCallComingSoon(true)}>📞</button>
         )}
       </div>
 
@@ -284,7 +324,7 @@ export default function CompanionChatPage() {
 
           {/* Presets */}
           <div className="comp-presets">
-            {PRESET_MESSAGES.map((p) => (
+            {presetMessages.map((p) => (
               <button
                 key={p.label}
                 className="comp-preset-btn"
@@ -299,7 +339,7 @@ export default function CompanionChatPage() {
           {/* Limit bar */}
           {!isPaid && (
             <div className="comp-limit-bar">
-              <span>{userMsgCount}/{FREE_MESSAGE_LIMIT} free messages</span>
+              <span>{t('companions.freeMessages').replace('{count}', String(userMsgCount)).replace('{limit}', String(FREE_MESSAGE_LIMIT))}</span>
               <div className="comp-limit-track">
                 <div className="comp-limit-fill" style={{ width: `${Math.min(100, (userMsgCount / FREE_MESSAGE_LIMIT) * 100)}%` }} />
               </div>
@@ -311,7 +351,7 @@ export default function CompanionChatPage() {
             <input
               ref={inputRef}
               className="comp-chat-input"
-              placeholder={isLimited ? 'Upgrade to keep chatting...' : `Write a message...`}
+              placeholder={isLimited ? t('companions.upgradePlaceholder') : t('companions.writePlaceholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onPaste={(e) => e.preventDefault()}
@@ -334,7 +374,7 @@ export default function CompanionChatPage() {
                 fallback={companion.isAssistant ? '✨' : companion.name[0]}
                 alt={companion.name}
               />
-              <span className="comp-gallery-v2">V2</span>
+              <span className="comp-gallery-v2">{t('companions.galleryV2')}</span>
             </div>
             <div className="comp-gallery-controls">
               <button onClick={prevGallery} className="comp-gallery-arrow">‹</button>
@@ -353,8 +393,8 @@ export default function CompanionChatPage() {
           </div>
 
           {!isAssistant && (
-            <button className="comp-call-btn-green" onClick={() => setPaywallType('call')}>
-              📞 Call Me
+            <button className="comp-call-btn-green" onClick={() => setShowCallComingSoon(true)}>
+              {t('companions.callMe')}
             </button>
           )}
         </div>
@@ -367,6 +407,52 @@ export default function CompanionChatPage() {
           companionName={companion.name}
           onClose={() => setPaywallType(null)}
         />
+      )}
+
+      {/* Call Coming Soon Modal */}
+      {showCallComingSoon && (
+        <div className="paywall-overlay" onClick={() => setShowCallComingSoon(false)}>
+          <div className="paywall-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="paywall-close" onClick={() => setShowCallComingSoon(false)}>×</button>
+            <div className="paywall-icon">📞</div>
+            <h3>{t('companions.callComingSoonTitle')}</h3>
+            <p>{t('companions.callComingSoonDesc').replace('{name}', companion.name)}</p>
+            <button className="paywall-btn-primary" onClick={() => setShowCallComingSoon(false)}>
+              {t('companions.callComingSoonOk')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Guest Rate Limit — character asks to register */}
+      {showGuestLimit && (
+        <div className="paywall-overlay" onClick={() => setShowGuestLimit(false)}>
+          <div className="paywall-modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            <button className="paywall-close" onClick={() => setShowGuestLimit(false)}>×</button>
+            <img
+              src={companion.storyThumbnailUrl || companion.avatarUrl}
+              alt={companion.name}
+              style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 0%', margin: '0 auto 12px', display: 'block', border: '3px solid rgba(255,77,141,0.4)' }}
+            />
+            <h3 style={{ margin: '0 0 8px' }}>{companion.name}</h3>
+            <p style={{ fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 20, color: 'var(--text-secondary)' }}>
+              {t('companions.guestLimitMessage').replace('{name}', companion.name)}
+            </p>
+            <a href="/register" style={{
+              display: 'block', padding: '14px 24px',
+              background: 'linear-gradient(135deg, #ff4d8d, #ff6fb5)',
+              color: '#fff', borderRadius: 12, fontWeight: 700,
+              fontSize: '1rem', textDecoration: 'none',
+              boxShadow: '0 4px 15px rgba(255,77,141,0.4)',
+              marginBottom: 10,
+            }}>
+              {t('companions.guestLimitRegister')}
+            </a>
+            <button className="paywall-btn-secondary" onClick={() => setShowGuestLimit(false)}>
+              {t('companions.guestLimitLater')}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

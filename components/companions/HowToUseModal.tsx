@@ -2,40 +2,24 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface HowToUseModalProps {
   onClose: () => void;
 }
 
-const STEPS = [
-  {
-    icon: '🗨️',
-    title: 'Step 1 — Choose Your Companion',
-    description:
-      'Browse the companion list and find someone who matches your vibe. Each girl has her own personality, backstory, and style.',
-  },
-  {
-    icon: '💬',
-    title: 'Step 2 — Start Chatting',
-    description:
-      'Talk to her like you would a real girlfriend. She remembers the conversation and responds personally. The more you chat, the closer you get.',
-  },
-  {
-    icon: '🔴',
-    title: 'Step 3 — Unlock Live Action',
-    description:
-      'As your bond grows, unlock Live Action mode. Watch her come to life with real video responses — just for you. Level up by chatting or upgrading.',
-  },
-  {
-    icon: '⭐',
-    title: 'Step 4 — Level Up',
-    description:
-      "Each conversation earns XP. Higher levels unlock more intimate actions. Skip levels instantly with coins if you can't wait 😏",
-  },
-];
+const STEP_ICONS = ['🗨️', '💬', '🔴', '⭐'];
 
 export default function HowToUseModal({ onClose }: HowToUseModalProps) {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const steps = [
+    { icon: STEP_ICONS[0], title: t('companions.howToStep1Title'), description: t('companions.howToStep1Desc') },
+    { icon: STEP_ICONS[1], title: t('companions.howToStep2Title'), description: t('companions.howToStep2Desc') },
+    { icon: STEP_ICONS[2], title: t('companions.howToStep3Title'), description: t('companions.howToStep3Desc') },
+    { icon: STEP_ICONS[3], title: t('companions.howToStep4Title'), description: t('companions.howToStep4Desc') },
+  ];
 
   const handleStart = () => {
     onClose();
@@ -46,12 +30,12 @@ export default function HowToUseModal({ onClose }: HowToUseModalProps) {
     <div className="how-to-use-overlay" onClick={onClose}>
       <div className="how-to-use-modal" onClick={(e) => e.stopPropagation()}>
         <div className="how-to-use-header">
-          <h2>✨ Meet Your AI Companion</h2>
+          <h2>{t('companions.howToTitle')}</h2>
           <button className="how-to-use-close" onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <div className="how-to-use-steps">
-          {STEPS.map((s) => (
+          {steps.map((s) => (
             <div key={s.title} className="how-to-use-step">
               <span className="how-to-use-icon">{s.icon}</span>
               <div>
@@ -63,7 +47,7 @@ export default function HowToUseModal({ onClose }: HowToUseModalProps) {
         </div>
 
         <button className="how-to-use-cta" onClick={handleStart}>
-          ✨ Start Chatting Now
+          {t('companions.howToCta')}
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface PaywallModalProps {
   type: 'chat_limit' | 'photo' | 'call' | 'live_action' | 'nude_assistant';
@@ -10,37 +11,37 @@ interface PaywallModalProps {
   onClose: () => void;
 }
 
-const COPY: Record<PaywallModalProps['type'], { icon: string; title: string; desc: (name: string, level?: number) => string }> = {
-  chat_limit: {
-    icon: '💬',
-    title: 'Unlock Unlimited Chat',
-    desc: (name) => `You've reached the free message limit with ${name}. Upgrade to keep the conversation going!`,
-  },
-  photo: {
-    icon: '📸',
-    title: 'Unlock Photo Mode',
-    desc: (name) => `Upgrade to receive photos from ${name}.`,
-  },
-  call: {
-    icon: '📞',
-    title: 'Unlock Voice Calls',
-    desc: (name) => `Upgrade to call ${name} and hear her voice.`,
-  },
-  live_action: {
-    icon: '🔥',
-    title: 'Unlock More Actions',
-    desc: (_name, level) => `Upgrade to access Level ${level} actions and beyond.`,
-  },
-  nude_assistant: {
-    icon: '✨',
-    title: 'Unlock Nude Assistant',
-    desc: () =>
-      "Your personal AI guide — prompt tips, Live Action skip strategies, companion recommendations, and 24/7 help. Included with Basic & Unlimited.",
-  },
+const ICON_MAP: Record<PaywallModalProps['type'], string> = {
+  chat_limit: '💬',
+  photo: '📸',
+  call: '📞',
+  live_action: '🔥',
+  nude_assistant: '✨',
+};
+
+const TITLE_KEYS: Record<PaywallModalProps['type'], string> = {
+  chat_limit: 'companions.paywallChatTitle',
+  photo: 'companions.paywallPhotoTitle',
+  call: 'companions.paywallCallTitle',
+  live_action: 'companions.paywallLiveTitle',
+  nude_assistant: 'companions.paywallAssistantTitle',
+};
+
+const DESC_KEYS: Record<PaywallModalProps['type'], string> = {
+  chat_limit: 'companions.paywallChatDesc',
+  photo: 'companions.paywallPhotoDesc',
+  call: 'companions.paywallCallDesc',
+  live_action: 'companions.paywallLiveDesc',
+  nude_assistant: 'companions.paywallAssistantDesc',
 };
 
 export default function PaywallModal({ type, companionName, requiredLevel, onClose }: PaywallModalProps) {
-  const { icon, title, desc } = COPY[type];
+  const { t } = useTranslation();
+  const icon = ICON_MAP[type];
+  const title = t(TITLE_KEYS[type]);
+  const desc = t(DESC_KEYS[type])
+    .replace('{name}', companionName)
+    .replace('{level}', String(requiredLevel ?? ''));
 
   return (
     <div className="paywall-overlay" onClick={onClose}>
@@ -48,12 +49,12 @@ export default function PaywallModal({ type, companionName, requiredLevel, onClo
         <button className="paywall-close" onClick={onClose}>×</button>
         <div className="paywall-icon">{icon}</div>
         <h3>{title}</h3>
-        <p>{desc(companionName, requiredLevel)}</p>
+        <p>{desc}</p>
         <Link href="/pricing" className="paywall-btn-primary">
-          Upgrade Now
+          {t('companions.paywallUpgrade')}
         </Link>
         <button className="paywall-btn-secondary" onClick={onClose}>
-          Maybe Later
+          {t('companions.paywallLater')}
         </button>
       </div>
     </div>

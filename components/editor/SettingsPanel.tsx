@@ -343,7 +343,8 @@ export default function SettingsPanel() {
                     </>
                 )}
 
-                {/* Count — at the bottom so users set it last */}
+                {/* Count — hidden for inpaint mode */}
+                {settings.generationType !== 'inpaint' && (
                 <div className="control-group" style={{ marginTop: 16 }}>
                     <label>{t('editor.count')} (1-4)</label>
                     <div className="counter-control">
@@ -362,6 +363,7 @@ export default function SettingsPanel() {
                         </button>
                     </div>
                 </div>
+                )}
 
                 <div className="settings-panel-footer-info" style={{ marginTop: 'auto', paddingTop: '20px', fontSize: '0.8rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
                     {isVideoMode ? t('editor.vidNotice') : t('editor.imgNotice')}

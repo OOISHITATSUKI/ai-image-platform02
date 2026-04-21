@@ -424,7 +424,7 @@ export default function ChatArea() {
         let creditCost = settings.count * 1; // txt2img
         if (isVideoGeneration) creditCost = settings.count * 5;
         else if (faceSwapMode) creditCost = settings.count * 5;
-        else if (inpaintMode) creditCost = settings.count * 3;
+        else if (inpaintMode) creditCost = 3;
         else if (settings.generationType === 'img2img') creditCost = settings.count * 2;
 
         // ── Require login ──
@@ -504,7 +504,7 @@ export default function ChatArea() {
                         generationType: ['face_swap', 'inpaint'].includes(settings.generationType) ? 'img2img' : settings.generationType,
                         aspectRatio: settings.aspectRatio,
                         resolution: settings.resolution,
-                        count: settings.count,
+                        count: inpaintMode ? 1 : settings.count,
                         qualityPreset: settings.qualityPreset,
                         imageBase64,
                         additionalImages,
@@ -514,7 +514,7 @@ export default function ChatArea() {
                         maskBase64: inpaintMode ? currentUploads[0]?.maskBase64 : undefined,
                         nudeMode: settings.nudeMode ?? true,
                         tagSettings,
-                        selectedFaceImageUrl: selectedFaceId
+                        selectedFaceImageUrl: (!inpaintMode && selectedFaceId)
                             ? savedFaces.find(f => f.id === selectedFaceId)?.image_url
                             : undefined,
                     }),

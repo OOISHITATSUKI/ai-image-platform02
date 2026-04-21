@@ -51,6 +51,8 @@ export interface Companion {
   isAssistant?: boolean;
   /** Per-character toggle (defaults to true). false → hide Live Action everywhere. */
   liveActionEnabled?: boolean;
+  /** Stories thumbnail — when set, the icon ring shows pink on the home page. */
+  storyThumbnailUrl?: string;
 }
 
 /** Should Live Action be shown/accessible for this companion? */

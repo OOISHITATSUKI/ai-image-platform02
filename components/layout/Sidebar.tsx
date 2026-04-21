@@ -112,19 +112,19 @@ export default function Sidebar() {
     const girlfriendNavItems: GirlfriendNav[] = [
         {
             icon: '🏠',
-            label: 'Home',
+            label: t('companions.sidebarHome'),
             href: '/companions',
             isActive: (p) => p === '/companions',
         },
         {
             icon: '🔴',
-            label: 'Live Action',
+            label: t('companions.sidebarLiveAction'),
             href: '/companions#live-action',
             isActive: (p) => !!p && p.endsWith('/live'),
         },
         {
             icon: '✨',
-            label: 'Nude Assistant',
+            label: t('companions.sidebarNudeAssistant'),
             href: '/companions/assistant',
             isActive: (p) => p === '/companions/assistant',
         },

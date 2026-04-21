@@ -3,14 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Companion } from '@/lib/companions';
 import { saveUserCompanion, buildUserCompanionSystemPrompt } from '@/lib/userCompanions';
-
-const PERSONALITIES = [
-  { value: 'playful', icon: '😊', label: 'Playful' },
-  { value: 'shy', icon: '🌸', label: 'Shy' },
-  { value: 'dominant', icon: '👑', label: 'Bold' },
-  { value: 'caring', icon: '💖', label: 'Caring' },
-  { value: 'mysterious', icon: '🌙', label: 'Mysterious' },
-] as const;
+import { useTranslation } from '@/lib/useTranslation';
 
 interface CreateCompanionModalProps {
   imageUrl: string;
@@ -19,8 +12,17 @@ interface CreateCompanionModalProps {
 }
 
 export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: CreateCompanionModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [personality, setPersonality] = useState<Companion['personality']>('playful');
+
+  const PERSONALITIES = [
+    { value: 'playful' as const, icon: '😊', label: t('companions.createPlayful') },
+    { value: 'shy' as const, icon: '🌸', label: t('companions.createShy') },
+    { value: 'dominant' as const, icon: '👑', label: t('companions.createBold') },
+    { value: 'caring' as const, icon: '💖', label: t('companions.createCaring') },
+    { value: 'mysterious' as const, icon: '🌙', label: t('companions.createMysterious') },
+  ];
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -57,7 +59,7 @@ export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: C
   return (
     <div className="create-companion-modal-overlay" onClick={onClose}>
       <div className="create-companion-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>✨ Bring her to life</h2>
+        <h2>{t('companions.createTitle')}</h2>
 
         <img
           src={imageUrl}
@@ -67,11 +69,11 @@ export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: C
 
         <div>
           <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 6, display: 'block' }}>
-            Give her a name
+            {t('companions.createNameLabel')}
           </label>
           <input
             className="create-companion-input"
-            placeholder='e.g. "Yuki", "Emma"...'
+            placeholder={t('companions.createNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
@@ -81,7 +83,7 @@ export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: C
 
         <div>
           <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 6, display: 'block' }}>
-            Her personality
+            {t('companions.createPersonalityLabel')}
           </label>
           <div className="personality-grid">
             {PERSONALITIES.map((p) => (
@@ -102,7 +104,7 @@ export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: C
           onClick={handleCreate}
           disabled={!name.trim()}
         >
-          💬 Start Chatting
+          {t('companions.createStartChat')}
         </button>
 
         <button
@@ -112,7 +114,7 @@ export default function CreateCompanionModal({ imageUrl, onClose, onCreated }: C
           }}
           onClick={onClose}
         >
-          Cancel
+          {t('companions.createCancel')}
         </button>
       </div>
     </div>

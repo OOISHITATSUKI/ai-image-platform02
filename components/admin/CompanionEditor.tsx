@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Companion } from '@/lib/companions';
+import AvatarCropModal from '@/components/admin/AvatarCropModal';
 
 interface Props {
   mode: 'new' | 'edit';
@@ -230,6 +231,25 @@ export default function CompanionEditor({ mode, companionId }: Props) {
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [tagsText, setTagsText] = useState('');
+  const [cropSrc, setCropSrc] = useState<{ src: string; slot: 'avatar' | 'g1' | 'g2' | 'g3' | 'storyThumb' } | null>(null);
+
+  // Stories state
+  interface StoryRow { id: string; media_url: string; media_type: string; duration_seconds: number; caption: string | null; sort_order: number; base_likes: number; base_comments: number; }
+  const [stories, setStories] = useState<StoryRow[]>([]);
+  const [storiesLoading, setStoriesLoading] = useState(false);
+
+  const loadStories = async (cid: string) => {
+    setStoriesLoading(true);
+    try {
+      const res = await fetch(`/api/admin/companions/${cid}/stories`);
+      const data = await res.json();
+      setStories(data.stories ?? []);
+    } catch {} finally { setStoriesLoading(false); }
+  };
+
+  useEffect(() => {
+    if (mode === 'edit' && companionId) loadStories(companionId);
+  }, [mode, companionId]);
 
   useEffect(() => {
     if (mode !== 'edit' || !companionId) return;
@@ -269,9 +289,57 @@ export default function CompanionEditor({ mode, companionId }: Props) {
     }));
   };
 
-  const handleUpload = async (file: File, slot: 'avatar' | 'g1' | 'g2' | 'g3') => {
+  /** Auto-crop an image to a 400x400 square (center-x, top-y for portrait) */
+  const autoSquareCrop = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const SIZE = 400;
+        const canvas = document.createElement('canvas');
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        const ctx = canvas.getContext('2d')!;
+
+        const side = Math.min(img.width, img.height);
+        // Horizontal: center crop. Vertical: top crop (face is usually at top)
+        const sx = (img.width - side) / 2;
+        const sy = img.height > img.width ? 0 : (img.height - side) / 2;
+
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Canvas toBlob failed'));
+        }, 'image/jpeg', 0.92);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  /** Upload a blob as companion image */
+  const uploadBlob = async (blob: Blob, companionId: string): Promise<string> => {
+    const f = new File([blob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const fd = new FormData();
+    fd.append('file', f);
+    fd.append('companionId', companionId);
+    const res = await fetch('/api/admin/upload-companion-image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    return data.url;
+  };
+
+  // Step 1: user picks file → show crop modal
+  const handleFileSelect = (file: File, slot: 'avatar' | 'g1' | 'g2' | 'g3' | 'storyThumb') => {
+    const url = URL.createObjectURL(file);
+    setCropSrc({ src: url, slot });
+  };
+
+  // Step 2: after crop → upload the cropped blob
+  const handleCroppedUpload = async (blob: Blob, slot: 'avatar' | 'g1' | 'g2' | 'g3' | 'storyThumb') => {
+    setCropSrc(null);
     setUploading(true);
     try {
+      const file = new File([blob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
       const fd = new FormData();
       fd.append('file', file);
       fd.append('companionId', c.id || 'new');
@@ -281,7 +349,9 @@ export default function CompanionEditor({ mode, companionId }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
-      if (slot === 'avatar') {
+      if (slot === 'storyThumb') {
+        set('storyThumbnailUrl', data.url);
+      } else if (slot === 'avatar') {
         set('avatarUrl', data.url);
       } else {
         const idx = slot === 'g1' ? 0 : slot === 'g2' ? 1 : 2;
@@ -294,6 +364,71 @@ export default function CompanionEditor({ mode, companionId }: Props) {
     } finally {
       setUploading(false);
     }
+  };
+
+  // Stories upload — supports both images and videos
+  const handleStoryUpload = async (file: File) => {
+    if (!companionId) return;
+    setUploading(true);
+    try {
+      const isVideo = file.type.startsWith('video/');
+      const fd = new FormData();
+
+      let uploadUrl: string;
+      if (isVideo) {
+        fd.append('video', file);
+        fd.append('companionId', companionId);
+        fd.append('actionId', 'story');
+        fd.append('variant', `${Date.now()}`);
+        uploadUrl = '/api/admin/upload-companion-video';
+      } else {
+        fd.append('file', file);
+        fd.append('companionId', companionId);
+        uploadUrl = '/api/admin/upload-companion-image';
+      }
+
+      const res = await fetch(uploadUrl, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      // For videos, get actual duration
+      let duration = 5;
+      if (isVideo) {
+        duration = await new Promise<number>((resolve) => {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          video.onloadedmetadata = () => { resolve(Math.round(video.duration) || 5); URL.revokeObjectURL(video.src); };
+          video.onerror = () => resolve(5);
+          video.src = URL.createObjectURL(file);
+        });
+      }
+
+      await fetch(`/api/admin/companions/${companionId}/stories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ media_url: data.url, media_type: isVideo ? 'video' : 'image', duration_seconds: duration }),
+      });
+      loadStories(companionId);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteStory = async (storyId: string) => {
+    if (!confirm('このStoryを削除しますか？')) return;
+    await fetch(`/api/admin/stories/${storyId}`, { method: 'DELETE' });
+    if (companionId) loadStories(companionId);
+  };
+
+  const handleUpdateStory = async (storyId: string, updates: Record<string, unknown>) => {
+    await fetch(`/api/admin/stories/${storyId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (companionId) loadStories(companionId);
   };
 
   const handleSave = async () => {
@@ -386,7 +521,21 @@ export default function CompanionEditor({ mode, companionId }: Props) {
             <label style={uploadBtn}>
               アップロード
               <input type="file" accept="image/*" style={{ display: 'none' }}
-                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 'avatar')} />
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  e.target.value = '';
+                  setUploading(true);
+                  try {
+                    const blob = await autoSquareCrop(file);
+                    const url = await uploadBlob(blob, c.id || 'new');
+                    set('avatarUrl', url);
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : 'Upload failed');
+                  } finally {
+                    setUploading(false);
+                  }
+                }} />
             </label>
           </div>
         </FormRow>
@@ -406,7 +555,26 @@ export default function CompanionEditor({ mode, companionId }: Props) {
               <label style={uploadBtn}>
                 アップロード
                 <input type="file" accept="image/*" style={{ display: 'none' }}
-                  onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], (`g${i + 1}` as 'g1' | 'g2' | 'g3'))} />
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    e.target.value = '';
+                    setUploading(true);
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('companionId', c.id || 'new');
+                    fetch('/api/admin/upload-companion-image', { method: 'POST', body: fd })
+                      .then(r => r.json())
+                      .then(data => {
+                        if (data.url) {
+                          const next = [...(c.galleryUrls ?? [])];
+                          next[i] = data.url;
+                          set('galleryUrls', next);
+                        }
+                      })
+                      .catch(err => alert(err instanceof Error ? err.message : 'Upload failed'))
+                      .finally(() => setUploading(false));
+                  }} />
               </label>
             </div>
           </FormRow>
@@ -478,12 +646,118 @@ export default function CompanionEditor({ mode, companionId }: Props) {
         </FormRow>
       </fieldset>
 
+      {/* Stories Section */}
+      {mode === 'edit' && !c.isAssistant && (
+        <fieldset style={fieldset}>
+          <legend style={legend}>📸 Stories（インスタ風）</legend>
+
+          <FormRow label="アイコンリング用サムネイル画像">
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 6, marginTop: 0 }}>
+              この画像が設定されている場合のみ、ホーム画面のアイコンにピンクリングが表示されます。
+            </p>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input style={{ ...input, flex: 1 }} value={c.storyThumbnailUrl ?? ''} onChange={(e) => set('storyThumbnailUrl', e.target.value || undefined)} placeholder="未設定 = リング非表示" />
+              <label style={uploadBtn}>
+                アップロード
+                <input type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    e.target.value = '';
+                    setCropSrc({ src: URL.createObjectURL(file), slot: 'storyThumb' });
+                  }} />
+              </label>
+              {c.storyThumbnailUrl && (
+                <button onClick={() => set('storyThumbnailUrl', undefined)} style={{ ...slotUploadBtn, background: 'rgba(255,50,50,0.15)', borderColor: 'rgba(255,50,50,0.4)', fontSize: '0.7rem', padding: '4px 8px' }}>
+                  クリア
+                </button>
+              )}
+            </div>
+            {c.storyThumbnailUrl && <img src={c.storyThumbnailUrl} alt="story thumb" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', marginTop: 8 }} />}
+          </FormRow>
+
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: 12 }}>
+            画像 or 動画をアップロード。ホーム画面のアイコンをタップで全画面表示されます。
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+            {storiesLoading ? (
+              <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>読み込み中...</span>
+            ) : (
+              <>
+                {stories.map((s) => (
+                  <div key={s.id} style={{ ...slotBox, minWidth: 180 }}>
+                    <div style={{ ...slotPreview, maxWidth: 80 }}>
+                      {s.media_type === 'video' ? (
+                        <video src={s.media_url} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
+                          onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()} />
+                      ) : (
+                        <img src={s.media_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                      {s.media_type === 'video' ? '🎬' : '🖼'} {s.duration_seconds}秒
+                    </div>
+                    <input
+                      placeholder="キャプション (任意)"
+                      defaultValue={s.caption ?? ''}
+                      maxLength={150}
+                      onBlur={(e) => { if (e.target.value !== (s.caption ?? '')) handleUpdateStory(s.id, { caption: e.target.value || null }); }}
+                      style={{ ...input, fontSize: '0.72rem', padding: '4px 6px' }}
+                    />
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)' }}>❤️ 初期いいね</label>
+                        <input type="number" defaultValue={s.base_likes ?? 0} min={0}
+                          onBlur={(e) => handleUpdateStory(s.id, { base_likes: parseInt(e.target.value) || 0 })}
+                          style={{ ...input, fontSize: '0.72rem', padding: '3px 5px' }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)' }}>💬 初期コメ</label>
+                        <input type="number" defaultValue={s.base_comments ?? 0} min={0}
+                          onBlur={(e) => handleUpdateStory(s.id, { base_comments: parseInt(e.target.value) || 0 })}
+                          style={{ ...input, fontSize: '0.72rem', padding: '3px 5px' }} />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteStory(s.id)}
+                      style={{ ...slotUploadBtn, background: 'rgba(255,50,50,0.15)', borderColor: 'rgba(255,50,50,0.4)', fontSize: '0.7rem', padding: '4px 8px' }}
+                    >
+                      削除
+                    </button>
+                  </div>
+                ))}
+                <label style={{
+                  ...slotBox, alignItems: 'center', justifyContent: 'center', minWidth: 100, minHeight: 120,
+                  cursor: 'pointer', border: '2px dashed rgba(255,255,255,0.15)',
+                }}>
+                  <span style={{ fontSize: '1.5rem', color: 'var(--text-tertiary)' }}>＋</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>追加</span>
+                  <input type="file" accept="image/*,video/mp4,video/webm" style={{ display: 'none' }}
+                    onChange={(e) => { if (e.target.files?.[0]) handleStoryUpload(e.target.files[0]); e.target.value = ''; }} />
+                </label>
+              </>
+            )}
+          </div>
+        </fieldset>
+      )}
+
       <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
         <button onClick={handleSave} disabled={saving || uploading} className="admin-btn-primary">
           {saving ? '保存中...' : uploading ? 'アップロード中...' : '保存する'}
         </button>
         <button onClick={() => router.push('/admin/companions')} className="admin-btn-secondary">キャンセル</button>
       </div>
+
+      {/* Crop Modal */}
+      {cropSrc && (
+        <AvatarCropModal
+          imageSrc={cropSrc.src}
+          aspect={cropSrc.slot === 'avatar' ? 3 / 4 : 4 / 5}
+          onComplete={(blob) => handleCroppedUpload(blob, cropSrc.slot)}
+          onClose={() => { URL.revokeObjectURL(cropSrc.src); setCropSrc(null); }}
+        />
+      )}
     </div>
   );
 }

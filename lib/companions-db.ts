@@ -39,6 +39,7 @@ export interface CompanionRow {
   profile_hobbies: string | null;
   profile_catchphrase: string | null;
   first_message: string | null;
+  story_thumbnail_url: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -88,6 +89,7 @@ export function rowToCompanion(row: CompanionRow): Companion {
     personalityDescription: row.personality_description ?? undefined,
     profile,
     firstMessage: row.first_message ?? undefined,
+    storyThumbnailUrl: row.story_thumbnail_url ?? undefined,
   };
 }
 
@@ -123,6 +125,7 @@ export function companionToRow(
     profile_hobbies: c.profile?.hobbies ?? null,
     profile_catchphrase: c.profile?.catchphrase ?? null,
     first_message: c.firstMessage ?? null,
+    story_thumbnail_url: c.storyThumbnailUrl ?? null,
   };
 }
 

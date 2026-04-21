@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import type { Companion } from '@/lib/companions';
 
@@ -12,11 +12,29 @@ type Row = Companion & {
 
 type Filter = 'all' | 'published' | 'draft' | 'hidden' | 'archived';
 
+const STATUS_LABELS: Record<Row['_status'], string> = {
+  published: '✅ 公開中',
+  draft: '📝 下書き',
+  hidden: '🙈 非表示',
+  archived: '📦 アーカイブ',
+};
+
+const FILTER_LABELS: Record<Filter, string> = {
+  all: 'すべて',
+  published: '公開中',
+  draft: '下書き',
+  hidden: '非表示',
+  archived: 'アーカイブ',
+};
+
 export default function AdminCompanionsPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  const dragRef = useRef<number | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -64,20 +82,67 @@ export default function AdminCompanionsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(`Really delete "${id}"? This is permanent.`)) return;
+    if (!confirm(`「${id}」を本当に削除しますか？この操作は元に戻せません。`)) return;
     const res = await fetch(`/api/admin/companions/${id}`, { method: 'DELETE' });
     if (res.ok) load();
   };
 
-  const moveSortOrder = async (id: string, currentOrder: number, direction: 'up' | 'down') => {
-    const newOrder = direction === 'up' ? currentOrder - 1 : currentOrder + 1;
-    await fetch(`/api/admin/companions/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'sort_order', value: newOrder }),
+  // ── Drag & Drop ──
+  const handleDragStart = useCallback((e: React.DragEvent, idx: number) => {
+    dragRef.current = idx;
+    setDragIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+    // Make drag image semi-transparent
+    if (e.currentTarget instanceof HTMLElement) {
+      e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setOverIdx(idx);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDragIdx(null);
+    setOverIdx(null);
+    dragRef.current = null;
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault();
+    const fromIdx = dragRef.current;
+    if (fromIdx === null || fromIdx === dropIdx) {
+      handleDragEnd();
+      return;
+    }
+
+    // Reorder the filtered list
+    const reordered = [...filtered];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(dropIdx, 0, moved);
+
+    // Build new order: array of { id, sort_order }
+    const updates = reordered.map((r, i) => ({ id: r.id, sort_order: i }));
+
+    // Optimistic UI update
+    const newRows = rows.map((r) => {
+      const u = updates.find((u) => u.id === r.id);
+      return u ? { ...r, _sort_order: u.sort_order } : r;
     });
-    load();
-  };
+    newRows.sort((a, b) => a._sort_order - b._sort_order);
+    setRows(newRows);
+
+    handleDragEnd();
+
+    // Persist to server
+    await fetch('/api/admin/companions/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orders: updates }),
+    });
+  }, [filtered, rows, handleDragEnd]);
 
   return (
     <div>
@@ -104,7 +169,7 @@ export default function AdminCompanionsPage() {
               cursor: 'pointer',
             }}
           >
-            {f} ({counts[f]})
+            {FILTER_LABELS[f]} ({counts[f]})
           </button>
         ))}
       </div>
@@ -113,26 +178,46 @@ export default function AdminCompanionsPage() {
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>Loading...</div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>
-          No companions in the database yet. Run the migration + seed script.
+          データベースにキャラクターがありません。マイグレーション＆シードスクリプトを実行してください。
         </div>
       ) : (
         <div style={{ overflowX: 'auto', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
             <thead style={{ background: 'rgba(255,255,255,0.03)' }}>
               <tr>
+                <th style={{ ...th, width: 32 }}></th>
                 <th style={th}>画像</th>
                 <th style={th}>ID</th>
                 <th style={th}>名前</th>
-                <th style={th}>年</th>
+                <th style={th}>年齢</th>
                 <th style={th}>性格</th>
                 <th style={th}>状態</th>
-                <th style={th}>Order</th>
+                <th style={th}>順番</th>
                 <th style={{ ...th, textAlign: 'right', paddingRight: 12 }}>操作</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c) => (
-                <tr key={c.id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              {filtered.map((c, idx) => (
+                <tr
+                  key={c.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
+                  onDrop={(e) => handleDrop(e, idx)}
+                  style={{
+                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    opacity: dragIdx === idx ? 0.4 : 1,
+                    background: overIdx === idx && dragIdx !== idx
+                      ? 'rgba(124, 92, 252, 0.15)'
+                      : 'transparent',
+                    cursor: 'grab',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <td style={{ ...td, cursor: 'grab', color: 'var(--text-tertiary)', fontSize: '1rem', textAlign: 'center' }}>
+                    ⠿
+                  </td>
                   <td style={td}>
                     <img src={c.avatarUrl} alt={c.name} style={{ width: 40, height: 56, objectFit: 'cover', borderRadius: 4 }} />
                   </td>
@@ -152,18 +237,13 @@ export default function AdminCompanionsPage() {
                         border: '1px solid rgba(255,255,255,0.15)',
                       }}
                     >
-                      <option value="published">✅ published</option>
-                      <option value="draft">📝 draft</option>
-                      <option value="hidden">🙈 hidden</option>
-                      <option value="archived">📦 archived</option>
+                      {(Object.keys(STATUS_LABELS) as Row['_status'][]).map((s) => (
+                        <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                      ))}
                     </select>
                   </td>
-                  <td style={td}>
-                    <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <button onClick={() => moveSortOrder(c.id, c._sort_order, 'up')} style={iconBtn} title="Up">↑</button>
-                      <span style={{ minWidth: 24, textAlign: 'center' }}>{c._sort_order}</span>
-                      <button onClick={() => moveSortOrder(c.id, c._sort_order, 'down')} style={iconBtn} title="Down">↓</button>
-                    </div>
+                  <td style={{ ...td, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                    {idx + 1}
                   </td>
                   <td style={{ ...td, textAlign: 'right' }}>
                     <div style={{ display: 'inline-flex', gap: 6 }}>
@@ -196,14 +276,4 @@ const td: React.CSSProperties = {
   padding: '10px 12px',
   color: 'var(--text-primary)',
   verticalAlign: 'middle',
-};
-
-const iconBtn: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid rgba(255,255,255,0.15)',
-  color: 'var(--text-secondary)',
-  borderRadius: 4,
-  padding: '2px 6px',
-  cursor: 'pointer',
-  fontSize: '0.75rem',
 };

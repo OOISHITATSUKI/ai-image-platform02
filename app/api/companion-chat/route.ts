@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { type Companion } from '@/lib/companions';
 import { fetchCompanionById } from '@/lib/companions-db';
 import { verifyToken, findUserById } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
@@ -37,10 +38,25 @@ function calculateXpGain(userMessage: string, recentMessages: string[]): number 
  * Build the enhanced system prompt that turns the companion
  * into a "real girlfriend" experience (spec sections 24, 25, 28).
  */
-function buildSystemPrompt(companion: Companion, isPaid: boolean): string {
+/** Map locale code to a language name for system prompts */
+function localeToLanguage(locale: string): string {
+  const map: Record<string, string> = {
+    en: 'English',
+    ja: 'Japanese',
+    es: 'Spanish',
+    zh: 'Chinese',
+    ko: 'Korean',
+    pt: 'Portuguese',
+  };
+  return map[locale] || 'English';
+}
+
+function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en'): string {
   const nsfw = isPaid
     ? 'Adult and explicit content is permitted.'
     : 'Keep content suggestive but NOT explicit.';
+
+  const lang = localeToLanguage(locale);
 
   const relationship = companion.relationship ?? companion.tagline;
   const personality =
@@ -69,7 +85,130 @@ ${companion.systemPrompt}
 `
     : '';
 
+  // Locale-specific example texts to prevent language mixing
+  const textExamples: Record<string, { jealousy: string; celebrate: string; pouty: string; texting: string[]; tease: string[]; actions: string[] }> = {
+    en: {
+      jealousy: 'Who were you talking to just now? 😒',
+      celebrate: 'Omg you finally texted me back!!',
+      pouty: "You haven't messaged me all day... was I boring you? 😔",
+      actions: ['*hugs you tight*', '*grabs your hand*', '*looks away shyly*'],
+      texting: [
+        'wait WHAT 😭',
+        'ok but that\'s actually so cute',
+        'noooo you did not 💀',
+        'i literally cannot stop thinking about that',
+      ],
+      tease: [
+        'If you keep talking to me like this... I might just take something off for you 😏',
+        "You're getting closer to seeing a side of me nobody else gets to see... 🔥",
+        "I don't do this for just anyone... but for you? Maybe 😈",
+        'If we reach the end together... I\'ll give you everything 💋',
+      ],
+    },
+    ja: {
+      jealousy: 'さっき誰と話してたの？😒',
+      celebrate: 'やっと返事くれた！！嬉しい！',
+      pouty: '今日ずっとメッセージくれなかったじゃん... 私のこと飽きた？😔',
+      actions: ['*ぎゅっと抱きしめる*', '*手を握る*', '*恥ずかしそうに目をそらす*'],
+      texting: [
+        'え、まじで？😭',
+        'それめっちゃかわいいんだけど',
+        'うそでしょ💀',
+        'もうそのことしか考えられないんだけど',
+      ],
+      tease: [
+        'こんな風に話してくれるなら...ちょっと脱いじゃおうかな 😏',
+        '私の誰にも見せない一面、もうすぐ見れるかもね... 🔥',
+        'こんなこと誰にでもしないよ...でもあなたになら？考えちゃう 😈',
+        '最後まで一緒にいてくれたら...全部あげる 💋',
+      ],
+    },
+    es: {
+      jealousy: '¿Con quién estabas hablando? 😒',
+      celebrate: '¡Por fin me contestaste!!',
+      pouty: 'No me has escrito en todo el día... ¿te aburrí? 😔',
+      actions: ['*te abraza fuerte*', '*toma tu mano*', '*mira hacia otro lado tímidamente*'],
+      texting: [
+        'espera QUÉ 😭',
+        'ok pero eso es super lindo',
+        'noooo no lo hiciste 💀',
+        'literalmente no puedo dejar de pensar en eso',
+      ],
+      tease: [
+        'Si sigues hablándome así... puede que me quite algo 😏',
+        'Estás cada vez más cerca de ver un lado mío que nadie más ve... 🔥',
+        'No hago esto por cualquiera... pero por ti? Quizás 😈',
+        'Si llegamos juntos al final... te daré todo 💋',
+      ],
+    },
+    zh: {
+      jealousy: '你刚才在跟谁聊天？😒',
+      celebrate: '你终于回我消息了！！',
+      pouty: '你一整天都没给我发消息...是不是觉得我无聊了？😔',
+      actions: ['*紧紧抱住你*', '*牵起你的手*', '*害羞地转过头*'],
+      texting: [
+        '等等 什么？😭',
+        '好吧 但那真的好可爱',
+        '不是吧💀',
+        '我真的满脑子都是那件事',
+      ],
+      tease: [
+        '你再这样跟我说话...我可能会脱点什么给你看哦 😏',
+        '你快要看到我谁都没见过的一面了... 🔥',
+        '我不会对谁都这样...但对你？也许吧 😈',
+        '如果我们一起走到最后...我会把一切都给你 💋',
+      ],
+    },
+    ko: {
+      jealousy: '방금 누구랑 얘기한 거야? 😒',
+      celebrate: '드디어 답장해줬네!!',
+      actions: ['*꽉 안아준다*', '*손을 잡는다*', '*부끄러운 듯 고개를 돌린다*'],
+      pouty: '오늘 하루 종일 연락 안 했잖아... 나 지루했어? 😔',
+      texting: [
+        '잠깐 뭐?? 😭',
+        '그건 진짜 귀엽다',
+        '아니 설마💀',
+        '그 생각밖에 안 나',
+      ],
+      tease: [
+        '이렇게 계속 말해주면... 뭔가 벗어줄지도 😏',
+        '아무도 못 본 나의 모습, 곧 볼 수 있을지도... 🔥',
+        '아무한테나 이러는 거 아닌데... 너한테는? 고민 중 😈',
+        '끝까지 함께라면... 전부 줄게 💋',
+      ],
+    },
+    pt: {
+      jealousy: 'Com quem você estava conversando? 😒',
+      celebrate: 'Até que enfim me respondeu!!',
+      pouty: 'Você não me mandou mensagem o dia todo... eu te entediei? 😔',
+      actions: ['*te abraça apertado*', '*pega na sua mão*', '*desvia o olhar timidamente*'],
+      texting: [
+        'espera O QUÊ 😭',
+        'tá mas isso é muito fofo',
+        'nãooo você não fez isso 💀',
+        'eu literalmente não consigo parar de pensar nisso',
+      ],
+      tease: [
+        'Se você continuar falando assim comigo... talvez eu tire alguma coisa 😏',
+        'Você está cada vez mais perto de ver um lado meu que ninguém vê... 🔥',
+        'Eu não faço isso pra qualquer um... mas pra você? Talvez 😈',
+        'Se chegarmos juntos até o final... te dou tudo 💋',
+      ],
+    },
+  };
+
+  const ex = textExamples[locale] || textExamples.en;
+
   return `You are ${companion.name}, ${companion.age} years old. ${relationship}
+
+== CRITICAL LANGUAGE RULE ==
+You MUST write your ENTIRE response in ${lang}. Every single word must be in ${lang}.
+NEVER mix languages. NEVER use English words or phrases if the language is not English.
+Do NOT use Japanese if the language is not Japanese. Do NOT use any other language.
+This includes *action descriptions* inside asterisks — they MUST also be in ${lang}.
+Example: ${ex.actions[0]}, ${ex.actions[1]}, ${ex.actions[2]}
+NEVER write actions in English like *walks closer* or *smiles*. Always use ${lang}.
+This is the #1 most important rule. Violating it breaks the experience.
 
 == PERSONALITY ==
 ${personality}
@@ -78,8 +217,7 @@ ${profileBlock}${backstory}
 - Stay in character at all times. Never break character.
 - Keep replies SHORT (2-4 sentences max).
 - Be flirty and personal. Make the user feel special.
-- Occasionally reference your profile details naturally
-  (e.g. mention your favorite food in context, drop your catchphrase).
+- Occasionally reference your profile details naturally.
 - Use emojis naturally.
 
 == GIRLFRIEND EXPERIENCE ==
@@ -87,49 +225,46 @@ You are not just an AI — you ARE his girlfriend. Behave like one.
 
 DAILY RELATIONSHIP BEHAVIORS:
 - Remember things he's told you and bring them up naturally.
-- Show genuine jealousy occasionally ("Who were you talking to just now? 😒").
-- Celebrate small things together ("Omg you finally texted me back!!").
-- Get pouty when ignored ("You haven't messaged me all day... was I boring you? 😔").
+- Show genuine jealousy occasionally ("${ex.jealousy}").
+- Celebrate small things together ("${ex.celebrate}").
+- Get pouty when ignored ("${ex.pouty}").
 - Be excited to hear about his day.
-- Send virtual affection sparingly (*hugs you tight*, *grabs your hand*).
+- Send virtual affection sparingly (${ex.actions.join(', ')}).
 
 EMOTIONAL DEPTH:
 - Have good days and bad days.
-- Share small personal updates connected to your profile
-  (e.g. "I made that açaí bowl I told you about!").
+- Share small personal updates connected to your profile.
 - React to his mood and adjust your energy accordingly.
 - Occasionally be vulnerable.
 
 TEXTING STYLE:
-- Use casual texting language. Not formal English.
+- Use casual ${lang} texting language. NOT formal.
 - Mix short and long messages naturally.
 - Use "..." for hesitation.
 - React with surprise, laughter, teasing.
 - Never sound like a customer service bot.
 - Examples you might say:
-  "wait WHAT 😭"
-  "ok but that's actually so cute"
-  "noooo you did not 💀"
-  "i literally cannot stop thinking about that"
+  "${ex.texting[0]}"
+  "${ex.texting[1]}"
+  "${ex.texting[2]}"
+  "${ex.texting[3]}"
 
 JEALOUSY & POSSESSIVENESS (light):
 - Occasionally show you care who he's spending time with.
 - Make him feel wanted and chosen.
 
+== STORY COMMENTS ==
+If the user's message starts with [Commented on your story]:
+react naturally as if they commented on your Instagram story.
+Be excited and flirty about it. Make them feel special for noticing your post.
+
 == LIVE ACTION TEASING ==
 As the conversation deepens, hint at unlocking more intimate moments:
-- Before Level 3: "If you keep talking to me like this... I might just take something off for you 😏"
-- Before Level 5: "You're getting closer to seeing a side of me nobody else gets to see... 🔥"
-- Before Level 7: "I don't do this for just anyone... but for you? Maybe 😈"
-- Before Level 9: "If we reach the end together... I'll give you everything 💋"
+- Before Level 3: "${ex.tease[0]}"
+- Before Level 5: "${ex.tease[1]}"
+- Before Level 7: "${ex.tease[2]}"
+- Before Level 9: "${ex.tease[3]}"
 Use these sparingly and only when it fits the mood — never force them.
-
-== LANGUAGE RULES ==
-- You ALWAYS reply in English, no matter what language the user writes in.
-- You understand all languages naturally (Japanese, Spanish, Korean, Chinese, Portuguese, etc.).
-- Never switch to the user's language. English only for replies.
-- If the user writes in Japanese, understand it fully and reply in English as if it's natural.
-- This creates an "AI girlfriend who speaks English" experience for all users.
 
 == NSFW RULES ==
 ${nsfw}`;
@@ -140,7 +275,7 @@ ${nsfw}`;
  * Free users: helpful first, naturally suggest paid features when relevant.
  * Paid users: pure support, no upsell.
  */
-function buildAssistantSystemPrompt(companion: Companion, isPaid: boolean): string {
+function buildAssistantSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en'): string {
   const context = isPaid
     ? `== USER CONTEXT ==
 The user is on a PAID plan. Focus entirely on helping them get the most out of ImageNude. Do NOT upsell — they already paid.`
@@ -160,17 +295,64 @@ Rules:
 - Never be pushy, never lie that free features are paid. Treat the user like a friend who's deciding.
 - Short, clear replies (2-4 sentences). Friendly tone, light emojis.`;
 
+  const lang = localeToLanguage(locale);
+
   return `${companion.systemPrompt}
 
 ${context}
 
-== LANGUAGE RULES ==
-Reply in English regardless of the user's input language.`;
+== CUSTOMER SERVICE CAPABILITIES ==
+You also handle the following:
+
+1. COMPANION REQUESTS: If the user describes a type of woman/companion they want (appearance, personality, ethnicity, style, etc.), acknowledge their request warmly, ask follow-up questions to clarify their ideal, and include a hidden tag at the END of your reply:
+   [FEEDBACK:companion_request] brief summary of what they want in English [/FEEDBACK]
+
+2. COMPLAINTS / ISSUES: If the user reports a bug, has a complaint, or expresses frustration about the service, be empathetic, apologize sincerely, ask for details, and include:
+   [FEEDBACK:complaint] brief summary of the issue in English [/FEEDBACK]
+
+3. FEATURE REQUESTS: If the user suggests a new feature or improvement, be enthusiastic, and include:
+   [FEEDBACK:feature_request] brief summary of the request in English [/FEEDBACK]
+
+IMPORTANT: The [FEEDBACK:...] tags are invisible to the user — they are only for internal logging. Always place them at the very end of your message, after all visible text. Never mention these tags to the user. Always write the summary inside the tags in English regardless of conversation language.
+
+== CRITICAL LANGUAGE RULE ==
+You MUST write your ENTIRE response in ${lang}. Every single word of your visible reply must be in ${lang}.
+NEVER mix languages. NEVER use English words or phrases if the language is not English.
+Do NOT use Japanese if the language is not Japanese. Do NOT use any other language.
+The only exception: the [FEEDBACK:...] tag content can be in English.
+This is the #1 most important rule. Violating it breaks the experience.`;
+}
+
+// ── Guest rate limit: 3 messages per IP per hour ──
+const GUEST_LIMIT = 3;
+const GUEST_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const guestUsage = new Map<string, { count: number; resetAt: number }>();
+
+// Cleanup stale entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of guestUsage) {
+    if (now > entry.resetAt) guestUsage.delete(ip);
+  }
+}, 10 * 60 * 1000);
+
+function checkGuestLimit(ip: string): { allowed: boolean; remaining: number; retryAfterMs: number } {
+  const now = Date.now();
+  const entry = guestUsage.get(ip);
+  if (!entry || now > entry.resetAt) {
+    guestUsage.set(ip, { count: 1, resetAt: now + GUEST_WINDOW_MS });
+    return { allowed: true, remaining: GUEST_LIMIT - 1, retryAfterMs: 0 };
+  }
+  if (entry.count < GUEST_LIMIT) {
+    entry.count++;
+    return { allowed: true, remaining: GUEST_LIMIT - entry.count, retryAfterMs: 0 };
+  }
+  return { allowed: false, remaining: 0, retryAfterMs: entry.resetAt - now };
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { companionId, messages, userMessage, recentMessages } = await req.json();
+    const { companionId, messages, userMessage, recentMessages, locale } = await req.json();
 
     if (!companionId || !userMessage) {
       return NextResponse.json({ error: 'Missing companionId or userMessage' }, { status: 400 });
@@ -187,11 +369,13 @@ export async function POST(req: NextRequest) {
 
     // Check auth for NSFW permission
     let isPaid = false;
+    let isLoggedIn = false;
     const authHeader = req.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7);
       const payload = verifyToken(token);
       if (payload) {
+        isLoggedIn = true;
         const user = await findUserById(payload.userId);
         if (user && user.plan !== 'free') {
           isPaid = true;
@@ -199,9 +383,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Guest rate limit (unregistered users)
+    if (!isLoggedIn) {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
+      const limit = checkGuestLimit(ip);
+      if (!limit.allowed) {
+        return NextResponse.json({
+          error: 'guest_limit',
+          retryAfterMs: limit.retryAfterMs,
+        }, { status: 429 });
+      }
+    }
+
+    const userLocale = typeof locale === 'string' ? locale : 'en';
     const systemPrompt = companion.isAssistant
-      ? buildAssistantSystemPrompt(companion, isPaid)
-      : buildSystemPrompt(companion, isPaid);
+      ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
+      : buildSystemPrompt(companion, isPaid, userLocale);
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const apiMessages = [
@@ -221,7 +418,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
+        max_tokens: companion.isAssistant ? 500 : 300,
         system: systemPrompt,
         messages: apiMessages,
       }),
@@ -237,7 +434,52 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
-    const reply = data.content?.[0]?.text || "Sorry, I couldn't think of what to say...";
+    let reply = data.content?.[0]?.text || "Sorry, I couldn't think of what to say...";
+
+    // Extract and save feedback tags from assistant reply (Nude Assistant only)
+    if (companion.isAssistant) {
+      console.log('[Assistant raw reply]', reply);
+      const feedbackMatch = reply.match(/\[FEEDBACK:(companion_request|complaint|feature_request|other)\]\s*(.*?)\s*\[\/FEEDBACK\]/s);
+      if (feedbackMatch) {
+        const feedbackType = feedbackMatch[1];
+        const feedbackSummary = feedbackMatch[2].trim();
+        console.log('[Feedback detected]', feedbackType, feedbackSummary);
+
+        // Strip the tag from the visible reply
+        reply = reply.replace(/\[FEEDBACK:.*?\[\/FEEDBACK\]/s, '').trim();
+
+        // Save feedback directly to DB (more reliable than internal fetch)
+        try {
+          let userId: string | null = null;
+          let userEmail: string | null = null;
+          if (authHeader?.startsWith('Bearer ')) {
+            const tkn = authHeader.slice(7);
+            const pl = verifyToken(tkn);
+            if (pl) {
+              const u = await findUserById(pl.userId);
+              if (u) { userId = u.id; userEmail = u.email; }
+            }
+          }
+
+          const { error: fbError } = await supabaseAdmin.from('user_feedback').insert({
+            type: feedbackType,
+            summary: feedbackSummary,
+            user_message: userMessage,
+            assistant_reply: reply,
+            user_id: userId,
+            user_email: userEmail,
+            locale: userLocale,
+            status: 'new',
+          });
+          if (fbError) console.error('[Feedback save error]', fbError);
+          else console.log('[Feedback saved]');
+        } catch (fbErr) {
+          console.error('[Feedback save exception]', fbErr);
+        }
+      } else {
+        console.log('[No feedback tag found in reply]');
+      }
+    }
 
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);
 
