@@ -521,25 +521,24 @@ export default function CompanionEditor({ mode, companionId }: Props) {
             <label style={uploadBtn}>
               アップロード
               <input type="file" accept="image/*" style={{ display: 'none' }}
-                onChange={async (e) => {
+                onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   e.target.value = '';
                   setUploading(true);
-                  try {
-                    const blob = await autoSquareCrop(file);
-                    const url = await uploadBlob(blob, c.id || 'new');
-                    set('avatarUrl', url);
-                  } catch (err) {
-                    alert(err instanceof Error ? err.message : 'Upload failed');
-                  } finally {
-                    setUploading(false);
-                  }
+                  const fd = new FormData();
+                  fd.append('file', file);
+                  fd.append('companionId', c.id || 'new');
+                  fetch('/api/admin/upload-companion-image', { method: 'POST', body: fd })
+                    .then(r => r.json())
+                    .then(data => { if (data.url) set('avatarUrl', data.url); })
+                    .catch(err => alert(err instanceof Error ? err.message : 'Upload failed'))
+                    .finally(() => setUploading(false));
                 }} />
             </label>
           </div>
         </FormRow>
-        {c.avatarUrl && <img src={c.avatarUrl} alt="avatar" style={{ width: 80, height: 112, objectFit: 'cover', borderRadius: 4, marginBottom: 12 }} />}
+        {c.avatarUrl && <img src={c.avatarUrl} alt="avatar" style={{ width: 80, height: 142, objectFit: 'contain', borderRadius: 4, marginBottom: 12, background: '#000' }} />}
 
         {([0, 1, 2] as const).map((i) => (
           <FormRow key={i} label={`Gallery ${i + 1}`}>
