@@ -9739,19 +9739,66 @@ button, a, [role="button"] {
 @media (max-width: 1024px) {
   .comp-chat-sidebar { display: none; }
   .comp-live-panel { width: 280px; }
+  .comp-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
 }
 @media (max-width: 768px) {
+  .comp-home { padding: 12px 12px 40px; }
+  .comp-hero { padding: 20px 12px 16px; }
+  .comp-hero-title { font-size: 1.4rem; }
+  .comp-hero-sub { font-size: 0.88rem; }
+  .comp-hero-cta { padding: 8px 20px; font-size: 0.85rem; }
   .comp-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .comp-live-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .comp-hero-title { font-size: 1.6rem; }
+  .comp-card-bottom { padding: 8px 10px; }
+  .comp-card-name { font-size: 0.82rem; }
+  .comp-card-tagline { font-size: 0.72rem; -webkit-line-clamp: 1; }
+  .comp-card-play { padding: 5px 10px; font-size: 0.72rem; }
   .comp-card-placeholder span { font-size: 2.5rem; }
+  .comp-section { margin-bottom: 24px; }
+  .comp-section-title { font-size: 1rem; }
+  .comp-icon-row { gap: 12px; padding: 8px 0 16px; }
   .comp-msg { max-width: 90%; }
+  .comp-chat-header { padding: 8px 12px; gap: 8px; }
+  .comp-chat-header-name { font-size: 0.88rem; }
+  .mode-toggle-btn { padding: 5px 10px; font-size: 0.75rem; }
+  .comp-chat-messages { padding: 12px; }
+  .comp-chat-input-row { padding: 8px 12px; }
+  .comp-chat-input { padding: 9px 14px; font-size: 0.85rem; }
+  .comp-presets { padding: 6px 12px; gap: 6px; }
+  .comp-preset-btn { padding: 5px 12px; font-size: 0.75rem; }
+  .comp-limit-bar { padding: 4px 12px; }
   .comp-live-layout { flex-direction: column; }
   .comp-live-panel {
     width: 100%; border-left: none; border-top: 1px solid var(--border);
     max-height: 40vh;
   }
   .live-video-wrap { max-height: 50vh; }
+  .comp-promo-card { min-height: auto; }
+  .comp-promo-inner { padding: 16px; }
+  .comp-promo-badge { font-size: 0.7rem; }
+  .comp-promo-inner p { font-size: 0.78rem; }
+  .comp-promo-cta { font-size: 0.75rem; }
+  .paywall-modal { padding: 24px 20px; margin: 0 16px; }
+  .story-caption { bottom: 110px; font-size: 0.82rem; }
+  .story-stats { bottom: 80px; }
+  .story-comment-input-wrap { padding: 8px 12px 16px; }
+  .story-comment-input { padding: 8px 14px; font-size: 0.82rem; }
+}
+@media (max-width: 480px) {
+  .comp-home { padding: 8px 8px 32px; }
+  .comp-hero { padding: 16px 8px 12px; }
+  .comp-hero-title { font-size: 1.2rem; }
+  .comp-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .comp-card-img { aspect-ratio: 2/3; }
+  .comp-card-bottom { padding: 6px 8px; }
+  .comp-card-name { font-size: 0.78rem; }
+  .comp-card-tagline { display: none; }
+  .comp-card-play { padding: 4px 8px; font-size: 0.7rem; }
+  .comp-icon-row { gap: 10px; }
+  .comp-chat-header { padding: 6px 10px; }
+  .comp-chat-messages { padding: 10px 8px; }
+  .comp-chat-input-row { padding: 6px 8px; }
+  .comp-msg-bubble { padding: 8px 12px; font-size: 0.85rem; }
 }
 
 /* ── Create Companion Modal ── */

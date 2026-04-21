@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { COMPANIONS, getActionVideoUrl, isLiveActionAvailable, type Companion } from '@/lib/companions';
 import { getUserCompanions } from '@/lib/userCompanions';
 import { useTranslation } from '@/lib/useTranslation';
+import { useAppStore } from '@/lib/store';
 import StoryAvatarRing from '@/components/companions/StoryAvatarRing';
 import StoriesModal, { type CompanionStories, type StoryItem } from '@/components/companions/StoriesModal';
 
@@ -42,6 +43,8 @@ function CompanionAvatar({
 
 export default function CompanionsPage() {
   const { t } = useTranslation();
+  const { user } = useAppStore();
+  const isPaid = !!user && user.plan !== 'free';
   const [userCompanions, setUserCompanions] = useState<Companion[]>([]);
   const [companions, setCompanions] = useState<Companion[]>(COMPANIONS);
 
@@ -178,8 +181,8 @@ export default function CompanionsPage() {
         <div className="comp-grid">
           {companions.map((c, idx) => (
             <React.Fragment key={c.id}>
-              {/* Insert promo banner after 2nd card */}
-              {idx === 2 && (
+              {/* Insert promo banner after 2nd card — hidden for paid users */}
+              {idx === 2 && !isPaid && (
                 <Link href="/pricing" className="comp-promo-card">
                   <div className="comp-promo-inner">
                     <span className="comp-promo-badge">{t('companions.promoBadge')}</span>
