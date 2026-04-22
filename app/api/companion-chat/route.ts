@@ -437,7 +437,8 @@ function getTodayStr(): string {
 }
 
 function checkDailyLimit(userId: string, plan: string, customLimit?: number | null): { allowed: boolean; used: number; limit: number } {
-  const limit = customLimit ?? DAILY_CHAT_LIMITS[plan] ?? DAILY_CHAT_LIMITS.free;
+  // customLimit: null = use plan default, 0 = unlimited, N = custom limit
+  const limit = (customLimit != null) ? customLimit : (DAILY_CHAT_LIMITS[plan] ?? DAILY_CHAT_LIMITS.free);
   const today = getTodayStr();
   const key = `${userId}:${today}`;
   const entry = dailyMsgCount.get(key);
@@ -447,7 +448,8 @@ function checkDailyLimit(userId: string, plan: string, customLimit?: number | nu
     return { allowed: true, used: 1, limit };
   }
 
-  if (entry.count >= limit) {
+  // limit === 0 means unlimited
+  if (limit > 0 && entry.count >= limit) {
     return { allowed: false, used: entry.count, limit };
   }
 
