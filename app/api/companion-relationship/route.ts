@@ -5,26 +5,27 @@ import { getRelationshipLevel, SENTIMENT_DELTAS, type SentimentCategory, type Re
 
 const DEFAULT_STATE: RelationshipState = { affection: 0, trust: 50, tension: 30, stage: 'stranger' };
 
-// GET — fetch 3-axis relationship state
+function getUserId(req: NextRequest): string | null {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const payload = verifyToken(authHeader.slice(7));
+  return payload?.userId ?? null;
+}
+
+// GET — fetch 3-axis relationship state + nickname
 export async function GET(req: NextRequest) {
   const companionId = req.nextUrl.searchParams.get('companionId');
   if (!companionId) return NextResponse.json({ error: 'Missing companionId' }, { status: 400 });
 
-  const authHeader = req.headers.get('authorization');
-  let userId: string | null = null;
-  if (authHeader?.startsWith('Bearer ')) {
-    const payload = verifyToken(authHeader.slice(7));
-    if (payload) userId = payload.userId;
-  }
-
+  const userId = getUserId(req);
   if (!userId) {
     const level = getRelationshipLevel(0);
-    return NextResponse.json({ ...DEFAULT_STATE, level, points: 0 });
+    return NextResponse.json({ ...DEFAULT_STATE, level, points: 0, nickname: null });
   }
 
   const { data } = await supabaseAdmin
     .from('companion_relationships')
-    .select('affection, trust, tension, stage, points')
+    .select('affection, trust, tension, stage, points, nickname')
     .eq('user_id', userId)
     .eq('companion_id', companionId)
     .maybeSingle();
@@ -38,8 +39,57 @@ export async function GET(req: NextRequest) {
     affection, trust, tension,
     stage: level.id,
     level,
-    points: affection, // backward compat
+    points: affection,
+    nickname: data?.nickname ?? null,
   });
+}
+
+// DELETE — reset relationship
+export async function DELETE(req: NextRequest) {
+  try {
+    const { companionId } = await req.json();
+    if (!companionId) return NextResponse.json({ error: 'Missing companionId' }, { status: 400 });
+
+    const userId = getUserId(req);
+    if (!userId) return NextResponse.json({ error: 'Login required' }, { status: 401 });
+
+    await supabaseAdmin
+      .from('companion_relationships')
+      .delete()
+      .eq('user_id', userId)
+      .eq('companion_id', companionId);
+
+    const level = getRelationshipLevel(0);
+    return NextResponse.json({ ...DEFAULT_STATE, level, points: 0, nickname: null, reset: true });
+  } catch {
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+// PATCH — update nickname
+export async function PATCH(req: NextRequest) {
+  try {
+    const { companionId, nickname } = await req.json();
+    if (!companionId) return NextResponse.json({ error: 'Missing companionId' }, { status: 400 });
+
+    const userId = getUserId(req);
+    if (!userId) return NextResponse.json({ error: 'Login required' }, { status: 401 });
+
+    const safeName = (typeof nickname === 'string' ? nickname.trim().slice(0, 20) : null) || null;
+
+    await supabaseAdmin
+      .from('companion_relationships')
+      .upsert({
+        user_id: userId,
+        companion_id: companionId,
+        nickname: safeName,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,companion_id' });
+
+    return NextResponse.json({ nickname: safeName });
+  } catch {
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
 
 // POST — update relationship with 3-axis deltas

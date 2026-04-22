@@ -501,7 +501,7 @@ function checkGuestLimit(ip: string): { allowed: boolean; remaining: number; ret
 
 export async function POST(req: NextRequest) {
   try {
-    const { companionId, messages, userMessage, recentMessages, locale, playStyle } = await req.json();
+    const { companionId, messages, userMessage, recentMessages, locale, playStyle, userNickname } = await req.json();
 
     if (!companionId || !userMessage) {
       return NextResponse.json({ error: 'Missing companionId or userMessage' }, { status: 400 });
@@ -591,9 +591,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const nicknameSuffix = (typeof userNickname === 'string' && userNickname.trim())
+      ? `\n\n== USER NICKNAME ==\nThe user wants you to call them "${userNickname.trim()}". Always address them by this name naturally in conversation. Never ask what to call them — they already told you.`
+      : '';
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
-      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel);
+      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel) + nicknameSuffix;
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const greetingPrompt = isGreeting

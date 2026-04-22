@@ -162,6 +162,7 @@ export default function CompanionChatPage() {
   const [relTrust, setRelTrust] = useState(50);
   const [relTension, setRelTension] = useState(30);
   const [stageChangeEffect, setStageChangeEffect] = useState<{ type: 'up' | 'down'; stage: string } | null>(null);
+  const [userNickname, setUserNickname] = useState<string | null>(null);
 
   // Show PlayStyle modal on first visit
   useEffect(() => {
@@ -172,7 +173,7 @@ export default function CompanionChatPage() {
     }
   }, [companion?.id, playStyleKey]);
 
-  // Fetch relationship points on load
+  // Fetch relationship points + nickname on load
   useEffect(() => {
     if (!companion || companion.isAssistant) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
@@ -184,9 +185,42 @@ export default function CompanionChatPage() {
         if (typeof d.affection === 'number') setRelPoints(d.affection);
         if (typeof d.trust === 'number') setRelTrust(d.trust);
         if (typeof d.tension === 'number') setRelTension(d.tension);
+        if (d.nickname !== undefined) setUserNickname(d.nickname);
       })
       .catch(() => {});
   }, [companion?.id, companionId]);
+
+  const saveNickname = async (name: string) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+    const res = await fetch('/api/companion-relationship', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ companionId, nickname: name }),
+    });
+    const d = await res.json();
+    if (d.nickname !== undefined) setUserNickname(d.nickname);
+  };
+
+  const resetRelationship = async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+    const res = await fetch('/api/companion-relationship', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ companionId }),
+    });
+    const d = await res.json();
+    if (d.reset) {
+      setRelPoints(0);
+      setRelTrust(50);
+      setRelTension(30);
+      setUserNickname(null);
+      setMessages([]);
+      localStorage.removeItem(chatStorageKey);
+      setShowPlayStyleModal(false);
+    }
+  };
 
   const [galleryIdx, setGalleryIdx] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -330,6 +364,7 @@ export default function CompanionChatPage() {
           recentMessages: recent,
           locale,
           playStyle: playStyle || 'sweet',
+          userNickname: userNickname || undefined,
         }),
       });
 
@@ -869,6 +904,7 @@ export default function CompanionChatPage() {
       {showPlayStyleModal && companion && (
         <PlayStyleModal
           companionName={companion.name}
+          currentNickname={userNickname}
           onSelect={(style) => {
             setPlayStyle(style);
             localStorage.setItem(playStyleKey, style);
@@ -879,6 +915,12 @@ export default function CompanionChatPage() {
             setPlayStyle(def);
             localStorage.setItem(playStyleKey, def);
             setShowPlayStyleModal(false);
+          }}
+          onNicknameChange={(name) => {
+            saveNickname(name);
+          }}
+          onReset={() => {
+            resetRelationship();
           }}
         />
       )}
