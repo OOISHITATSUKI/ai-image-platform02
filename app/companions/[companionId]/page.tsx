@@ -490,7 +490,11 @@ export default function CompanionChatPage() {
             <Link href={`/companions/${companionId}/live`} className="mode-toggle-btn">{t('companions.modeLive')}</Link>
           )}
         </div>
-        {/* call button removed */}
+        {!isAssistant && (
+          <button className="comp-header-settings-btn" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
+            ⚙️
+          </button>
+        )}
       </div>
 
       <div className="comp-chat-body-wrap">
@@ -642,17 +646,20 @@ export default function CompanionChatPage() {
           </div>
 
 
-          {/* Input with icon toolbar */}
+          {/* Input with icon toolbar — LINE-style layout */}
           <form className="comp-chat-input-row" onSubmit={handleSubmit}>
             {!isAssistant && (
               <div className="comp-input-icons">
+                <button type="button" className="comp-input-icon-btn comp-input-call-btn" onClick={() => setShowCallComingSoon(true)} title={t('companions.callMe')}>
+                  📞
+                </button>
                 <button type="button" className="comp-input-icon-btn" onClick={() => spendCoins('gift')} title={t('companions.coinGift')}>
                   🎁<span className="comp-input-icon-badge">50</span>
                 </button>
                 <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCoins('boost')} title={t('companions.coinBoost')}>
                   🚀<span className="comp-input-icon-badge">100</span>
                 </button>
-                {/* call button removed */}
+                <div className="comp-input-divider" />
               </div>
             )}
             <input
@@ -686,14 +693,7 @@ export default function CompanionChatPage() {
             </div>
           )}
 
-          {/* Gallery dots + settings — top right */}
-          <div className="comp-char-top-right">
-            {!isAssistant && (
-              <button className="comp-char-settings-btn" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
-                ⚙️
-              </button>
-            )}
-          </div>
+          {/* Gallery dots — top right (settings moved to header) */}
 
           {/* Gallery dots */}
           {galleryImages.length > 1 && (

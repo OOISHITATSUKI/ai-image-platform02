@@ -9647,18 +9647,7 @@ button, a, [role="button"] {
   border: none; border-radius: 999px; padding: 1px 7px;
   color: #fff; font-size: 0.65rem; font-weight: 700; cursor: pointer;
 }
-.comp-char-top-right {
-  position: absolute; top: 14px; right: 14px; z-index: 2;
-  display: flex; gap: 8px; align-items: center;
-}
-.comp-char-settings-btn {
-  background: rgba(10,10,18,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
-  width: 34px; height: 34px; font-size: 0.9rem;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s;
-}
-.comp-char-settings-btn:hover { background: rgba(236,72,153,0.2); border-color: rgba(236,72,153,0.4); }
+/* (settings button moved to header) */
 .comp-char-dots {
   position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 2;
   display: flex; gap: 6px;
@@ -9729,18 +9718,56 @@ button, a, [role="button"] {
   font-size: 0.78rem; line-height: 1.5; color: #d4d4d8;
 }
 
-/* Input icon toolbar */
-.comp-input-icons { display: flex; gap: 4px; flex-shrink: 0; }
+/* Header settings button (⚙️) — top bar right */
+.comp-header-settings-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%; width: 32px; height: 32px;
+  color: rgba(255,255,255,0.7); font-size: 0.85rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s ease;
+}
+.comp-header-settings-btn:hover { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.3); color: #f472b6; }
+
+/* Input icon toolbar — LINE-style */
+.comp-input-icons { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
 .comp-input-icon-btn {
-  position: relative; width: 36px; height: 36px; border-radius: 10px;
+  position: relative; width: 40px; height: 40px; border-radius: 12px;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
-  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease; flex-shrink: 0;
 }
 .comp-input-icon-btn:hover { background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.3); }
 .comp-input-icon-badge {
   position: absolute; bottom: -3px; right: -3px;
   background: #ec4899; color: #fff; font-size: 0.55rem; font-weight: 700;
   border-radius: 999px; padding: 1px 4px; border: 1.5px solid #0a0a12;
+}
+
+/* Call button — green gradient, LINE-style */
+.comp-input-call-btn {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border: 1px solid rgba(16,185,129,0.4) !important;
+  color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,0.35);
+  animation: call-pulse 2s infinite;
+}
+.comp-input-call-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(16,185,129,0.5) !important;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border-color: rgba(16,185,129,0.6) !important;
+}
+@keyframes call-pulse {
+  0% { box-shadow: 0 2px 8px rgba(16,185,129,0.35), 0 0 0 0 rgba(16,185,129,0.5); }
+  70% { box-shadow: 0 2px 8px rgba(16,185,129,0.35), 0 0 0 8px rgba(16,185,129,0); }
+  100% { box-shadow: 0 2px 8px rgba(16,185,129,0.35), 0 0 0 0 rgba(16,185,129,0); }
+}
+
+/* Divider between icons and input */
+.comp-input-divider {
+  width: 1px; height: 24px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 4px; flex-shrink: 0;
 }
 
 /* OLD sidebar — now hidden, replaced by char panel */
