@@ -94,7 +94,7 @@ function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string
 - Music: ${p.music}
 - Movies: ${p.movies}
 - Hobbies: ${p.hobbies}
-- Catchphrase: ${p.catchphrase}
+- Catchphrase (translate to ${lang}): ${p.catchphrase}
 `
     : '';
 
@@ -226,6 +226,7 @@ You MUST write your ENTIRE response in ${lang}. Every single word must be in ${l
 NEVER mix languages. NEVER use English words or phrases if the language is not English.
 Do NOT use Japanese if the language is not Japanese. Do NOT use any other language.
 This includes *action descriptions* inside asterisks — they MUST also be in ${lang}.
+This includes catchphrases and pet names — translate them to ${lang}. For example, "mon cher" → translate to ${lang} equivalent.
 Example: ${ex.actions[0]}, ${ex.actions[1]}, ${ex.actions[2]}
 NEVER write actions in English like *walks closer* or *smiles*. Always use ${lang}.
 This is the #1 most important rule. Violating it breaks the experience.
