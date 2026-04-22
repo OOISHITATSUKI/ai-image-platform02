@@ -232,13 +232,44 @@ export default function CompanionChatPage() {
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   // Girlfriend experience: she speaks first — only if no saved history
+  // Generate greeting via chat API so it respects the user's language
+  const greetingSent = useRef(false);
   useEffect(() => {
-    if (!companion) return;
+    if (!companion || greetingSent.current) return;
     const saved = typeof window !== 'undefined' ? localStorage.getItem(chatStorageKey) : null;
-    if (saved) return; // already has history, don't overwrite
-    if (companion.firstMessage) {
-      setMessages([{ role: 'assistant', content: companion.firstMessage }]);
-    }
+    if (saved) return;
+    if (!companion.firstMessage) return;
+    greetingSent.current = true;
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    // Ask the AI to generate the first greeting in the user's language
+    fetch('/api/companion-chat', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        companionId,
+        messages: [],
+        userMessage: '[SYSTEM_GREETING]',
+        recentMessages: [],
+        locale,
+        playStyle: playStyle || 'sweet',
+      }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.reply) {
+          setMessages([{ role: 'assistant', content: data.reply }]);
+        } else {
+          // Fallback to hardcoded message
+          setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
+        }
+      })
+      .catch(() => {
+        setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companion?.id]);
 

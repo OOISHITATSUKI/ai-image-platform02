@@ -529,8 +529,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Daily message limit for logged-in users (skip for Nude Assistant)
-    if (isLoggedIn && userId && !companion.isAssistant) {
+    // System greeting — generate first message in user's language (no limit check)
+    const isGreeting = userMessage === '[SYSTEM_GREETING]';
+
+    // Daily message limit for logged-in users (skip for Nude Assistant and greetings)
+    if (!isGreeting && isLoggedIn && userId && !companion.isAssistant) {
       // Check for admin-set custom limit
       let customLimit: number | null = null;
       const { data: userData } = await supabaseAdmin
@@ -551,8 +554,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Guest rate limit (unregistered users, skip for Nude Assistant)
-    if (!isLoggedIn && !companion.isAssistant) {
+    // Guest rate limit (unregistered users, skip for Nude Assistant and greetings)
+    if (!isGreeting && !isLoggedIn && !companion.isAssistant) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
       const limit = checkGuestLimit(ip);
       if (!limit.allowed) {
@@ -586,9 +589,12 @@ export async function POST(req: NextRequest) {
       : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel);
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
+    const greetingPrompt = isGreeting
+      ? `Generate your first greeting message to a new visitor. Be warm and in-character. Reference: "${companion.firstMessage || 'Hey there!'}". Keep it short (1-3 sentences). Do NOT include any tags.`
+      : userMessage;
     const apiMessages = [
       ...history,
-      { role: 'user' as const, content: userMessage },
+      { role: 'user' as const, content: greetingPrompt },
     ];
 
     const controller = new AbortController();
