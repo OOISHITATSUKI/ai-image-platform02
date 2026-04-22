@@ -21,14 +21,16 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // ── Sync credits from Supabase (Maximal sync) ──
+        // ── Sync credits + coins from Supabase (Maximal sync) ──
+        let userCoins = 0;
         try {
             const { data: sbUser } = await supabase
                 .from('users')
-                .select('credits')
+                .select('credits, coins')
                 .eq('id', user.id)
                 .single();
 
+            if (sbUser) userCoins = (sbUser as Record<string, unknown>).coins as number ?? 0;
             if (sbUser && typeof sbUser.credits === 'number') {
                 if (user.credits > sbUser.credits) {
                     console.log(`Syncing credits for ${user.id}: Local(${user.credits}) -> Supabase(${sbUser.credits}) [Local is higher]`);
@@ -77,6 +79,7 @@ export async function GET(req: NextRequest) {
                 dateOfBirth: user.dateOfBirth,
                 country: user.country,
                 firstGenerationConfirmed: user.firstGenerationConfirmed,
+                coins: userCoins,
                 lastLoginAt: user.lastLoginAt,
                 termsAgreedAt: user.termsAgreedAt,
                 termsVersion: user.termsVersion,

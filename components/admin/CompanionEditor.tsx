@@ -318,7 +318,7 @@ export default function CompanionEditor({ mode, companionId }: Props) {
 
   /** Upload a blob as companion image */
   const uploadBlob = async (blob: Blob, companionId: string): Promise<string> => {
-    const f = new File([blob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const f = new File([blob], `cropped-${Date.now()}.webp`, { type: 'image/webp' });
     const fd = new FormData();
     fd.append('file', f);
     fd.append('companionId', companionId);
@@ -339,7 +339,7 @@ export default function CompanionEditor({ mode, companionId }: Props) {
     setCropSrc(null);
     setUploading(true);
     try {
-      const file = new File([blob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `cropped-${Date.now()}.webp`, { type: 'image/webp' });
       const fd = new FormData();
       fd.append('file', file);
       fd.append('companionId', c.id || 'new');

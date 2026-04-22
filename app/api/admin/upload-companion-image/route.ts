@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -22,23 +23,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 });
     }
 
-    const ext = (() => {
-      switch (file.type) {
-        case 'image/png':  return 'png';
-        case 'image/webp': return 'webp';
-        case 'image/gif':  return 'gif';
-        default:           return 'jpg';
-      }
-    })();
-
     const safeId = companionId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || 'custom';
-    const filename = `${safeId}-${Date.now()}.${ext}`;
+    const filename = `${safeId}-${Date.now()}.webp`;
     const destDir = path.join(process.cwd(), 'public', 'companions', 'avatars');
     await fs.mkdir(destDir, { recursive: true });
     const fullPath = path.join(destDir, filename);
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(fullPath, bytes);
+
+    // Convert to WebP with sharp (quality 82 = good balance of size/quality)
+    const webpBuffer = await sharp(bytes)
+      .webp({ quality: 82 })
+      .toBuffer();
+
+    await fs.writeFile(fullPath, webpBuffer);
 
     const publicUrl = `/companions/avatars/${filename}`;
     return NextResponse.json({ ok: true, url: publicUrl });

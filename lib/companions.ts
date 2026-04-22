@@ -741,6 +741,77 @@ export function getCompatibilityPrompt(level: CompatibilityLevel): string {
   }
 }
 
+// ── Relationship System v2: 3-axis + 6 phases ──
+
+export const RELATIONSHIP_LEVELS = [
+  { id: 'stranger', label: 'Stranger', minAffection: 0, emoji: '👋' },
+  { id: 'acquaintance', label: 'Acquaintance', minAffection: 50, emoji: '🤝' },
+  { id: 'crush', label: 'Crush', minAffection: 150, emoji: '💕' },
+  { id: 'dating', label: 'Dating', minAffection: 350, emoji: '💓' },
+  { id: 'intimate', label: 'Intimate', minAffection: 600, emoji: '❤️‍🔥' },
+  { id: 'devoted', label: 'Devoted', minAffection: 850, emoji: '💎' },
+] as const;
+
+export type RelationshipLevel = typeof RELATIONSHIP_LEVELS[number]['id'];
+
+export interface RelationshipState {
+  affection: number;   // 0-1000, oxytocin (bonding)
+  trust: number;       // 0-100, frontal cortex (consistency)
+  tension: number;     // 0-100, dopamine (excitement)
+  stage: RelationshipLevel;
+}
+
+export function getRelationshipLevel(affection: number): typeof RELATIONSHIP_LEVELS[number] {
+  for (let i = RELATIONSHIP_LEVELS.length - 1; i >= 0; i--) {
+    if (affection >= RELATIONSHIP_LEVELS[i].minAffection) return RELATIONSHIP_LEVELS[i];
+  }
+  return RELATIONSHIP_LEVELS[0];
+}
+
+export function getNextLevel(affection: number): typeof RELATIONSHIP_LEVELS[number] | null {
+  const current = getRelationshipLevel(affection);
+  const idx = RELATIONSHIP_LEVELS.findIndex(l => l.id === current.id);
+  return idx < RELATIONSHIP_LEVELS.length - 1 ? RELATIONSHIP_LEVELS[idx + 1] : null;
+}
+
+// For backward compat — maps affection to "points" equivalent
+export function getRelationshipPoints(state: RelationshipState): number {
+  return state.affection;
+}
+
+// ── 9 Sentiment Categories ──
+export type SentimentCategory = 'adoration' | 'tenderness' | 'playful' | 'compliment' | 'neutral' | 'coldness' | 'criticism' | 'contempt' | 'betrayal';
+
+export interface SentimentDeltas {
+  affection: number;
+  trust: number;
+  tension: number;
+}
+
+export const SENTIMENT_DELTAS: Record<SentimentCategory, SentimentDeltas> = {
+  adoration:   { affection: 25,  trust: 3,   tension: 10 },
+  tenderness:  { affection: 15,  trust: 5,   tension: -2 },
+  playful:     { affection: 8,   trust: 1,   tension: 12 },
+  compliment:  { affection: 10,  trust: 2,   tension: 3 },
+  neutral:     { affection: 2,   trust: 0,   tension: 0 },
+  coldness:    { affection: -8,  trust: -2,  tension: -5 },
+  criticism:   { affection: -15, trust: -8,  tension: -3 },
+  contempt:    { affection: -25, trust: -20, tension: -10 },
+  betrayal:    { affection: -50, trust: -60, tension: -20 },
+};
+
+export const SENTIMENT_EMOTIONS: Record<SentimentCategory, { emoji: string; color: string }> = {
+  adoration:  { emoji: '💕💕', color: '#ff4d8d' },
+  tenderness: { emoji: '💖', color: '#ff8fb5' },
+  playful:    { emoji: '😊', color: '#ffd700' },
+  compliment: { emoji: '❤️', color: '#ff6b9d' },
+  neutral:    { emoji: '', color: '' },
+  coldness:   { emoji: '💭', color: '#8899aa' },
+  criticism:  { emoji: '😔', color: '#6677aa' },
+  contempt:   { emoji: '💔', color: '#cc4444' },
+  betrayal:   { emoji: '💔💔', color: '#991111' },
+};
+
 export function getCompanionById(id: string): Companion | undefined {
   if (id === 'assistant') return nudeAssistant;
   return COMPANIONS.find((c) => c.id === id);

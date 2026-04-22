@@ -10,6 +10,9 @@ import {
   XP_PER_MESSAGE,
   isLiveActionAvailable,
   PLAY_STYLES,
+  RELATIONSHIP_LEVELS,
+  getRelationshipLevel,
+  getNextLevel,
   type Companion,
   type PlayStyle,
 } from '@/lib/companions';
@@ -104,12 +107,27 @@ export default function CompanionChatPage() {
   const isPaid = !!user && user.plan !== 'free';
   const isAssistant = !!companion?.isAssistant;
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const chatStorageKey = `chat_history_${companionId}`;
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem(chatStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Message[];
+        // Strip expired image URLs (photos auto-delete after 1h)
+        return parsed.map(m => ({ ...m, imageUrl: undefined, imageLoading: false }));
+      }
+    } catch {}
+    return [];
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [paywallType, setPaywallType] = useState<'chat_limit' | 'photo' | 'call' | 'nude_assistant' | null>(null);
   const [showCallComingSoon, setShowCallComingSoon] = useState(false);
   const [showGuestLimit, setShowGuestLimit] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [showRoadmap, setShowRoadmap] = useState(false);
+  const [showCoinShop, setShowCoinShop] = useState(false);
 
   // PlayStyle
   const playStyleKey = `playstyle_${companionId}`;
@@ -118,6 +136,10 @@ export default function CompanionChatPage() {
     return (localStorage.getItem(playStyleKey) || 'sweet') as PlayStyle;
   });
   const [showPlayStyleModal, setShowPlayStyleModal] = useState(false);
+  const [relPoints, setRelPoints] = useState(0);
+  const [relTrust, setRelTrust] = useState(50);
+  const [relTension, setRelTension] = useState(30);
+  const [stageChangeEffect, setStageChangeEffect] = useState<{ type: 'up' | 'down'; stage: string } | null>(null);
 
   // Show PlayStyle modal on first visit
   useEffect(() => {
@@ -127,6 +149,23 @@ export default function CompanionChatPage() {
       setShowPlayStyleModal(true);
     }
   }, [companion?.id, playStyleKey]);
+
+  // Fetch relationship points on load
+  useEffect(() => {
+    if (!companion || companion.isAssistant) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    fetch(`/api/companion-relationship?companionId=${companionId}`, { headers })
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d.affection === 'number') setRelPoints(d.affection);
+        if (typeof d.trust === 'number') setRelTrust(d.trust);
+        if (typeof d.tension === 'number') setRelTension(d.tension);
+      })
+      .catch(() => {});
+  }, [companion?.id, companionId]);
+
   const [galleryIdx, setGalleryIdx] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -154,18 +193,29 @@ export default function CompanionChatPage() {
   const userMsgCount = messages.filter((m) => m.role === 'user').length;
   const isLimited = !isPaid && userMsgCount >= FREE_MESSAGE_LIMIT;
 
+  // Persist messages to localStorage (keep last 50)
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        const toSave = messages.slice(-50).map(({ role, content }) => ({ role, content }));
+        localStorage.setItem(chatStorageKey, JSON.stringify(toSave));
+      } catch {}
+    }
+  }, [messages, chatStorageKey]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  // Girlfriend experience: she speaks first when the chat opens.
+  // Girlfriend experience: she speaks first — only if no saved history
   useEffect(() => {
-    if (companion?.firstMessage) {
+    if (!companion) return;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem(chatStorageKey) : null;
+    if (saved) return; // already has history, don't overwrite
+    if (companion.firstMessage) {
       setMessages([{ role: 'assistant', content: companion.firstMessage }]);
-    } else {
-      setMessages([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companion?.id]);
@@ -204,7 +254,6 @@ export default function CompanionChatPage() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
-    if (isLimited) { setPaywallType('chat_limit'); return; }
 
     const userMsg: Message = { role: 'user', content: text.trim() };
     const updated = [...messages, userMsg];
@@ -236,7 +285,11 @@ export default function CompanionChatPage() {
       if (!res.ok) {
         if (data.error === 'guest_limit') {
           setShowGuestLimit(true);
-          // Remove the user message we optimistically added
+          setMessages((prev) => prev.slice(0, -1));
+          return;
+        }
+        if (data.error === 'daily_limit') {
+          setPaywallType('chat_limit');
           setMessages((prev) => prev.slice(0, -1));
           return;
         }
@@ -297,15 +350,60 @@ export default function CompanionChatPage() {
       }
       pushRecentMessage(text.trim());
 
+      // Update relationship with 3-axis sentiment
+      if (!isAssistant && data.sentiment) {
+        const sentiment = data.sentiment as string;
+        const affD = (data.affDelta as number) ?? 2;
+        const trustD = (data.trustDelta as number) ?? 0;
+        const tensionD = (data.tensionDelta as number) ?? 0;
+
+        const relHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+        const relToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (relToken) relHeaders['Authorization'] = `Bearer ${relToken}`;
+        fetch('/api/companion-relationship', {
+          method: 'POST',
+          headers: relHeaders,
+          body: JSON.stringify({ companionId, sentiment, affectionDelta: affD, trustDelta: trustD, tensionDelta: tensionD, reason: `chat_${sentiment}` }),
+        })
+          .then((r) => r.json())
+          .then((d) => {
+            if (typeof d.affection === 'number') setRelPoints(d.affection);
+            if (typeof d.trust === 'number') setRelTrust(d.trust);
+            if (typeof d.tension === 'number') setRelTension(d.tension);
+            // Stage change effect
+            if (d.stageChanged) {
+              setStageChangeEffect({ type: d.stageUp ? 'up' : 'down', stage: d.newStage });
+              setTimeout(() => setStageChangeEffect(null), 3000);
+            }
+          })
+          .catch(() => {});
+
+        // Sentiment micro-animation
+        if (affD !== 0) {
+          const el = document.createElement('div');
+          const emojiMap: Record<string, string> = {
+            adoration: '💕💕', tenderness: '💖', playful: '😊', compliment: '❤️',
+            coldness: '💭', criticism: '😔', contempt: '💔', betrayal: '💔💔',
+          };
+          if (affD > 0) {
+            el.className = 'sentiment-up-animation';
+            el.textContent = `${emojiMap[sentiment] || '❤️'} +${affD}`;
+          } else {
+            el.className = 'sentiment-down-animation';
+            el.textContent = `${emojiMap[sentiment] || '😢'} ${affD}`;
+          }
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 2000);
+        }
+      }
+
       // If user asked about play styles, show the modal after reply
       const psKeywords = /play.?style|関係性|スタイル|vibe|relationship style|how.*treat|どう接して|変更|change.*style/i;
       if (psKeywords.test(text)) {
         setTimeout(() => setShowPlayStyleModal(true), 1500);
       }
 
-      if (!isPaid && userMsgCount + 1 >= FREE_MESSAGE_LIMIT) {
-        setPaywallType('chat_limit');
-      }
+      // Daily limit is now enforced server-side via 429 response
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -389,34 +487,48 @@ export default function CompanionChatPage() {
             )}
 
             {messages.map((msg, idx) => (
-              <div key={idx} className={`comp-msg ${msg.role === 'user' ? 'comp-msg-user' : 'comp-msg-ai'}`}>
-                {msg.role === 'assistant' && (
-                  <AvatarFace companion={companion} className="comp-msg-avatar" />
-                )}
-                <div className="comp-msg-bubble">
-                  {msg.content}
-                  {msg.imageLoading && (
+              <React.Fragment key={idx}>
+                {/* Text bubble */}
+                <div className={`comp-msg ${msg.role === 'user' ? 'comp-msg-user' : 'comp-msg-ai'}`}>
+                  {msg.role === 'assistant' && (
+                    <AvatarFace companion={companion} className="comp-msg-avatar" />
+                  )}
+                  <div className="comp-msg-bubble">{msg.content}</div>
+                </div>
+
+                {/* Photo loading — separate bubble */}
+                {msg.imageLoading && (
+                  <div className="comp-msg comp-msg-ai">
+                    <AvatarFace companion={companion} className="comp-msg-avatar" />
                     <div className="comp-photo-loading">
                       <div className="comp-photo-loading-box">
                         <div className="comp-photo-loading-shimmer" />
-                        <span className="comp-photo-loading-text">📸 Generating photo...</span>
+                        <span className="comp-photo-loading-text">📸 {t('companions.photoSending')}</span>
                       </div>
                     </div>
-                  )}
-                  {msg.imageUrl && (
-                    <div className="comp-photo-wrap">
-                      <img src={msg.imageUrl} alt="Photo" className="comp-photo-msg" />
-                      <a
-                        href={`/api/download?url=${encodeURIComponent(msg.imageUrl)}`}
-                        className="comp-photo-download"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        ⬇
-                      </a>
+                  </div>
+                )}
+
+                {/* Photo result — separate bubble */}
+                {msg.imageUrl && (
+                  <div className="comp-msg comp-msg-ai">
+                    <AvatarFace companion={companion} className="comp-msg-avatar" />
+                    <div className="comp-photo-bubble">
+                      <div className="comp-photo-wrap">
+                        <img src={msg.imageUrl} alt="Photo" className="comp-photo-msg" onClick={() => setLightboxUrl(msg.imageUrl!)} style={{ cursor: 'pointer' }} />
+                        <a
+                          href={`/api/download?url=${encodeURIComponent(msg.imageUrl)}`}
+                          className="comp-photo-download"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          ⬇
+                        </a>
+                      </div>
+                      <span className="comp-photo-caption">📷 Photo from {companion.name}</span>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
 
             {isLoading && (
@@ -430,6 +542,71 @@ export default function CompanionChatPage() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Mobile Barometer (hidden on desktop) */}
+          {!isAssistant && (() => {
+            const cl = getRelationshipLevel(relPoints);
+            const nl = getNextLevel(relPoints);
+            const ptn = nl ? nl.minAffection - relPoints : 0;
+            return (
+            <div className="comp-mobile-barometer">
+              <div className="comp-mobile-bar-info">
+                <button className="comp-mobile-roadmap-btn" onClick={() => setShowRoadmap(true)}>
+                  {cl.emoji} {t(`companions.rel_${cl.id}`)} ▾
+                </button>
+                {nl && <span className="comp-mobile-bar-next">{t('companions.rel_next').replace('{points}', String(ptn))} {t(`companions.rel_unlock_${nl.id}`)}</span>}
+              </div>
+              {/* 3-axis mini bars with labels */}
+              <div className="comp-mobile-3axis">
+                <div className="comp-mobile-axis-item">
+                  <span className="comp-mobile-axis-label" style={{ color: '#ff4d8d' }}>{t('companions.rel_axis_affection')}</span>
+                  <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ff4d8d' }} /></div>
+                  <span className="comp-mobile-axis-num">{relPoints}</span>
+                </div>
+                <div className="comp-mobile-axis-item">
+                  <span className="comp-mobile-axis-label" style={{ color: '#4d9fff' }}>{t('companions.rel_axis_trust')}</span>
+                  <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTrust}%`, background: '#4d9fff' }} /></div>
+                  <span className="comp-mobile-axis-num">{relTrust}</span>
+                </div>
+                <div className="comp-mobile-axis-item">
+                  <span className="comp-mobile-axis-label" style={{ color: '#ffcc00' }}>{t('companions.rel_axis_tension')}</span>
+                  <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTension}%`, background: '#ffcc00' }} /></div>
+                  <span className="comp-mobile-axis-num">{relTension}</span>
+                </div>
+              </div>
+              <div className="comp-mobile-bar-actions">
+                <button className="comp-mobile-bar-btn" onClick={async () => {
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) { setShowGuestLimit(true); return; }
+                  const res = await fetch('/api/companion-coins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ companionId, action: 'gift' }),
+                  });
+                  const d = await res.json();
+                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+                  if (d.points !== undefined) setRelPoints(d.points);
+                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+                  const el = document.createElement('div'); el.className = 'coin-gift-animation'; el.textContent = '🎁 +20'; document.body.appendChild(el); setTimeout(() => el.remove(), 1500);
+                }}>🎁 <span className="comp-coin-cost">50</span></button>
+                <button className="comp-mobile-bar-btn comp-mobile-bar-btn-boost" onClick={async () => {
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) { setShowGuestLimit(true); return; }
+                  const res = await fetch('/api/companion-coins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ companionId, action: 'boost' }),
+                  });
+                  const d = await res.json();
+                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+                  if (d.points !== undefined) setRelPoints(d.points);
+                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+                  const el = document.createElement('div'); el.className = 'coin-boost-animation'; el.textContent = '🚀 +100'; document.body.appendChild(el); setTimeout(() => el.remove(), 1800);
+                }}>🚀 <span className="comp-coin-cost">100</span></button>
+                <span className="comp-mobile-bar-coins">🪙 {user?.coins ?? 0}</span>
+              </div>
+            </div>
+            ); })()}
+
           {/* Presets */}
           <div className="comp-presets">
             {presetMessages.map((p) => (
@@ -437,36 +614,27 @@ export default function CompanionChatPage() {
                 key={p.label}
                 className="comp-preset-btn"
                 onClick={() => handlePreset(p)}
-                disabled={isLoading || (isLimited && !('isPaywalled' in p))}
+                disabled={isLoading}
               >
                 {p.label}
               </button>
             ))}
           </div>
 
-          {/* Limit bar */}
-          {!isPaid && (
-            <div className="comp-limit-bar">
-              <span>{t('companions.freeMessages').replace('{count}', String(userMsgCount)).replace('{limit}', String(FREE_MESSAGE_LIMIT))}</span>
-              <div className="comp-limit-track">
-                <div className="comp-limit-fill" style={{ width: `${Math.min(100, (userMsgCount / FREE_MESSAGE_LIMIT) * 100)}%` }} />
-              </div>
-            </div>
-          )}
 
           {/* Input */}
           <form className="comp-chat-input-row" onSubmit={handleSubmit}>
             <input
               ref={inputRef}
               className="comp-chat-input"
-              placeholder={isLimited ? t('companions.upgradePlaceholder') : t('companions.writePlaceholder')}
+              placeholder={t('companions.writePlaceholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onPaste={(e) => e.preventDefault()}
               onContextMenu={(e) => e.preventDefault()}
-              disabled={isLoading || isLimited}
+              disabled={isLoading}
             />
-            <button type="submit" className="comp-chat-send" disabled={isLoading || !input.trim() || isLimited}>
+            <button type="submit" className="comp-chat-send" disabled={isLoading || !input.trim()}>
               →
             </button>
           </form>
@@ -499,6 +667,119 @@ export default function CompanionChatPage() {
             <h3>{companion.name} <span className="comp-profile-age">{companion.age}</span></h3>
             <p className="comp-profile-desc">{companion.description}</p>
           </div>
+
+          {/* Relationship Barometer 3-axis + Coins */}
+          {!isAssistant && (() => {
+            const currentLevel = getRelationshipLevel(relPoints);
+            const nextLevel = getNextLevel(relPoints);
+            const pointsToNext = nextLevel ? nextLevel.minAffection - relPoints : 0;
+            return (
+            <div className="comp-rel-barometer">
+              <button className="comp-rel-header-btn" onClick={() => setShowRoadmap(true)}>
+                <span className="comp-rel-emoji">{currentLevel.emoji}</span>
+                <span className="comp-rel-level">{t(`companions.rel_${currentLevel.id}`)}</span>
+                <span className="comp-rel-roadmap-hint">▾</span>
+              </button>
+
+              {/* 3-axis petals */}
+              <div className="comp-rel-axes">
+                <div className="comp-rel-axis">
+                  <div className="comp-rel-axis-label">
+                    <span className="comp-rel-axis-dot" style={{ background: '#ff4d8d' }} />
+                    <span>{t('companions.rel_axis_affection')}</span>
+                    <span className="comp-rel-axis-val">{relPoints}</span>
+                  </div>
+                  <div className="comp-rel-axis-bar">
+                    <div className="comp-rel-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: 'linear-gradient(90deg, #ff4d8d, #ff8fb5)' }} />
+                  </div>
+                </div>
+                <div className="comp-rel-axis">
+                  <div className="comp-rel-axis-label">
+                    <span className="comp-rel-axis-dot" style={{ background: '#4d9fff' }} />
+                    <span>{t('companions.rel_axis_trust')}</span>
+                    <span className="comp-rel-axis-val">{relTrust}</span>
+                  </div>
+                  <div className="comp-rel-axis-bar">
+                    <div className="comp-rel-axis-fill" style={{ width: `${relTrust}%`, background: 'linear-gradient(90deg, #4d9fff, #8bc4ff)' }} />
+                  </div>
+                </div>
+                <div className="comp-rel-axis">
+                  <div className="comp-rel-axis-label">
+                    <span className="comp-rel-axis-dot" style={{ background: '#ffcc00' }} />
+                    <span>{t('companions.rel_axis_tension')}</span>
+                    <span className="comp-rel-axis-val">{relTension}</span>
+                  </div>
+                  <div className="comp-rel-axis-bar">
+                    <div className="comp-rel-axis-fill" style={{ width: `${relTension}%`, background: 'linear-gradient(90deg, #ffcc00, #ffe066)' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Next stage unlock */}
+              {nextLevel && (
+                <div className="comp-rel-next-reward">
+                  <span className="comp-rel-next-label">
+                    {t('companions.rel_next').replace('{points}', String(pointsToNext))}
+                  </span>
+                  <span className="comp-rel-next-unlock">
+                    {t(`companions.rel_unlock_${nextLevel.id}`)}
+                  </span>
+                </div>
+              )}
+              {!nextLevel && (
+                <div className="comp-rel-points">💎 {t('companions.rel_max')}</div>
+              )}
+              {/* Coin actions */}
+              <div className="comp-coin-actions">
+                <button className="comp-coin-btn" onClick={async () => {
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) { setShowGuestLimit(true); return; }
+                  const res = await fetch('/api/companion-coins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ companionId, action: 'gift' }),
+                  });
+                  const d = await res.json();
+                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+                  if (d.points !== undefined) setRelPoints(d.points);
+                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+                  // Gift animation
+                  const el = document.createElement('div');
+                  el.className = 'coin-gift-animation';
+                  el.textContent = '🎁 +20';
+                  document.body.appendChild(el);
+                  setTimeout(() => el.remove(), 1500);
+                }}>
+                  🎁 {t('companions.coinGift')} <span className="comp-coin-cost">50</span>
+                </button>
+                <button className="comp-coin-btn comp-coin-btn-boost" onClick={async () => {
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) { setShowGuestLimit(true); return; }
+                  const res = await fetch('/api/companion-coins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ companionId, action: 'boost' }),
+                  });
+                  const d = await res.json();
+                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+                  if (d.points !== undefined) setRelPoints(d.points);
+                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+                  // Boost animation
+                  const el = document.createElement('div');
+                  el.className = 'coin-boost-animation';
+                  el.textContent = '🚀 +100';
+                  document.body.appendChild(el);
+                  setTimeout(() => el.remove(), 1800);
+                }}>
+                  🚀 {t('companions.coinBoost')} <span className="comp-coin-cost">100</span>
+                </button>
+              </div>
+              {/* Coin balance */}
+              <div className="comp-coin-balance">
+                🪙 {user?.coins ?? 0} {t('companions.coinBalance')}
+              </div>
+            </div>
+            ); })()}
 
           {!isAssistant && (
             <button className="comp-call-btn-green" onClick={() => setShowCallComingSoon(true)}>
@@ -585,6 +866,102 @@ export default function CompanionChatPage() {
             setShowPlayStyleModal(false);
           }}
         />
+      )}
+
+      {/* Roadmap Modal */}
+      {showRoadmap && companion && (
+        <div className="paywall-overlay" onClick={() => setShowRoadmap(false)}>
+          <div className="roadmap-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="paywall-close" onClick={() => setShowRoadmap(false)}>×</button>
+            <h3>{t('companions.roadmapTitle').replace('{name}', companion.name)}</h3>
+            <div className="roadmap-stages">
+              {RELATIONSHIP_LEVELS.map((lvl, i) => {
+                const isCurrent = getRelationshipLevel(relPoints).id === lvl.id;
+                const isReached = relPoints >= lvl.minAffection;
+                return (
+                  <div key={lvl.id} className={`roadmap-stage ${isCurrent ? 'roadmap-current' : ''} ${isReached ? 'roadmap-reached' : 'roadmap-locked'}`}>
+                    <div className="roadmap-stage-left">
+                      <span className="roadmap-emoji">{lvl.emoji}</span>
+                      {i < RELATIONSHIP_LEVELS.length - 1 && <div className={`roadmap-line ${isReached ? 'roadmap-line-active' : ''}`} />}
+                    </div>
+                    <div className="roadmap-stage-right">
+                      <div className="roadmap-stage-header">
+                        <span className="roadmap-stage-name">{t(`companions.rel_${lvl.id}`)}</span>
+                        <span className="roadmap-stage-pts">{lvl.minAffection}pt</span>
+                      </div>
+                      <div className="roadmap-stage-unlock">
+                        {i < RELATIONSHIP_LEVELS.length - 1 ? t(`companions.rel_unlock_${RELATIONSHIP_LEVELS[i + 1]?.id}`) : t('companions.rel_max')}
+                      </div>
+                      {isCurrent && <span className="roadmap-you-badge">← {t('companions.roadmapYou')}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stage Change Effect */}
+      {stageChangeEffect && (
+        <div className={`stage-change-overlay ${stageChangeEffect.type === 'up' ? 'stage-up' : 'stage-down'}`}>
+          <div className="stage-change-content">
+            <span className="stage-change-emoji">
+              {stageChangeEffect.type === 'up' ? getRelationshipLevel(relPoints).emoji : '💔'}
+            </span>
+            <span className="stage-change-text">
+              {stageChangeEffect.type === 'up' ? t('companions.rel_stage_up') : t('companions.rel_stage_down')}
+            </span>
+            <span className="stage-change-stage">
+              {t(`companions.rel_${stageChangeEffect.stage}`)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Coin Shop Modal */}
+      {showCoinShop && (
+        <div className="paywall-overlay" onClick={() => setShowCoinShop(false)}>
+          <div className="coin-shop-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="paywall-close" onClick={() => setShowCoinShop(false)}>×</button>
+            <h3>🪙 {t('companions.coinShopTitle')}</h3>
+            <p className="coin-shop-desc">{t('companions.coinShopDesc')}</p>
+            <div className="coin-shop-packs">
+              {[
+                { coins: 300, price: '¥490', tag: '' },
+                { coins: 700, price: '¥980', tag: t('companions.coinShopPopular') },
+                { coins: 1600, price: '¥1,980', tag: t('companions.coinShopBest') },
+              ].map((pack) => (
+                <button key={pack.coins} className={`coin-shop-pack ${pack.tag ? 'coin-shop-pack-highlight' : ''}`} onClick={() => {
+                  // TODO: Connect to actual payment flow
+                  window.open('/pricing', '_blank');
+                }}>
+                  {pack.tag && <span className="coin-shop-pack-tag">{pack.tag}</span>}
+                  <span className="coin-shop-pack-coins">🪙 {pack.coins}</span>
+                  <span className="coin-shop-pack-price">{pack.price}</span>
+                </button>
+              ))}
+            </div>
+            <div className="coin-shop-balance">
+              {t('companions.coinShopCurrent')}: 🪙 {user?.coins ?? 0} {t('companions.coinBalance')}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div className="comp-lightbox" onClick={() => setLightboxUrl(null)}>
+          <button className="comp-lightbox-close" onClick={() => setLightboxUrl(null)}>✕</button>
+          <img src={lightboxUrl} alt="Photo" className="comp-lightbox-img" />
+          <a
+            href={`/api/download?url=${encodeURIComponent(lightboxUrl)}`}
+            className="comp-lightbox-download"
+            onClick={(e) => e.stopPropagation()}
+          >
+            ⬇ Download
+          </a>
+        </div>
       )}
     </div>
   );

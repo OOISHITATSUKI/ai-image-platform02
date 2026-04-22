@@ -219,6 +219,10 @@ export default function AdminUsersPage() {
                                                 const c = prompt('New credit amount:', String(u.credits));
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>Credits</button>
+                                            <button onClick={async () => {
+                                                const c = prompt('コイン数を入力:', '0');
+                                                if (c !== null) doAction(u.id, 'set_coins', Number(c));
+                                            }} style={btnStyle('#f59e0b')}>🪙Coins</button>
                                             <button onClick={() => { const p = prompt('Enter plan (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>Plan</button>
                                             <button onClick={() => { setEmailModal({ userId: u.id, email: u.email }); setEmailSubject(''); setEmailBody(''); setEmailTemplate('custom'); }} style={btnStyle('#06b6d4')}>Email</button>
                                             <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>Delete</button>

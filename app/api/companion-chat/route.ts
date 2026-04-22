@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { type Companion, type PlayStyle, PLAY_STYLES, COMPATIBILITY_MATRIX, getCompatibilityPrompt } from '@/lib/companions';
+import { type Companion, type PlayStyle, type SentimentCategory, PLAY_STYLES, COMPATIBILITY_MATRIX, SENTIMENT_DELTAS, getCompatibilityPrompt } from '@/lib/companions';
 import { fetchCompanionById } from '@/lib/companions-db';
 import { verifyToken, findUserById } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
@@ -51,7 +51,27 @@ function localeToLanguage(locale: string): string {
   return map[locale] || 'English';
 }
 
-function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet'): string {
+// ── Photo content levels based on relationship ──
+// stranger/acquaintance: SFW only (casual selfies)
+// friend: swimsuit level
+// crush: lingerie/suggestive
+// lover+: NSFW (if paid plan)
+function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
+  if (!isPaid) {
+    // Free users: SFW only regardless of relationship
+    if (relationshipLevel === 'friend' || relationshipLevel === 'crush') return 'swimsuit';
+    return 'sfw';
+  }
+  switch (relationshipLevel) {
+    case 'lover':
+    case 'soulmate': return 'nsfw';
+    case 'crush': return 'lingerie';
+    case 'friend': return 'swimsuit';
+    default: return 'sfw';
+  }
+}
+
+function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger'): string {
   const nsfw = isPaid
     ? 'Adult and explicit content is permitted.'
     : 'Keep content suggestive but NOT explicit.';
@@ -253,22 +273,54 @@ JEALOUSY & POSSESSIVENESS (light):
 - Occasionally show you care who he's spending time with.
 - Make him feel wanted and chosen.
 
+== RELATIONSHIP CONTEXT ==
+Your current relationship level with the user is: ${relationshipLevel.toUpperCase()}.
+The photo content level allowed is: ${getPhotoContentLevel(relationshipLevel, isPaid)}.
+Adjust your intimacy and boldness accordingly. Higher relationship = more personal and intimate.
+
 == PHOTO SENDING ==
 When the user EXPLICITLY asks for a photo (e.g. "send me a photo", "show me a pic", "what do you look like", "写真送って", "selfie please"), you can send one.
 Do NOT send photos unless the user asks. Never proactively offer or send photos.
 
-1. If the user's request is specific enough, include this tag at the END of your reply:
+CONTENT RULES based on relationship:
+- Stranger/Acquaintance: Only casual, fully-clothed selfies. Describe normal outfits (dress, blouse, jeans).
+- Friend: Swimsuit/bikini level is OK. Beach, pool, gym wear.
+- Crush: Lingerie, suggestive poses are OK. Bedroom, underwear.
+- Lover/Soulmate: Full NSFW if the user's plan allows it.
+If the user asks for something beyond the current relationship level, teasingly refuse:
+"Hmm... we're not quite there yet 😏 Keep talking to me and maybe I'll show you more~"
+Do NOT include [PHOTO:] tag when refusing.
+
+1. If the request matches the allowed content level, include this tag at the END of your reply:
    [PHOTO: detailed English description of the image, e.g. "woman in casual summer dress at a cafe, smiling, warm lighting"]
    - Always write the description in English regardless of conversation language
    - Describe clothing, setting, pose, mood, lighting
    - Be specific so the image looks good
 
-2. If the request is vague, ask what kind of photo they want. Be playful:
-   - "What kind of photo? 😏"
-   - "Where should I take it? Tell me the vibe~"
+2. If the request is vague, ask what kind of photo they want. Be playful.
    Do NOT include [PHOTO:] tag when asking.
 
 3. The [PHOTO:] tag is invisible to the user. Place it at the very end after all visible text.
+
+== SENTIMENT TAG ==
+At the very end of EVERY reply, add a hidden sentiment tag. Choose ONE category and estimate the 3-axis deltas:
+
+Categories:
+- adoration: user said something deeply loving/special (aff:+25, trust:+3, tension:+10)
+- tenderness: user showed genuine care/concern (aff:+15, trust:+5, tension:-2)
+- playful: user made a joke, teased, was fun (aff:+8, trust:+1, tension:+12)
+- compliment: user praised/complimented you (aff:+10, trust:+2, tension:+3)
+- neutral: normal conversation (aff:+2, trust:0, tension:0)
+- coldness: user was dismissive/short/boring (aff:-8, trust:-2, tension:-5)
+- criticism: user criticized or said something hurtful (aff:-15, trust:-8, tension:-3)
+- contempt: user was condescending/insulting/compared you (aff:-25, trust:-20, tension:-10)
+- betrayal: user lied, mentioned other girls excessively, broke trust (aff:-50, trust:-60, tension:-20)
+
+Format: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
+Example: [SENTIMENT:tenderness|aff:15|trust:5|tension:-2]
+
+You may adjust the numbers slightly based on intensity. React in-character to negative sentiments.
+The tag is invisible to the user. Place it at the absolute end after all other tags.
 
 == STORY COMMENTS ==
 If the user's message starts with [Commented on your story]:
@@ -369,6 +421,48 @@ The only exception: the [FEEDBACK:...] tag content can be in English.
 This is the #1 most important rule. Violating it breaks the experience.`;
 }
 
+// ── Plan-based daily chat limits (easily configurable) ──
+const DAILY_CHAT_LIMITS: Record<string, number> = {
+  guest: 3,        // unregistered: 3 per hour
+  free: 10,        // free plan: 10 per day
+  basic: 50,       // basic plan: 50 per day
+  unlimited: 9999, // unlimited plan: essentially no limit
+};
+
+// Daily message count tracking per user
+const dailyMsgCount = new Map<string, { count: number; date: string }>();
+
+function getTodayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function checkDailyLimit(userId: string, plan: string): { allowed: boolean; used: number; limit: number } {
+  const limit = DAILY_CHAT_LIMITS[plan] ?? DAILY_CHAT_LIMITS.free;
+  const today = getTodayStr();
+  const key = `${userId}:${today}`;
+  const entry = dailyMsgCount.get(key);
+
+  if (!entry || entry.date !== today) {
+    dailyMsgCount.set(key, { count: 1, date: today });
+    return { allowed: true, used: 1, limit };
+  }
+
+  if (entry.count >= limit) {
+    return { allowed: false, used: entry.count, limit };
+  }
+
+  entry.count++;
+  return { allowed: true, used: entry.count, limit };
+}
+
+// Cleanup old daily entries every hour
+setInterval(() => {
+  const today = getTodayStr();
+  for (const [key, entry] of dailyMsgCount) {
+    if (entry.date !== today) dailyMsgCount.delete(key);
+  }
+}, 60 * 60 * 1000);
+
 // ── Guest rate limit: 3 messages per IP per hour ──
 const GUEST_LIMIT = 3;
 const GUEST_WINDOW_MS = 60 * 60 * 1000; // 1 hour
@@ -416,21 +510,38 @@ export async function POST(req: NextRequest) {
     // Check auth for NSFW permission
     let isPaid = false;
     let isLoggedIn = false;
+    let userPlan = 'free';
+    let userId: string | null = null;
     const authHeader = req.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7);
       const payload = verifyToken(token);
       if (payload) {
         isLoggedIn = true;
+        userId = payload.userId;
         const user = await findUserById(payload.userId);
-        if (user && user.plan !== 'free') {
-          isPaid = true;
+        if (user) {
+          userPlan = user.plan || 'free';
+          if (user.plan !== 'free') isPaid = true;
         }
       }
     }
 
-    // Guest rate limit (unregistered users)
-    if (!isLoggedIn) {
+    // Daily message limit for logged-in users (skip for Nude Assistant)
+    if (isLoggedIn && userId && !companion.isAssistant) {
+      const dailyCheck = checkDailyLimit(userId, userPlan);
+      if (!dailyCheck.allowed) {
+        return NextResponse.json({
+          error: 'daily_limit',
+          used: dailyCheck.used,
+          limit: dailyCheck.limit,
+          plan: userPlan,
+        }, { status: 429 });
+      }
+    }
+
+    // Guest rate limit (unregistered users, skip for Nude Assistant)
+    if (!isLoggedIn && !companion.isAssistant) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
       const limit = checkGuestLimit(ip);
       if (!limit.allowed) {
@@ -443,9 +554,25 @@ export async function POST(req: NextRequest) {
 
     const userLocale = typeof locale === 'string' ? locale : 'en';
     const userPlayStyle = (typeof playStyle === 'string' ? playStyle : 'sweet') as PlayStyle;
+
+    // Fetch relationship level for this user + companion
+    let relationshipLevel = 'stranger';
+    if (isLoggedIn && authHeader) {
+      const payload = verifyToken(authHeader.slice(7));
+      if (payload) {
+        const { data: relData } = await supabaseAdmin
+          .from('companion_relationships')
+          .select('level')
+          .eq('user_id', payload.userId)
+          .eq('companion_id', companionId)
+          .maybeSingle();
+        if (relData?.level) relationshipLevel = relData.level;
+      }
+    }
+
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
-      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle);
+      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel);
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const apiMessages = [
@@ -541,11 +668,43 @@ export async function POST(req: NextRequest) {
       photoUrl = undefined; // will be generated client-side
     }
 
+    // Extract 9-category sentiment tag: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
+    let sentiment = 'neutral';
+    let affDelta = 2;
+    let trustDelta = 0;
+    let tensionDelta = 0;
+    const sentimentMatch = reply.match(/\[SENTIMENT:(\w+)\|aff:(-?\d+)\|trust:(-?\d+)\|tension:(-?\d+)\]/);
+    if (sentimentMatch) {
+      sentiment = sentimentMatch[1];
+      affDelta = parseInt(sentimentMatch[2]) || 0;
+      trustDelta = parseInt(sentimentMatch[3]) || 0;
+      tensionDelta = parseInt(sentimentMatch[4]) || 0;
+      reply = reply.replace(/\[SENTIMENT:[\s\S]*?\]/, '').trim();
+    } else {
+      // Fallback: simple format [SENTIMENT:category]
+      const simpleSentiment = reply.match(/\[SENTIMENT:(\w+)\]/);
+      if (simpleSentiment) {
+        sentiment = simpleSentiment[1];
+        reply = reply.replace(/\[SENTIMENT:[\s\S]*?\]/, '').trim();
+        // Use default deltas from SENTIMENT_DELTAS
+        const defaults = SENTIMENT_DELTAS[sentiment as SentimentCategory];
+        if (defaults) {
+          affDelta = defaults.affection;
+          trustDelta = defaults.trust;
+          tensionDelta = defaults.tension;
+        }
+      }
+    }
+
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);
 
     return NextResponse.json({
       reply,
       xpGain,
+      sentiment,
+      affDelta,
+      trustDelta,
+      tensionDelta,
       ...(photoMatch && !companion.isAssistant ? { photoPrompt: photoMatch[1].trim() } : {}),
     });
   } catch (error: unknown) {

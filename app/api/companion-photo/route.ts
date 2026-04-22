@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, findUserById } from '@/lib/auth';
 import { fetchCompanionById } from '@/lib/companions-db';
+import { supabaseAdmin } from '@/lib/supabase-server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120; // 2 minutes max for image generation
@@ -45,8 +47,13 @@ setInterval(() => {
   }
 }, 30 * 60 * 1000);
 
-// SFW negative prompt
-const SFW_NEGATIVE = 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, bikini, see-through, suggestive pose, sexual, erotic';
+// Content level negative prompts
+const NEGATIVE_BY_LEVEL: Record<string, string> = {
+  sfw: 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, bikini, see-through, suggestive pose, sexual, erotic, cleavage',
+  swimsuit: 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, see-through, sexual, erotic',
+  lingerie: 'nsfw, nude, naked, nipples, genitalia, sex, explicit, pornographic',
+  nsfw: '',
+};
 const BASE_NEGATIVE = '(worst quality:1.4), (low quality:1.4), (ugly:1.3), (deformed:1.3), bad anatomy, bad proportions, blurry, watermark, text, signature, plastic skin, doll-like, CGI, 3d render, anime, cartoon, illustration, painting, drawing, art, sketch, unrealistic, airbrushed, oversmoothed skin, extra fingers, mutated hands, poorly drawn face, poorly drawn hands, missing fingers, extra limbs, fused fingers, long neck, cross-eyed';
 
 async function pollResult(taskId: string): Promise<string | null> {
@@ -150,10 +157,38 @@ export async function POST(req: NextRequest) {
       guestPhotoUsage.set(ip, Date.now());
     }
 
+    // Fetch relationship level
+    let relationshipLevel = 'stranger';
+    if (isLoggedIn && authHeader) {
+      const payload = verifyToken(authHeader.slice(7));
+      if (payload) {
+        const { data: relData } = await supabaseAdmin
+          .from('companion_relationships')
+          .select('level')
+          .eq('user_id', payload.userId)
+          .eq('companion_id', companionId)
+          .maybeSingle();
+        if (relData?.level) relationshipLevel = relData.level;
+      }
+    }
+
+    // Determine content level based on relationship + plan
+    const contentLevel = (() => {
+      if (!isPaid) {
+        if (relationshipLevel === 'friend' || relationshipLevel === 'crush') return 'swimsuit';
+        return 'sfw';
+      }
+      switch (relationshipLevel) {
+        case 'lover': case 'soulmate': return 'nsfw';
+        case 'crush': return 'lingerie';
+        case 'friend': return 'swimsuit';
+        default: return 'sfw';
+      }
+    })();
+
     // Build generation prompt
-    const negativePrompt = isPaid
-      ? BASE_NEGATIVE
-      : `${SFW_NEGATIVE}, ${BASE_NEGATIVE}`;
+    const levelNeg = NEGATIVE_BY_LEVEL[contentLevel] || NEGATIVE_BY_LEVEL.sfw;
+    const negativePrompt = levelNeg ? `${levelNeg}, ${BASE_NEGATIVE}` : BASE_NEGATIVE;
 
     const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${prompt}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
 
@@ -227,9 +262,14 @@ export async function POST(req: NextRequest) {
 
     // Step 4: Save to disk (auto-deleted after 1 hour)
     await fs.mkdir(PHOTO_DIR, { recursive: true });
-    const filename = `cp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const filename = `cp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
     const filePath = path.join(PHOTO_DIR, filename);
-    await fs.writeFile(filePath, Buffer.from(finalBase64, 'base64'));
+
+    // Convert to WebP for smaller file size
+    const webpBuffer = await sharp(Buffer.from(finalBase64, 'base64'))
+      .webp({ quality: 82 })
+      .toBuffer();
+    await fs.writeFile(filePath, webpBuffer);
 
     const publicUrl = `/companions/photos/${filename}`;
     return NextResponse.json({ ok: true, imageUrl: publicUrl });

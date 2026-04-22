@@ -195,6 +195,9 @@ interface AppState {
     // ----- Credits -----
     deductCredits: (amount: number) => void;
     addCredits: (amount: number) => void;
+    // ----- Coins (companion) -----
+    deductCoins: (amount: number) => void;
+    addCoins: (amount: number) => void;
 
     // ----- Saved Faces -----
     savedFaces: SavedFace[];
@@ -285,6 +288,7 @@ export const useAppStore = create<AppState>()(
                                 email_verified: true,
                                 plan: user.plan || 'free',
                                 credits: user.credits ?? 20,
+                                coins: user.coins ?? 0,
                                 locale: user.locale || 'en',
                                 theme: user.theme || 'dark',
                                 first_generation_confirmed: false,
@@ -567,6 +571,16 @@ export const useAppStore = create<AppState>()(
             addCredits: (amount: number) =>
                 set((s) => ({
                     user: s.user ? { ...s.user, credits: (s.user?.credits ?? 0) + amount } : null,
+                })),
+
+            // ----- Coins (companion) -----
+            deductCoins: (amount: number) =>
+                set((s) => ({
+                    user: s.user ? { ...s.user, coins: Math.max(0, (s.user.coins ?? 0) - amount) } : null,
+                })),
+            addCoins: (amount: number) =>
+                set((s) => ({
+                    user: s.user ? { ...s.user, coins: (s.user?.coins ?? 0) + amount } : null,
                 })),
 
             // ----- Saved Faces -----

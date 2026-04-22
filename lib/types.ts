@@ -131,6 +131,7 @@ export interface User {
   country?: string;
   firstGenerationConfirmed?: boolean;
   termsAgreedAt?: number;
+  coins: number;
 }
 
 // ----- Plan Limits -----

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readUsers, saveUser, deleteUser, type UserRecord } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 // GET: List all users (for admin panel)
 export async function GET() {
@@ -64,6 +65,16 @@ export async function POST(req: NextRequest) {
                     user.credits = value;
                 }
                 break;
+            case 'set_coins':
+                if (typeof value === 'number' && value >= 0) {
+                    // Coins are stored in Supabase only
+                    await supabaseAdmin
+                        .from('users')
+                        .update({ coins: value })
+                        .eq('id', userId);
+                }
+                return NextResponse.json({ success: true, coins: value });
+
             case 'set_plan': {
                 const planValue = strValue || value;
                 if (['free', 'basic', 'pro', 'ultimate', 'paid'].includes(planValue)) {
