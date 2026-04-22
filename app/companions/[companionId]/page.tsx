@@ -490,9 +490,7 @@ export default function CompanionChatPage() {
             <Link href={`/companions/${companionId}/live`} className="mode-toggle-btn">{t('companions.modeLive')}</Link>
           )}
         </div>
-        {!isAssistant && (
-          <button className="comp-chat-call-btn" onClick={() => setShowCallComingSoon(true)}>📞</button>
-        )}
+        {/* call button removed */}
       </div>
 
       <div className="comp-chat-body-wrap">
@@ -654,9 +652,7 @@ export default function CompanionChatPage() {
                 <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCoins('boost')} title={t('companions.coinBoost')}>
                   🚀<span className="comp-input-icon-badge">100</span>
                 </button>
-                <button type="button" className="comp-input-icon-btn" onClick={() => setShowCallComingSoon(true)} title={t('companions.callMe')}>
-                  📞
-                </button>
+                {/* call button removed */}
               </div>
             )}
             <input
@@ -675,7 +671,7 @@ export default function CompanionChatPage() {
           </form>
         </div>
 
-        {/* Right Column — Character Panel with glass overlay (desktop only) */}
+        {/* Right Column — 9:16 Character Panel (desktop only) */}
         <div className="comp-char-panel">
           {/* Full 9:16 character image */}
           <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
@@ -690,8 +686,14 @@ export default function CompanionChatPage() {
             </div>
           )}
 
-          {/* V2 badge — top right */}
-          <span className="comp-char-v2">{t('companions.galleryV2')}</span>
+          {/* Gallery dots + settings — top right */}
+          <div className="comp-char-top-right">
+            {!isAssistant && (
+              <button className="comp-char-settings-btn" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
+                ⚙️
+              </button>
+            )}
+          </div>
 
           {/* Gallery dots */}
           {galleryImages.length > 1 && (
@@ -702,34 +704,16 @@ export default function CompanionChatPage() {
             </div>
           )}
 
-          {/* Glass card overlay — bottom */}
-          <div className="comp-char-glass">
-            {/* Name + profile toggle + stage */}
-            <div className="comp-char-glass-header">
-              <div className="comp-char-name-row">
-                <h3>{companion.name} <span className="comp-char-age">{companion.age}</span></h3>
-                <button className="comp-char-profile-toggle" onClick={() => setShowProfile(!showProfile)}>
-                  {showProfile ? '✕' : 'ℹ'}
-                </button>
-              </div>
-              {!isAssistant && (
-                <button className="comp-char-stage-badge" onClick={() => setShowRoadmap(true)}>
-                  {getRelationshipLevel(relPoints).emoji} {t(`companions.rel_${getRelationshipLevel(relPoints).id}`)} ▾
-                </button>
-              )}
-            </div>
-
-            {/* Profile (collapsible) */}
-            {showProfile && (
-              <div className="comp-char-profile-text">{companion.description}</div>
-            )}
-
-            {/* 3-axis barometer */}
-            {!isAssistant && (() => {
-              const nl = getNextLevel(relPoints);
-              const ptn = nl ? nl.minAffection - relPoints : 0;
-              return (
-              <div className="comp-char-barometer">
+          {/* Floating barometer — mid-right area */}
+          {!isAssistant && (() => {
+            const nl = getNextLevel(relPoints);
+            const ptn = nl ? nl.minAffection - relPoints : 0;
+            return (
+            <div className="comp-char-float-barometer">
+              <button className="comp-char-float-stage" onClick={() => setShowRoadmap(true)}>
+                {getRelationshipLevel(relPoints).emoji} {t(`companions.rel_${getRelationshipLevel(relPoints).id}`)} ▾
+              </button>
+              <div className="comp-char-float-axes">
                 <div className="comp-char-axis">
                   <span className="comp-char-axis-label">{t('companions.rel_axis_affection')}</span>
                   <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899', boxShadow: '0 0 8px #ec489988' }} /></div>
@@ -745,32 +729,28 @@ export default function CompanionChatPage() {
                   <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24', boxShadow: '0 0 8px #fbbf2488' }} /></div>
                   <span className="comp-char-axis-num">{relTension}</span>
                 </div>
-
-                {/* Next unlock hint */}
-                {nl && (
-                  <div className="comp-char-unlock-hint">
-                    <span className="comp-char-unlock-pts">
-                      {t('companions.rel_next').replace('{points}', String(ptn))}
-                    </span>
-                    <span className="comp-char-unlock-reward">
-                      {t(`companions.rel_unlock_${nl.id}`)}
-                    </span>
-                  </div>
-                )}
-                {!nl && <div className="comp-char-unlock-reward">💎 {t('companions.rel_max')}</div>}
               </div>
-              ); })()}
+              {nl && (
+                <div className="comp-char-float-unlock">
+                  <span>{t('companions.rel_next').replace('{points}', String(ptn))}</span>
+                  <span className="comp-char-unlock-reward">{t(`companions.rel_unlock_${nl.id}`)}</span>
+                </div>
+              )}
+            </div>
+            ); })()}
 
-            {/* CTA row */}
-            {!isAssistant && (
-              <div className="comp-char-cta-row">
-                <button className="comp-char-cta-call" onClick={() => setShowCallComingSoon(true)}>
-                  📞 {t('companions.callMe')}
-                </button>
-                <button className="comp-char-cta-settings" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
-                  ⚙️
+          {/* Glass card overlay — bottom (minimal: name + profile only) */}
+          <div className="comp-char-glass comp-char-glass-minimal">
+            <div className="comp-char-glass-header">
+              <div className="comp-char-name-row">
+                <h3>{companion.name} <span className="comp-char-age">{companion.age}</span></h3>
+                <button className="comp-char-profile-toggle" onClick={() => setShowProfile(!showProfile)}>
+                  {showProfile ? '✕' : 'ℹ'}
                 </button>
               </div>
+            </div>
+            {showProfile && (
+              <div className="comp-char-profile-text">{companion.description}</div>
             )}
           </div>
         </div>

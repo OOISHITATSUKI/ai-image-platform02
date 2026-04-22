@@ -71,11 +71,26 @@ export default function AdminUsersPage() {
     const doAction = async (userId: string, action: string, value?: number, strValue?: string) => {
         const token = localStorage.getItem('auth_token');
         const headers: Record<string, string> = { 'Content-Type': 'application/json', Authorization: token ?? '' };
-        await fetch('/api/admin/users', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ userId, action, value, strValue }),
-        });
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ userId, action, value, strValue }),
+            });
+            const data = await res.json();
+            if (!res.ok || data.error) {
+                alert(`Error: ${data.error || res.statusText}`);
+                return;
+            }
+            // Show success feedback for specific actions
+            if (action === 'set_daily_chat_limit') {
+                const v = data.daily_chat_limit;
+                alert(v === null ? 'Chat limit reset to plan default' : v === 0 ? 'Chat limit set to unlimited' : `Chat limit set to ${v}/day`);
+            }
+        } catch (e) {
+            alert(`Request failed: ${e}`);
+            return;
+        }
         fetchUsers();
     };
 

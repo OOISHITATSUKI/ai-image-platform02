@@ -9618,10 +9618,11 @@ button, a, [role="button"] {
 .comp-chat-send:hover:not(:disabled) { opacity: 0.9; }
 .comp-chat-send:disabled { opacity: 0.4; cursor: default; }
 
-/* Character Panel (right column — 9:16 image + glass overlay) */
+/* Character Panel (right column — 9:16 aspect ratio) */
 .comp-char-panel {
-  width: min(38%, 480px); flex-shrink: 0;
+  aspect-ratio: 9/16; height: 100%; flex-shrink: 0;
   position: relative; overflow: hidden;
+  border-radius: 16px; margin: 0 8px 0 0;
 }
 .comp-char-image {
   position: absolute; inset: 0;
@@ -9630,7 +9631,7 @@ button, a, [role="button"] {
 }
 .comp-char-gradient {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(10,10,18,0.4) 0%, transparent 20%, transparent 50%, rgba(10,10,18,0.95) 100%);
+  background: linear-gradient(to bottom, rgba(10,10,18,0.3) 0%, transparent 25%, transparent 60%, rgba(10,10,18,0.85) 100%);
   pointer-events: none;
 }
 .comp-char-coins {
@@ -9646,14 +9647,20 @@ button, a, [role="button"] {
   border: none; border-radius: 999px; padding: 1px 7px;
   color: #fff; font-size: 0.65rem; font-weight: 700; cursor: pointer;
 }
-.comp-char-v2 {
+.comp-char-top-right {
   position: absolute; top: 14px; right: 14px; z-index: 2;
-  background: var(--companion-purple); color: #fff;
-  font-size: 0.65rem; font-weight: 700; padding: 2px 8px;
-  border-radius: var(--radius-full);
+  display: flex; gap: 8px; align-items: center;
 }
+.comp-char-settings-btn {
+  background: rgba(10,10,18,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
+  width: 34px; height: 34px; font-size: 0.9rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.comp-char-settings-btn:hover { background: rgba(236,72,153,0.2); border-color: rgba(236,72,153,0.4); }
 .comp-char-dots {
-  position: absolute; top: 50px; left: 50%; transform: translateX(-50%); z-index: 2;
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 2;
   display: flex; gap: 6px;
 }
 .comp-char-dot {
@@ -9663,13 +9670,35 @@ button, a, [role="button"] {
 }
 .comp-char-dot.active { background: #fff; }
 
-/* Glass card overlay */
+/* Floating barometer — overlaid on image */
+.comp-char-float-barometer {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 2;
+  background: rgba(10,10,18,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+  min-width: 150px; max-width: 180px;
+}
+.comp-char-float-stage {
+  align-self: flex-start;
+  background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3);
+  border-radius: 999px; padding: 4px 10px;
+  color: #ec4899; font-size: 0.72rem; font-weight: 600; cursor: pointer;
+}
+.comp-char-float-axes { display: flex; flex-direction: column; gap: 4px; }
+.comp-char-float-unlock {
+  display: flex; flex-direction: column; gap: 2px;
+  padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.65rem; color: rgba(255,255,255,0.6);
+}
+
+/* Glass card overlay — minimal */
 .comp-char-glass {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
   background: rgba(10,10,18,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255,255,255,0.08);
   padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
 }
+.comp-char-glass-minimal { padding: 12px 16px; gap: 8px; }
 .comp-char-glass-header { display: flex; flex-direction: column; gap: 6px; }
 .comp-char-name-row { display: flex; align-items: center; justify-content: space-between; }
 .comp-char-name-row h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
@@ -9680,54 +9709,19 @@ button, a, [role="button"] {
   color: rgba(255,255,255,0.7); font-size: 0.8rem;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
-.comp-char-stage-badge {
-  align-self: flex-start;
-  background: rgba(10,10,18,0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(236,72,153,0.3); border-radius: 999px;
-  padding: 5px 12px; color: #ec4899; font-size: 0.75rem; font-weight: 600;
-  cursor: pointer;
-}
 .comp-char-profile-text {
   background: rgba(10,10,18,0.5); border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px; padding: 10px;
   font-size: 0.78rem; line-height: 1.5; color: #d4d4d8;
 }
 
-/* 3-axis barometer in glass */
-.comp-char-barometer { display: flex; flex-direction: column; gap: 5px; }
+/* 3-axis barometer (shared styles) */
 .comp-char-axis { display: flex; align-items: center; gap: 6px; }
-.comp-char-axis-label { font-size: 0.72rem; color: rgba(255,255,255,0.6); width: 48px; flex-shrink: 0; }
-.comp-char-axis-track { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+.comp-char-axis-label { font-size: 0.68rem; color: rgba(255,255,255,0.6); width: 44px; flex-shrink: 0; }
+.comp-char-axis-track { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
 .comp-char-axis-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.comp-char-axis-num { font-size: 0.68rem; color: rgba(255,255,255,0.5); width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
-
-/* Unlock hint — high contrast */
-.comp-char-unlock-hint {
-  padding: 8px 12px; margin-top: 2px;
-  background: rgba(10,10,18,0.85);
-  border: 1px solid rgba(236,72,153,0.4);
-  border-left: 3px solid #ec4899;
-  border-radius: 8px;
-}
-.comp-char-unlock-pts { display: block; font-size: 0.68rem; color: #f4f4f5; font-weight: 500; }
-.comp-char-unlock-pts span { color: #fbbf24; font-weight: 700; }
-.comp-char-unlock-reward { font-size: 0.82rem; color: #fff; font-weight: 700; }
-
-/* CTA row */
-.comp-char-cta-row { display: flex; gap: 8px; }
-.comp-char-cta-call {
-  flex: 1; padding: 10px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  border: none; border-radius: 10px;
-  color: #fff; font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);
-}
-.comp-char-cta-settings {
-  width: 42px;
-  background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3);
-  border-radius: 10px; color: #f472b6; font-size: 1rem;
-  cursor: pointer;
-}
+.comp-char-axis-num { font-size: 0.65rem; color: rgba(255,255,255,0.5); width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
+.comp-char-unlock-reward { font-size: 0.72rem; color: #fff; font-weight: 700; }
 
 /* Input icon toolbar */
 .comp-input-icons { display: flex; gap: 4px; flex-shrink: 0; }

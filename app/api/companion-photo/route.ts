@@ -14,7 +14,7 @@ const NOVITA_BASE = 'https://api.novita.ai/v3/async';
 const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 
 // ── Auto-cleanup: delete companion photos older than 1 hour ──
-const PHOTO_DIR = path.join(process.cwd(), 'public', 'companions', 'photos');
+const PHOTO_DIR = path.join(process.cwd(), 'data', 'companion-photos');
 const PHOTO_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 async function cleanupOldPhotos() {
@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
       .toBuffer();
     await fs.writeFile(filePath, webpBuffer);
 
-    const publicUrl = `/companions/photos/${filename}`;
+    const publicUrl = `/api/companion-photos/${filename}`;
     return NextResponse.json({ ok: true, imageUrl: publicUrl });
   } catch (error) {
     console.error('companion-photo error:', error);
