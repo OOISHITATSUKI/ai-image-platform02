@@ -7,22 +7,42 @@ export async function GET() {
     try {
         const users = await readUsers();
 
-        const userList = Object.values(users).map((u: UserRecord) => ({
-            id: u.id,
-            email: u.email,
-            username: u.username,
-            status: u.status,
-            plan: u.plan,
-            credits: u.credits,
-            emailVerified: u.emailVerified,
-            dateOfBirth: u.dateOfBirth,
-            country: u.country,
-            firstGenerationConfirmed: u.firstGenerationConfirmed,
-            createdAt: u.createdAt,
-            updatedAt: u.updatedAt,
-            termsAgreedAt: u.agreements?.termsOfService ? u.agreements.termsOfService : null,
-            agreementsCompleted: !!u.agreements?.termsOfService,
-        }));
+        // Fetch coins & daily_chat_limit from Supabase
+        const userIds = Object.keys(users);
+        const sbMap = new Map<string, { coins: number; daily_chat_limit: number | null }>();
+        if (userIds.length > 0) {
+            const { data: sbUsers } = await supabaseAdmin
+                .from('users')
+                .select('id, coins, daily_chat_limit')
+                .in('id', userIds);
+            if (sbUsers) {
+                for (const su of sbUsers) {
+                    sbMap.set(su.id, { coins: su.coins ?? 0, daily_chat_limit: su.daily_chat_limit ?? null });
+                }
+            }
+        }
+
+        const userList = Object.values(users).map((u: UserRecord) => {
+            const sb = sbMap.get(u.id);
+            return {
+                id: u.id,
+                email: u.email,
+                username: u.username,
+                status: u.status,
+                plan: u.plan,
+                credits: u.credits,
+                coins: sb?.coins ?? 0,
+                dailyChatLimit: sb?.daily_chat_limit ?? null,
+                emailVerified: u.emailVerified,
+                dateOfBirth: u.dateOfBirth,
+                country: u.country,
+                firstGenerationConfirmed: u.firstGenerationConfirmed,
+                createdAt: u.createdAt,
+                updatedAt: u.updatedAt,
+                termsAgreedAt: u.agreements?.termsOfService ? u.agreements.termsOfService : null,
+                agreementsCompleted: !!u.agreements?.termsOfService,
+            };
+        });
 
         // Sort by newest first
         userList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));

@@ -10,6 +10,8 @@ interface AdminUser {
     plan: string;
     termsAgreedAt?: string | null;
     credits: number;
+    coins: number;
+    dailyChatLimit: number | null;
     country?: string;
     createdAt: number;
     lastLoginAt?: number;
@@ -209,7 +211,7 @@ export default function AdminUsersPage() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
-                                {['Username', 'Email', 'Status', 'Plan', 'Credits', 'Country', 'Terms', 'Registered', 'Actions'].map(h => (
+                                {['Username', 'Email', 'Status', 'Plan', 'Credits', '🪙Coins', '💬Limit', 'Country', 'Terms', 'Registered', 'Actions'].map(h => (
                                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>
@@ -224,6 +226,8 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td style={{ padding: '9px 14px', color: '#a78bfa' }}>{u.plan}</td>
                                     <td style={{ padding: '9px 14px', color: '#f59e0b' }}>{u.credits}</td>
+                                    <td style={{ padding: '9px 14px', color: '#fbbf24' }}>{u.coins}</td>
+                                    <td style={{ padding: '9px 14px', color: '#8b5cf6' }}>{u.dailyChatLimit === null ? <span style={{ color: 'var(--text-secondary)' }}>default</span> : u.dailyChatLimit === 0 ? '∞' : u.dailyChatLimit}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)' }}>{u.country || '-'}</td>
                                     <td style={{ padding: '9px 14px' }}>{u.termsAgreedAt ? <span style={{ color: '#10b981' }}>Yes</span> : <span style={{ color: '#ef4444' }}>No</span>}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{new Date(u.createdAt).toLocaleDateString('en-US')}</td>
@@ -237,7 +241,7 @@ export default function AdminUsersPage() {
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>Credits</button>
                                             <button onClick={async () => {
-                                                const c = prompt('コイン数を入力:', '0');
+                                                const c = prompt('コイン数を入力:', String(u.coins));
                                                 if (c !== null) doAction(u.id, 'set_coins', Number(c));
                                             }} style={btnStyle('#f59e0b')}>🪙Coins</button>
                                             <button onClick={async () => {
@@ -255,7 +259,7 @@ export default function AdminUsersPage() {
                                 </tr>
                             ))}
                             {filteredUsers.length === 0 && (
-                                <tr><td colSpan={9} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found</td></tr>
+                                <tr><td colSpan={11} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found</td></tr>
                             )}
                         </tbody>
                     </table>
