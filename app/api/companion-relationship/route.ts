@@ -49,10 +49,18 @@ export async function POST(req: NextRequest) {
     const { companionId, reason } = body;
 
     // Support both old format (pointsDelta) and new format (sentiment/deltas)
+    // Always prefer explicit delta values from the caller (AI-computed) over hardcoded SENTIMENT_DELTAS
     const sentiment: SentimentCategory | undefined = body.sentiment;
-    const deltas = sentiment
-      ? SENTIMENT_DELTAS[sentiment] ?? SENTIMENT_DELTAS.neutral
-      : { affection: body.pointsDelta ?? body.affectionDelta ?? 3, trust: body.trustDelta ?? 0, tension: body.tensionDelta ?? 0 };
+    const rawDeltas = (body.affectionDelta != null || body.pointsDelta != null)
+      ? { affection: body.pointsDelta ?? body.affectionDelta ?? 2, trust: body.trustDelta ?? 0, tension: body.tensionDelta ?? 0 }
+      : (sentiment ? (SENTIMENT_DELTAS[sentiment] ?? SENTIMENT_DELTAS.neutral) : SENTIMENT_DELTAS.neutral);
+
+    // Clamp negative affection to prevent catastrophic drops (max -10 per message)
+    const deltas = {
+      affection: Math.max(-10, rawDeltas.affection),
+      trust: Math.max(-5, rawDeltas.trust),
+      tension: rawDeltas.tension,
+    };
 
     if (!companionId) {
       return NextResponse.json({ error: 'Missing companionId' }, { status: 400 });
