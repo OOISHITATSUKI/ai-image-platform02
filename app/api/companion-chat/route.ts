@@ -486,14 +486,14 @@ export async function POST(req: NextRequest) {
     // Extract and save feedback tags from assistant reply (Nude Assistant only)
     if (companion.isAssistant) {
       console.log('[Assistant raw reply]', reply);
-      const feedbackMatch = reply.match(/\[FEEDBACK:(companion_request|complaint|feature_request|other)\]\s*(.*?)\s*\[\/FEEDBACK\]/s);
+      const feedbackMatch = reply.match(/\[FEEDBACK:(companion_request|complaint|feature_request|other)\]\s*([\s\S]*?)\s*\[\/FEEDBACK\]/);
       if (feedbackMatch) {
         const feedbackType = feedbackMatch[1];
         const feedbackSummary = feedbackMatch[2].trim();
         console.log('[Feedback detected]', feedbackType, feedbackSummary);
 
         // Strip the tag from the visible reply
-        reply = reply.replace(/\[FEEDBACK:.*?\[\/FEEDBACK\]/s, '').trim();
+        reply = reply.replace(/\[FEEDBACK:[\s\S]*?\[\/FEEDBACK\]/, '').trim();
 
         // Save feedback directly to DB (more reliable than internal fetch)
         try {
@@ -530,11 +530,11 @@ export async function POST(req: NextRequest) {
 
     // Extract photo generation tag
     let photoUrl: string | undefined;
-    const photoMatch = reply.match(/\[PHOTO:\s*(.*?)\]/s);
+    const photoMatch = reply.match(/\[PHOTO:\s*([\s\S]*?)\]/);
     if (photoMatch && !companion.isAssistant) {
       const photoPrompt = photoMatch[1].trim();
       console.log('[Photo detected]', photoPrompt);
-      reply = reply.replace(/\[PHOTO:.*?\]/s, '').trim();
+      reply = reply.replace(/\[PHOTO:[\s\S]*?\]/, '').trim();
 
       // Generate photo asynchronously — don't block the chat response
       // Instead, return a photoPrompt so the client can call /api/companion-photo
