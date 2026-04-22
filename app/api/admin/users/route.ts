@@ -73,13 +73,19 @@ export async function POST(req: NextRequest) {
                         .eq('id', userId);
                 }
                 return NextResponse.json({ success: true, coins: value });
-            case 'set_daily_chat_limit':
+            case 'set_daily_chat_limit': {
                 // null = use plan default, number = custom limit
-                await supabaseAdmin
+                const limitVal = value === -1 ? null : (typeof value === 'number' ? value : null);
+                const { error: limitErr } = await supabaseAdmin
                     .from('users')
-                    .update({ daily_chat_limit: value === -1 ? null : (value ?? null) })
+                    .update({ daily_chat_limit: limitVal })
                     .eq('id', userId);
-                return NextResponse.json({ success: true, daily_chat_limit: value === -1 ? null : value });
+                if (limitErr) {
+                    console.error('set_daily_chat_limit error:', limitErr);
+                    return NextResponse.json({ error: limitErr.message }, { status: 500 });
+                }
+                return NextResponse.json({ success: true, daily_chat_limit: limitVal });
+            }
 
             case 'set_plan': {
                 const planValue = strValue || value;
