@@ -673,7 +673,7 @@ export async function POST(req: NextRequest) {
     let affDelta = 2;
     let trustDelta = 0;
     let tensionDelta = 0;
-    const sentimentMatch = reply.match(/\[SENTIMENT:(\w+)\|aff:(-?\d+)\|trust:(-?\d+)\|tension:(-?\d+)\]/);
+    const sentimentMatch = reply.match(/\[SENTIMENT:(\w+)\|aff:([+-]?\d+)\|trust:([+-]?\d+)\|tension:([+-]?\d+)\]/);
     if (sentimentMatch) {
       sentiment = sentimentMatch[1];
       affDelta = parseInt(sentimentMatch[2]) || 0;
