@@ -704,55 +704,66 @@ export default function CompanionChatPage() {
             </div>
           )}
 
-          {/* Floating barometer — mid-right area */}
+          {/* Bottom barometer overlay — full width */}
           {!isAssistant && (() => {
+            const cl = getRelationshipLevel(relPoints);
             const nl = getNextLevel(relPoints);
             const ptn = nl ? nl.minAffection - relPoints : 0;
             return (
-            <div className="comp-char-float-barometer">
-              <button className="comp-char-float-stage" onClick={() => setShowRoadmap(true)}>
-                {getRelationshipLevel(relPoints).emoji} {t(`companions.rel_${getRelationshipLevel(relPoints).id}`)} ▾
+            <div className="comp-char-bottom-overlay">
+              {/* Stage badge */}
+              <button className="comp-char-bottom-stage" onClick={() => setShowRoadmap(true)}>
+                {cl.emoji} {t(`companions.rel_${cl.id}`)} <span className="comp-char-bottom-stage-arrow">▾</span>
               </button>
-              <div className="comp-char-float-axes">
-                <div className="comp-char-axis">
-                  <span className="comp-char-axis-label">{t('companions.rel_axis_affection')}</span>
-                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899', boxShadow: '0 0 8px #ec489988' }} /></div>
-                  <span className="comp-char-axis-num">{relPoints}</span>
-                </div>
-                <div className="comp-char-axis">
-                  <span className="comp-char-axis-label">{t('companions.rel_axis_trust')}</span>
-                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${relTrust}%`, background: '#60a5fa', boxShadow: '0 0 8px #60a5fa88' }} /></div>
-                  <span className="comp-char-axis-num">{relTrust}</span>
-                </div>
-                <div className="comp-char-axis">
-                  <span className="comp-char-axis-label">{t('companions.rel_axis_tension')}</span>
-                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24', boxShadow: '0 0 8px #fbbf2488' }} /></div>
-                  <span className="comp-char-axis-num">{relTension}</span>
-                </div>
+
+              {/* 3-axis barometer */}
+              <div className="comp-char-bottom-axes">
+                {[
+                  { label: t('companions.rel_axis_affection'), value: relPoints, max: 1000, color: '#ec4899' },
+                  { label: t('companions.rel_axis_trust'), value: relTrust, max: 100, color: '#60a5fa' },
+                  { label: t('companions.rel_axis_tension'), value: relTension, max: 100, color: '#fbbf24' },
+                ].map(b => (
+                  <div key={b.label} className="comp-char-bottom-axis">
+                    <span className="comp-char-bottom-axis-label">{b.label}</span>
+                    <div className="comp-char-bottom-axis-track">
+                      <div className="comp-char-bottom-axis-fill" style={{ width: `${(b.value / b.max) * 100}%`, background: `linear-gradient(90deg, ${b.color}cc, ${b.color})`, boxShadow: `0 0 10px ${b.color}99` }} />
+                    </div>
+                    <span className="comp-char-bottom-axis-num" style={{ color: b.color }}>{b.value}</span>
+                  </div>
+                ))}
               </div>
+
+              {/* Next unlock hint */}
               {nl && (
-                <div className="comp-char-float-unlock">
-                  <span>{t('companions.rel_next').replace('{points}', String(ptn))}</span>
-                  <span className="comp-char-unlock-reward">{t(`companions.rel_unlock_${nl.id}`)}</span>
+                <div className="comp-char-bottom-unlock">
+                  <span className="comp-char-bottom-unlock-pts">
+                    {t('companions.rel_next').replace('{points}', String(ptn)).replace(String(ptn), `<em>${ptn}</em>`).includes('<em>')
+                      ? <>{t('companions.rel_next').split(String(ptn))[0]}<em>{ptn}</em>{t('companions.rel_next').split(String(ptn)).slice(1).join(String(ptn))}</>
+                      : t('companions.rel_next').replace('{points}', String(ptn))}
+                  </span>
+                  <span className="comp-char-bottom-unlock-reward">{t(`companions.rel_unlock_${nl.id}`)}</span>
                 </div>
               )}
+              {!nl && <div className="comp-char-bottom-unlock-reward">💎 {t('companions.rel_max')}</div>}
             </div>
             ); })()}
 
-          {/* Glass card overlay — bottom (minimal: name + profile only) */}
-          <div className="comp-char-glass comp-char-glass-minimal">
-            <div className="comp-char-glass-header">
-              <div className="comp-char-name-row">
-                <h3>{companion.name} <span className="comp-char-age">{companion.age}</span></h3>
-                <button className="comp-char-profile-toggle" onClick={() => setShowProfile(!showProfile)}>
-                  {showProfile ? '✕' : 'ℹ'}
-                </button>
+          {/* Name + profile toggle (assistant only shows this) */}
+          {isAssistant && (
+            <div className="comp-char-glass comp-char-glass-minimal">
+              <div className="comp-char-glass-header">
+                <div className="comp-char-name-row">
+                  <h3>{companion.name} <span className="comp-char-age">{companion.age}</span></h3>
+                  <button className="comp-char-profile-toggle" onClick={() => setShowProfile(!showProfile)}>
+                    {showProfile ? '✕' : 'ℹ'}
+                  </button>
+                </div>
               </div>
+              {showProfile && (
+                <div className="comp-char-profile-text">{companion.description}</div>
+              )}
             </div>
-            {showProfile && (
-              <div className="comp-char-profile-text">{companion.description}</div>
-            )}
-          </div>
+          )}
         </div>
       </div>
 

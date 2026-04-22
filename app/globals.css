@@ -9631,7 +9631,7 @@ button, a, [role="button"] {
 }
 .comp-char-gradient {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(10,10,18,0.3) 0%, transparent 25%, transparent 60%, rgba(10,10,18,0.85) 100%);
+  background: linear-gradient(to bottom, rgba(10,10,18,0.4) 0%, transparent 15%, transparent 50%, rgba(10,10,18,0.6) 75%, rgba(10,10,18,0.95) 100%);
   pointer-events: none;
 }
 .comp-char-coins {
@@ -9670,28 +9670,42 @@ button, a, [role="button"] {
 }
 .comp-char-dot.active { background: #fff; }
 
-/* Floating barometer — overlaid on image */
-.comp-char-float-barometer {
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 2;
-  background: rgba(10,10,18,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
-  padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
-  min-width: 150px; max-width: 180px;
+/* Bottom barometer overlay — full width at bottom of image */
+.comp-char-bottom-overlay {
+  position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 10;
+  background: rgba(10, 10, 18, 0.78);
+  backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px; padding: 14px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex; flex-direction: column; gap: 10px;
 }
-.comp-char-float-stage {
+.comp-char-bottom-stage {
   align-self: flex-start;
-  background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3);
-  border-radius: 999px; padding: 4px 10px;
-  color: #ec4899; font-size: 0.72rem; font-weight: 600; cursor: pointer;
+  background: linear-gradient(135deg, rgba(236,72,153,0.35), rgba(168,85,247,0.25));
+  border: 1px solid rgba(236,72,153,0.5); border-radius: 999px;
+  padding: 5px 14px; display: flex; align-items: center; gap: 6px;
+  color: #ffffff; font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.02em; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(236,72,153,0.3);
 }
-.comp-char-float-axes { display: flex; flex-direction: column; gap: 4px; }
-.comp-char-float-unlock {
-  display: flex; flex-direction: column; gap: 2px;
-  padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.06);
-  font-size: 0.65rem; color: rgba(255,255,255,0.6);
+.comp-char-bottom-stage-arrow { opacity: 0.6; font-size: 0.55rem; }
+.comp-char-bottom-axes { display: flex; flex-direction: column; gap: 6px; }
+.comp-char-bottom-axis { display: flex; align-items: center; gap: 10px; }
+.comp-char-bottom-axis-label { width: 56px; font-size: 0.75rem; color: #d4d4d8; font-weight: 500; flex-shrink: 0; }
+.comp-char-bottom-axis-track { flex: 1; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+.comp-char-bottom-axis-fill { height: 100%; border-radius: 999px; transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1); }
+.comp-char-bottom-axis-num { min-width: 32px; text-align: right; font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.comp-char-bottom-unlock {
+  margin-top: 2px; padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
+.comp-char-bottom-unlock-pts { font-size: 0.68rem; color: #a1a1aa; font-weight: 500; }
+.comp-char-bottom-unlock-pts em { color: #fbbf24; font-weight: 700; font-style: normal; font-size: 0.72rem; }
+.comp-char-bottom-unlock-reward { font-size: 0.78rem; color: #ffffff; font-weight: 700; }
 
-/* Glass card overlay — minimal */
+/* Glass card overlay — for assistant only */
 .comp-char-glass {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
   background: rgba(10,10,18,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -9714,14 +9728,6 @@ button, a, [role="button"] {
   border-radius: 10px; padding: 10px;
   font-size: 0.78rem; line-height: 1.5; color: #d4d4d8;
 }
-
-/* 3-axis barometer (shared styles) */
-.comp-char-axis { display: flex; align-items: center; gap: 6px; }
-.comp-char-axis-label { font-size: 0.68rem; color: rgba(255,255,255,0.6); width: 44px; flex-shrink: 0; }
-.comp-char-axis-track { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-.comp-char-axis-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-.comp-char-axis-num { font-size: 0.65rem; color: rgba(255,255,255,0.5); width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
-.comp-char-unlock-reward { font-size: 0.72rem; color: #fff; font-weight: 700; }
 
 /* Input icon toolbar */
 .comp-input-icons { display: flex; gap: 4px; flex-shrink: 0; }
