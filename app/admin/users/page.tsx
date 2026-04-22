@@ -223,6 +223,10 @@ export default function AdminUsersPage() {
                                                 const c = prompt('コイン数を入力:', '0');
                                                 if (c !== null) doAction(u.id, 'set_coins', Number(c));
                                             }} style={btnStyle('#f59e0b')}>🪙Coins</button>
+                                            <button onClick={async () => {
+                                                const c = prompt('1日のチャット上限を入力:\n（-1 = プランのデフォルトに戻す, 0 = 無制限, 数字 = カスタム上限）', '-1');
+                                                if (c !== null) doAction(u.id, 'set_daily_chat_limit', Number(c));
+                                            }} style={btnStyle('#8b5cf6')}>💬Limit</button>
                                             <button onClick={() => { const p = prompt('Enter plan (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>Plan</button>
                                             <button onClick={() => { setEmailModal({ userId: u.id, email: u.email }); setEmailSubject(''); setEmailBody(''); setEmailTemplate('custom'); }} style={btnStyle('#06b6d4')}>Email</button>
                                             <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>Delete</button>

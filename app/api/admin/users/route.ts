@@ -67,13 +67,19 @@ export async function POST(req: NextRequest) {
                 break;
             case 'set_coins':
                 if (typeof value === 'number' && value >= 0) {
-                    // Coins are stored in Supabase only
                     await supabaseAdmin
                         .from('users')
                         .update({ coins: value })
                         .eq('id', userId);
                 }
                 return NextResponse.json({ success: true, coins: value });
+            case 'set_daily_chat_limit':
+                // null = use plan default, number = custom limit
+                await supabaseAdmin
+                    .from('users')
+                    .update({ daily_chat_limit: value === -1 ? null : (value ?? null) })
+                    .eq('id', userId);
+                return NextResponse.json({ success: true, daily_chat_limit: value === -1 ? null : value });
 
             case 'set_plan': {
                 const planValue = strValue || value;

@@ -436,8 +436,8 @@ function getTodayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function checkDailyLimit(userId: string, plan: string): { allowed: boolean; used: number; limit: number } {
-  const limit = DAILY_CHAT_LIMITS[plan] ?? DAILY_CHAT_LIMITS.free;
+function checkDailyLimit(userId: string, plan: string, customLimit?: number | null): { allowed: boolean; used: number; limit: number } {
+  const limit = customLimit ?? DAILY_CHAT_LIMITS[plan] ?? DAILY_CHAT_LIMITS.free;
   const today = getTodayStr();
   const key = `${userId}:${today}`;
   const entry = dailyMsgCount.get(key);
@@ -529,7 +529,16 @@ export async function POST(req: NextRequest) {
 
     // Daily message limit for logged-in users (skip for Nude Assistant)
     if (isLoggedIn && userId && !companion.isAssistant) {
-      const dailyCheck = checkDailyLimit(userId, userPlan);
+      // Check for admin-set custom limit
+      let customLimit: number | null = null;
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('daily_chat_limit')
+        .eq('id', userId)
+        .maybeSingle();
+      if (userData?.daily_chat_limit != null) customLimit = userData.daily_chat_limit;
+
+      const dailyCheck = checkDailyLimit(userId, userPlan, customLimit);
       if (!dailyCheck.allowed) {
         return NextResponse.json({
           error: 'daily_limit',

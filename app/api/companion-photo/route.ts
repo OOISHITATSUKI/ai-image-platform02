@@ -240,15 +240,17 @@ export async function POST(req: NextRequest) {
     let finalBase64: string | null = null;
     if (companion.avatarUrl) {
       try {
-        const avatarFullUrl = companion.avatarUrl.startsWith('http')
-          ? companion.avatarUrl
-          : `${req.nextUrl.origin}${companion.avatarUrl}`;
+        // Read avatar from filesystem if local path, fetch if remote URL
+        let faceBase64: string;
+        if (companion.avatarUrl.startsWith('http')) {
+          faceBase64 = await fetchImageAsBase64(companion.avatarUrl);
+        } else {
+          const avatarPath = path.join(process.cwd(), 'public', companion.avatarUrl);
+          const avatarBuf = await fs.readFile(avatarPath);
+          faceBase64 = avatarBuf.toString('base64');
+        }
 
-        const [faceBase64, targetBase64] = await Promise.all([
-          fetchImageAsBase64(avatarFullUrl),
-          fetchImageAsBase64(imageUrl),
-        ]);
-
+        const targetBase64 = await fetchImageAsBase64(imageUrl);
         finalBase64 = await mergeFace(faceBase64, targetBase64);
       } catch (e) {
         console.error('Face swap failed, using original:', e);
