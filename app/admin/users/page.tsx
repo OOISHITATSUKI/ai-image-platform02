@@ -85,7 +85,9 @@ export default function AdminUsersPage() {
             // Show success feedback for specific actions
             if (action === 'set_daily_chat_limit') {
                 const v = data.daily_chat_limit;
-                alert(v === null ? 'Chat limit reset to plan default' : v === 0 ? 'Chat limit set to unlimited' : `Chat limit set to ${v}/day`);
+                if (v === null || v === undefined) alert('✅ Chat limit: プランのデフォルトに戻しました');
+                else if (v === 0) alert('✅ Chat limit: 無制限に設定しました');
+                else alert(`✅ Chat limit: ${v}件/日 に設定しました`);
             }
         } catch (e) {
             alert(`Request failed: ${e}`);
@@ -240,7 +242,10 @@ export default function AdminUsersPage() {
                                             }} style={btnStyle('#f59e0b')}>🪙Coins</button>
                                             <button onClick={async () => {
                                                 const c = prompt('1日のチャット上限を入力:\n（-1 = プランのデフォルトに戻す, 0 = 無制限, 数字 = カスタム上限）', '-1');
-                                                if (c !== null) doAction(u.id, 'set_daily_chat_limit', Number(c));
+                                                if (c === null) return;
+                                                const n = parseInt(c, 10);
+                                                if (isNaN(n) || n < -1) { alert('無効な値です。-1以上の整数を入力してください。'); return; }
+                                                doAction(u.id, 'set_daily_chat_limit', n);
                                             }} style={btnStyle('#8b5cf6')}>💬Limit</button>
                                             <button onClick={() => { const p = prompt('Enter plan (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>Plan</button>
                                             <button onClick={() => { setEmailModal({ userId: u.id, email: u.email }); setEmailSubject(''); setEmailBody(''); setEmailTemplate('custom'); }} style={btnStyle('#06b6d4')}>Email</button>
