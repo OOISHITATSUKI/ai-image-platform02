@@ -101,13 +101,15 @@ export async function POST(req: NextRequest) {
 
       const { data: existing } = await supabaseAdmin
         .from('companion_relationships')
-        .select('points')
+        .select('points, affection, trust, tension')
         .eq('user_id', user.id)
         .eq('companion_id', companionId)
         .maybeSingle();
 
-      const newPoints = (existing?.points ?? 0) + pointsDelta;
-      const level = getRelationshipLevel(newPoints);
+      const oldAff = existing?.affection ?? existing?.points ?? 0;
+      const newAff = oldAff + pointsDelta;
+      const newPoints = newAff; // keep points and affection in sync
+      const level = getRelationshipLevel(newAff);
 
       await supabaseAdmin
         .from('companion_relationships')
@@ -115,7 +117,11 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           companion_id: companionId,
           points: newPoints,
+          affection: newAff,
+          stage: level.id,
           level: level.id,
+          trust: existing?.trust ?? 50,
+          tension: existing?.tension ?? 30,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,companion_id' });
 
@@ -126,21 +132,23 @@ export async function POST(req: NextRequest) {
         reason: action,
       });
 
-      result = { ...result, points: newPoints, level };
+      result = { ...result, points: newPoints, affection: newAff, level };
     }
 
     if (action === 'unlock_content') {
       const { data: existing } = await supabaseAdmin
         .from('companion_relationships')
-        .select('points, level')
+        .select('points, affection, trust, tension, level')
         .eq('user_id', user.id)
         .eq('companion_id', companionId)
         .maybeSingle();
 
       const currentLevel = existing?.level ?? 'stranger';
       const targetPoints = CONTENT_TIER_POINTS[currentLevel] ?? 300;
-      const newPoints = Math.max(existing?.points ?? 0, targetPoints);
-      const level = getRelationshipLevel(newPoints);
+      const oldAff = existing?.affection ?? existing?.points ?? 0;
+      const newAff = Math.max(oldAff, targetPoints);
+      const newPoints = newAff;
+      const level = getRelationshipLevel(newAff);
 
       await supabaseAdmin
         .from('companion_relationships')
@@ -148,18 +156,22 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           companion_id: companionId,
           points: newPoints,
+          affection: newAff,
+          stage: level.id,
           level: level.id,
+          trust: existing?.trust ?? 50,
+          tension: existing?.tension ?? 30,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,companion_id' });
 
       await supabaseAdmin.from('relationship_transactions').insert({
         user_id: user.id,
         companion_id: companionId,
-        points_delta: newPoints - (existing?.points ?? 0),
+        points_delta: newAff - oldAff,
         reason: 'unlock_content',
       });
 
-      result = { ...result, points: newPoints, level };
+      result = { ...result, points: newPoints, affection: newAff, level };
     }
 
     if (action === 'skip_level') {
