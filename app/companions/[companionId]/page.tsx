@@ -742,10 +742,22 @@ export default function CompanionChatPage() {
             const ptn = nl ? nl.minAffection - relPoints : 0;
             return (
             <div className="comp-char-bottom-overlay">
-              {/* Stage badge */}
-              <button className="comp-char-bottom-stage" onClick={() => setShowRoadmap(true)}>
-                {cl.emoji} {t(`companions.rel_${cl.id}`)} <span className="comp-char-bottom-stage-arrow">▾</span>
-              </button>
+              {/* Name + mini profile */}
+              <div className="comp-char-bottom-header">
+                <div className="comp-char-bottom-name">
+                  <h3>{companion.name} <span className="comp-char-bottom-age">{companion.age}</span></h3>
+                  <button className="comp-char-bottom-stage" onClick={() => setShowRoadmap(true)}>
+                    {cl.emoji} {t(`companions.rel_${cl.id}`)} <span className="comp-char-bottom-stage-arrow">▾</span>
+                  </button>
+                </div>
+                {companion.profile && (
+                  <div className="comp-char-bottom-profile">
+                    <span>📍 {companion.profile.hometown}</span>
+                    <span>💼 {companion.profile.occupation}</span>
+                    {companion.profile.hobbies && <span>✨ {companion.profile.hobbies}</span>}
+                  </div>
+                )}
+              </div>
 
               {/* 3-axis barometer */}
               <div className="comp-char-bottom-axes">
