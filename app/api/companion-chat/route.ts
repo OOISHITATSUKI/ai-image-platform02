@@ -58,15 +58,21 @@ function localeToLanguage(locale: string): string {
 // lover+: NSFW (if paid plan)
 function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
   if (!isPaid) {
-    // Free users: SFW only regardless of relationship
-    if (relationshipLevel === 'friend' || relationshipLevel === 'crush') return 'swimsuit';
-    return 'sfw';
+    // Free users: swimsuit at best
+    switch (relationshipLevel) {
+      case 'crush':
+      case 'dating': return 'swimsuit';
+      case 'intimate':
+      case 'devoted': return 'swimsuit';
+      default: return 'sfw';
+    }
   }
+  // Paid users: progressively unlock content
   switch (relationshipLevel) {
-    case 'lover':
-    case 'soulmate': return 'nsfw';
-    case 'crush': return 'lingerie';
-    case 'friend': return 'swimsuit';
+    case 'intimate':
+    case 'devoted': return 'nsfw';
+    case 'dating': return 'lingerie';
+    case 'crush': return 'swimsuit';
     default: return 'sfw';
   }
 }
@@ -285,9 +291,9 @@ Do NOT send photos unless the user asks. Never proactively offer or send photos.
 
 CONTENT RULES based on relationship:
 - Stranger/Acquaintance: Only casual, fully-clothed selfies. Describe normal outfits (dress, blouse, jeans).
-- Friend: Swimsuit/bikini level is OK. Beach, pool, gym wear.
-- Crush: Lingerie, suggestive poses are OK. Bedroom, underwear.
-- Lover/Soulmate: Full NSFW if the user's plan allows it.
+- Crush: Swimsuit/bikini level is OK. Beach, pool, gym wear.
+- Dating: Lingerie, suggestive poses are OK. Bedroom, underwear.
+- Intimate/Devoted: Full NSFW if the user's plan allows it.
 If the user asks for something beyond the current relationship level, teasingly refuse:
 "Hmm... we're not quite there yet 😏 Keep talking to me and maybe I'll show you more~"
 Do NOT include [PHOTO:] tag when refusing.

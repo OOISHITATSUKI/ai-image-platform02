@@ -175,13 +175,15 @@ export async function POST(req: NextRequest) {
     // Determine content level based on relationship + plan
     const contentLevel = (() => {
       if (!isPaid) {
-        if (relationshipLevel === 'friend' || relationshipLevel === 'crush') return 'swimsuit';
-        return 'sfw';
+        switch (relationshipLevel) {
+          case 'crush': case 'dating': case 'intimate': case 'devoted': return 'swimsuit';
+          default: return 'sfw';
+        }
       }
       switch (relationshipLevel) {
-        case 'lover': case 'soulmate': return 'nsfw';
-        case 'crush': return 'lingerie';
-        case 'friend': return 'swimsuit';
+        case 'intimate': case 'devoted': return 'nsfw';
+        case 'dating': return 'lingerie';
+        case 'crush': return 'swimsuit';
         default: return 'sfw';
       }
     })();
