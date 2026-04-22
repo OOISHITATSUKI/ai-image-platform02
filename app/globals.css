@@ -9618,13 +9618,133 @@ button, a, [role="button"] {
 .comp-chat-send:hover:not(:disabled) { opacity: 0.9; }
 .comp-chat-send:disabled { opacity: 0.4; cursor: default; }
 
-/* Chat Sidebar (right column) */
-.comp-chat-sidebar {
-  width: 320px; flex-shrink: 0;
-  border-left: 1px solid var(--border);
-  padding: 16px; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 16px;
+/* Character Panel (right column — 9:16 image + glass overlay) */
+.comp-char-panel {
+  width: min(38%, 480px); flex-shrink: 0;
+  position: relative; overflow: hidden;
 }
+.comp-char-image {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center top;
+  background-repeat: no-repeat;
+}
+.comp-char-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,18,0.4) 0%, transparent 20%, transparent 50%, rgba(10,10,18,0.95) 100%);
+  pointer-events: none;
+}
+.comp-char-coins {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  background: rgba(10,10,18,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(251,191,36,0.3); border-radius: 999px;
+  padding: 5px 12px; display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700; cursor: pointer;
+}
+.comp-char-coins-num { color: #fbbf24; }
+.comp-char-coins-add {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  border: none; border-radius: 999px; padding: 1px 7px;
+  color: #fff; font-size: 0.65rem; font-weight: 700; cursor: pointer;
+}
+.comp-char-v2 {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  background: var(--companion-purple); color: #fff;
+  font-size: 0.65rem; font-weight: 700; padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+.comp-char-dots {
+  position: absolute; top: 50px; left: 50%; transform: translateX(-50%); z-index: 2;
+  display: flex; gap: 6px;
+}
+.comp-char-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.4); cursor: pointer;
+  transition: background 0.2s;
+}
+.comp-char-dot.active { background: #fff; }
+
+/* Glass card overlay */
+.comp-char-glass {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  background: rgba(10,10,18,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.comp-char-glass-header { display: flex; flex-direction: column; gap: 6px; }
+.comp-char-name-row { display: flex; align-items: center; justify-content: space-between; }
+.comp-char-name-row h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
+.comp-char-age { font-weight: 400; color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+.comp-char-profile-toggle {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%; width: 28px; height: 28px;
+  color: rgba(255,255,255,0.7); font-size: 0.8rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.comp-char-stage-badge {
+  align-self: flex-start;
+  background: rgba(10,10,18,0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(236,72,153,0.3); border-radius: 999px;
+  padding: 5px 12px; color: #ec4899; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer;
+}
+.comp-char-profile-text {
+  background: rgba(10,10,18,0.5); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 10px;
+  font-size: 0.78rem; line-height: 1.5; color: #d4d4d8;
+}
+
+/* 3-axis barometer in glass */
+.comp-char-barometer { display: flex; flex-direction: column; gap: 5px; }
+.comp-char-axis { display: flex; align-items: center; gap: 6px; }
+.comp-char-axis-label { font-size: 0.72rem; color: rgba(255,255,255,0.6); width: 48px; flex-shrink: 0; }
+.comp-char-axis-track { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+.comp-char-axis-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.comp-char-axis-num { font-size: 0.68rem; color: rgba(255,255,255,0.5); width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Unlock hint — high contrast */
+.comp-char-unlock-hint {
+  padding: 8px 12px; margin-top: 2px;
+  background: rgba(10,10,18,0.85);
+  border: 1px solid rgba(236,72,153,0.4);
+  border-left: 3px solid #ec4899;
+  border-radius: 8px;
+}
+.comp-char-unlock-pts { display: block; font-size: 0.68rem; color: #f4f4f5; font-weight: 500; }
+.comp-char-unlock-pts span { color: #fbbf24; font-weight: 700; }
+.comp-char-unlock-reward { font-size: 0.82rem; color: #fff; font-weight: 700; }
+
+/* CTA row */
+.comp-char-cta-row { display: flex; gap: 8px; }
+.comp-char-cta-call {
+  flex: 1; padding: 10px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none; border-radius: 10px;
+  color: #fff; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+}
+.comp-char-cta-settings {
+  width: 42px;
+  background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3);
+  border-radius: 10px; color: #f472b6; font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Input icon toolbar */
+.comp-input-icons { display: flex; gap: 4px; flex-shrink: 0; }
+.comp-input-icon-btn {
+  position: relative; width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.comp-input-icon-btn:hover { background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.3); }
+.comp-input-icon-badge {
+  position: absolute; bottom: -3px; right: -3px;
+  background: #ec4899; color: #fff; font-size: 0.55rem; font-weight: 700;
+  border-radius: 999px; padding: 1px 4px; border: 1.5px solid #0a0a12;
+}
+
+/* OLD sidebar — now hidden, replaced by char panel */
+.comp-chat-sidebar { display: none; }
 
 /* Gallery */
 .comp-gallery { border-radius: var(--radius-lg); overflow: hidden; }
@@ -9868,6 +9988,7 @@ button, a, [role="button"] {
 
 /* Tablet */
 @media (max-width: 1024px) {
+  .comp-char-panel { display: none; }
   .comp-chat-sidebar { display: none; }
   .comp-live-panel { width: 280px; }
   .comp-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }

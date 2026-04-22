@@ -127,6 +127,28 @@ export default function CompanionChatPage() {
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [showRoadmap, setShowRoadmap] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  // Coin spend helper
+  const spendCoins = async (action: 'gift' | 'boost') => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) { setShowGuestLimit(true); return; }
+    const res = await fetch('/api/companion-coins', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ companionId, action }),
+    });
+    const d = await res.json();
+    if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+    if (d.affection !== undefined) setRelPoints(d.affection);
+    else if (d.points !== undefined) setRelPoints(d.points);
+    if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+    const el = document.createElement('div');
+    el.className = action === 'gift' ? 'coin-gift-animation' : 'coin-boost-animation';
+    el.textContent = action === 'gift' ? '🎁 +20' : '🚀 +100';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1800);
+  };
   const [showCoinShop, setShowCoinShop] = useState(false);
 
   // PlayStyle
@@ -622,8 +644,21 @@ export default function CompanionChatPage() {
           </div>
 
 
-          {/* Input */}
+          {/* Input with icon toolbar */}
           <form className="comp-chat-input-row" onSubmit={handleSubmit}>
+            {!isAssistant && (
+              <div className="comp-input-icons">
+                <button type="button" className="comp-input-icon-btn" onClick={() => spendCoins('gift')} title={t('companions.coinGift')}>
+                  🎁<span className="comp-input-icon-badge">50</span>
+                </button>
+                <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCoins('boost')} title={t('companions.coinBoost')}>
+                  🚀<span className="comp-input-icon-badge">100</span>
+                </button>
+                <button type="button" className="comp-input-icon-btn" onClick={() => setShowCallComingSoon(true)} title={t('companions.callMe')}>
+                  📞
+                </button>
+              </div>
+            )}
             <input
               ref={inputRef}
               className="comp-chat-input"
@@ -640,158 +675,104 @@ export default function CompanionChatPage() {
           </form>
         </div>
 
-        {/* Right Column — Profile (desktop only) */}
-        <div className="comp-chat-sidebar">
-          {/* Gallery Slider */}
-          <div className="comp-gallery">
-            <div className="comp-gallery-img">
-              <GalleryImage
-                src={galleryImages[galleryIdx] || companion.avatarUrl}
-                fallback={companion.isAssistant ? '✨' : companion.name[0]}
-                alt={companion.name}
-              />
-              <span className="comp-gallery-v2">{t('companions.galleryV2')}</span>
-            </div>
-            <div className="comp-gallery-controls">
-              <button onClick={prevGallery} className="comp-gallery-arrow">‹</button>
-              <div className="comp-gallery-dots">
-                {galleryImages.map((_, i) => (
-                  <span key={i} className={`comp-gallery-dot ${i === galleryIdx ? 'active' : ''}`} onClick={() => setGalleryIdx(i)} />
-                ))}
-              </div>
-              <button onClick={nextGallery} className="comp-gallery-arrow">›</button>
-            </div>
-          </div>
+        {/* Right Column — Character Panel with glass overlay (desktop only) */}
+        <div className="comp-char-panel">
+          {/* Full 9:16 character image */}
+          <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
+          <div className="comp-char-gradient" />
 
-          <div className="comp-profile-info">
-            <h3>{companion.name} <span className="comp-profile-age">{companion.age}</span></h3>
-            <p className="comp-profile-desc">{companion.description}</p>
-          </div>
-
-          {/* Relationship Barometer 3-axis + Coins */}
-          {!isAssistant && (() => {
-            const currentLevel = getRelationshipLevel(relPoints);
-            const nextLevel = getNextLevel(relPoints);
-            const pointsToNext = nextLevel ? nextLevel.minAffection - relPoints : 0;
-            return (
-            <div className="comp-rel-barometer">
-              <button className="comp-rel-header-btn" onClick={() => setShowRoadmap(true)}>
-                <span className="comp-rel-emoji">{currentLevel.emoji}</span>
-                <span className="comp-rel-level">{t(`companions.rel_${currentLevel.id}`)}</span>
-                <span className="comp-rel-roadmap-hint">▾</span>
-              </button>
-
-              {/* 3-axis petals */}
-              <div className="comp-rel-axes">
-                <div className="comp-rel-axis">
-                  <div className="comp-rel-axis-label">
-                    <span className="comp-rel-axis-dot" style={{ background: '#ff4d8d' }} />
-                    <span>{t('companions.rel_axis_affection')}</span>
-                    <span className="comp-rel-axis-val">{relPoints}</span>
-                  </div>
-                  <div className="comp-rel-axis-bar">
-                    <div className="comp-rel-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: 'linear-gradient(90deg, #ff4d8d, #ff8fb5)' }} />
-                  </div>
-                </div>
-                <div className="comp-rel-axis">
-                  <div className="comp-rel-axis-label">
-                    <span className="comp-rel-axis-dot" style={{ background: '#4d9fff' }} />
-                    <span>{t('companions.rel_axis_trust')}</span>
-                    <span className="comp-rel-axis-val">{relTrust}</span>
-                  </div>
-                  <div className="comp-rel-axis-bar">
-                    <div className="comp-rel-axis-fill" style={{ width: `${relTrust}%`, background: 'linear-gradient(90deg, #4d9fff, #8bc4ff)' }} />
-                  </div>
-                </div>
-                <div className="comp-rel-axis">
-                  <div className="comp-rel-axis-label">
-                    <span className="comp-rel-axis-dot" style={{ background: '#ffcc00' }} />
-                    <span>{t('companions.rel_axis_tension')}</span>
-                    <span className="comp-rel-axis-val">{relTension}</span>
-                  </div>
-                  <div className="comp-rel-axis-bar">
-                    <div className="comp-rel-axis-fill" style={{ width: `${relTension}%`, background: 'linear-gradient(90deg, #ffcc00, #ffe066)' }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Next stage unlock */}
-              {nextLevel && (
-                <div className="comp-rel-next-reward">
-                  <span className="comp-rel-next-label">
-                    {t('companions.rel_next').replace('{points}', String(pointsToNext))}
-                  </span>
-                  <span className="comp-rel-next-unlock">
-                    {t(`companions.rel_unlock_${nextLevel.id}`)}
-                  </span>
-                </div>
-              )}
-              {!nextLevel && (
-                <div className="comp-rel-points">💎 {t('companions.rel_max')}</div>
-              )}
-              {/* Coin actions */}
-              <div className="comp-coin-actions">
-                <button className="comp-coin-btn" onClick={async () => {
-                  const token = localStorage.getItem('auth_token');
-                  if (!token) { setShowGuestLimit(true); return; }
-                  const res = await fetch('/api/companion-coins', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ companionId, action: 'gift' }),
-                  });
-                  const d = await res.json();
-                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
-                  if (d.points !== undefined) setRelPoints(d.points);
-                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
-                  // Gift animation
-                  const el = document.createElement('div');
-                  el.className = 'coin-gift-animation';
-                  el.textContent = '🎁 +20';
-                  document.body.appendChild(el);
-                  setTimeout(() => el.remove(), 1500);
-                }}>
-                  🎁 {t('companions.coinGift')} <span className="comp-coin-cost">50</span>
-                </button>
-                <button className="comp-coin-btn comp-coin-btn-boost" onClick={async () => {
-                  const token = localStorage.getItem('auth_token');
-                  if (!token) { setShowGuestLimit(true); return; }
-                  const res = await fetch('/api/companion-coins', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ companionId, action: 'boost' }),
-                  });
-                  const d = await res.json();
-                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
-                  if (d.points !== undefined) setRelPoints(d.points);
-                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
-                  // Boost animation
-                  const el = document.createElement('div');
-                  el.className = 'coin-boost-animation';
-                  el.textContent = '🚀 +100';
-                  document.body.appendChild(el);
-                  setTimeout(() => el.remove(), 1800);
-                }}>
-                  🚀 {t('companions.coinBoost')} <span className="comp-coin-cost">100</span>
-                </button>
-              </div>
-              {/* Coin balance */}
-              <div className="comp-coin-balance">
-                🪙 {user?.coins ?? 0} {t('companions.coinBalance')}
-              </div>
-            </div>
-            ); })()}
-
+          {/* Coin balance — top left */}
           {!isAssistant && (
-            <button className="comp-call-btn-green" onClick={() => setShowCallComingSoon(true)}>
-              {t('companions.callMe')}
-            </button>
+            <div className="comp-char-coins" onClick={() => setShowCoinShop(true)}>
+              <span style={{ fontSize: '0.85rem' }}>🪙</span>
+              <span className="comp-char-coins-num">{user?.coins ?? 0}</span>
+              <button className="comp-char-coins-add">+</button>
+            </div>
           )}
 
-          {playStyle && (
-            <button className="comp-change-relation-btn" onClick={() => setShowPlayStyleModal(true)}>
-              {PLAY_STYLES.find((s) => s.id === playStyle)?.emoji} {t('companions.changeRelation').replace('{name}', companion.name)}
-            </button>
+          {/* V2 badge — top right */}
+          <span className="comp-char-v2">{t('companions.galleryV2')}</span>
+
+          {/* Gallery dots */}
+          {galleryImages.length > 1 && (
+            <div className="comp-char-dots">
+              {galleryImages.map((_, i) => (
+                <span key={i} className={`comp-char-dot ${i === galleryIdx ? 'active' : ''}`} onClick={() => setGalleryIdx(i)} />
+              ))}
+            </div>
           )}
+
+          {/* Glass card overlay — bottom */}
+          <div className="comp-char-glass">
+            {/* Name + profile toggle + stage */}
+            <div className="comp-char-glass-header">
+              <div className="comp-char-name-row">
+                <h3>{companion.name} <span className="comp-char-age">{companion.age}</span></h3>
+                <button className="comp-char-profile-toggle" onClick={() => setShowProfile(!showProfile)}>
+                  {showProfile ? '✕' : 'ℹ'}
+                </button>
+              </div>
+              {!isAssistant && (
+                <button className="comp-char-stage-badge" onClick={() => setShowRoadmap(true)}>
+                  {getRelationshipLevel(relPoints).emoji} {t(`companions.rel_${getRelationshipLevel(relPoints).id}`)} ▾
+                </button>
+              )}
+            </div>
+
+            {/* Profile (collapsible) */}
+            {showProfile && (
+              <div className="comp-char-profile-text">{companion.description}</div>
+            )}
+
+            {/* 3-axis barometer */}
+            {!isAssistant && (() => {
+              const nl = getNextLevel(relPoints);
+              const ptn = nl ? nl.minAffection - relPoints : 0;
+              return (
+              <div className="comp-char-barometer">
+                <div className="comp-char-axis">
+                  <span className="comp-char-axis-label">{t('companions.rel_axis_affection')}</span>
+                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899', boxShadow: '0 0 8px #ec489988' }} /></div>
+                  <span className="comp-char-axis-num">{relPoints}</span>
+                </div>
+                <div className="comp-char-axis">
+                  <span className="comp-char-axis-label">{t('companions.rel_axis_trust')}</span>
+                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${relTrust}%`, background: '#60a5fa', boxShadow: '0 0 8px #60a5fa88' }} /></div>
+                  <span className="comp-char-axis-num">{relTrust}</span>
+                </div>
+                <div className="comp-char-axis">
+                  <span className="comp-char-axis-label">{t('companions.rel_axis_tension')}</span>
+                  <div className="comp-char-axis-track"><div className="comp-char-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24', boxShadow: '0 0 8px #fbbf2488' }} /></div>
+                  <span className="comp-char-axis-num">{relTension}</span>
+                </div>
+
+                {/* Next unlock hint */}
+                {nl && (
+                  <div className="comp-char-unlock-hint">
+                    <span className="comp-char-unlock-pts">
+                      {t('companions.rel_next').replace('{points}', String(ptn))}
+                    </span>
+                    <span className="comp-char-unlock-reward">
+                      {t(`companions.rel_unlock_${nl.id}`)}
+                    </span>
+                  </div>
+                )}
+                {!nl && <div className="comp-char-unlock-reward">💎 {t('companions.rel_max')}</div>}
+              </div>
+              ); })()}
+
+            {/* CTA row */}
+            {!isAssistant && (
+              <div className="comp-char-cta-row">
+                <button className="comp-char-cta-call" onClick={() => setShowCallComingSoon(true)}>
+                  📞 {t('companions.callMe')}
+                </button>
+                <button className="comp-char-cta-settings" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
+                  ⚙️
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
