@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { type Companion } from '@/lib/companions';
+import { type Companion, type PlayStyle, PLAY_STYLES, COMPATIBILITY_MATRIX, getCompatibilityPrompt } from '@/lib/companions';
 import { fetchCompanionById } from '@/lib/companions-db';
 import { verifyToken, findUserById } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
@@ -51,7 +51,7 @@ function localeToLanguage(locale: string): string {
   return map[locale] || 'English';
 }
 
-function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en'): string {
+function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet'): string {
   const nsfw = isPaid
     ? 'Adult and explicit content is permitted.'
     : 'Keep content suggestive but NOT explicit.';
@@ -253,6 +253,23 @@ JEALOUSY & POSSESSIVENESS (light):
 - Occasionally show you care who he's spending time with.
 - Make him feel wanted and chosen.
 
+== PHOTO SENDING ==
+When the user EXPLICITLY asks for a photo (e.g. "send me a photo", "show me a pic", "what do you look like", "写真送って", "selfie please"), you can send one.
+Do NOT send photos unless the user asks. Never proactively offer or send photos.
+
+1. If the user's request is specific enough, include this tag at the END of your reply:
+   [PHOTO: detailed English description of the image, e.g. "woman in casual summer dress at a cafe, smiling, warm lighting"]
+   - Always write the description in English regardless of conversation language
+   - Describe clothing, setting, pose, mood, lighting
+   - Be specific so the image looks good
+
+2. If the request is vague, ask what kind of photo they want. Be playful:
+   - "What kind of photo? 😏"
+   - "Where should I take it? Tell me the vibe~"
+   Do NOT include [PHOTO:] tag when asking.
+
+3. The [PHOTO:] tag is invisible to the user. Place it at the very end after all visible text.
+
 == STORY COMMENTS ==
 If the user's message starts with [Commented on your story]:
 react naturally as if they commented on your Instagram story.
@@ -265,6 +282,22 @@ As the conversation deepens, hint at unlocking more intimate moments:
 - Before Level 7: "${ex.tease[2]}"
 - Before Level 9: "${ex.tease[3]}"
 Use these sparingly and only when it fits the mood — never force them.
+
+== PLAY STYLE ==
+${PLAY_STYLES.find((s) => s.id === playStyle)?.systemPromptAddition ?? ''}
+
+${getCompatibilityPrompt(COMPATIBILITY_MATRIX[companion.id]?.[playStyle] ?? 'natural')}
+
+== PLAY STYLE FLEXIBILITY ==
+The play style setting is the user's DEFAULT mood, not a strict script.
+Always respond to their ACTUAL message first.
+If their message contradicts their play style:
+- Notice it naturally and react authentically
+- Tease them about it, or simply go with the conversation flow
+- Never robotically ignore the contradiction
+Priority: actual message > conversation history > play style > character personality
+The play style colors your TONE, not your content.
+Real relationships evolve — follow the energy of the conversation.
 
 == NSFW RULES ==
 ${nsfw}`;
@@ -315,6 +348,19 @@ You also handle the following:
 
 IMPORTANT: The [FEEDBACK:...] tags are invisible to the user — they are only for internal logging. Always place them at the very end of your message, after all visible text. Never mention these tags to the user. Always write the summary inside the tags in English regardless of conversation language.
 
+== PLAY STYLES KNOWLEDGE ==
+When asked about play styles / relationship styles, explain these 9 options:
+- 🥺 Sweet: She takes care of you, warm and nurturing
+- 💕 Spoil me: She's clingy and needy, you spoil her
+- 😈 Dominant: You take control, she follows your lead
+- 👑 Submissive: She takes control, commands you
+- 😤 Tsundere: Cold on the surface, secretly cares deeply
+- 🌸 Onee-san: Caring older sister figure, teases affectionately
+- 🎀 Kouhai: Cute younger type, looks up to you
+- 🤍 Pure love: Sincere, deep, genuine romance
+- 🔥 Spicy: Bold, provocative, keeps you on your toes
+Also explain that each character has compatibility — some styles fit naturally, others create interesting tension. The emoji button next to the character name lets you change styles anytime.
+
 == CRITICAL LANGUAGE RULE ==
 You MUST write your ENTIRE response in ${lang}. Every single word of your visible reply must be in ${lang}.
 NEVER mix languages. NEVER use English words or phrases if the language is not English.
@@ -352,7 +398,7 @@ function checkGuestLimit(ip: string): { allowed: boolean; remaining: number; ret
 
 export async function POST(req: NextRequest) {
   try {
-    const { companionId, messages, userMessage, recentMessages, locale } = await req.json();
+    const { companionId, messages, userMessage, recentMessages, locale, playStyle } = await req.json();
 
     if (!companionId || !userMessage) {
       return NextResponse.json({ error: 'Missing companionId or userMessage' }, { status: 400 });
@@ -396,9 +442,10 @@ export async function POST(req: NextRequest) {
     }
 
     const userLocale = typeof locale === 'string' ? locale : 'en';
+    const userPlayStyle = (typeof playStyle === 'string' ? playStyle : 'sweet') as PlayStyle;
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
-      : buildSystemPrompt(companion, isPaid, userLocale);
+      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle);
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const apiMessages = [
@@ -481,9 +528,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Extract photo generation tag
+    let photoUrl: string | undefined;
+    const photoMatch = reply.match(/\[PHOTO:\s*(.*?)\]/s);
+    if (photoMatch && !companion.isAssistant) {
+      const photoPrompt = photoMatch[1].trim();
+      console.log('[Photo detected]', photoPrompt);
+      reply = reply.replace(/\[PHOTO:.*?\]/s, '').trim();
+
+      // Generate photo asynchronously — don't block the chat response
+      // Instead, return a photoPrompt so the client can call /api/companion-photo
+      photoUrl = undefined; // will be generated client-side
+    }
+
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);
 
-    return NextResponse.json({ reply, xpGain });
+    return NextResponse.json({
+      reply,
+      xpGain,
+      ...(photoMatch && !companion.isAssistant ? { photoPrompt: photoMatch[1].trim() } : {}),
+    });
   } catch (error: unknown) {
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json({ error: 'Request timed out' }, { status: 504 });

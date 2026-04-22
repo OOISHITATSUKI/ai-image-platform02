@@ -9,15 +9,20 @@ import {
   FREE_MESSAGE_LIMIT,
   XP_PER_MESSAGE,
   isLiveActionAvailable,
+  PLAY_STYLES,
   type Companion,
+  type PlayStyle,
 } from '@/lib/companions';
 import { getUserCompanionById } from '@/lib/userCompanions';
 import PaywallModal from '@/components/companions/PaywallModal';
+import PlayStyleModal from '@/components/companions/PlayStyleModal';
 import { useTranslation } from '@/lib/useTranslation';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  imageUrl?: string;
+  imageLoading?: boolean;
 }
 
 /** Displays the companion avatar image or a styled initial fallback. */
@@ -105,6 +110,23 @@ export default function CompanionChatPage() {
   const [paywallType, setPaywallType] = useState<'chat_limit' | 'photo' | 'call' | 'nude_assistant' | null>(null);
   const [showCallComingSoon, setShowCallComingSoon] = useState(false);
   const [showGuestLimit, setShowGuestLimit] = useState(false);
+
+  // PlayStyle
+  const playStyleKey = `playstyle_${companionId}`;
+  const [playStyle, setPlayStyle] = useState<PlayStyle>(() => {
+    if (typeof window === 'undefined') return 'sweet';
+    return (localStorage.getItem(playStyleKey) || 'sweet') as PlayStyle;
+  });
+  const [showPlayStyleModal, setShowPlayStyleModal] = useState(false);
+
+  // Show PlayStyle modal on first visit
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(playStyleKey);
+    if (!saved && companion) {
+      setShowPlayStyleModal(true);
+    }
+  }, [companion?.id, playStyleKey]);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +191,7 @@ export default function CompanionChatPage() {
   const presetMessages = isAssistant ? [
     { label: t('companions.assistPresetRequest'), message: t('companions.assistPresetRequestMsg') },
     { label: t('companions.assistPresetHow'), message: t('companions.assistPresetHowMsg') },
+    { label: t('companions.assistPresetPlayStyle'), message: t('companions.assistPresetPlayStyleMsg') },
     { label: t('companions.assistPresetIssue'), message: t('companions.assistPresetIssueMsg') },
     { label: t('companions.assistPresetFeature'), message: t('companions.assistPresetFeatureMsg') },
   ] : [
@@ -176,7 +199,7 @@ export default function CompanionChatPage() {
     { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
     { label: t('companions.presetMiss'), message: t('companions.presetMissMsg') },
     { label: t('companions.presetBold'), message: t('companions.presetBoldMsg') },
-    { label: t('companions.presetPhoto'), message: t('companions.presetPhotoMsg'), isPaywalled: true },
+    { label: t('companions.presetPhoto'), message: t('companions.presetPhotoMsg') },
   ];
 
   const sendMessage = async (text: string) => {
@@ -200,10 +223,11 @@ export default function CompanionChatPage() {
         headers,
         body: JSON.stringify({
           companionId,
-          messages: updated.slice(-20),
+          messages: updated.slice(-20).map(({ role, content }) => ({ role, content })),
           userMessage: text.trim(),
           recentMessages: recent,
           locale,
+          playStyle: playStyle || 'sweet',
         }),
       });
 
@@ -219,8 +243,65 @@ export default function CompanionChatPage() {
         throw new Error(data.error || 'API error');
       }
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+      // If AI wants to send a photo, check free user limit (1st free, 2nd+ paywall)
+      if (data.photoPrompt) {
+        if (!isPaid) {
+          const photoCountKey = 'companion_photo_count';
+          const count = parseInt(localStorage.getItem(photoCountKey) || '0', 10);
+          if (count >= 1) {
+            // 2nd+ photo for free user → paywall
+            setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+            setPaywallType('photo');
+            pushRecentMessage(text.trim());
+            return;
+          }
+          localStorage.setItem(photoCountKey, String(count + 1));
+        }
+
+        // Add assistant message with photo loading state
+        // Use a unique ID to find this message later
+        const photoMsgId = `photo-${Date.now()}`;
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply, imageLoading: true, _photoId: photoMsgId } as Message & { _photoId: string }]);
+
+        // Generate photo in background (don't await — let it run independently)
+        const photoHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+        const tkn = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (tkn) photoHeaders['Authorization'] = `Bearer ${tkn}`;
+
+        fetch('/api/companion-photo', {
+          method: 'POST',
+          headers: photoHeaders,
+          body: JSON.stringify({ companionId, prompt: data.photoPrompt }),
+        })
+          .then(r => r.json())
+          .then(photoData => {
+            setMessages((prev) => prev.map((m) => {
+              const msg = m as Message & { _photoId?: string };
+              if (msg._photoId === photoMsgId) {
+                return { ...m, imageUrl: photoData.imageUrl || undefined, imageLoading: false };
+              }
+              return m;
+            }));
+          })
+          .catch(() => {
+            setMessages((prev) => prev.map((m) => {
+              const msg = m as Message & { _photoId?: string };
+              if (msg._photoId === photoMsgId) {
+                return { ...m, imageLoading: false };
+              }
+              return m;
+            }));
+          });
+      } else {
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+      }
       pushRecentMessage(text.trim());
+
+      // If user asked about play styles, show the modal after reply
+      const psKeywords = /play.?style|関係性|スタイル|vibe|relationship style|how.*treat|どう接して|変更|change.*style/i;
+      if (psKeywords.test(text)) {
+        setTimeout(() => setShowPlayStyleModal(true), 1500);
+      }
 
       if (!isPaid && userMsgCount + 1 >= FREE_MESSAGE_LIMIT) {
         setPaywallType('chat_limit');
@@ -278,6 +359,11 @@ export default function CompanionChatPage() {
         <Link href="/companions" className="comp-chat-back">←</Link>
         <AvatarFace companion={companion} className="comp-chat-header-avatar" />
         <span className="comp-chat-header-name">{companion.name}</span>
+        {playStyle && (
+          <button className="comp-playstyle-header-btn" onClick={() => setShowPlayStyleModal(true)}>
+            {PLAY_STYLES.find((s) => s.id === playStyle)?.emoji}
+          </button>
+        )}
         <div className="comp-mode-toggle">
           <span className="mode-toggle-btn active">{t('companions.modeChat')}</span>
           {isLiveActionAvailable(companion) && (
@@ -291,7 +377,7 @@ export default function CompanionChatPage() {
 
       <div className="comp-chat-body-wrap">
         {/* Chat Column */}
-        <div className="comp-chat-main">
+        <div className="comp-chat-main" style={{ '--chat-bg-image': `url(${companion.avatarUrl})` } as React.CSSProperties}>
           <div className="comp-chat-messages">
             {messages.length === 0 && (
               <div className="comp-chat-intro">
@@ -307,7 +393,29 @@ export default function CompanionChatPage() {
                 {msg.role === 'assistant' && (
                   <AvatarFace companion={companion} className="comp-msg-avatar" />
                 )}
-                <div className="comp-msg-bubble">{msg.content}</div>
+                <div className="comp-msg-bubble">
+                  {msg.content}
+                  {msg.imageLoading && (
+                    <div className="comp-photo-loading">
+                      <div className="comp-photo-loading-box">
+                        <div className="comp-photo-loading-shimmer" />
+                        <span className="comp-photo-loading-text">📸 Generating photo...</span>
+                      </div>
+                    </div>
+                  )}
+                  {msg.imageUrl && (
+                    <div className="comp-photo-wrap">
+                      <img src={msg.imageUrl} alt="Photo" className="comp-photo-msg" />
+                      <a
+                        href={`/api/download?url=${encodeURIComponent(msg.imageUrl)}`}
+                        className="comp-photo-download"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        ⬇
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 
@@ -397,6 +505,12 @@ export default function CompanionChatPage() {
               {t('companions.callMe')}
             </button>
           )}
+
+          {playStyle && (
+            <button className="comp-change-relation-btn" onClick={() => setShowPlayStyleModal(true)}>
+              {PLAY_STYLES.find((s) => s.id === playStyle)?.emoji} {t('companions.changeRelation').replace('{name}', companion.name)}
+            </button>
+          )}
         </div>
       </div>
 
@@ -453,6 +567,24 @@ export default function CompanionChatPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* PlayStyle selection modal */}
+      {showPlayStyleModal && companion && (
+        <PlayStyleModal
+          companionName={companion.name}
+          onSelect={(style) => {
+            setPlayStyle(style);
+            localStorage.setItem(playStyleKey, style);
+            setShowPlayStyleModal(false);
+          }}
+          onSkip={() => {
+            const def: PlayStyle = 'sweet';
+            setPlayStyle(def);
+            localStorage.setItem(playStyleKey, def);
+            setShowPlayStyleModal(false);
+          }}
+        />
       )}
     </div>
   );
