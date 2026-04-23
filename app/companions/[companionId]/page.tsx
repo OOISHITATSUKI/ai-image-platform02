@@ -345,8 +345,18 @@ export default function CompanionChatPage() {
     { label: t('companions.presetPhoto'), message: t('companions.presetPhotoMsg') },
   ];
 
+  // Detect breakup/reset keywords in user message
+  const [showResetFromChat, setShowResetFromChat] = useState(false);
+  const breakupKeywords = /別れ|わかれ|やり直し|リセット|break\s*up|start\s*over|reset|goodbye|さようなら|もう終わり|関係.*終|끝내|헤어지|分手|重新开始|terminar|romper/i;
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+
+    // Check for breakup/reset intent
+    if (!isAssistant && breakupKeywords.test(text.trim())) {
+      setShowResetFromChat(true);
+      return;
+    }
 
     const userMsg: Message = { role: 'user', content: text.trim() };
     const updated = [...messages, userMsg];
@@ -1006,6 +1016,41 @@ export default function CompanionChatPage() {
             <div className="coin-shop-balance">
               {t('companions.coinShopCurrent')}: 🪙 {user?.coins ?? 0} {t('companions.coinBalance')}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset from Chat Modal */}
+      {showResetFromChat && companion && (
+        <div className="paywall-overlay" onClick={() => setShowResetFromChat(false)}>
+          <div className="paywall-modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            <button className="paywall-close" onClick={() => setShowResetFromChat(false)}>×</button>
+            <img
+              src={companion.storyThumbnailUrl || companion.avatarUrl}
+              alt={companion.name}
+              style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 0%', margin: '0 auto 12px', display: 'block', border: '3px solid rgba(239,68,68,0.4)' }}
+            />
+            <h3 style={{ margin: '0 0 8px' }}>💔 {companion.name}</h3>
+            <p style={{ fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 8, color: 'var(--text-secondary)' }}>
+              {(t('companions.resetConfirm') || '本当に{name}と一度、破局しますか？').replace('{name}', companion.name)}
+            </p>
+            <p style={{ fontSize: '0.78rem', color: '#a1a1aa', marginBottom: 20 }}>
+              {t('companions.resetNote') || '⚠ チャット履歴・関係ポイント・ニックネームが全て削除されます。この操作は取り消せません。'}
+            </p>
+            <button
+              onClick={() => { setShowResetFromChat(false); resetRelationship(); }}
+              style={{
+                display: 'block', width: '100%', padding: '14px 24px',
+                background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)',
+                color: '#ef4444', borderRadius: 12, fontWeight: 700,
+                fontSize: '1rem', cursor: 'pointer', marginBottom: 10,
+              }}
+            >
+              💔 {t('companions.resetYes') || 'リセットする'}
+            </button>
+            <button className="paywall-btn-secondary" onClick={() => { setShowResetFromChat(false); sendMessage(input || '...'); }}>
+              {t('companions.resetStay') || 'やっぱりやめる'}
+            </button>
           </div>
         </div>
       )}
