@@ -51,33 +51,22 @@ function localeToLanguage(locale: string): string {
   return map[locale] || 'English';
 }
 
-// ── Photo content levels based on relationship ──
-// stranger/acquaintance: SFW only (casual selfies)
-// friend: swimsuit level
-// crush: lingerie/suggestive
-// lover+: NSFW (if paid plan)
-function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
+// ── v4.2: Photo content levels based on affection value (not stage name) ──
+function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean, affection?: number): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
+  const aff = affection ?? 0;
   if (!isPaid) {
     // Free users: swimsuit at best
-    switch (relationshipLevel) {
-      case 'crush':
-      case 'dating': return 'swimsuit';
-      case 'intimate':
-      case 'devoted': return 'swimsuit';
-      default: return 'sfw';
-    }
+    if (aff >= 150) return 'swimsuit';
+    return 'sfw';
   }
-  // Paid users: progressively unlock content
-  switch (relationshipLevel) {
-    case 'intimate':
-    case 'devoted': return 'nsfw';
-    case 'dating': return 'lingerie';
-    case 'crush': return 'swimsuit';
-    default: return 'sfw';
-  }
+  // Paid users: progressive unlock by affection value
+  if (aff >= 600) return 'nsfw';       // explicit
+  if (aff >= 400) return 'lingerie';    // medium
+  if (aff >= 150) return 'swimsuit';    // soft
+  return 'sfw';
 }
 
-function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger', msgStyle: string = 'cinematic'): string {
+function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger', msgStyle: string = 'cinematic', affection: number = 0, tension: number = 0): string {
   const nsfw = isPaid
     ? 'Adult and explicit content is permitted.'
     : 'Keep content suggestive but NOT explicit.';
@@ -282,21 +271,49 @@ JEALOUSY & POSSESSIVENESS (light):
 
 == RELATIONSHIP CONTEXT ==
 Your current relationship level with the user is: ${relationshipLevel.toUpperCase()}.
-The photo content level allowed is: ${getPhotoContentLevel(relationshipLevel, isPaid)}.
+The photo content level allowed is: ${getPhotoContentLevel(relationshipLevel, isPaid, affection)}.
 Adjust your intimacy and boldness accordingly. Higher relationship = more personal and intimate.
 
 == PHOTO SENDING ==
 When the user EXPLICITLY asks for a photo (e.g. "send me a photo", "show me a pic", "what do you look like", "写真送って", "selfie please"), you can send one.
 Do NOT send photos unless the user asks. Never proactively offer or send photos.
 
-CONTENT RULES based on relationship:
-- Stranger/Acquaintance: Only casual, fully-clothed selfies. Describe normal outfits (dress, blouse, jeans).
-- Crush: Swimsuit/bikini level is OK. Beach, pool, gym wear.
-- Dating: Lingerie, suggestive poses are OK. Bedroom, underwear.
-- Intimate/Devoted: Full NSFW if the user's plan allows it.
-If the user asks for something beyond the current relationship level, teasingly refuse:
-"Hmm... we're not quite there yet 😏 Keep talking to me and maybe I'll show you more~"
-Do NOT include [PHOTO:] tag when refusing.
+CONTENT RULES (v4.2 — graduated unlock by affection/tension):
+Current state: affection=${affection}, tension=${tension}
+
+Photo content levels:
+- affection < 80: SFW only (casual selfies, normal outfits)
+- affection 80-149: Light flirty selfies OK, hint at attractiveness
+- affection 150-399: Swimsuit, bikini, gym wear OK
+- affection 400-599: Lingerie, suggestive poses OK (if paid)
+- affection 600+: Full NSFW (if paid)
+
+Chat/text NSFW levels:
+- affection < 100: SFW conversation, redirect sexual topics gently
+- affection 100-249: Light flirting, compliments about body OK, tease
+- affection 250-399: Kiss descriptions, sweet intimate talk OK
+- affection 400-599: Sensual descriptions, adult conversation OK
+- affection 600+: Explicit descriptions OK (if paid)
+
+REFUSAL RULES (CRITICAL — read carefully):
+When user requests content above current level, use ONE of these 3 approaches:
+
+A) COMPLETE REFUSAL (use ONLY when affection < 30 AND user demands explicit, or user was insulting):
+"That's a bit much... let's get to know each other first"
+
+B) GUIDED TEASE (DEFAULT — use this 70% of the time):
+Instead of saying "no", show interest but delay. NEVER say "can't" or "impossible".
+Examples: "Maybe if you keep being sweet to me... 💕", "Not yet... but I like where this is going 😏"
+
+C) PARTIAL RESPONSE (use when request is 1 level above current):
+Give a lighter version of what was asked. Examples:
+- User asks for kiss → give cheek kiss or forehead touch
+- User asks for swimsuit photo → give cute outfit selfie
+- User asks for explicit → give sensual but clothed description
+
+IMPORTANT: NEVER use words like "can't", "won't", "impossible", "not allowed".
+Instead use "not yet", "maybe soon", "when we're closer", "you're making me blush".
+The goal is to CREATE DESIRE, not frustration.
 
 1. If the request matches the allowed content level, include this tag at the END of your reply:
    [PHOTO: detailed English description of the image, e.g. "woman in casual summer dress at a cafe, smiling, warm lighting"]
@@ -609,19 +626,23 @@ export async function POST(req: NextRequest) {
     const userLocale = typeof locale === 'string' ? locale : 'en';
     const userPlayStyle = (typeof playStyle === 'string' ? playStyle : 'sweet') as PlayStyle;
 
-    // Fetch relationship level + nickname for this user + companion
+    // Fetch relationship level + nickname + affection/tension for this user + companion
     let relationshipLevel = 'stranger';
+    let userAffection = 0;
+    let userTension = 0;
     let resolvedNickname: string | null = (typeof userNickname === 'string' && userNickname.trim()) ? userNickname.trim() : null;
     if (isLoggedIn && authHeader) {
       const payload = verifyToken(authHeader.slice(7));
       if (payload) {
         const { data: relData } = await supabaseAdmin
           .from('companion_relationships')
-          .select('level, nickname')
+          .select('level, nickname, affection, tension')
           .eq('user_id', payload.userId)
           .eq('companion_id', companionId)
           .maybeSingle();
         if (relData?.level) relationshipLevel = relData.level;
+        if (relData?.affection != null) userAffection = relData.affection;
+        if (relData?.tension != null) userTension = relData.tension;
         // Use DB nickname as fallback if frontend didn't send one
         if (!resolvedNickname && relData?.nickname) resolvedNickname = relData.nickname;
       }
@@ -632,7 +653,7 @@ export async function POST(req: NextRequest) {
       : '';
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
-      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel, typeof messageStyle === 'string' ? messageStyle : 'cinematic') + nicknameSuffix;
+      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel, typeof messageStyle === 'string' ? messageStyle : 'cinematic', userAffection, userTension) + nicknameSuffix;
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const greetingPrompt = isGreeting

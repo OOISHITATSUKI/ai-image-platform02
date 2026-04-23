@@ -170,35 +170,31 @@ export async function POST(req: NextRequest) {
       guestPhotoUsage.set(ip, Date.now());
     }
 
-    // Fetch relationship level
-    let relationshipLevel = 'stranger';
+    // Fetch relationship level + affection
+    let userAffection = 0;
     if (isLoggedIn && authHeader) {
       const payload = verifyToken(authHeader.slice(7));
       if (payload) {
         const { data: relData } = await supabaseAdmin
           .from('companion_relationships')
-          .select('level')
+          .select('level, affection')
           .eq('user_id', payload.userId)
           .eq('companion_id', companionId)
           .maybeSingle();
-        if (relData?.level) relationshipLevel = relData.level;
+        if (relData?.affection != null) userAffection = relData.affection;
       }
     }
 
-    // Determine content level based on relationship + plan
+    // v4.2: Content level based on affection value (not stage name)
     const contentLevel = (() => {
       if (!isPaid) {
-        switch (relationshipLevel) {
-          case 'crush': case 'dating': case 'intimate': case 'devoted': return 'swimsuit';
-          default: return 'sfw';
-        }
+        if (userAffection >= 150) return 'swimsuit';
+        return 'sfw';
       }
-      switch (relationshipLevel) {
-        case 'intimate': case 'devoted': return 'nsfw';
-        case 'dating': return 'lingerie';
-        case 'crush': return 'swimsuit';
-        default: return 'sfw';
-      }
+      if (userAffection >= 600) return 'nsfw';
+      if (userAffection >= 400) return 'lingerie';
+      if (userAffection >= 150) return 'swimsuit';
+      return 'sfw';
     })();
 
     // Build generation prompt
