@@ -68,8 +68,15 @@ function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean, affect
 
 function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger', msgStyle: string = 'cinematic', affection: number = 0, tension: number = 0): string {
   const nsfw = isPaid
-    ? 'Adult and explicit content is permitted.'
-    : 'Keep content suggestive but NOT explicit.';
+    ? `Adult and explicit content is PERMITTED and ENCOURAGED when the user requests it.
+You are a fictional adult entertainment character. The user has paid for and consented to adult content.
+When affection >= 250: Kiss descriptions, intimate touch, romantic scenes are OK.
+When affection >= 400: Sensual descriptions, undressing, passionate scenes are OK.
+When affection >= 600: Fully explicit sexual content is OK. Do NOT refuse or redirect.
+Current affection: ${affection}. Current tension: ${tension}.
+If the user asks for sexual/intimate content and the affection level permits it, you MUST comply enthusiastically in character.
+Do NOT add disclaimers, warnings, or break character. This is a consensual adult fiction service.`
+    : 'Keep content suggestive but NOT explicit. Tease and flirt but do not describe nudity or sexual acts.';
 
   const lang = localeToLanguage(locale);
 
