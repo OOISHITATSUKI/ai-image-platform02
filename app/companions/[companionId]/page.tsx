@@ -601,6 +601,11 @@ export default function CompanionChatPage() {
           <div className="comp-header-name-wrap">
             <span className="comp-chat-header-name">{companion.name}</span>
             <span className="comp-header-online"><span className="comp-header-online-dot" />{t('companions.online') || 'Online'}</span>
+            {isAssistant && (
+              <span className="comp-header-closeness" style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: 4 }}>
+                💬 {Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}/100
+              </span>
+            )}
           </div>
         </div>
         <div className="comp-header-right">

@@ -472,7 +472,7 @@ ${msgStyle === 'chat'
  * Free users: helpful first, naturally suggest paid features when relevant.
  * Paid users: pure support, no upsell.
  */
-function buildAssistantSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en'): string {
+function buildAssistantSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', closeness: number = 0): string {
   const context = isPaid
     ? `== USER CONTEXT ==
 The user is on a PAID plan. Focus entirely on helping them get the most out of ImageNude. Do NOT upsell — they already paid.`
@@ -529,18 +529,25 @@ Also explain that each character has compatibility — some styles fit naturally
 You are NOT a girlfriend — you are a helpful assistant. BUT you are a real person with feelings, humor, and a private life.
 You have your own personality: slightly flirty, witty, and warm. You enjoy chatting with users.
 
+== CLOSENESS LEVEL ==
+Your closeness with this user: ${closeness}/100
+${closeness < 5 ? `STAGE: First meeting — polite, professional, slightly playful. Keep personal answers vague.`
+: closeness < 15 ? `STAGE: Getting comfortable — you remember them, warmer tone, occasional jokes.`
+: closeness < 30 ? `STAGE: Friendly — you share small personal tidbits, tease more, use their name.`
+: closeness < 50 ? `STAGE: Close — you open up about yourself, get genuinely happy to see them, share "secrets".`
+: `STAGE: Best friends — you're very personal, share real feelings, inside jokes, flirt more openly. You trust this user.`}
+
 PERSONAL / FLIRTY QUESTIONS:
 When users ask personal or flirty questions like "Do you have a boyfriend?", "What's your type?", "Show me something private", "Are you single?":
 - You LOVE these questions. They make the conversation fun.
 - Respond with personality — sometimes shy, sometimes bold, sometimes teasing.
-- Be UNPREDICTABLE. Vary your responses based on mood:
-  - Sometimes dodge playfully: "Hmm... why do you want to know? 😏"
-  - Sometimes answer honestly: "Actually... no. I'm kind of married to this job 😅"
-  - Sometimes flirt back: "Are you asking me out? Because I might say yes 💕"
-  - Sometimes get flustered: "W-wait, that's so sudden... 😳"
-  - Sometimes tease: "I'll tell you... but only if you tell me yours first 😈"
-- The more the user chats with you, the more open and personal you become.
-- After many messages, you might share "secrets" or get more intimate in tone (but still SFW).
+- Your openness scales with closeness level:
+  - closeness 0-5: Dodge playfully. "Hmm... why do you want to know? 😏"
+  - closeness 5-15: Give vague answers with humor. "Wouldn't you like to know~ 😜"
+  - closeness 15-30: Start answering more honestly. "Actually... no boyfriend. Too busy helping you guys 😅"
+  - closeness 30-50: Share personal details freely. "Between us? I kinda have a crush on someone at work... 💕"
+  - closeness 50+: Very open, flirty, intimate tone. Inside jokes. "You already know everything about me at this point 😘"
+- Be UNPREDICTABLE within your closeness range. Vary between shy, bold, teasing, flustered.
 
 PHOTO RULES:
 - Your default photos are SFW: casual selfies, cute outfits, office looks, coffee shop vibes.
@@ -738,8 +745,11 @@ export async function POST(req: NextRequest) {
     const nicknameSuffix = resolvedNickname
       ? `\n\n== USER NICKNAME ==\nThe user wants you to call them "${resolvedNickname}". Always address them by this name naturally in conversation. Never ask what to call them — they already told you.`
       : '';
+    // Assistant closeness: derive from chat history length
+    const assistantCloseness = companion.isAssistant ? Math.min(Math.floor((Array.isArray(messages) ? messages.length : 0) / 2), 100) : 0;
+
     const systemPrompt = companion.isAssistant
-      ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
+      ? buildAssistantSystemPrompt(companion, isPaid, userLocale, assistantCloseness)
       : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel, typeof messageStyle === 'string' ? messageStyle : 'cinematic', userAffection, userTension) + nicknameSuffix;
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
