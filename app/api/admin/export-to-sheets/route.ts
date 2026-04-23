@@ -229,11 +229,12 @@ export async function collectKpiData() {
     let companionPaywallShown = 0;
     let companionPaywallClicked = 0;
     try {
-        // Use today's data (events accumulate throughout the day)
-        const jstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-        const yDateStr = jstNow.toISOString().split('T')[0];
-        const yStart = `${yDateStr}T00:00:00Z`;
-        const yEnd = `${yDateStr}T23:59:59Z`;
+        // Collect companion events from the last 24 hours
+        // (covers yesterday's cron window + today's accumulation)
+        const now = new Date();
+        const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yStart = past24h.toISOString();
+        const yEnd = now.toISOString();
 
         const [sessions, messages, photos, levelUps, paywallShown, paywallClicked] = await Promise.all([
             supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_session_start').gte('created_at', yStart).lte('created_at', yEnd),
