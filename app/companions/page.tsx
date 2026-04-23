@@ -109,21 +109,17 @@ export default function CompanionsPage() {
       <section className="comp-hero">
         <h1 className="comp-hero-title">{t('companions.heroTitle')}</h1>
         <p className="comp-hero-sub">{t('companions.heroSub')}</p>
-        <Link href="/editor" className="comp-hero-cta">
-          {t('companions.heroCreate')}
-        </Link>
       </section>
 
-      {/* Nude Assistant promo — open to everyone, with soft upsell inside */}
-      <section className="comp-section assistant-home-section">
-        <Link href="/companions/assistant" className="assistant-home-promo">
-          <div className="assistant-home-promo-icon">✨</div>
-          <div className="assistant-home-promo-text">
-            <span className="assistant-home-promo-badge">{t('companions.assistantBadge')}</span>
-            <h3>{t('companions.assistantTitle')}</h3>
-            <p>{t('companions.assistantDesc')}</p>
-          </div>
-          <span className="assistant-home-promo-cta">{t('companions.assistantCta')}</span>
+      {/* AI Assistant Banner */}
+      <section className="comp-section" style={{ padding: '0 16px' }}>
+        <Link href="/companions/assistant" style={{ display: 'block', borderRadius: 16, overflow: 'hidden' }}>
+          <img
+            src="/companions/assistant-banner.webp"
+            alt="AI Assistant"
+            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 16 }}
+            loading="eager"
+          />
         </Link>
       </section>
 
