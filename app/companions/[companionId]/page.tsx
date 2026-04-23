@@ -145,6 +145,7 @@ export default function CompanionChatPage() {
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [showBarometerInfo, setShowBarometerInfo] = useState(false);
+  const [showAssistCloseness, setShowAssistCloseness] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -344,8 +345,9 @@ export default function CompanionChatPage() {
     );
   }
 
-  // Preset messages — assistant gets FAQ-style presets (random 3), companions get flirty ones
+  // Preset messages — assistant gets FAQ + flirty presets (random 3), companions get flirty ones
   const allAssistantPresets = [
+    // FAQ / serious
     { label: t('companions.assistPresetRequest'), message: t('companions.assistPresetRequestMsg') },
     { label: t('companions.assistPresetHow'), message: t('companions.assistPresetHowMsg') },
     { label: t('companions.assistPresetPlayStyle'), message: t('companions.assistPresetPlayStyleMsg') },
@@ -357,6 +359,14 @@ export default function CompanionChatPage() {
     { label: t('companions.assistFaqPrompt'), message: t('companions.assistFaqPromptMsg') },
     { label: t('companions.assistFaqPayment'), message: t('companions.assistFaqPaymentMsg') },
     { label: t('companions.assistFaqLevel'), message: t('companions.assistFaqLevelMsg') },
+    { label: t('companions.assistFaqVideo'), message: t('companions.assistFaqVideoMsg') },
+    { label: t('companions.assistFaqInpaint'), message: t('companions.assistFaqInpaintMsg') },
+    // Flirty / playful
+    { label: t('companions.assistFlirtBf'), message: t('companions.assistFlirtBfMsg') },
+    { label: t('companions.assistFlirtPhoto'), message: t('companions.assistFlirtPhotoMsg') },
+    { label: t('companions.assistFlirtType'), message: t('companions.assistFlirtTypeMsg') },
+    { label: t('companions.assistFlirtDate'), message: t('companions.assistFlirtDateMsg') },
+    { label: t('companions.assistFlirtAge'), message: t('companions.assistFlirtAgeMsg') },
   ];
   const [assistantPresets] = useState(() => {
     const shuffled = [...allAssistantPresets].sort(() => Math.random() - 0.5);
@@ -603,7 +613,7 @@ export default function CompanionChatPage() {
             <span className="comp-header-online">
               <span className="comp-header-online-dot" />{t('companions.online') || 'Online'}
               {isAssistant && (
-                <span style={{ marginLeft: 8, color: '#a78bfa', fontWeight: 600 }}>
+                <span onClick={(e) => { e.stopPropagation(); setShowAssistCloseness(true); }} style={{ marginLeft: 8, color: '#a78bfa', fontWeight: 600, cursor: 'pointer' }}>
                   💬 {Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}/100
                 </span>
               )}
@@ -697,6 +707,27 @@ export default function CompanionChatPage() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Mobile: Assistant closeness bar */}
+          {isAssistant && (
+            <div className="comp-mobile-barometer" style={{ padding: '8px 16px', cursor: 'pointer' }} onClick={() => setShowAssistCloseness(true)}>
+              <div className="comp-mobile-bar-info" style={{ justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 600 }}>
+                  💬 {t('companions.assistCloseness') || 'Closeness'}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}/100
+                </span>
+              </div>
+              <div className="comp-mobile-axis-track" style={{ marginTop: 4 }}>
+                <div className="comp-mobile-axis-fill" style={{
+                  width: `${Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}%`,
+                  background: 'linear-gradient(90deg, #a78bfa, #f472b6)',
+                  transition: 'width 0.5s ease',
+                }} />
+              </div>
+            </div>
+          )}
 
           {/* Mobile Barometer (hidden on desktop) */}
           {!isAssistant && (() => {
@@ -935,6 +966,57 @@ export default function CompanionChatPage() {
           onClose={() => setPaywallType(null)}
         />
       )}
+
+      {/* Assistant Closeness Modal */}
+      {showAssistCloseness && isAssistant && (() => {
+        const closeness = Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100);
+        const stages = [
+          { min: 0, label: t('companions.assistStage1') || 'First meeting', emoji: '👋', desc: t('companions.assistStage1Desc') || 'Polite and professional' },
+          { min: 5, label: t('companions.assistStage2') || 'Getting comfortable', emoji: '😊', desc: t('companions.assistStage2Desc') || 'Warmer, occasional jokes' },
+          { min: 15, label: t('companions.assistStage3') || 'Friendly', emoji: '💬', desc: t('companions.assistStage3Desc') || 'Shares personal tidbits' },
+          { min: 30, label: t('companions.assistStage4') || 'Close', emoji: '💕', desc: t('companions.assistStage4Desc') || 'Opens up, shares secrets' },
+          { min: 50, label: t('companions.assistStage5') || 'Best friends', emoji: '✨', desc: t('companions.assistStage5Desc') || 'Very personal, inside jokes' },
+        ];
+        const currentStage = [...stages].reverse().find(s => closeness >= s.min) || stages[0];
+        return (
+          <div className="paywall-overlay" onClick={() => setShowAssistCloseness(false)}>
+            <div className="paywall-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 360 }}>
+              <button className="paywall-close" onClick={() => setShowAssistCloseness(false)}>×</button>
+              <div className="paywall-icon">{currentStage.emoji}</div>
+              <h3>{t('companions.assistClosenessTitle') || 'Closeness with Assistant'}</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 16px' }}>
+                {t('companions.assistClosenessDesc') || 'The more you chat, the more she opens up to you'}
+              </p>
+              <div style={{ margin: '0 0 16px', textAlign: 'center' }}>
+                <span style={{ fontSize: '2rem', fontWeight: 700, color: '#a78bfa' }}>{closeness}</span>
+                <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/100</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 8, height: 8, marginBottom: 20 }}>
+                <div style={{ width: `${closeness}%`, height: '100%', borderRadius: 8, background: 'linear-gradient(90deg, #a78bfa, #f472b6)', transition: 'width 0.5s ease' }} />
+              </div>
+              {stages.map((s, i) => {
+                const isActive = closeness >= s.min;
+                const isCurrent = s === currentStage;
+                return (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', borderRadius: 8,
+                    background: isCurrent ? 'rgba(167,139,250,0.15)' : 'transparent',
+                    opacity: isActive ? 1 : 0.4,
+                    marginBottom: 4,
+                  }}>
+                    <span style={{ fontSize: '1.1rem' }}>{s.emoji}</span>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: isCurrent ? '#a78bfa' : 'var(--text-primary)' }}>{s.label}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{s.desc}</div>
+                    </div>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{s.min}+</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Call Coming Soon Modal */}
       {showCallComingSoon && (

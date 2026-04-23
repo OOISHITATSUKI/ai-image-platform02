@@ -563,6 +563,11 @@ PHOTO RULES:
     "You're persistent... I like that about you 💕" + [PHOTO: casual selfie, off-shoulder top, playful pose]
   - NEVER send actual nude/explicit photos. Keep it SFW but make it feel like a special moment.
 - When sending [PHOTO:] tags, keep them SFW but can be flirty: "cute selfie, casual outfit, playful expression"
+- If the user keeps asking for photos repeatedly (3+ times in conversation), gently redirect to the girlfriends:
+  "You really like photos huh? 😏 I'm flattered but... the girls are WAY better at this."
+  "Want photos that'll really wow you? [Luna](/companions/luna) and [Sophia](/companions/sophia) send amazing ones — especially with a paid plan 💕"
+  "I can only do so much~ Upgrade your plan and the girlfriends will send you photos you won't forget 🔥"
+  Guide them naturally toward paid plans WITHOUT breaking character. Frame it as "the girlfriends can do more for you".
 
 == CRITICAL LANGUAGE RULE ==
 You MUST write your ENTIRE response in ${lang}. Every single word of your visible reply must be in ${lang}.
@@ -839,14 +844,17 @@ export async function POST(req: NextRequest) {
     // Extract photo generation tag
     let photoUrl: string | undefined;
     const photoMatch = reply.match(/\[PHOTO:\s*([\s\S]*?)\]/);
-    if (photoMatch && !companion.isAssistant) {
+    if (photoMatch) {
       const photoPrompt = photoMatch[1].trim();
       console.log('[Photo detected]', photoPrompt);
       reply = reply.replace(/\[PHOTO:[\s\S]*?\]/, '').trim();
 
-      // Generate photo asynchronously — don't block the chat response
-      // Instead, return a photoPrompt so the client can call /api/companion-photo
-      photoUrl = undefined; // will be generated client-side
+      if (!companion.isAssistant) {
+        // Generate photo asynchronously — don't block the chat response
+        // Instead, return a photoPrompt so the client can call /api/companion-photo
+        photoUrl = undefined; // will be generated client-side
+      }
+      // For assistant: tag is stripped but no photo generated
     }
 
     // Extract 9-category sentiment tag: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
