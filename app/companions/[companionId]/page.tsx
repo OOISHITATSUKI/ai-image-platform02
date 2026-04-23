@@ -1010,7 +1010,7 @@ export default function CompanionChatPage() {
         </div>
       )}
 
-      {/* Barometer Info Modal */}
+      {/* Barometer Info Modal — v4.1 */}
       {showBarometerInfo && companion && !isAssistant && (() => {
         const cl = getRelationshipLevel(relPoints);
         const nl = getNextLevel(relPoints);
@@ -1019,46 +1019,63 @@ export default function CompanionChatPage() {
         <div className="paywall-overlay" onClick={() => setShowBarometerInfo(false)}>
           <div className="barometer-info-modal" onClick={(e) => e.stopPropagation()}>
             <button className="paywall-close" onClick={() => setShowBarometerInfo(false)}>×</button>
-            <h3>{cl.emoji} {t('companions.barometerTitle')?.replace('{name}', companion.name) || `あなたと${companion.name}の関係`}</h3>
-            <p className="barometer-info-stage">{t('companions.barometerStage') || '現在のステージ'}: <strong>{t(`companions.rel_${cl.id}`)}</strong></p>
+            <h3>{t('companions.barometerTitle')?.replace('{name}', companion.name) || `あなたと${companion.name}の関係`}</h3>
+            <p className="barometer-info-stage">{cl.emoji} {t(`companions.rel_${cl.id}`)}</p>
 
-            <div className="barometer-info-axes">
-              <div className="barometer-info-axis">
-                <div className="barometer-info-axis-head"><span style={{ color: '#ec4899' }}>💖 {t('companions.rel_axis_affection')}</span> <strong style={{ color: '#ec4899' }}>{relPoints} / 1000</strong></div>
-                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899' }} /></div>
-                <p className="barometer-info-axis-desc">{t('companions.barometerAffDesc') || 'キャラがあなたをどれだけ好きか。上がりやすく、ゆっくり下がる。'}</p>
+            {/* 💖 Affection */}
+            <div className="barometer-info-section">
+              <div className="barometer-info-axis-head"><span style={{ color: '#ec4899' }}>💖 {t('companions.rel_axis_affection')}</span> <strong style={{ color: '#ec4899' }}>{relPoints} / 1000</strong></div>
+              <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899' }} /></div>
+              <p className="barometer-info-axis-desc">{t('companions.barometerAffDesc') || 'キャラがあなたを好きな気持ち。上げると見た目・シチュエーションが解放される。'}</p>
+              <div className="barometer-info-methods">
+                <span className="barometer-info-methods-label">{t('companions.barometerHowTo') || '上げ方'}:</span>
+                <div className="barometer-info-method"><span>💬 褒める・気遣う</span><span className="barometer-info-delta">+5〜+15</span></div>
+                <div className="barometer-info-method"><span>🎁 ギフトを贈る</span><span className="barometer-info-delta">+30</span></div>
+                <div className="barometer-info-method"><span>📞 電話で話す</span><span className="barometer-info-delta">+20</span></div>
               </div>
-              <div className="barometer-info-axis">
-                <div className="barometer-info-axis-head"><span style={{ color: '#60a5fa' }}>💙 {t('companions.rel_axis_trust')}</span> <strong style={{ color: '#60a5fa' }}>{relTrust} / 100</strong></div>
-                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTrust}%`, background: '#60a5fa' }} /></div>
-                <p className="barometer-info-axis-desc">{t('companions.barometerTrustDesc') || '一貫性と約束を守ることで上がる。裏切りで一瞬崩壊。'}</p>
-              </div>
-              <div className="barometer-info-axis">
-                <div className="barometer-info-axis-head"><span style={{ color: '#fbbf24' }}>💛 {t('companions.rel_axis_tension')}</span> <strong style={{ color: '#fbbf24' }}>{relTension} / 100</strong></div>
-                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24' }} /></div>
-                <p className="barometer-info-axis-desc">{t('companions.barometerTensionDesc') || '予測不能な高揚感。焦らしとギャップで上がる。'}</p>
+              {nl && (
+                <div className="barometer-info-next">
+                  <span>あと <em>{ptn}</em>pt →</span> <strong>{t(`companions.rel_unlock_${nl.id}`)}</strong>
+                </div>
+              )}
+            </div>
+
+            {/* 💙 Trust */}
+            <div className="barometer-info-section">
+              <div className="barometer-info-axis-head"><span style={{ color: '#60a5fa' }}>💙 {t('companions.rel_axis_trust')}</span> <strong style={{ color: '#60a5fa' }}>{relTrust} / 100</strong></div>
+              <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTrust}%`, background: '#60a5fa' }} /></div>
+              <p className="barometer-info-axis-desc">{t('companions.barometerTrustDesc') || 'キャラが心を開いている度合い。上げると内面・秘密・本音が解放される。'}</p>
+              <p className="barometer-info-warn">⚠️ {t('companions.barometerTrustWarn') || '上げるには時間と誠実さが必要。課金ではほぼ上がらない。'}</p>
+              <div className="barometer-info-methods">
+                <span className="barometer-info-methods-label">{t('companions.barometerHowTo') || '上げ方'}:</span>
+                <div className="barometer-info-method"><span>💬 悩みを聞く・共感</span><span className="barometer-info-delta">+5〜+8</span></div>
+                <div className="barometer-info-method"><span>📅 毎日会話する</span><span className="barometer-info-delta">+1/回</span></div>
+                <div className="barometer-info-method"><span>💬 一貫性ある発言</span><span className="barometer-info-delta">+1〜+2</span></div>
               </div>
             </div>
 
-            {nl && (
-              <div className="barometer-info-next">
-                <span>{t('companions.rel_next')?.replace('{points}', String(ptn)) || `あと${ptn}ptで`}</span>
-                <strong>{t(`companions.rel_unlock_${nl.id}`)}</strong>
+            {/* 💛 Tension */}
+            <div className="barometer-info-section">
+              <div className="barometer-info-axis-head"><span style={{ color: '#fbbf24' }}>💛 {t('companions.rel_axis_tension')}</span> <strong style={{ color: '#fbbf24' }}>{relTension} / 100</strong></div>
+              <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24' }} /></div>
+              <p className="barometer-info-axis-desc">{t('companions.barometerTensionDesc') || '現在進行の感情の高ぶり。上げると色っぽさ・大胆さが上昇。'}</p>
+              <p className="barometer-info-warn">📉 {t('companions.barometerTensionWarn') || '毎日自然に減衰する（-2/日）。放置すると冷める。'}</p>
+              <div className="barometer-info-methods">
+                <span className="barometer-info-methods-label">{t('companions.barometerHowTo') || '上げ方'}:</span>
+                <div className="barometer-info-method"><span>💬 新しい話題</span><span className="barometer-info-delta">+5〜+8</span></div>
+                <div className="barometer-info-method"><span>🚀 ブースト</span><span className="barometer-info-delta">+30</span></div>
+                <div className="barometer-info-method"><span>📞 電話で話す</span><span className="barometer-info-delta">+10</span></div>
               </div>
-            )}
-
-            <div className="barometer-info-tips">
-              <h4>💡 {t('companions.barometerTips') || 'ヒント'}</h4>
-              <ul>
-                <li>🎁 {t('companions.barometerTip1') || 'ギフトで好意が+20'}</li>
-                <li>🚀 {t('companions.barometerTip2') || 'ブーストで好意が+100'}</li>
-                <li>💬 {t('companions.barometerTip3') || '毎日会話することで信頼が上昇'}</li>
-              </ul>
             </div>
 
-            <button className="paywall-btn-primary" onClick={() => setShowBarometerInfo(false)}>
-              {t('companions.barometerClose') || '閉じる'}
-            </button>
+            {/* CTA */}
+            <div className="barometer-info-cta">
+              <span className="barometer-info-cta-label">💡 {t('companions.barometerCtaLabel') || 'すぐに進めたい？'}</span>
+              <div className="barometer-info-cta-btns">
+                <button onClick={() => { setShowBarometerInfo(false); spendCoins('gift'); }}>🎁 {t('companions.coinGift') || 'ギフト'}</button>
+                <button onClick={() => { setShowBarometerInfo(false); spendCoins('boost'); }}>🚀 {t('companions.coinBoost') || 'ブースト'}</button>
+              </div>
+            </div>
           </div>
         </div>
         ); })()}

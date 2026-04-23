@@ -105,12 +105,19 @@ export async function POST(req: NextRequest) {
       ? { affection: body.pointsDelta ?? body.affectionDelta ?? 2, trust: body.trustDelta ?? 0, tension: body.tensionDelta ?? 0 }
       : (sentiment ? (SENTIMENT_DELTAS[sentiment] ?? SENTIMENT_DELTAS.neutral) : SENTIMENT_DELTAS.neutral);
 
-    // Clamp negative affection to prevent catastrophic drops (max -10 per message)
+    // v4.1: Validate and clamp deltas to prevent bugs
     const deltas = {
-      affection: Math.max(-10, rawDeltas.affection),
-      trust: Math.max(-5, rawDeltas.trust),
-      tension: rawDeltas.tension,
+      affection: Math.max(-10, Math.min(30, rawDeltas.affection)),
+      trust: Math.max(-5, Math.min(15, rawDeltas.trust)),
+      tension: Math.max(-10, Math.min(30, rawDeltas.tension)),
     };
+
+    // Safety: if no explicit negative sentiment, affection should never decrease
+    const isNegativeSentiment = sentiment && ['coldness', 'criticism', 'contempt', 'betrayal'].includes(sentiment);
+    if (deltas.affection < 0 && !isNegativeSentiment) {
+      console.warn('[relationship] Blocked suspicious negative affection delta:', { sentiment, deltas, reason });
+      deltas.affection = 0;
+    }
 
     if (!companionId) {
       return NextResponse.json({ error: 'Missing companionId' }, { status: 400 });

@@ -780,7 +780,7 @@ export function getRelationshipPoints(state: RelationshipState): number {
 }
 
 // ── 9 Sentiment Categories ──
-export type SentimentCategory = 'adoration' | 'tenderness' | 'playful' | 'compliment' | 'neutral' | 'coldness' | 'criticism' | 'contempt' | 'betrayal';
+export type SentimentCategory = 'adoration' | 'tenderness' | 'playful' | 'compliment' | 'curiosity' | 'neutral' | 'coldness' | 'criticism' | 'contempt' | 'betrayal';
 
 export interface SentimentDeltas {
   affection: number;
@@ -788,16 +788,18 @@ export interface SentimentDeltas {
   tension: number;
 }
 
+// v4.1: Rebalanced — normal conversation never lowers affection
 export const SENTIMENT_DELTAS: Record<SentimentCategory, SentimentDeltas> = {
-  adoration:   { affection: 25,  trust: 3,   tension: 10 },
-  tenderness:  { affection: 15,  trust: 5,   tension: -2 },
-  playful:     { affection: 8,   trust: 1,   tension: 12 },
-  compliment:  { affection: 10,  trust: 2,   tension: 3 },
-  neutral:     { affection: 2,   trust: 0,   tension: 0 },
-  coldness:    { affection: -8,  trust: -2,  tension: -5 },
-  criticism:   { affection: -15, trust: -8,  tension: -3 },
-  contempt:    { affection: -25, trust: -20, tension: -10 },
-  betrayal:    { affection: -50, trust: -60, tension: -20 },
+  adoration:   { affection: 15,  trust: 3,   tension: 5 },   // 愛情表現
+  tenderness:  { affection: 8,   trust: 5,   tension: 2 },   // 優しさ・気遣い
+  compliment:  { affection: 5,   trust: 2,   tension: 3 },   // 褒め言葉
+  playful:     { affection: 3,   trust: 1,   tension: 8 },   // じゃれ合い
+  curiosity:   { affection: 2,   trust: 1,   tension: 5 },   // 興味・質問
+  neutral:     { affection: 2,   trust: 1,   tension: 0 },   // 中立・日常会話
+  coldness:    { affection: -3,  trust: 0,   tension: -2 },   // 素っ気ない
+  criticism:   { affection: -10, trust: -3,  tension: -2 },   // 批判
+  contempt:    { affection: -20, trust: -15, tension: -5 },   // 軽蔑
+  betrayal:    { affection: -20, trust: -15, tension: -5 },   // 裏切り (clamped same as contempt)
 };
 
 export const SENTIMENT_EMOTIONS: Record<SentimentCategory, { emoji: string; color: string }> = {
@@ -805,6 +807,7 @@ export const SENTIMENT_EMOTIONS: Record<SentimentCategory, { emoji: string; colo
   tenderness: { emoji: '💖', color: '#ff8fb5' },
   playful:    { emoji: '😊', color: '#ffd700' },
   compliment: { emoji: '❤️', color: '#ff6b9d' },
+  curiosity:  { emoji: '✨', color: '#a78bfa' },
   neutral:    { emoji: '', color: '' },
   coldness:   { emoji: '💭', color: '#8899aa' },
   criticism:  { emoji: '😔', color: '#6677aa' },

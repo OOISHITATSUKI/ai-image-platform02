@@ -11100,30 +11100,50 @@ button, a, [role="button"] {
 .playstyle-nickname-save:hover { background: rgba(236,72,153,0.25); }
 .playstyle-nickname-save:disabled { opacity: 0.4; cursor: default; }
 
-/* Barometer Info Modal */
+/* Barometer Info Modal — v4.1 */
 .barometer-info-modal {
-  background: #1a1a2e; border-radius: 16px; padding: 28px 24px;
-  width: 420px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+  background: #1a1a2e; border-radius: 16px; padding: 24px 20px;
+  width: 440px; max-width: 92vw; max-height: 80vh; overflow-y: auto;
   border: 1px solid rgba(255,255,255,0.08); position: relative;
 }
-.barometer-info-modal h3 { margin: 0 0 6px; font-size: 1.15rem; color: #fff; }
-.barometer-info-stage { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 16px; }
-.barometer-info-axes { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-.barometer-info-axis { display: flex; flex-direction: column; gap: 4px; }
-.barometer-info-axis-head { display: flex; justify-content: space-between; font-size: 0.82rem; }
-.barometer-info-axis-desc { font-size: 0.7rem; color: #71717a; margin: 2px 0 0; line-height: 1.4; }
-.barometer-info-next {
-  padding: 10px 14px; margin-bottom: 14px;
-  background: rgba(236,72,153,0.08); border: 1px solid rgba(236,72,153,0.2);
-  border-left: 3px solid #ec4899; border-radius: 10px;
-  font-size: 0.82rem; color: #d4d4d8;
-  display: flex; flex-direction: column; gap: 2px;
+.barometer-info-modal h3 { margin: 0 0 4px; font-size: 1.1rem; color: #fff; }
+.barometer-info-stage { font-size: 0.95rem; color: #ec4899; font-weight: 700; margin: 0 0 14px; }
+.barometer-info-section {
+  padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.barometer-info-next strong { color: #fff; font-size: 0.88rem; }
-.barometer-info-tips { margin-bottom: 16px; }
-.barometer-info-tips h4 { margin: 0 0 8px; font-size: 0.85rem; color: #f4f4f5; }
-.barometer-info-tips ul { margin: 0; padding: 0 0 0 4px; list-style: none; }
-.barometer-info-tips li { font-size: 0.78rem; color: #a1a1aa; padding: 3px 0; }
+.barometer-info-section:last-of-type { border-bottom: none; }
+.barometer-info-axis-head { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+.barometer-info-axis-desc { font-size: 0.75rem; color: #a1a1aa; margin: 6px 0 0; line-height: 1.5; }
+.barometer-info-warn { font-size: 0.72rem; color: #fbbf24; margin: 4px 0 0; }
+.barometer-info-methods { margin-top: 10px; }
+.barometer-info-methods-label { font-size: 0.7rem; color: #71717a; display: block; margin-bottom: 4px; }
+.barometer-info-method {
+  display: flex; justify-content: space-between; padding: 3px 0;
+  font-size: 0.78rem; color: #d4d4d8;
+}
+.barometer-info-delta { color: #10b981; font-weight: 600; }
+.barometer-info-next {
+  margin-top: 10px; padding: 8px 12px;
+  background: rgba(236,72,153,0.08); border-left: 3px solid #ec4899;
+  border-radius: 6px; font-size: 0.78rem; color: #a1a1aa;
+  display: flex; align-items: center; gap: 6px;
+}
+.barometer-info-next em { color: #fbbf24; font-style: normal; font-weight: 700; }
+.barometer-info-next strong { color: #fff; font-weight: 700; }
+.barometer-info-cta {
+  margin-top: 14px; padding: 14px;
+  background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.08));
+  border: 1px solid rgba(236,72,153,0.2); border-radius: 12px;
+  text-align: center;
+}
+.barometer-info-cta-label { font-size: 0.78rem; color: #a1a1aa; display: block; margin-bottom: 10px; }
+.barometer-info-cta-btns { display: flex; gap: 8px; }
+.barometer-info-cta-btns button {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; color: #fff;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  box-shadow: 0 2px 8px rgba(236,72,153,0.3);
+}
 
 /* Message style toggle */
 .playstyle-msgstyle { margin-bottom: 16px; }
