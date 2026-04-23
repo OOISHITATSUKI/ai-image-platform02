@@ -47,11 +47,11 @@ setInterval(() => {
   }
 }, 30 * 60 * 1000);
 
-// Content level negative prompts
+// Content level negative prompts — v4.2: relaxed for higher levels
 const NEGATIVE_BY_LEVEL: Record<string, string> = {
   sfw: 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, bikini, see-through, suggestive pose, sexual, erotic, cleavage',
-  swimsuit: 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, see-through, sexual, erotic',
-  lingerie: 'nsfw, nude, naked, nipples, genitalia, sex, explicit, pornographic',
+  swimsuit: 'nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, see-through',
+  lingerie: 'genitalia, explicit pornographic acts',
   nsfw: '',
 };
 const BASE_NEGATIVE = '(worst quality:1.4), (low quality:1.4), (ugly:1.3), (deformed:1.3), bad anatomy, bad proportions, blurry, watermark, text, signature, plastic skin, doll-like, CGI, 3d render, anime, cartoon, illustration, painting, drawing, art, sketch, unrealistic, airbrushed, oversmoothed skin, extra fingers, mutated hands, poorly drawn face, poorly drawn hands, missing fingers, extra limbs, fused fingers, long neck, cross-eyed';
@@ -185,17 +185,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // v4.2: Content level based on affection value (not stage name)
+    // v4.2b: Lower thresholds for faster NSFW progression
     const contentLevel = (() => {
       if (!isPaid) {
-        if (userAffection >= 150) return 'swimsuit';
+        if (userAffection >= 100) return 'swimsuit';
         return 'sfw';
       }
-      if (userAffection >= 600) return 'nsfw';
-      if (userAffection >= 400) return 'lingerie';
-      if (userAffection >= 150) return 'swimsuit';
+      if (userAffection >= 400) return 'nsfw';
+      if (userAffection >= 250) return 'lingerie';
+      if (userAffection >= 100) return 'swimsuit';
       return 'sfw';
     })();
+    console.log(`[companion-photo] affection=${userAffection}, isPaid=${isPaid}, contentLevel=${contentLevel}`);
 
     // Build generation prompt
     const levelNeg = NEGATIVE_BY_LEVEL[contentLevel] || NEGATIVE_BY_LEVEL.sfw;

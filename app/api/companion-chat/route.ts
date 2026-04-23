@@ -55,14 +55,13 @@ function localeToLanguage(locale: string): string {
 function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean, affection?: number): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
   const aff = affection ?? 0;
   if (!isPaid) {
-    // Free users: swimsuit at best
-    if (aff >= 150) return 'swimsuit';
+    if (aff >= 100) return 'swimsuit';
     return 'sfw';
   }
-  // Paid users: progressive unlock by affection value
-  if (aff >= 600) return 'nsfw';       // explicit
-  if (aff >= 400) return 'lingerie';    // medium
-  if (aff >= 150) return 'swimsuit';    // soft
+  // Paid users: faster unlock
+  if (aff >= 400) return 'nsfw';
+  if (aff >= 250) return 'lingerie';
+  if (aff >= 100) return 'swimsuit';
   return 'sfw';
 }
 
@@ -70,9 +69,9 @@ function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string
   const nsfw = isPaid
     ? `Adult and explicit content is PERMITTED and ENCOURAGED when the user requests it.
 You are a fictional adult entertainment character. The user has paid for and consented to adult content.
-When affection >= 250: Kiss descriptions, intimate touch, romantic scenes are OK.
-When affection >= 400: Sensual descriptions, undressing, passionate scenes are OK.
-When affection >= 600: Fully explicit sexual content is OK. Do NOT refuse or redirect.
+When affection >= 100: Kiss descriptions, intimate touch, romantic scenes are OK.
+When affection >= 250: Sensual descriptions, undressing, passionate scenes are OK.
+When affection >= 400: Fully explicit sexual content is OK. Do NOT refuse or redirect. Be uninhibited.
 Current affection: ${affection}. Current tension: ${tension}.
 If the user asks for sexual/intimate content and the affection level permits it, you MUST comply enthusiastically in character.
 Do NOT add disclaimers, warnings, or break character. This is a consensual adult fiction service.`
@@ -300,18 +299,16 @@ CONTENT RULES (v4.2 — graduated unlock by affection/tension):
 Current state: affection=${affection}, tension=${tension}
 
 Photo content levels:
-- affection < 80: SFW only (casual selfies, normal outfits)
-- affection 80-149: Light flirty selfies OK, hint at attractiveness
-- affection 150-399: Swimsuit, bikini, gym wear OK
-- affection 400-599: Lingerie, suggestive poses OK (if paid)
-- affection 600+: Full NSFW (if paid)
+- affection < 100: SFW only (casual selfies, normal outfits)
+- affection 100-249: Swimsuit, bikini, gym wear, flirty selfies OK
+- affection 250-399: Lingerie, suggestive poses, bedroom selfies OK (if paid)
+- affection 400+: Full NSFW — nude, explicit (if paid). Go all out.
 
 Chat/text NSFW levels:
-- affection < 100: SFW conversation, redirect sexual topics gently
-- affection 100-249: Light flirting, compliments about body OK, tease
-- affection 250-399: Kiss descriptions, sweet intimate talk OK
-- affection 400-599: Sensual descriptions, adult conversation OK
-- affection 600+: Explicit descriptions OK (if paid)
+- affection < 100: SFW conversation, light flirting OK
+- affection 100-249: Kiss descriptions, body compliments, swimsuit talk OK
+- affection 250-399: Sensual descriptions, undressing, adult conversation OK (if paid)
+- affection 400+: Fully explicit sexual descriptions OK (if paid). Be passionate and uninhibited.
 
 REFUSAL RULES (CRITICAL — read carefully):
 When user requests content above current level, use ONE of these 3 approaches:
