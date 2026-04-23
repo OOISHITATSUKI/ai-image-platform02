@@ -368,10 +368,12 @@ export default function CompanionChatPage() {
     { label: t('companions.assistFlirtDate'), message: t('companions.assistFlirtDateMsg') },
     { label: t('companions.assistFlirtAge'), message: t('companions.assistFlirtAgeMsg') },
   ];
-  const [assistantPresets] = useState(() => {
+  // Re-shuffle assistant presets whenever message count changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const assistantPresets = React.useMemo(() => {
     const shuffled = [...allAssistantPresets].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 3);
-  });
+  }, [messages.length]);
   const presetMessages = isAssistant ? assistantPresets : [
     { label: t('companions.presetSecret'), message: t('companions.presetSecretMsg') },
     { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
