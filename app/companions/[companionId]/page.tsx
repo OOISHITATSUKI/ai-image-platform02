@@ -627,12 +627,32 @@ export default function CompanionChatPage() {
             <span className="comp-chat-header-name">{companion.name}</span>
             <span className="comp-header-online">
               <span className="comp-header-online-dot" />{t('companions.online') || 'Online'}
-              {isAssistant && (
-                <span onClick={(e) => { e.stopPropagation(); setShowAssistCloseness(true); }} style={{ marginLeft: 8, color: '#a78bfa', fontWeight: 600, cursor: 'pointer' }}>
-                  💬 {Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}/100
-                </span>
-              )}
             </span>
+            {isAssistant && (() => {
+              const closeness = Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100);
+              const stages = [
+                { min: 50, emoji: '✨', label: t('companions.assistStage5') || 'Best friends' },
+                { min: 30, emoji: '💕', label: t('companions.assistStage4') || 'Close' },
+                { min: 15, emoji: '💬', label: t('companions.assistStage3') || 'Friendly' },
+                { min: 5, emoji: '😊', label: t('companions.assistStage2') || 'Comfortable' },
+                { min: 0, emoji: '👋', label: t('companions.assistStage1') || 'First meeting' },
+              ];
+              const stage = stages.find(s => closeness >= s.min) || stages[stages.length - 1];
+              return (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowAssistCloseness(true); }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)',
+                    borderRadius: 20, padding: '2px 10px 2px 6px', cursor: 'pointer',
+                    fontSize: '0.7rem', fontWeight: 600, color: '#a78bfa',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {stage.emoji} {stage.label}
+                </button>
+              );
+            })()}
           </div>
         </div>
         <div className="comp-header-right">
@@ -724,25 +744,36 @@ export default function CompanionChatPage() {
           </div>
 
           {/* Mobile: Assistant closeness bar */}
-          {isAssistant && (
-            <div className="comp-mobile-barometer" style={{ padding: '8px 16px', cursor: 'pointer' }} onClick={() => setShowAssistCloseness(true)}>
-              <div className="comp-mobile-bar-info" style={{ justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 600 }}>
-                  💬 {t('companions.assistCloseness') || 'Closeness'}
-                </span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}/100
-                </span>
+          {isAssistant && (() => {
+            const closeness = Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100);
+            const stages = [
+              { min: 50, emoji: '✨', label: t('companions.assistStage5') || 'Best friends' },
+              { min: 30, emoji: '💕', label: t('companions.assistStage4') || 'Close' },
+              { min: 15, emoji: '💬', label: t('companions.assistStage3') || 'Friendly' },
+              { min: 5, emoji: '😊', label: t('companions.assistStage2') || 'Comfortable' },
+              { min: 0, emoji: '👋', label: t('companions.assistStage1') || 'First meeting' },
+            ];
+            const stage = stages.find(s => closeness >= s.min) || stages[stages.length - 1];
+            return (
+              <div className="comp-mobile-barometer" style={{ padding: '8px 16px', cursor: 'pointer' }} onClick={() => setShowAssistCloseness(true)}>
+                <div className="comp-mobile-bar-info" style={{ justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 600 }}>
+                    {stage.emoji} {stage.label}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    {closeness}/100
+                  </span>
+                </div>
+                <div className="comp-mobile-axis-track" style={{ marginTop: 4 }}>
+                  <div className="comp-mobile-axis-fill" style={{
+                    width: `${closeness}%`,
+                    background: 'linear-gradient(90deg, #a78bfa, #f472b6)',
+                    transition: 'width 0.5s ease',
+                  }} />
+                </div>
               </div>
-              <div className="comp-mobile-axis-track" style={{ marginTop: 4 }}>
-                <div className="comp-mobile-axis-fill" style={{
-                  width: `${Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100)}%`,
-                  background: 'linear-gradient(90deg, #a78bfa, #f472b6)',
-                  transition: 'width 0.5s ease',
-                }} />
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Mobile Barometer (hidden on desktop) */}
           {!isAssistant && (() => {
