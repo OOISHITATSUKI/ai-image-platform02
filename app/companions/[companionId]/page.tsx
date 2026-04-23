@@ -21,6 +21,19 @@ import PaywallModal from '@/components/companions/PaywallModal';
 import PlayStyleModal from '@/components/companions/PlayStyleModal';
 import { useTranslation } from '@/lib/useTranslation';
 
+/** Convert markdown-style links [text](url) to clickable <a> tags */
+function renderMessageContent(content: string): React.ReactNode {
+  const parts = content.split(/(\[[^\]]+\]\([^)]+\))/g);
+  if (parts.length === 1) return content;
+  return parts.map((part, i) => {
+    const match = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (match) {
+      return <a key={i} href={match[2]} style={{ color: '#f472b6', textDecoration: 'underline' }}>{match[1]}</a>;
+    }
+    return part;
+  });
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -629,7 +642,7 @@ export default function CompanionChatPage() {
                   {msg.role === 'assistant' && (
                     <AvatarFace companion={companion} className="comp-msg-avatar" />
                   )}
-                  <div className="comp-msg-bubble">{msg.content}</div>
+                  <div className="comp-msg-bubble">{msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}</div>
                 </div>
 
                 {/* Photo loading — separate bubble */}
