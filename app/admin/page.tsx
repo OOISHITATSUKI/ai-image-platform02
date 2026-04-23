@@ -82,6 +82,7 @@ export default function AdminDashboardPage() {
     const [activity, setActivity] = useState<GuestActivityData | null>(null);
     const [sheetsExporting, setSheetsExporting] = useState(false);
     const [sheetsMessage, setSheetsMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [companionKpi, setCompanionKpi] = useState<{ today: Record<string, number>; history: Record<string, Record<string, { value: number }>> } | null>(null);
 
     const handleSheetsExport = async () => {
         setSheetsExporting(true);
@@ -110,10 +111,12 @@ export default function AdminDashboardPage() {
         Promise.all([
             fetch('/api/admin/stats', { headers }).then(r => r.json()),
             fetch('/api/admin/guest-activity', { headers }).then(r => r.json()),
-        ]).then(([statsData, activityData]) => {
+            fetch('/api/admin/companion-kpi?days=7', { headers }).then(r => r.json()).catch(() => null),
+        ]).then(([statsData, activityData, kpiData]) => {
             if (statsData.error) setError(statsData.error);
             else setStats(statsData);
             if (!activityData.error) setActivity(activityData);
+            if (kpiData && !kpiData.error) setCompanionKpi(kpiData);
             setLoading(false);
         }).catch(() => { setError('Failed to load stats'); setLoading(false); });
     }, []);
@@ -437,6 +440,89 @@ export default function AdminDashboardPage() {
                     <div style={valueStyle('#f59e0b')}>{stats.totalBlocks.toLocaleString()}</div>
                 </div>
             </div>
+
+            {/* ── Companion KPI Section ── */}
+            {companionKpi && (
+                <>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', marginTop: '40px', color: 'var(--text-primary)' }}>
+                        💕 コンパニオン KPI（本日リアルタイム）
+                    </h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>DAU</div>
+                            <div style={valueStyle('#f472b6')}>{companionKpi.today.dau?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>セッション数</div>
+                            <div style={valueStyle('#a78bfa')}>{companionKpi.today.sessions?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>メッセージ数</div>
+                            <div style={valueStyle('#34d399')}>{companionKpi.today.messages?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>写真リクエスト</div>
+                            <div style={valueStyle('#60a5fa')}>{companionKpi.today.photos?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>レベルアップ</div>
+                            <div style={valueStyle('#f59e0b')}>{companionKpi.today.levelUps?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
+                        💰 課金ファネル（本日）
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>Paywall表示</div>
+                            <div style={valueStyle('#f87171')}>{companionKpi.today.paywallShown?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>Upgradeクリック</div>
+                            <div style={valueStyle('#10b981')}>{companionKpi.today.paywallClicked?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>Paywall CVR</div>
+                            <div style={valueStyle('#a78bfa')}>{companionKpi.today.paywallCvr || 0}%</div>
+                        </div>
+                    </div>
+
+                    {/* Historical data (past 7 days) */}
+                    {Object.keys(companionKpi.history).length > 0 && (
+                        <>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
+                                📊 過去7日間の推移
+                            </h3>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', marginBottom: '24px' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                            {['日付', 'DAU', 'メッセージ', 'セッション', '写真', 'PW表示', 'PWクリック', 'CVR'].map(h => (
+                                                <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 500 }}>{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(companionKpi.history).map(([date, metrics]) => (
+                                            <tr key={date} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>{date}</td>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600, color: '#f472b6' }}>{metrics.companion_dau?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', color: '#34d399' }}>{metrics.companion_messages_sent?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', color: '#a78bfa' }}>{metrics.companion_sessions?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', color: '#60a5fa' }}>{metrics.companion_photos_requested?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', color: '#f87171' }}>{metrics.companion_paywall_shown?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', color: '#10b981' }}>{metrics.companion_paywall_clicked?.value ?? '-'}</td>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600, color: '#a78bfa' }}>{metrics.companion_paywall_cvr?.value ?? '-'}%</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
         </div>
     );
 }

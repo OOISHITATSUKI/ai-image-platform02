@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/useTranslation';
+import { logCompanionEventClient } from '@/lib/companion-analytics';
+import { COMPANION_EVENTS, PAYWALL_TRIGGERS } from '@/lib/companion-constants';
 
 interface PaywallModalProps {
   type: 'chat_limit' | 'photo' | 'call' | 'live_action' | 'nude_assistant';
@@ -35,6 +37,14 @@ const DESC_KEYS: Record<PaywallModalProps['type'], string> = {
   nude_assistant: 'companions.paywallAssistantDesc',
 };
 
+const TYPE_TO_TRIGGER: Record<PaywallModalProps['type'], string> = {
+  chat_limit: PAYWALL_TRIGGERS.MESSAGE_LIMIT,
+  photo: PAYWALL_TRIGGERS.PHOTO_LIMIT,
+  call: PAYWALL_TRIGGERS.LEVEL_GATE,
+  live_action: PAYWALL_TRIGGERS.LIVE_ACTION_GATE,
+  nude_assistant: PAYWALL_TRIGGERS.NSFW_GATE,
+};
+
 export default function PaywallModal({ type, companionName, requiredLevel, onClose }: PaywallModalProps) {
   const { t } = useTranslation();
   const icon = ICON_MAP[type];
@@ -43,6 +53,21 @@ export default function PaywallModal({ type, companionName, requiredLevel, onClo
     .replace('{name}', companionName)
     .replace('{level}', String(requiredLevel ?? ''));
 
+  // Log paywall_shown event on mount
+  useEffect(() => {
+    logCompanionEventClient({
+      eventType: COMPANION_EVENTS.PAYWALL_SHOWN,
+      metadata: { trigger: TYPE_TO_TRIGGER[type] },
+    });
+  }, [type]);
+
+  const handleUpgradeClick = () => {
+    logCompanionEventClient({
+      eventType: COMPANION_EVENTS.PAYWALL_CLICKED,
+      metadata: { trigger: TYPE_TO_TRIGGER[type] },
+    });
+  };
+
   return (
     <div className="paywall-overlay" onClick={onClose}>
       <div className="paywall-modal" onClick={(e) => e.stopPropagation()}>
@@ -50,7 +75,7 @@ export default function PaywallModal({ type, companionName, requiredLevel, onClo
         <div className="paywall-icon">{icon}</div>
         <h3>{title}</h3>
         <p>{desc}</p>
-        <Link href="/pricing" className="paywall-btn-primary">
+        <Link href="/pricing" className="paywall-btn-primary" onClick={handleUpgradeClick}>
           {t('companions.paywallUpgrade')}
         </Link>
         <button className="paywall-btn-secondary" onClick={onClose}>

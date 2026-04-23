@@ -5,6 +5,8 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { logCompanionEvent } from '@/lib/companion-analytics';
+import { COMPANION_EVENTS } from '@/lib/companion-constants';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120; // 2 minutes max for image generation
@@ -333,6 +335,20 @@ export async function POST(req: NextRequest) {
     await fs.writeFile(filePath, webpBuffer);
 
     const publicUrl = `/api/companion-photos/${filename}`;
+
+    // Log photo request event
+    if (isLoggedIn && authHeader) {
+      const payload = verifyToken(authHeader.slice(7));
+      if (payload) {
+        logCompanionEvent({
+          userId: payload.userId,
+          eventType: COMPANION_EVENTS.PHOTO_REQUESTED,
+          characterId: companionId,
+          metadata: { content_level: contentLevel, affection: userAffection },
+        });
+      }
+    }
+
     return NextResponse.json({ ok: true, imageUrl: publicUrl });
   } catch (error) {
     console.error('companion-photo error:', error);

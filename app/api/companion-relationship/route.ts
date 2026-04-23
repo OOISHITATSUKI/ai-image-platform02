@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { verifyToken } from '@/lib/auth';
 import { getRelationshipLevel, SENTIMENT_DELTAS, type SentimentCategory, type RelationshipState } from '@/lib/companions';
+import { logCompanionEvent } from '@/lib/companion-analytics';
+import { COMPANION_EVENTS } from '@/lib/companion-constants';
 
 const DEFAULT_STATE: RelationshipState = { affection: 0, trust: 50, tension: 30, stage: 'stranger' };
 
@@ -179,6 +181,16 @@ export async function POST(req: NextRequest) {
       points_delta: deltas.affection,
       reason: reason || sentiment || 'chat',
     });
+
+    // Log level-up event if stage changed upward
+    if (stageUp && userId) {
+      logCompanionEvent({
+        userId,
+        eventType: COMPANION_EVENTS.LEVEL_UP,
+        characterId: companionId,
+        metadata: { old_stage: oldLevel.id, new_stage: newLevel.id, affection: newAff },
+      });
+    }
 
     return NextResponse.json({
       affection: newAff,

@@ -3,6 +3,8 @@ import { type Companion, type PlayStyle, type SentimentCategory, PLAY_STYLES, CO
 import { fetchCompanionById } from '@/lib/companions-db';
 import { verifyToken, findUserById } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { logCompanionEvent } from '@/lib/companion-analytics';
+import { COMPANION_EVENTS } from '@/lib/companion-constants';
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
@@ -894,6 +896,30 @@ export async function POST(req: NextRequest) {
     }
 
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);
+
+    // Log companion analytics events (fire-and-forget)
+    if (userId && !isGreeting) {
+      logCompanionEvent({
+        userId,
+        eventType: COMPANION_EVENTS.MESSAGE_SENT,
+        characterId: companionId,
+        metadata: { message_length: userMessage.length },
+      });
+      logCompanionEvent({
+        userId,
+        eventType: COMPANION_EVENTS.AI_REPLIED,
+        characterId: companionId,
+        metadata: { failed: false },
+      });
+      if (xpGain > 0) {
+        logCompanionEvent({
+          userId,
+          eventType: COMPANION_EVENTS.XP_GAINED,
+          characterId: companionId,
+          metadata: { amount: xpGain, source: 'message' },
+        });
+      }
+    }
 
     return NextResponse.json({
       reply,

@@ -20,6 +20,8 @@ import { getUserCompanionById } from '@/lib/userCompanions';
 import PaywallModal from '@/components/companions/PaywallModal';
 import PlayStyleModal from '@/components/companions/PlayStyleModal';
 import { useTranslation } from '@/lib/useTranslation';
+import { logCompanionEventClient } from '@/lib/companion-analytics';
+import { COMPANION_EVENTS, PAYWALL_TRIGGERS } from '@/lib/companion-constants';
 
 /** Convert markdown-style links [text](url) to clickable <a> tags */
 function renderMessageContent(content: string): React.ReactNode {
@@ -183,6 +185,16 @@ export default function CompanionChatPage() {
   const [relTension, setRelTension] = useState(30);
   const [stageChangeEffect, setStageChangeEffect] = useState<{ type: 'up' | 'down'; stage: string } | null>(null);
   const [userNickname, setUserNickname] = useState<string | null>(null);
+
+  // Log session start event
+  useEffect(() => {
+    if (!companion) return;
+    logCompanionEventClient({
+      eventType: COMPANION_EVENTS.SESSION_START,
+      characterId: companion.id,
+      metadata: { entry_point: 'direct_url' },
+    });
+  }, [companion?.id]);
 
   // Show PlayStyle modal on first visit (skip for assistant)
   useEffect(() => {
