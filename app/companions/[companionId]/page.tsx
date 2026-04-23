@@ -540,27 +540,33 @@ export default function CompanionChatPage() {
 
   return (
     <div className="comp-chat-page">
-      {/* Header */}
+      {/* Header — simplified: ← avatar name | coins ⚙️ */}
       <div className="comp-chat-header">
-        <Link href="/companions" className="comp-chat-back">←</Link>
-        <AvatarFace companion={companion} className="comp-chat-header-avatar" />
-        <span className="comp-chat-header-name">{companion.name}</span>
-        {playStyle && (
-          <button className="comp-playstyle-header-btn" onClick={() => setShowPlayStyleModal(true)}>
-            {PLAY_STYLES.find((s) => s.id === playStyle)?.emoji}
-          </button>
-        )}
-        <div className="comp-mode-toggle">
-          <span className="mode-toggle-btn active">{t('companions.modeChat')}</span>
+        <div className="comp-header-left">
+          <Link href="/companions" className="comp-chat-back">←</Link>
+          <AvatarFace companion={companion} className="comp-chat-header-avatar" />
+          <div className="comp-header-name-wrap">
+            <span className="comp-chat-header-name">{companion.name}</span>
+            <span className="comp-header-online"><span className="comp-header-online-dot" />{t('companions.online') || 'Online'}</span>
+          </div>
+        </div>
+        <div className="comp-header-right">
           {isLiveActionAvailable(companion) && (
-            <Link href={`/companions/${companionId}/live`} className="mode-toggle-btn">{t('companions.modeLive')}</Link>
+            <Link href={`/companions/${companionId}/live`} className="comp-header-live-btn">Live</Link>
+          )}
+          {!isAssistant && (
+            <div className="comp-header-coin-badge" onClick={() => setShowCoinShop(true)}>
+              <span className="comp-header-coin-icon">🪙</span>
+              <span className="comp-header-coin-num">{user?.coins ?? 0}</span>
+              <button className="comp-header-coin-add">+</button>
+            </div>
+          )}
+          {!isAssistant && (
+            <button className="comp-header-settings-btn" onClick={() => setShowPlayStyleModal(true)}>
+              ⚙️
+            </button>
           )}
         </div>
-        {!isAssistant && (
-          <button className="comp-header-settings-btn" onClick={() => setShowPlayStyleModal(true)} title={t('companions.changeRelation').replace('{name}', companion.name)}>
-            ⚙️
-          </button>
-        )}
       </div>
 
       <div className="comp-chat-body-wrap">
@@ -663,37 +669,7 @@ export default function CompanionChatPage() {
                   <span className="comp-mobile-axis-num">{relTension}</span>
                 </div>
               </div>
-              <div className="comp-mobile-bar-actions">
-                <button className="comp-mobile-bar-btn" onClick={async () => {
-                  const token = localStorage.getItem('auth_token');
-                  if (!token) { setShowGuestLimit(true); return; }
-                  const res = await fetch('/api/companion-coins', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ companionId, action: 'gift' }),
-                  });
-                  const d = await res.json();
-                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
-                  if (d.points !== undefined) setRelPoints(d.points);
-                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
-                  const el = document.createElement('div'); el.className = 'coin-gift-animation'; el.textContent = '🎁 +20'; document.body.appendChild(el); setTimeout(() => el.remove(), 1500);
-                }}>🎁 <span className="comp-coin-cost">50</span></button>
-                <button className="comp-mobile-bar-btn comp-mobile-bar-btn-boost" onClick={async () => {
-                  const token = localStorage.getItem('auth_token');
-                  if (!token) { setShowGuestLimit(true); return; }
-                  const res = await fetch('/api/companion-coins', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ companionId, action: 'boost' }),
-                  });
-                  const d = await res.json();
-                  if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
-                  if (d.points !== undefined) setRelPoints(d.points);
-                  if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
-                  const el = document.createElement('div'); el.className = 'coin-boost-animation'; el.textContent = '🚀 +100'; document.body.appendChild(el); setTimeout(() => el.remove(), 1800);
-                }}>🚀 <span className="comp-coin-cost">100</span></button>
-                <span className="comp-mobile-bar-coins">🪙 {user?.coins ?? 0}</span>
-              </div>
+              {/* Actions moved to input bar icons */}
             </div>
             ); })()}
 
