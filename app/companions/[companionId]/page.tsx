@@ -368,12 +368,12 @@ export default function CompanionChatPage() {
     { label: t('companions.assistFlirtDate'), message: t('companions.assistFlirtDateMsg') },
     { label: t('companions.assistFlirtAge'), message: t('companions.assistFlirtAgeMsg') },
   ];
-  // Re-shuffle assistant presets whenever message count changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const assistantPresets = React.useMemo(() => {
+  const [assistPresetSeed, setAssistPresetSeed] = useState(0);
+  const [assistantPresets, setAssistantPresets] = useState<{label: string; message: string}[]>([]);
+  useEffect(() => {
     const shuffled = [...allAssistantPresets].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
-  }, [messages.length]);
+    setAssistantPresets(shuffled.slice(0, 3));
+  }, [assistPresetSeed]); // eslint-disable-line react-hooks/exhaustive-deps
   const presetMessages = isAssistant ? assistantPresets : [
     { label: t('companions.presetSecret'), message: t('companions.presetSecretMsg') },
     { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
@@ -500,6 +500,7 @@ export default function CompanionChatPage() {
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
       }
       pushRecentMessage(text.trim());
+      if (isAssistant) setAssistPresetSeed(s => s + 1);
 
       // Update relationship with 3-axis sentiment
       if (!isAssistant && data.sentiment) {
