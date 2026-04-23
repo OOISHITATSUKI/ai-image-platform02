@@ -276,24 +276,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Image generation failed after retries' }, { status: 504 });
     }
 
-    // Step 3: Face swap with companion's avatar
+    // Step 3: Face swap with companion's avatar (or gallery fallback)
     let finalBase64: string | null = null;
-    if (companion.avatarUrl) {
+
+    // Collect all candidate face images: avatar + gallery
+    const faceCandidates: string[] = [];
+    if (companion.avatarUrl) faceCandidates.push(companion.avatarUrl);
+    if (Array.isArray(companion.galleryUrls)) {
+      for (const url of companion.galleryUrls) {
+        if (url && !faceCandidates.includes(url)) faceCandidates.push(url);
+      }
+    }
+
+    for (const faceUrl of faceCandidates) {
       try {
-        // Read avatar from filesystem if local path, fetch if remote URL
         let faceBase64: string;
-        if (companion.avatarUrl.startsWith('http')) {
-          faceBase64 = await fetchImageAsBase64(companion.avatarUrl);
+        if (faceUrl.startsWith('http')) {
+          faceBase64 = await fetchImageAsBase64(faceUrl);
         } else {
-          const avatarPath = path.join(process.cwd(), 'public', companion.avatarUrl);
-          const avatarBuf = await fs.readFile(avatarPath);
-          faceBase64 = avatarBuf.toString('base64');
+          const facePath = path.join(process.cwd(), 'public', faceUrl);
+          const faceBuf = await fs.readFile(facePath);
+          // Skip placeholder files (< 1KB = likely not a real image)
+          if (faceBuf.length < 1024) {
+            console.log(`[companion-photo] Skipping placeholder face: ${faceUrl} (${faceBuf.length} bytes)`);
+            continue;
+          }
+          faceBase64 = faceBuf.toString('base64');
         }
 
         const targetBase64 = await fetchImageAsBase64(imageUrl);
         finalBase64 = await mergeFace(faceBase64, targetBase64);
+        if (finalBase64) {
+          console.log(`[companion-photo] Face swap success with: ${faceUrl}`);
+          break; // Use first successful face swap
+        }
       } catch (e) {
-        console.error('Face swap failed, using original:', e);
+        console.error(`[companion-photo] Face swap failed with ${faceUrl}:`, e);
+        continue; // Try next candidate
       }
     }
 
