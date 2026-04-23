@@ -850,12 +850,8 @@ export async function POST(req: NextRequest) {
       console.log('[Photo detected]', photoPrompt);
       reply = reply.replace(/\[PHOTO:[\s\S]*?\]/, '').trim();
 
-      if (!companion.isAssistant) {
-        // Generate photo asynchronously — don't block the chat response
-        // Instead, return a photoPrompt so the client can call /api/companion-photo
-        photoUrl = undefined; // will be generated client-side
-      }
-      // For assistant: tag is stripped but no photo generated
+      // Return photoPrompt so the client can call /api/companion-photo
+      photoUrl = undefined; // will be generated client-side
     }
 
     // Extract 9-category sentiment tag: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
@@ -928,7 +924,7 @@ export async function POST(req: NextRequest) {
       trustDelta,
       tensionDelta,
       suggestedReplies,
-      ...(photoMatch && !companion.isAssistant ? { photoPrompt: photoMatch[1].trim() } : {}),
+      ...(photoMatch ? { photoPrompt: photoMatch[1].trim() } : {}),
     });
   } catch (error: unknown) {
     if (error instanceof Error && error.name === 'AbortError') {
