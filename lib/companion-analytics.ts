@@ -29,27 +29,5 @@ export async function logCompanionEvent(params: {
   }
 }
 
-/**
- * Client-side event logger — calls a lightweight API endpoint.
- * Used from frontend components where supabaseAdmin is not available.
- */
-export async function logCompanionEventClient(params: {
-  eventType: string;
-  characterId?: string;
-  sessionId?: string;
-  metadata?: Record<string, unknown>;
-}): Promise<void> {
-  try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    await fetch('/api/companion-event', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(params),
-    });
-  } catch {
-    // fire-and-forget
-  }
-}
+// Client-side logger is in companion-analytics-client.ts
+// (separated to avoid bundling supabaseAdmin in client components)

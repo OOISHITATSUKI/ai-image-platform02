@@ -20,7 +20,7 @@ import { getUserCompanionById } from '@/lib/userCompanions';
 import PaywallModal from '@/components/companions/PaywallModal';
 import PlayStyleModal from '@/components/companions/PlayStyleModal';
 import { useTranslation } from '@/lib/useTranslation';
-import { logCompanionEventClient } from '@/lib/companion-analytics';
+import { logCompanionEventClient } from '@/lib/companion-analytics-client';
 import { COMPANION_EVENTS, PAYWALL_TRIGGERS } from '@/lib/companion-constants';
 
 /** Convert markdown-style links [text](url) to clickable <a> tags */
