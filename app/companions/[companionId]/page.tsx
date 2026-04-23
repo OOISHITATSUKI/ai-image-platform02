@@ -170,9 +170,10 @@ export default function CompanionChatPage() {
   const [stageChangeEffect, setStageChangeEffect] = useState<{ type: 'up' | 'down'; stage: string } | null>(null);
   const [userNickname, setUserNickname] = useState<string | null>(null);
 
-  // Show PlayStyle modal on first visit
+  // Show PlayStyle modal on first visit (skip for assistant)
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (companion?.isAssistant) return;
     const saved = localStorage.getItem(playStyleKey);
     if (!saved && companion) {
       setShowPlayStyleModal(true);
@@ -330,14 +331,25 @@ export default function CompanionChatPage() {
     );
   }
 
-  // Preset messages — assistant gets customer-service presets, companions get flirty ones
-  const presetMessages = isAssistant ? [
+  // Preset messages — assistant gets FAQ-style presets (random 3), companions get flirty ones
+  const allAssistantPresets = [
     { label: t('companions.assistPresetRequest'), message: t('companions.assistPresetRequestMsg') },
     { label: t('companions.assistPresetHow'), message: t('companions.assistPresetHowMsg') },
     { label: t('companions.assistPresetPlayStyle'), message: t('companions.assistPresetPlayStyleMsg') },
     { label: t('companions.assistPresetIssue'), message: t('companions.assistPresetIssueMsg') },
     { label: t('companions.assistPresetFeature'), message: t('companions.assistPresetFeatureMsg') },
-  ] : [
+    { label: t('companions.assistFaqCredits'), message: t('companions.assistFaqCreditsMsg') },
+    { label: t('companions.assistFaqNsfw'), message: t('companions.assistFaqNsfwMsg') },
+    { label: t('companions.assistFaqFaceswap'), message: t('companions.assistFaqFaceswapMsg') },
+    { label: t('companions.assistFaqPrompt'), message: t('companions.assistFaqPromptMsg') },
+    { label: t('companions.assistFaqPayment'), message: t('companions.assistFaqPaymentMsg') },
+    { label: t('companions.assistFaqLevel'), message: t('companions.assistFaqLevelMsg') },
+  ];
+  const [assistantPresets] = useState(() => {
+    const shuffled = [...allAssistantPresets].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  });
+  const presetMessages = isAssistant ? assistantPresets : [
     { label: t('companions.presetSecret'), message: t('companions.presetSecretMsg') },
     { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
     { label: t('companions.presetMiss'), message: t('companions.presetMissMsg') },
@@ -511,10 +523,12 @@ export default function CompanionChatPage() {
         }
       }
 
-      // If user asked about play styles, show the modal after reply
-      const psKeywords = /play.?style|関係性|スタイル|vibe|relationship style|how.*treat|どう接して|変更|change.*style/i;
-      if (psKeywords.test(text)) {
-        setTimeout(() => setShowPlayStyleModal(true), 1500);
+      // If user asked about play styles, show the modal after reply (not for assistant)
+      if (!isAssistant) {
+        const psKeywords = /play.?style|関係性|スタイル|vibe|relationship style|how.*treat|どう接して|変更|change.*style/i;
+        if (psKeywords.test(text)) {
+          setTimeout(() => setShowPlayStyleModal(true), 1500);
+        }
       }
 
       // Daily limit is now enforced server-side via 429 response
@@ -948,8 +962,8 @@ export default function CompanionChatPage() {
         </div>
       )}
 
-      {/* PlayStyle selection modal */}
-      {showPlayStyleModal && companion && (
+      {/* PlayStyle selection modal (not for assistant) */}
+      {showPlayStyleModal && companion && !isAssistant && (
         <PlayStyleModal
           companionName={companion.name}
           currentNickname={userNickname}
