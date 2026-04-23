@@ -431,7 +431,11 @@ export default function CompanionChatPage() {
             setMessages((prev) => prev.map((m) => {
               const msg = m as Message & { _photoId?: string };
               if (msg._photoId === photoMsgId) {
-                return { ...m, imageUrl: photoData.imageUrl || undefined, imageLoading: false };
+                if (photoData.imageUrl) {
+                  return { ...m, imageUrl: photoData.imageUrl, imageLoading: false };
+                }
+                // Photo generation failed — show error in chat
+                return { ...m, content: m.content + `\n\n📷 ${t('companions.photoFailed') || '写真の送信に失敗しました...もう一度お願いしてね'}`, imageLoading: false };
               }
               return m;
             }));
@@ -440,7 +444,7 @@ export default function CompanionChatPage() {
             setMessages((prev) => prev.map((m) => {
               const msg = m as Message & { _photoId?: string };
               if (msg._photoId === photoMsgId) {
-                return { ...m, imageLoading: false };
+                return { ...m, content: m.content + `\n\n📷 ${t('companions.photoFailed') || '写真の送信に失敗しました...もう一度お願いしてね'}`, imageLoading: false };
               }
               return m;
             }));

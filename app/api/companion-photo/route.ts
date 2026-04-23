@@ -89,10 +89,23 @@ async function pollResult(taskId: string): Promise<string | null> {
   return null;
 }
 
-async function fetchImageAsBase64(url: string): Promise<string> {
-  const res = await fetch(url);
-  const buf = await res.arrayBuffer();
-  return Buffer.from(buf).toString('base64');
+async function fetchImageAsBase64(url: string, retries = 3): Promise<string> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = await res.arrayBuffer();
+      return Buffer.from(buf).toString('base64');
+    } catch (e) {
+      console.error(`[companion-photo] fetchImage attempt ${i + 1}/${retries} failed:`, e);
+      if (i === retries - 1) throw e;
+      await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw new Error('fetchImageAsBase64 exhausted retries');
 }
 
 async function mergeFace(faceBase64: string, targetBase64: string): Promise<string | null> {
@@ -194,48 +207,61 @@ export async function POST(req: NextRequest) {
 
     const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${prompt}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
 
-    // Step 1: Generate base image via txt2img
-    const genRes = await fetch(`${NOVITA_BASE}/txt2img`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${NOVITA_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        extra: {
-          response_image_type: 'jpeg',
-          enable_nsfw_detection: false,
+    // Step 1: Generate base image via txt2img (with 1 retry)
+    let imageUrl: string | null = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const genRes = await fetch(`${NOVITA_BASE}/txt2img`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${NOVITA_API_KEY}`,
+          'Content-Type': 'application/json',
         },
-        request: {
-          model_name: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors',
-          prompt: finalPrompt,
-          negative_prompt: negativePrompt,
-          width: 832,
-          height: 1216,
-          steps: 32,
-          guidance_scale: 5.5,
-          sampler_name: 'DPM++ 2M Karras',
-          image_num: 1,
-          seed: -1,
-        },
-      }),
-    });
+        body: JSON.stringify({
+          extra: {
+            response_image_type: 'jpeg',
+            enable_nsfw_detection: false,
+          },
+          request: {
+            model_name: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors',
+            prompt: finalPrompt,
+            negative_prompt: negativePrompt,
+            width: 832,
+            height: 1216,
+            steps: 32,
+            guidance_scale: 5.5,
+            sampler_name: 'DPM++ 2M Karras',
+            image_num: 1,
+            seed: -1,
+          },
+        }),
+      });
 
-    if (!genRes.ok) {
-      console.error('txt2img error:', await genRes.text());
-      return NextResponse.json({ error: 'Image generation failed' }, { status: 502 });
+      if (!genRes.ok) {
+        const errText = await genRes.text();
+        console.error(`[companion-photo] txt2img attempt ${attempt + 1} error:`, errText);
+        if (attempt === 1) return NextResponse.json({ error: 'Image generation failed' }, { status: 502 });
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+
+      const genData = await genRes.json();
+      const taskId = genData.task_id;
+      if (!taskId) {
+        console.error('[companion-photo] No task_id in response');
+        if (attempt === 1) return NextResponse.json({ error: 'No task ID' }, { status: 502 });
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+
+      // Step 2: Poll for result
+      imageUrl = await pollResult(taskId);
+      if (imageUrl) break;
+      console.error(`[companion-photo] poll timed out, attempt ${attempt + 1}`);
+      if (attempt === 1) return NextResponse.json({ error: 'Image generation timed out' }, { status: 504 });
     }
 
-    const genData = await genRes.json();
-    const taskId = genData.task_id;
-    if (!taskId) {
-      return NextResponse.json({ error: 'No task ID' }, { status: 502 });
-    }
-
-    // Step 2: Poll for result
-    const imageUrl = await pollResult(taskId);
     if (!imageUrl) {
-      return NextResponse.json({ error: 'Image generation timed out' }, { status: 504 });
+      return NextResponse.json({ error: 'Image generation failed after retries' }, { status: 504 });
     }
 
     // Step 3: Face swap with companion's avatar
