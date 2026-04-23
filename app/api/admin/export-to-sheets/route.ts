@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { checkAdmin } from '@/app/api/admin/stats/route';
 import { getAllGuestGenerations } from '@/lib/db/guest_generations';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 // ── Google Sheets helpers ──
 
@@ -219,6 +220,49 @@ export async function collectKpiData() {
         console.error('[collectKpiData] Umami fetch failed, continuing without Umami data:', e);
     }
 
+    // ── Companion KPI (from companion_events table) ──
+    let companionDau = 0;
+    let companionSessions = 0;
+    let companionMessages = 0;
+    let companionPhotos = 0;
+    let companionLevelUps = 0;
+    let companionPaywallShown = 0;
+    let companionPaywallClicked = 0;
+    try {
+        // Yesterday in JST
+        const jstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+        const yesterday = new Date(jstNow);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yDateStr = yesterday.toISOString().split('T')[0];
+        const yStart = `${yDateStr}T00:00:00Z`;
+        const yEnd = `${yDateStr}T23:59:59Z`;
+
+        const [sessions, messages, photos, levelUps, paywallShown, paywallClicked] = await Promise.all([
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_session_start').gte('created_at', yStart).lte('created_at', yEnd),
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_message_sent').gte('created_at', yStart).lte('created_at', yEnd),
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_photo_requested').gte('created_at', yStart).lte('created_at', yEnd),
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'level_up').gte('created_at', yStart).lte('created_at', yEnd),
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'paywall_shown').gte('created_at', yStart).lte('created_at', yEnd),
+            supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'paywall_clicked').gte('created_at', yStart).lte('created_at', yEnd),
+        ]);
+        companionSessions = sessions.count ?? 0;
+        companionMessages = messages.count ?? 0;
+        companionPhotos = photos.count ?? 0;
+        companionLevelUps = levelUps.count ?? 0;
+        companionPaywallShown = paywallShown.count ?? 0;
+        companionPaywallClicked = paywallClicked.count ?? 0;
+
+        // DAU
+        const { data: dauData } = await supabaseAdmin
+            .from('companion_events')
+            .select('user_id')
+            .gte('created_at', yStart)
+            .lte('created_at', yEnd);
+        companionDau = new Set(dauData?.map(r => r.user_id)).size;
+    } catch (e) {
+        console.error('[collectKpiData] Companion KPI fetch failed:', e);
+    }
+
     return {
         dateStr,
         totalGens,
@@ -233,6 +277,14 @@ export async function collectKpiData() {
         bounceRate: umami.bounceRate,
         mobileRatio: umami.mobileRatio,
         topReferrers: umami.topReferrers,
+        // Companion
+        companionDau,
+        companionSessions,
+        companionMessages,
+        companionPhotos,
+        companionLevelUps,
+        companionPaywallShown,
+        companionPaywallClicked,
     };
 }
 
@@ -259,26 +311,40 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
         console.warn(`[export-to-sheets] 'imagenude_kpi_tracker01' not found. Using '${targetSheet}' instead.`);
     }
 
-    // Ensure header row (row 2) has Umami column names in O-U
+    // Ensure header row (row 2) has Umami column names in O-U and Companion in V-AB
     try {
         const headerRes = await sheets.spreadsheets.values.get({
             spreadsheetId: sheetId,
-            range: `'${targetSheet}'!O2:U2`,
+            range: `'${targetSheet}'!O2:AB2`,
         });
         const existing = headerRes.data.values?.[0] ?? [];
         if (!existing[0]) {
             await sheets.spreadsheets.values.update({
                 spreadsheetId: sheetId,
-                range: `'${targetSheet}'!O2:U2`,
+                range: `'${targetSheet}'!O2:AB2`,
                 valueInputOption: 'RAW',
                 requestBody: {
-                    values: [['ページビュー数', 'ユニークビジター数', '直帰率', 'モバイル比率', '流入元TOP1', '流入元TOP2', '流入元TOP3']],
+                    values: [[
+                        'ページビュー数', 'ユニークビジター数', '直帰率', 'モバイル比率', '流入元TOP1', '流入元TOP2', '流入元TOP3',
+                        'Companion DAU', 'Companionセッション', 'Companionメッセージ', 'Companion写真', 'Companionレベルアップ', 'Paywall表示', 'Paywall CVR',
+                    ]],
                 },
             });
-            console.log('[export-to-sheets] Added Umami header columns O2:U2');
+            console.log('[export-to-sheets] Added Umami + Companion header columns O2:AB2');
+        } else if (!existing[7]) {
+            // Umami headers exist but Companion headers missing
+            await sheets.spreadsheets.values.update({
+                spreadsheetId: sheetId,
+                range: `'${targetSheet}'!V2:AB2`,
+                valueInputOption: 'RAW',
+                requestBody: {
+                    values: [['Companion DAU', 'Companionセッション', 'Companionメッセージ', 'Companion写真', 'Companionレベルアップ', 'Paywall表示', 'Paywall CVR']],
+                },
+            });
+            console.log('[export-to-sheets] Added Companion header columns V2:AB2');
         }
     } catch (e) {
-        console.warn('[export-to-sheets] Failed to update Umami headers:', e);
+        console.warn('[export-to-sheets] Failed to update headers:', e);
     }
 
     // Split referrers into 3 separate columns
@@ -314,11 +380,21 @@ export async function writeToSheets(data: Awaited<ReturnType<typeof collectKpiDa
         ref1,                             // S: 流入元TOP1
         ref2,                             // T: 流入元TOP2
         ref3,                             // U: 流入元TOP3
+        // Companion KPI (V-AB)
+        data.companionDau,                // V: Companion DAU
+        data.companionSessions,           // W: Companionセッション
+        data.companionMessages,           // X: Companionメッセージ
+        data.companionPhotos,             // Y: Companion写真
+        data.companionLevelUps,           // Z: Companionレベルアップ
+        data.companionPaywallShown,       // AA: Paywall表示
+        data.companionPaywallShown > 0    // AB: Paywall CVR
+            ? `${Math.round((data.companionPaywallClicked / data.companionPaywallShown) * 10000) / 100}%`
+            : '0%',
     ];
 
     await sheets.spreadsheets.values.append({
         spreadsheetId: sheetId,
-        range: `'${targetSheet}'!A:U`,
+        range: `'${targetSheet}'!A:AB`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
