@@ -198,11 +198,20 @@ export async function POST(req: NextRequest) {
     })();
     console.log(`[companion-photo] affection=${userAffection}, isPaid=${isPaid}, contentLevel=${contentLevel}`);
 
-    // Build generation prompt
+    // Build generation prompt — boost based on content level
     const levelNeg = NEGATIVE_BY_LEVEL[contentLevel] || NEGATIVE_BY_LEVEL.sfw;
     const negativePrompt = levelNeg ? `${levelNeg}, ${BASE_NEGATIVE}` : BASE_NEGATIVE;
 
-    const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${prompt}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
+    const LEVEL_BOOST: Record<string, string> = {
+      sfw: '',
+      swimsuit: ', bikini, swimsuit, beach, showing skin, cleavage',
+      lingerie: ', lingerie, lace bra, panties, bedroom, seductive pose, showing skin, cleavage, sensual',
+      nsfw: ', nude, naked, topless, nipples visible, no clothes, fully undressed, explicit, sexual pose, bedroom, seductive, erotic, showing breasts',
+    };
+    const boost = LEVEL_BOOST[contentLevel] || '';
+
+    const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
+    console.log(`[companion-photo] contentLevel=${contentLevel}, prompt=${finalPrompt.slice(0, 200)}...`);
 
     // Step 1: Generate base image via txt2img (with 1 retry)
     let imageUrl: string | null = null;
