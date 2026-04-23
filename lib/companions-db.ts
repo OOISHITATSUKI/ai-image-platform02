@@ -52,6 +52,10 @@ export function rowToCompanion(row: CompanionRow): Companion {
     row.profile_music ||
     row.profile_hobbies;
 
+  // Merge body attributes from hardcoded companion data (not in DB yet)
+  const legacy = COMPANIONS.find((c) => c.id === row.id) ?? (row.is_assistant ? nudeAssistant : undefined);
+  const legacyProfile = legacy?.profile;
+
   const profile: CompanionProfile | undefined = hasProfile
     ? {
         hometown: row.profile_hometown ?? '',
@@ -62,11 +66,18 @@ export function rowToCompanion(row: CompanionRow): Companion {
         movies: row.profile_movies ?? '',
         hobbies: row.profile_hobbies ?? '',
         catchphrase: row.profile_catchphrase ?? '',
+        // Body attributes — sourced from hardcoded data until DB columns are added
+        bodyType: legacyProfile?.bodyType,
+        breastSize: legacyProfile?.breastSize,
+        hairColor: legacyProfile?.hairColor,
+        hairStyle: legacyProfile?.hairStyle,
+        skinTone: legacyProfile?.skinTone,
+        height: legacyProfile?.height,
+        specialFeatures: legacyProfile?.specialFeatures,
       }
     : undefined;
 
   // Re-hydrate with current defaultLiveActions for this id (keeps clip mapping fresh)
-  const legacy = COMPANIONS.find((c) => c.id === row.id) ?? (row.is_assistant ? nudeAssistant : undefined);
   const liveActions = legacy?.liveActions ?? [];
 
   return {

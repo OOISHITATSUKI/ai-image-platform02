@@ -185,15 +185,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // v4.2b: Lower thresholds for faster NSFW progression
+    // v4.3: Lower NSFW thresholds — Dating (250+) unlocks NSFW for paid users
     const contentLevel = (() => {
       if (!isPaid) {
         if (userAffection >= 100) return 'swimsuit';
         return 'sfw';
       }
-      if (userAffection >= 400) return 'nsfw';
-      if (userAffection >= 250) return 'lingerie';
-      if (userAffection >= 100) return 'swimsuit';
+      if (userAffection >= 300) return 'nsfw';
+      if (userAffection >= 200) return 'lingerie';
+      if (userAffection >= 80) return 'swimsuit';
       return 'sfw';
     })();
     console.log(`[companion-photo] affection=${userAffection}, isPaid=${isPaid}, contentLevel=${contentLevel}`);
@@ -210,7 +210,13 @@ export async function POST(req: NextRequest) {
     };
     const boost = LEVEL_BOOST[contentLevel] || '';
 
-    const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
+    // Inject companion's physical attributes into the prompt
+    const p = companion.profile;
+    const bodyDesc = p?.bodyType
+      ? `${p.hairColor ?? ''} ${p.hairStyle ?? ''} hair, ${p.skinTone ?? ''} skin, ${p.bodyType} body, ${p.breastSize ?? 'medium'} breasts${p.specialFeatures ? `, ${p.specialFeatures}` : ''}`
+      : '';
+
+    const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
     console.log(`[companion-photo] contentLevel=${contentLevel}, prompt=${finalPrompt.slice(0, 200)}...`);
 
     // Step 1: Generate base image via txt2img (with 1 retry)

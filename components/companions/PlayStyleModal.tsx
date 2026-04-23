@@ -31,7 +31,7 @@ export default function PlayStyleModal({ companionName, currentNickname, current
         {onNicknameChange && (
           <div className="playstyle-nickname">
             <label className="playstyle-nickname-label">
-              {t('companions.nicknameLabel') || `${companionName}からの呼び名`}
+              {(t('companions.nicknameLabel') || `${companionName}からの呼び名`).replace('{name}', companionName)}
             </label>
             <div className="playstyle-nickname-row">
               <input
