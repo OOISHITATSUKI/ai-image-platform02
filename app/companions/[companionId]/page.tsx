@@ -860,9 +860,12 @@ export default function CompanionChatPage() {
               {nl && (
                 <div className="comp-char-bottom-unlock">
                   <span className="comp-char-bottom-unlock-pts">
-                    {t('companions.rel_next').replace('{points}', String(ptn)).replace(String(ptn), `<em>${ptn}</em>`).includes('<em>')
-                      ? <>{t('companions.rel_next').split(String(ptn))[0]}<em>{ptn}</em>{t('companions.rel_next').split(String(ptn)).slice(1).join(String(ptn))}</>
-                      : t('companions.rel_next').replace('{points}', String(ptn))}
+                    {(() => {
+                      const tmpl = t('companions.rel_next');
+                      const idx = tmpl.indexOf('{points}');
+                      if (idx === -1) return tmpl;
+                      return <>{tmpl.slice(0, idx)}<em>{ptn}</em>{tmpl.slice(idx + '{points}'.length)}</>;
+                    })()}
                   </span>
                   <span className="comp-char-bottom-unlock-reward">{t(`companions.rel_unlock_${nl.id}`)}</span>
                 </div>
