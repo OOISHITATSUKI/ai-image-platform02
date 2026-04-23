@@ -229,11 +229,9 @@ export async function collectKpiData() {
     let companionPaywallShown = 0;
     let companionPaywallClicked = 0;
     try {
-        // Yesterday in JST
+        // Use today's data (events accumulate throughout the day)
         const jstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-        const yesterday = new Date(jstNow);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yDateStr = yesterday.toISOString().split('T')[0];
+        const yDateStr = jstNow.toISOString().split('T')[0];
         const yStart = `${yDateStr}T00:00:00Z`;
         const yEnd = `${yDateStr}T23:59:59Z`;
 
