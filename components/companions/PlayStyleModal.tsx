@@ -7,13 +7,15 @@ import { useTranslation } from '@/lib/useTranslation';
 interface PlayStyleModalProps {
   companionName: string;
   currentNickname?: string | null;
+  currentMessageStyle?: 'cinematic' | 'chat';
   onSelect: (style: PlayStyle) => void;
   onSkip: () => void;
   onNicknameChange?: (nickname: string) => void;
+  onMessageStyleChange?: (style: 'cinematic' | 'chat') => void;
   onReset?: () => void;
 }
 
-export default function PlayStyleModal({ companionName, currentNickname, onSelect, onSkip, onNicknameChange, onReset }: PlayStyleModalProps) {
+export default function PlayStyleModal({ companionName, currentNickname, currentMessageStyle, onSelect, onSkip, onNicknameChange, onMessageStyleChange, onReset }: PlayStyleModalProps) {
   const [selected, setSelected] = useState<PlayStyle | null>(null);
   const [nickname, setNickname] = useState(currentNickname ?? '');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -47,6 +49,33 @@ export default function PlayStyleModal({ companionName, currentNickname, onSelec
                 disabled={nickname.trim() === (currentNickname ?? '')}
               >
                 {t('companions.nicknameSave') || '保存'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Message style toggle */}
+        {onMessageStyleChange && (
+          <div className="playstyle-msgstyle">
+            <label className="playstyle-nickname-label">
+              {t('companions.messageStyleLabel') || 'メッセージスタイル'}
+            </label>
+            <div className="playstyle-msgstyle-row">
+              <button
+                className={`playstyle-msgstyle-btn ${currentMessageStyle === 'cinematic' ? 'active' : ''}`}
+                onClick={() => onMessageStyleChange('cinematic')}
+              >
+                <span className="playstyle-msgstyle-emoji">🎬</span>
+                <span className="playstyle-msgstyle-label">{t('companions.styleCinematic') || 'シネマティック'}</span>
+                <span className="playstyle-msgstyle-desc">{t('companions.styleCinematicDesc') || '情景描写付き'}</span>
+              </button>
+              <button
+                className={`playstyle-msgstyle-btn ${currentMessageStyle === 'chat' ? 'active' : ''}`}
+                onClick={() => onMessageStyleChange('chat')}
+              >
+                <span className="playstyle-msgstyle-emoji">💬</span>
+                <span className="playstyle-msgstyle-label">{t('companions.styleChat') || 'チャット'}</span>
+                <span className="playstyle-msgstyle-desc">{t('companions.styleChatDesc') || 'LINE風で読みやすい'}</span>
               </button>
             </div>
           </div>

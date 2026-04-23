@@ -11100,6 +11100,48 @@ button, a, [role="button"] {
 .playstyle-nickname-save:hover { background: rgba(236,72,153,0.25); }
 .playstyle-nickname-save:disabled { opacity: 0.4; cursor: default; }
 
+/* Barometer Info Modal */
+.barometer-info-modal {
+  background: #1a1a2e; border-radius: 16px; padding: 28px 24px;
+  width: 420px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.08); position: relative;
+}
+.barometer-info-modal h3 { margin: 0 0 6px; font-size: 1.15rem; color: #fff; }
+.barometer-info-stage { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 16px; }
+.barometer-info-axes { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.barometer-info-axis { display: flex; flex-direction: column; gap: 4px; }
+.barometer-info-axis-head { display: flex; justify-content: space-between; font-size: 0.82rem; }
+.barometer-info-axis-desc { font-size: 0.7rem; color: #71717a; margin: 2px 0 0; line-height: 1.4; }
+.barometer-info-next {
+  padding: 10px 14px; margin-bottom: 14px;
+  background: rgba(236,72,153,0.08); border: 1px solid rgba(236,72,153,0.2);
+  border-left: 3px solid #ec4899; border-radius: 10px;
+  font-size: 0.82rem; color: #d4d4d8;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.barometer-info-next strong { color: #fff; font-size: 0.88rem; }
+.barometer-info-tips { margin-bottom: 16px; }
+.barometer-info-tips h4 { margin: 0 0 8px; font-size: 0.85rem; color: #f4f4f5; }
+.barometer-info-tips ul { margin: 0; padding: 0 0 0 4px; list-style: none; }
+.barometer-info-tips li { font-size: 0.78rem; color: #a1a1aa; padding: 3px 0; }
+
+/* Message style toggle */
+.playstyle-msgstyle { margin-bottom: 16px; }
+.playstyle-msgstyle-row { display: flex; gap: 8px; }
+.playstyle-msgstyle-btn {
+  flex: 1; padding: 10px; border-radius: 12px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.playstyle-msgstyle-btn:hover { background: rgba(255,255,255,0.06); }
+.playstyle-msgstyle-btn.active {
+  border-color: var(--companion-pink); background: rgba(255,77,141,0.1);
+}
+.playstyle-msgstyle-emoji { font-size: 1.3rem; }
+.playstyle-msgstyle-label { font-size: 0.8rem; font-weight: 700; color: #f4f4f5; }
+.playstyle-msgstyle-desc { font-size: 0.65rem; color: var(--text-secondary); }
+
 /* Reset relationship */
 .playstyle-reset-area { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
 .playstyle-reset-btn {

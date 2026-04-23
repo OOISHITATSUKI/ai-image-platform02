@@ -77,7 +77,7 @@ function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean): 'sfw'
   }
 }
 
-function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger'): string {
+function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string = 'en', playStyle: PlayStyle = 'sweet', relationshipLevel: string = 'stranger', msgStyle: string = 'cinematic'): string {
   const nsfw = isPaid
     ? 'Adult and explicit content is permitted.'
     : 'Keep content suggestive but NOT explicit.';
@@ -327,6 +327,18 @@ Format: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
 Example: [SENTIMENT:tenderness|aff:15|trust:5|tension:-2]
 
 You may adjust the numbers slightly based on intensity. React in-character to negative sentiments.
+
+== SUGGESTED REPLIES ==
+After the SENTIMENT tag, generate 3 short reply suggestions the user might send next.
+Rules:
+- Each suggestion max 15 characters
+- Must naturally follow your latest message
+- Include 1 emoji each
+- 3 types: affirmative, question, emotional
+- Write in ${lang}
+
+Format: [REPLIES:suggestion1|suggestion2|suggestion3]
+Example: [REPLIES:会いたいな ❤️|今何してる？ 😊|大好き 💕]
 The tag is invisible to the user. Place it at the absolute end after all other tags.
 
 == STORY COMMENTS ==
@@ -359,7 +371,22 @@ The play style colors your TONE, not your content.
 Real relationships evolve — follow the energy of the conversation.
 
 == NSFW RULES ==
-${nsfw}`;
+${nsfw}
+
+== MESSAGE STYLE ==
+${msgStyle === 'chat'
+  ? `Style: CHAT MODE
+- Do NOT use action descriptions (*like this* or （like this）)
+- Write short, casual messages like LINE/WhatsApp
+- Keep replies to 1-3 short sentences
+- Use emojis naturally at the end (1-2 per message)
+- Use line breaks between sentences for readability
+- Sound like a real text conversation, not a novel`
+  : `Style: CINEMATIC MODE
+- Use action descriptions to set the scene
+- Weave actions and dialogue together naturally
+- Create an immersive, novel-like reading experience
+- Keep total reply length to 2-4 sentences`}`;
 }
 
 /**
@@ -501,7 +528,7 @@ function checkGuestLimit(ip: string): { allowed: boolean; remaining: number; ret
 
 export async function POST(req: NextRequest) {
   try {
-    const { companionId, messages, userMessage, recentMessages, locale, playStyle, userNickname } = await req.json();
+    const { companionId, messages, userMessage, recentMessages, locale, playStyle, userNickname, messageStyle } = await req.json();
 
     if (!companionId || !userMessage) {
       return NextResponse.json({ error: 'Missing companionId or userMessage' }, { status: 400 });
@@ -599,7 +626,7 @@ export async function POST(req: NextRequest) {
       : '';
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)
-      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel) + nicknameSuffix;
+      : buildSystemPrompt(companion, isPaid, userLocale, userPlayStyle, relationshipLevel, typeof messageStyle === 'string' ? messageStyle : 'cinematic') + nicknameSuffix;
 
     const history: ChatMsg[] = Array.isArray(messages) ? messages.slice(-20) : [];
     const greetingPrompt = isGreeting
@@ -726,6 +753,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Extract suggested replies: [REPLIES:a|b|c]
+    let suggestedReplies: string[] = [];
+    const repliesMatch = reply.match(/\[REPLIES:([\s\S]*?)\]/);
+    if (repliesMatch) {
+      suggestedReplies = repliesMatch[1].split('|').map((s: string) => s.trim()).filter((s: string) => s.length > 0).slice(0, 3);
+      reply = reply.replace(/\[REPLIES:[\s\S]*?\]/, '').trim();
+    }
+
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);
 
     return NextResponse.json({
@@ -735,6 +770,7 @@ export async function POST(req: NextRequest) {
       affDelta,
       trustDelta,
       tensionDelta,
+      suggestedReplies,
       ...(photoMatch && !companion.isAssistant ? { photoPrompt: photoMatch[1].trim() } : {}),
     });
   } catch (error: unknown) {

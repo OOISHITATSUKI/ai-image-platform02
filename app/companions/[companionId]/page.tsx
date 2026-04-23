@@ -122,10 +122,16 @@ export default function CompanionChatPage() {
   });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [dynamicReplies, setDynamicReplies] = useState<string[]>([]);
+  const [messageStyle, setMessageStyle] = useState<'cinematic' | 'chat'>(() => {
+    if (typeof window === 'undefined') return 'cinematic';
+    return (localStorage.getItem(`msgStyle_${companionId}`) || 'cinematic') as 'cinematic' | 'chat';
+  });
   const [paywallType, setPaywallType] = useState<'chat_limit' | 'photo' | 'call' | 'nude_assistant' | null>(null);
   const [showCallComingSoon, setShowCallComingSoon] = useState(false);
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [showBarometerInfo, setShowBarometerInfo] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -365,6 +371,7 @@ export default function CompanionChatPage() {
           locale,
           playStyle: playStyle || 'sweet',
           userNickname: userNickname || undefined,
+          messageStyle,
         }),
       });
 
@@ -382,6 +389,11 @@ export default function CompanionChatPage() {
           return;
         }
         throw new Error(data.error || 'API error');
+      }
+
+      // Update dynamic quick replies
+      if (Array.isArray(data.suggestedReplies) && data.suggestedReplies.length > 0) {
+        setDynamicReplies(data.suggestedReplies);
       }
 
       // If AI wants to send a photo, check free user limit (1st free, 2nd+ paywall)
@@ -644,7 +656,7 @@ export default function CompanionChatPage() {
             const nl = getNextLevel(relPoints);
             const ptn = nl ? nl.minAffection - relPoints : 0;
             return (
-            <div className="comp-mobile-barometer">
+            <div className="comp-mobile-barometer" onClick={() => setShowBarometerInfo(true)} style={{ cursor: 'pointer' }}>
               <div className="comp-mobile-bar-info">
                 <button className="comp-mobile-roadmap-btn" onClick={() => setShowRoadmap(true)}>
                   {cl.emoji} {t(`companions.rel_${cl.id}`)} ▾
@@ -675,14 +687,21 @@ export default function CompanionChatPage() {
 
           {/* Presets */}
           <div className="comp-presets">
-            {presetMessages.map((p) => (
+            {(dynamicReplies.length > 0 ? dynamicReplies : presetMessages.map(p => p.label)).map((text, idx) => (
               <button
-                key={p.label}
+                key={`${text}-${idx}`}
                 className="comp-preset-btn"
-                onClick={() => handlePreset(p)}
+                onClick={() => {
+                  if (dynamicReplies.length > 0) {
+                    sendMessage(text);
+                    setDynamicReplies([]);
+                  } else {
+                    handlePreset(presetMessages[idx]);
+                  }
+                }}
                 disabled={isLoading}
               >
-                {p.label}
+                {typeof text === 'string' ? text : (text as { label: string }).label}
               </button>
             ))}
           </div>
@@ -752,7 +771,7 @@ export default function CompanionChatPage() {
             const nl = getNextLevel(relPoints);
             const ptn = nl ? nl.minAffection - relPoints : 0;
             return (
-            <div className="comp-char-bottom-overlay">
+            <div className="comp-char-bottom-overlay" onClick={() => setShowBarometerInfo(true)} style={{ cursor: 'pointer' }}>
               {/* Name + mini profile */}
               <div className="comp-char-bottom-header">
                 <div className="comp-char-bottom-name">
@@ -881,6 +900,7 @@ export default function CompanionChatPage() {
         <PlayStyleModal
           companionName={companion.name}
           currentNickname={userNickname}
+          currentMessageStyle={messageStyle}
           onSelect={(style) => {
             setPlayStyle(style);
             localStorage.setItem(playStyleKey, style);
@@ -894,6 +914,10 @@ export default function CompanionChatPage() {
           }}
           onNicknameChange={(name) => {
             saveNickname(name);
+          }}
+          onMessageStyleChange={(style) => {
+            setMessageStyle(style);
+            localStorage.setItem(`msgStyle_${companionId}`, style);
           }}
           onReset={() => {
             resetRelationship();
@@ -981,6 +1005,59 @@ export default function CompanionChatPage() {
           </div>
         </div>
       )}
+
+      {/* Barometer Info Modal */}
+      {showBarometerInfo && companion && !isAssistant && (() => {
+        const cl = getRelationshipLevel(relPoints);
+        const nl = getNextLevel(relPoints);
+        const ptn = nl ? nl.minAffection - relPoints : 0;
+        return (
+        <div className="paywall-overlay" onClick={() => setShowBarometerInfo(false)}>
+          <div className="barometer-info-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="paywall-close" onClick={() => setShowBarometerInfo(false)}>×</button>
+            <h3>{cl.emoji} {t('companions.barometerTitle')?.replace('{name}', companion.name) || `あなたと${companion.name}の関係`}</h3>
+            <p className="barometer-info-stage">{t('companions.barometerStage') || '現在のステージ'}: <strong>{t(`companions.rel_${cl.id}`)}</strong></p>
+
+            <div className="barometer-info-axes">
+              <div className="barometer-info-axis">
+                <div className="barometer-info-axis-head"><span style={{ color: '#ec4899' }}>💖 {t('companions.rel_axis_affection')}</span> <strong style={{ color: '#ec4899' }}>{relPoints} / 1000</strong></div>
+                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${(relPoints / 1000) * 100}%`, background: '#ec4899' }} /></div>
+                <p className="barometer-info-axis-desc">{t('companions.barometerAffDesc') || 'キャラがあなたをどれだけ好きか。上がりやすく、ゆっくり下がる。'}</p>
+              </div>
+              <div className="barometer-info-axis">
+                <div className="barometer-info-axis-head"><span style={{ color: '#60a5fa' }}>💙 {t('companions.rel_axis_trust')}</span> <strong style={{ color: '#60a5fa' }}>{relTrust} / 100</strong></div>
+                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTrust}%`, background: '#60a5fa' }} /></div>
+                <p className="barometer-info-axis-desc">{t('companions.barometerTrustDesc') || '一貫性と約束を守ることで上がる。裏切りで一瞬崩壊。'}</p>
+              </div>
+              <div className="barometer-info-axis">
+                <div className="barometer-info-axis-head"><span style={{ color: '#fbbf24' }}>💛 {t('companions.rel_axis_tension')}</span> <strong style={{ color: '#fbbf24' }}>{relTension} / 100</strong></div>
+                <div className="comp-mobile-axis-track"><div className="comp-mobile-axis-fill" style={{ width: `${relTension}%`, background: '#fbbf24' }} /></div>
+                <p className="barometer-info-axis-desc">{t('companions.barometerTensionDesc') || '予測不能な高揚感。焦らしとギャップで上がる。'}</p>
+              </div>
+            </div>
+
+            {nl && (
+              <div className="barometer-info-next">
+                <span>{t('companions.rel_next')?.replace('{points}', String(ptn)) || `あと${ptn}ptで`}</span>
+                <strong>{t(`companions.rel_unlock_${nl.id}`)}</strong>
+              </div>
+            )}
+
+            <div className="barometer-info-tips">
+              <h4>💡 {t('companions.barometerTips') || 'ヒント'}</h4>
+              <ul>
+                <li>🎁 {t('companions.barometerTip1') || 'ギフトで好意が+20'}</li>
+                <li>🚀 {t('companions.barometerTip2') || 'ブーストで好意が+100'}</li>
+                <li>💬 {t('companions.barometerTip3') || '毎日会話することで信頼が上昇'}</li>
+              </ul>
+            </div>
+
+            <button className="paywall-btn-primary" onClick={() => setShowBarometerInfo(false)}>
+              {t('companions.barometerClose') || '閉じる'}
+            </button>
+          </div>
+        </div>
+        ); })()}
 
       {/* Lightbox */}
       {lightboxUrl && (
