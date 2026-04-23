@@ -364,11 +364,13 @@ Rules:
 - Each suggestion max 15 characters
 - Must naturally follow your latest message
 - Include 1 emoji each
-- 3 types: affirmative, question, emotional
+- 3 types: affirmative, question, emotional/action
 - Write in ${lang}
+- Every 3-4 turns, include a photo request as one option (e.g. "写真見せて 📸", "selfie please 😍")
+  This teaches users they can request photos.
 
 Format: [REPLIES:suggestion1|suggestion2|suggestion3]
-Example: [REPLIES:会いたいな ❤️|今何してる？ 😊|大好き 💕]
+Example: [REPLIES:会いたいな ❤️|今何してる？ 😊|写真見せて 📸]
 The tag is invisible to the user. Place it at the absolute end after all other tags.
 
 == STORY COMMENTS ==

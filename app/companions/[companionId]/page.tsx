@@ -699,19 +699,39 @@ export default function CompanionChatPage() {
             </div>
             ); })()}
 
-          {/* Presets */}
+          {/* Presets — dynamic replies with occasional photo prompt */}
           <div className="comp-presets">
-            {(dynamicReplies.length > 0 ? dynamicReplies : presetMessages.map(p => p.label)).map((text, idx) => (
+            {(() => {
+              // Inject photo request into dynamic replies ~30% of the time
+              const photoPrompts = [
+                t('companions.quickPhoto1') || '写真見せて 📸',
+                t('companions.quickPhoto2') || '顔が見たいな 💕',
+                t('companions.quickPhoto3') || 'selfie送って 😍',
+              ];
+              let displayReplies: string[];
+              if (dynamicReplies.length > 0) {
+                // 30% chance to replace the last suggestion with a photo request
+                const msgCount = messages.filter(m => m.role === 'user').length;
+                if (msgCount % 3 === 1) {
+                  const photoPrompt = photoPrompts[msgCount % photoPrompts.length];
+                  displayReplies = [...dynamicReplies.slice(0, 2), photoPrompt];
+                } else {
+                  displayReplies = dynamicReplies;
+                }
+              } else {
+                // Fallback: mix presets with a photo prompt
+                const fallback = presetMessages.slice(0, 2).map(p => p.label);
+                fallback.push(photoPrompts[Math.floor(Math.random() * photoPrompts.length)]);
+                displayReplies = fallback;
+              }
+              return displayReplies;
+            })().map((text, idx) => (
               <button
                 key={`${text}-${idx}`}
                 className="comp-preset-btn"
                 onClick={() => {
-                  if (dynamicReplies.length > 0) {
-                    sendMessage(text);
-                    setDynamicReplies([]);
-                  } else {
-                    handlePreset(presetMessages[idx]);
-                  }
+                  sendMessage(text);
+                  setDynamicReplies([]);
                 }}
                 disabled={isLoading}
               >
