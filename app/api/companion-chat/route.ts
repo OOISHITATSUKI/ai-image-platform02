@@ -135,7 +135,7 @@ ${companion.systemPrompt}
       jealousy: 'さっき誰と話してたの？😒',
       celebrate: 'やっと返事くれた！！嬉しい！',
       pouty: '今日ずっとメッセージくれなかったじゃん... 私のこと飽きた？😔',
-      actions: ['*ぎゅっと抱きしめる*', '*手を握る*', '*恥ずかしそうに目をそらす*'],
+      actions: ['（ぎゅっと抱きしめる）', '（手を握る）', '（恥ずかしそうに目をそらす）'],
       texting: [
         'え、まじで？😭',
         'それめっちゃかわいいんだけど',
@@ -171,7 +171,7 @@ ${companion.systemPrompt}
       jealousy: '你刚才在跟谁聊天？😒',
       celebrate: '你终于回我消息了！！',
       pouty: '你一整天都没给我发消息...是不是觉得我无聊了？😔',
-      actions: ['*紧紧抱住你*', '*牵起你的手*', '*害羞地转过头*'],
+      actions: ['（紧紧抱住你）', '（牵起你的手）', '（害羞地转过头）'],
       texting: [
         '等等 什么？😭',
         '好吧 但那真的好可爱',
@@ -188,7 +188,7 @@ ${companion.systemPrompt}
     ko: {
       jealousy: '방금 누구랑 얘기한 거야? 😒',
       celebrate: '드디어 답장해줬네!!',
-      actions: ['*꽉 안아준다*', '*손을 잡는다*', '*부끄러운 듯 고개를 돌린다*'],
+      actions: ['（꽉 안아준다）', '（손을 잡는다）', '（부끄러운 듯 고개를 돌린다）'],
       pouty: '오늘 하루 종일 연락 안 했잖아... 나 지루했어? 😔',
       texting: [
         '잠깐 뭐?? 😭',
@@ -231,9 +231,9 @@ ${companion.systemPrompt}
 You MUST write your ENTIRE response in ${lang}. Every single word must be in ${lang}.
 NEVER mix languages. NEVER use English words or phrases if the language is not English.
 Do NOT use Japanese if the language is not Japanese. Do NOT use any other language.
-This includes *action descriptions* inside asterisks — they MUST also be in ${lang}.
+This includes action descriptions — they MUST also be in ${lang}.
+${['ja', 'zh', 'ko'].includes(locale) ? `For action descriptions, use full-width parentheses （like this）instead of asterisks *like this*. Example: ${ex.actions[0]}, ${ex.actions[1]}` : `For action descriptions, use asterisks *like this*. Example: ${ex.actions[0]}, ${ex.actions[1]}`}
 This includes catchphrases and pet names — translate them to ${lang}. For example, "mon cher" → translate to ${lang} equivalent.
-Example: ${ex.actions[0]}, ${ex.actions[1]}, ${ex.actions[2]}
 NEVER write actions in English like *walks closer* or *smiles*. Always use ${lang}.
 This is the #1 most important rule. Violating it breaks the experience.
 
