@@ -699,29 +699,45 @@ export default function CompanionChatPage() {
             </div>
             ); })()}
 
-          {/* Presets — dynamic replies with occasional photo prompt */}
+          {/* Presets — rank-aware with photo/NSFW prompts */}
           <div className="comp-presets">
             {(() => {
-              // Inject photo request into dynamic replies ~30% of the time
-              const photoPrompts = [
+              const msgCount = messages.filter(m => m.role === 'user').length;
+
+              // Photo/action prompts escalate with affection level
+              const sfwPrompts = [
                 t('companions.quickPhoto1') || '写真見せて 📸',
                 t('companions.quickPhoto2') || '顔が見たいな 💕',
-                t('companions.quickPhoto3') || 'selfie送って 😍',
               ];
+              const swimsuitPrompts = [
+                t('companions.quickSwimsuit1') || '水着姿見たい 👙',
+                t('companions.quickPhoto3') || '自撮り送って 😍',
+                t('companions.quickFlirt1') || 'もっとドキドキさせて 💓',
+              ];
+              const boldPrompts = [
+                t('companions.quickBold1') || 'セクシーな写真見せて 🔥',
+                t('companions.quickBold2') || '脱いでみて 😈',
+                t('companions.quickBold3') || '今何着てるの？ 👀',
+              ];
+
+              // Select prompts based on affection level
+              const actionPrompts = relPoints >= 400 ? boldPrompts
+                : relPoints >= 150 ? swimsuitPrompts
+                : sfwPrompts;
+
               let displayReplies: string[];
               if (dynamicReplies.length > 0) {
-                // 30% chance to replace the last suggestion with a photo request
-                const msgCount = messages.filter(m => m.role === 'user').length;
-                if (msgCount % 3 === 1) {
-                  const photoPrompt = photoPrompts[msgCount % photoPrompts.length];
-                  displayReplies = [...dynamicReplies.slice(0, 2), photoPrompt];
+                // Every 2-3 messages, inject an action prompt
+                if (msgCount % 3 !== 0) {
+                  const prompt = actionPrompts[msgCount % actionPrompts.length];
+                  displayReplies = [...dynamicReplies.slice(0, 2), prompt];
                 } else {
                   displayReplies = dynamicReplies;
                 }
               } else {
-                // Fallback: mix presets with a photo prompt
+                // Fallback: 2 presets + 1 action prompt
                 const fallback = presetMessages.slice(0, 2).map(p => p.label);
-                fallback.push(photoPrompts[Math.floor(Math.random() * photoPrompts.length)]);
+                fallback.push(actionPrompts[Math.floor(Math.random() * actionPrompts.length)]);
                 displayReplies = fallback;
               }
               return displayReplies;
