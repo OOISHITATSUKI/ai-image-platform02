@@ -576,23 +576,26 @@ export async function POST(req: NextRequest) {
     const userLocale = typeof locale === 'string' ? locale : 'en';
     const userPlayStyle = (typeof playStyle === 'string' ? playStyle : 'sweet') as PlayStyle;
 
-    // Fetch relationship level for this user + companion
+    // Fetch relationship level + nickname for this user + companion
     let relationshipLevel = 'stranger';
+    let resolvedNickname: string | null = (typeof userNickname === 'string' && userNickname.trim()) ? userNickname.trim() : null;
     if (isLoggedIn && authHeader) {
       const payload = verifyToken(authHeader.slice(7));
       if (payload) {
         const { data: relData } = await supabaseAdmin
           .from('companion_relationships')
-          .select('level')
+          .select('level, nickname')
           .eq('user_id', payload.userId)
           .eq('companion_id', companionId)
           .maybeSingle();
         if (relData?.level) relationshipLevel = relData.level;
+        // Use DB nickname as fallback if frontend didn't send one
+        if (!resolvedNickname && relData?.nickname) resolvedNickname = relData.nickname;
       }
     }
 
-    const nicknameSuffix = (typeof userNickname === 'string' && userNickname.trim())
-      ? `\n\n== USER NICKNAME ==\nThe user wants you to call them "${userNickname.trim()}". Always address them by this name naturally in conversation. Never ask what to call them — they already told you.`
+    const nicknameSuffix = resolvedNickname
+      ? `\n\n== USER NICKNAME ==\nThe user wants you to call them "${resolvedNickname}". Always address them by this name naturally in conversation. Never ask what to call them — they already told you.`
       : '';
     const systemPrompt = companion.isAssistant
       ? buildAssistantSystemPrompt(companion, isPaid, userLocale)

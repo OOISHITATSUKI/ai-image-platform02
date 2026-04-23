@@ -787,9 +787,9 @@ export default function CompanionChatPage() {
                 </div>
                 {companion.profile && (
                   <div className="comp-char-bottom-profile">
-                    <span>📍 {companion.profile.hometown}</span>
-                    <span>💼 {companion.profile.occupation}</span>
-                    {companion.profile.hobbies && <span>✨ {companion.profile.hobbies}</span>}
+                    <span>📍 {t('companions.profileHometown') || 'From'}: {companion.profile.hometown}</span>
+                    <span>💼 {t('companions.profileOccupation') || 'Job'}: {companion.profile.occupation}</span>
+                    {companion.profile.hobbies && <span>✨ {t('companions.profileHobbies') || 'Hobbies'}: {companion.profile.hobbies}</span>}
                   </div>
                 )}
               </div>

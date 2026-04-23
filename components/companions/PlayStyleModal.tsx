@@ -83,16 +83,19 @@ export default function PlayStyleModal({ companionName, currentNickname, onSelec
           <div className="playstyle-reset-area">
             {!showResetConfirm ? (
               <button className="playstyle-reset-btn" onClick={() => setShowResetConfirm(true)}>
-                {t('companions.resetRelation') || '関係をリセットする'}
+                💔 {t('companions.resetRelation') || '関係をリセットする'}
               </button>
             ) : (
               <div className="playstyle-reset-confirm">
                 <p className="playstyle-reset-warn">
-                  {(t('companions.resetConfirm') || '{name}との関係を本当にやり直しますか？全てのポイントがリセットされます。').replace('{name}', companionName)}
+                  {(t('companions.resetConfirm') || '本当に{name}と一度、破局しますか？').replace('{name}', companionName)}
+                </p>
+                <p className="playstyle-reset-note">
+                  {t('companions.resetNote') || '⚠ チャット履歴・関係ポイント・ニックネームが全て削除されます。この操作は取り消せません。'}
                 </p>
                 <div className="playstyle-reset-actions">
                   <button className="playstyle-reset-yes" onClick={onReset}>
-                    {t('companions.resetYes') || 'リセットする'}
+                    💔 {t('companions.resetYes') || 'リセットする'}
                   </button>
                   <button className="playstyle-reset-no" onClick={() => setShowResetConfirm(false)}>
                     {t('companions.resetNo') || 'やめる'}

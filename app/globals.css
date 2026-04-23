@@ -11108,10 +11108,14 @@ button, a, [role="button"] {
 .playstyle-reset-btn:hover { color: #ef4444; }
 .playstyle-reset-confirm { animation: fadeIn 0.2s ease-out; }
 .playstyle-reset-warn {
-  font-size: 0.82rem; color: #fbbf24; line-height: 1.5;
-  margin: 0 0 10px; padding: 10px;
-  background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
-  border-radius: 10px;
+  font-size: 0.9rem; color: #fff; line-height: 1.5;
+  margin: 0 0 6px; padding: 12px;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 10px; font-weight: 600;
+}
+.playstyle-reset-note {
+  font-size: 0.75rem; color: #a1a1aa; line-height: 1.5;
+  margin: 0 0 12px; padding: 0 4px;
 }
 .playstyle-reset-actions { display: flex; gap: 8px; }
 .playstyle-reset-yes {
