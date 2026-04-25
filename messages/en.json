@@ -1006,6 +1006,8 @@
     "assistStage4Desc": "Opens up, shares secrets",
     "assistStage5": "Best friends",
     "assistStage5Desc": "Very personal, inside jokes, flirty",
+    "assistResetBtn": "Reset Chat & Closeness",
+    "assistResetConfirm": "Reset chat history and closeness? This cannot be undone.",
     "assistFaqCredits": "How do credits work? 🪙",
     "assistFaqCreditsMsg": "How does the credit system work? How many credits do I need per image?",
     "assistFaqNsfw": "How to get NSFW? 🔥",

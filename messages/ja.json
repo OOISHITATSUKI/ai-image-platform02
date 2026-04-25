@@ -1001,6 +1001,8 @@
     "assistStage4Desc": "秘密も共有してくれる",
     "assistStage5": "親友",
     "assistStage5Desc": "とても個人的、いたずらっぽい",
+    "assistResetBtn": "チャット＆親密度をリセット",
+    "assistResetConfirm": "チャット履歴と親密度をリセットしますか？この操作は取り消せません。",
     "assistFaqCredits": "クレジットの仕組み 🪙",
     "assistFaqCreditsMsg": "クレジットシステムはどう動くの？画像1枚に何クレジット必要？",
     "assistFaqNsfw": "NSFWの出し方 🔥",

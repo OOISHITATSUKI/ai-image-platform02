@@ -1059,6 +1059,23 @@ export default function CompanionChatPage() {
                   </div>
                 );
               })}
+              <button
+                onClick={() => {
+                  if (confirm(t('companions.assistResetConfirm') || 'Reset chat history and closeness? This cannot be undone.')) {
+                    setMessages([]);
+                    localStorage.removeItem(`chat_history_${companion.id}`);
+                    setAssistPresetSeed(s => s + 1);
+                    setShowAssistCloseness(false);
+                  }
+                }}
+                style={{
+                  marginTop: 16, width: '100%', padding: '8px 0', borderRadius: 8,
+                  border: '1px solid rgba(239,68,68,0.3)', background: 'transparent',
+                  color: '#f87171', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600,
+                }}
+              >
+                🗑️ {t('companions.assistResetBtn') || 'Reset Chat & Closeness'}
+              </button>
             </div>
           </div>
         );
