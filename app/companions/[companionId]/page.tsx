@@ -876,7 +876,7 @@ export default function CompanionChatPage() {
                   📞
                 </button>
                 <button type="button" className="comp-input-icon-btn" onClick={() => spendCoins('gift')} title={t('companions.coinGift')}>
-                  🎁<span className="comp-input-icon-badge">50</span>
+                  🎁<span className="comp-input-icon-badge">20</span>
                 </button>
                 <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCoins('boost')} title={t('companions.coinBoost')}>
                   🚀<span className="comp-input-icon-badge">100</span>

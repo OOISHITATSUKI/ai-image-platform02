@@ -31,7 +31,9 @@ export default function Sidebar() {
     const { t } = useTranslation();
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
-    const [chatHistoryOpen, setChatHistoryOpen] = useState(true);
+    const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
+    const [girlfriendsOpen, setGirlfriendsOpen] = useState(true);
+    const [createOpen, setCreateOpen] = useState(false);
     const editInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const pathname = usePathname();
@@ -196,13 +198,13 @@ export default function Sidebar() {
 
     return (
         <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-            {/* Logo */}
-            <div className="sidebar-header">
+            {/* Logo — compact */}
+            <div className="sidebar-header" style={{ padding: sidebarCollapsed ? '12px 8px' : '10px 16px' }}>
                 <Link href="/companions" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
                     {!sidebarCollapsed ? (
                         <>
-                            <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" />
-                            <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" />
+                            <img src="/logo-dark.png" alt="Image Nude" className="app-logo logo-dark" style={{ maxHeight: 28 }} />
+                            <img src="/logo-light.png" alt="Image Nude" className="app-logo logo-light" style={{ maxHeight: 28 }} />
                         </>
                     ) : (
                         <div className="logo-icon">⚡</div>
@@ -210,19 +212,24 @@ export default function Sidebar() {
                 </Link>
             </div>
 
-            {/* New Chat Button */}
-            <button className="sidebar-new-chat" onClick={handleNewChat}>
-                <span>＋</span>
-                {!sidebarCollapsed && <span>{t('chat.newChat')}</span>}
-            </button>
-
             {/* Scrollable area: nav sections + chat history */}
             <div className="sidebar-scroll-area">
 
-                {/* 💕 GIRLFRIENDS (main) */}
+                {/* 💕 GIRLFRIENDS — collapsible */}
                 <div className="nav-section nav-section-girlfriends">
-                    {!sidebarCollapsed && <div className="nav-section-label">💕 GIRLFRIENDS</div>}
-                    {girlfriendNavItems.map((item) => {
+                    {!sidebarCollapsed ? (
+                        <div
+                            className="nav-section-label"
+                            onClick={() => setGirlfriendsOpen(v => !v)}
+                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
+                        >
+                            <span>💕 GIRLFRIENDS</span>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', transition: 'transform 0.2s', transform: girlfriendsOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+                        </div>
+                    ) : (
+                        <div className="nav-section-label">💕</div>
+                    )}
+                    {(girlfriendsOpen || sidebarCollapsed) && girlfriendNavItems.map((item) => {
                         const active = item.isActive(pathname);
                         const locked = !!item.isPremium && !isPremiumUser;
                         return (
@@ -250,10 +257,21 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* 🎨 CREATE (sub) */}
+                {/* 🎨 CREATE — collapsible */}
                 <div className="nav-section nav-section-create">
-                    {!sidebarCollapsed && <div className="nav-section-label">🎨 CREATE</div>}
-                    {createNavItems.map((item) => {
+                    {!sidebarCollapsed ? (
+                        <div
+                            className="nav-section-label"
+                            onClick={() => setCreateOpen(v => !v)}
+                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
+                        >
+                            <span>🎨 CREATE</span>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', transition: 'transform 0.2s', transform: createOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▾</span>
+                        </div>
+                    ) : (
+                        <div className="nav-section-label">🎨</div>
+                    )}
+                    {(createOpen || sidebarCollapsed) && createNavItems.map((item) => {
                         const isActive = item.type === 'img2vid'
                             ? ['txt2vid', 'img2vid', 'ref2vid', 'vid2vid'].includes(settings.generationType)
                             : settings.generationType === item.type;
@@ -387,6 +405,34 @@ export default function Sidebar() {
                     )}
                 </div>
 
+                {/* Library — below chat history */}
+                {!sidebarCollapsed && (
+                    <Link
+                        href="/library"
+                        className="nav-item"
+                        style={{ margin: '4px 12px 8px', borderRadius: 8 }}
+                        onClick={() => {
+                            closeSidebarOnMobile();
+                            if (unlockedNewCount > 0) {
+                                localStorage.removeItem('guest_unlocked_new');
+                                setUnlockedNewCount(0);
+                            }
+                        }}
+                    >
+                        <span className="nav-icon">📁</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+                            {t('nav.library')}
+                            {unlockedNewCount > 0 && (
+                                <span style={{
+                                    background: '#ef4444', color: '#fff', fontSize: '0.6rem',
+                                    fontWeight: 700, borderRadius: 10, padding: '1px 6px',
+                                    minWidth: 18, textAlign: 'center', lineHeight: '16px',
+                                }}>{unlockedNewCount}</span>
+                            )}
+                        </span>
+                    </Link>
+                )}
+
             </div>{/* end sidebar-scroll-area */}
 
             {/* Footer */}
@@ -437,33 +483,7 @@ export default function Sidebar() {
                         <span>⚠</span><span>Terms not yet accepted</span>
                     </div>
                 )}
-                {/* Library link — moved to footer area */}
-                {!sidebarCollapsed && (
-                    <Link
-                        href="/library"
-                        className="nav-item"
-                        style={{ margin: '0 12px 8px', borderRadius: 8 }}
-                        onClick={() => {
-                            closeSidebarOnMobile();
-                            if (unlockedNewCount > 0) {
-                                localStorage.removeItem('guest_unlocked_new');
-                                setUnlockedNewCount(0);
-                            }
-                        }}
-                    >
-                        <span className="nav-icon">📁</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
-                            {t('nav.library')}
-                            {unlockedNewCount > 0 && (
-                                <span style={{
-                                    background: '#ef4444', color: '#fff', fontSize: '0.6rem',
-                                    fontWeight: 700, borderRadius: 10, padding: '1px 6px',
-                                    minWidth: 18, textAlign: 'center', lineHeight: '16px',
-                                }}>{unlockedNewCount}</span>
-                            )}
-                        </span>
-                    </Link>
-                )}
+                {/* Library link removed from here — now below chat history */}
 
                 {/* Credits Panel - Hidden when collapsed */}
                 {!sidebarCollapsed && (
@@ -501,24 +521,6 @@ export default function Sidebar() {
                         }}>
                             💎 {t('credits.buyCredits')}
                         </Link>
-                        <a
-                            href="https://discord.gg/wDVMxfrXkM"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                                marginTop: 8, padding: '7px 0', borderRadius: 8,
-                                border: '1px solid rgba(88,101,242,0.4)', background: 'rgba(88,101,242,0.08)',
-                                color: '#7289da', fontSize: '0.78rem', fontWeight: 600,
-                                textDecoration: 'none', cursor: 'pointer',
-                                width: '100%', boxSizing: 'border-box',
-                            }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                            </svg>
-                            Discord
-                        </a>
                     </div>
                 )}
 
@@ -574,20 +576,34 @@ export default function Sidebar() {
                     </div>
                 )}
 
-                {/* How to use */}
+                {/* How to use + Discord (compact) */}
                 {!sidebarCollapsed && (
-                    <div style={{ padding: '0 12px', marginBottom: 4 }}>
+                    <div style={{ padding: '0 12px', marginBottom: 4, display: 'flex', gap: 6 }}>
                         <button
                             onClick={handleHowToUseClick}
                             style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                                width: '100%', padding: '7px 0', borderRadius: 8,
+                                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                padding: '6px 0', borderRadius: 8,
                                 border: '1px solid rgba(255,255,255,0.08)', background: 'transparent',
-                                color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', cursor: 'pointer',
+                                color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', cursor: 'pointer',
                             }}
                         >
                             ？ {t('qa.howToUse')}
                         </button>
+                        <a
+                            href="https://discord.gg/wDVMxfrXkM"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                padding: '6px 12px', borderRadius: 8,
+                                border: '1px solid rgba(88,101,242,0.3)', background: 'transparent',
+                                color: 'rgba(88,101,242,0.6)', fontSize: '0.72rem', fontWeight: 600,
+                                textDecoration: 'none', cursor: 'pointer',
+                            }}
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                        </a>
                     </div>
                 )}
 
