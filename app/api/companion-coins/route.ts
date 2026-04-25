@@ -7,7 +7,7 @@ import { getRelationshipLevel } from '@/lib/companions';
  * POST /api/companion-coins — spend coins on companion features
  * Body: { companionId, action, amount? }
  * Actions:
- *   - 'gift'           → 50 coins → relationship +20
+ *   - 'gift'           → 20 coins → relationship +20
  *   - 'boost'          → 100 coins → relationship +100
  *   - 'unlock_content' → 200 coins → relationship instantly to next content tier
  *   - 'skip_level'     → variable → Live Action level skip
@@ -15,7 +15,7 @@ import { getRelationshipLevel } from '@/lib/companions';
  */
 
 const COIN_COSTS: Record<string, number> = {
-  gift: 50,
+  gift: 20,
   boost: 100,
   unlock_content: 200,
   extra_chat: 80,
