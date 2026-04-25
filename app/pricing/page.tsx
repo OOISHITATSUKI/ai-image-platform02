@@ -151,44 +151,46 @@ export default function PricingPage() {
                     <p style={sectionDescStyle}>
                         {t('pricing.sectionGfDesc') || 'Chat with AI girlfriends for free! Paid users unlock NSFW photos, explicit chat, unlimited messages, and deeper relationships.'}
                     </p>
-                    <div style={gridStyle}>
-                        <div style={cardBase}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                {t('pricing.free') || 'Free'}
-                            </div>
-                            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)' }}>$0</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 6 }}>{t('pricing.freeDesc') || 'Basic companion experience'}</div>
-                            <div style={feat}>{ok} {t('pricing.gf.chatAll') || 'Chat with all girlfriends'}</div>
-                            <div style={feat}>{ok} {t('pricing.gf.msg10') || '10 messages / day'}</div>
-                            <div style={feat}>{ok} {t('pricing.gf.sfwPhotos') || 'SFW & swimsuit photos'}</div>
-                            <div style={feat}>{ok} {t('pricing.gf.playStyles') || 'Play styles & levels'}</div>
-                            <div style={feat}>{no} <span style={{ opacity: 0.5 }}>{t('pricing.gf.nsfwPhotos') || 'NSFW photos & explicit chat'}</span></div>
-                            <div style={feat}>{no} <span style={{ opacity: 0.5 }}>{t('pricing.gf.liveAction') || 'Live Action levels 2+'}</span></div>
-                            <div style={{ ...ctaSecondary, textAlign: 'center', cursor: 'default', opacity: isPaid ? 0.4 : 0.6 }}>
-                                {isPaid ? (t('pricing.free') || 'Free') : (t('pricing.currentPlan') || 'Current Plan')}
-                            </div>
-                        </div>
-                        <div style={featuredCard}>
-                            <div style={badge}>{t('pricing.unlockAll') || 'UNLOCK ALL'}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                {t('pricing.anyPaid') || 'Any Paid Plan'}
-                            </div>
-                            <div style={priceGradient}>$14.99+</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 6 }}>{t('pricing.anyPaidDesc') || 'Buy any credit pack to unlock'}</div>
-                            <div style={feat}>{ok} <strong>{t('pricing.gf.unlimited') || 'Unlimited daily messages'}</strong></div>
-                            <div style={feat}>{ok} <strong>{t('pricing.gf.nsfwUnlock') || 'NSFW & nude photos'}</strong></div>
-                            <div style={feat}>{ok} <strong>{t('pricing.gf.explicit') || 'Explicit chat & intimate scenes'}</strong></div>
+
+                    {/* What you get */}
+                    <div style={{ ...cardBase, marginBottom: 16, background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.15)' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#a78bfa', marginBottom: 4 }}>{t('pricing.gf.whatsIncluded') || 'What coins unlock:'}</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4px 20px' }}>
+                            <div style={feat}>{ok} {t('pricing.gf.unlimited') || 'Unlimited daily messages'}</div>
+                            <div style={feat}>{ok} {t('pricing.gf.nsfwUnlock') || 'NSFW & nude photos'}</div>
+                            <div style={feat}>{ok} {t('pricing.gf.explicit') || 'Explicit chat & intimate scenes'}</div>
                             <div style={feat}>{ok} {t('pricing.gf.lingerie') || 'Lingerie & bedroom selfies'}</div>
                             <div style={feat}>{ok} {t('pricing.gf.allLive') || 'All Live Action levels'}</div>
                             <div style={feat}>{ok} {t('pricing.gf.assistant') || 'Nude Assistant full access'}</div>
-                            {isPaid ? (
-                                <div style={{ ...ctaPrimary, cursor: 'default', opacity: 0.7 }}>✓ {t('pricing.unlocked') || 'Unlocked'}</div>
-                            ) : (
-                                <button style={ctaPrimary} onClick={() => handleCheckout('standard')}>
-                                    {t('pricing.unlockNow') || 'Unlock Now'} — $14.99
-                                </button>
-                            )}
                         </div>
+                    </div>
+
+                    {/* 3 coin packs matching coin shop */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                        {[
+                            { coins: 300, price: '¥490', tag: '', packType: 'coin_300' },
+                            { coins: 700, price: '¥980', tag: t('companions.coinShopPopular') || 'POPULAR', packType: 'coin_700' },
+                            { coins: 1600, price: '¥1,980', tag: t('companions.coinShopBest') || 'BEST VALUE', packType: 'coin_1600' },
+                        ].map((pack) => (
+                            <div key={pack.coins} style={pack.tag === (t('companions.coinShopBest') || 'BEST VALUE') ? featuredCard : cardBase}>
+                                {pack.tag && <div style={badge}>{pack.tag}</div>}
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>🪙</div>
+                                    <div style={priceGradient}>{pack.coins}</div>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 8 }}>{t('companions.coinBalance') || 'coins'}</div>
+                                </div>
+                                <button style={pack.tag === (t('companions.coinShopBest') || 'BEST VALUE') ? ctaPrimary : ctaSecondary} onClick={() => {
+                                    window.location.href = '/pricing';
+                                }}>
+                                    {pack.price}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Free tier note */}
+                    <div style={{ marginTop: 12, padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, fontSize: '0.75rem', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+                        💬 {t('pricing.gf.freeNote') || 'Free users can chat with all girlfriends (10 messages/day) with SFW photos and play styles. Purchase coins to unlock the full experience!'}
                     </div>
                 </div>
 
