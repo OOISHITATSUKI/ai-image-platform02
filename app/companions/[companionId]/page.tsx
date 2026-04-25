@@ -1191,27 +1191,25 @@ export default function CompanionChatPage() {
         </div>
       )}
 
-      {/* Coin Shop Modal — links to pricing */}
+      {/* Coin Shop Modal */}
       {showCoinShop && (
         <div className="paywall-overlay" onClick={() => setShowCoinShop(false)}>
           <div className="coin-shop-modal" onClick={(e) => e.stopPropagation()}>
             <button className="paywall-close" onClick={() => setShowCoinShop(false)}>×</button>
-            <h3>💕 {t('companions.coinShopTitle')}</h3>
-            <p className="coin-shop-desc">{t('companions.coinShopDesc2') || 'Purchase any credit pack to unlock unlimited messages, NSFW photos, and get bonus coins!'}</p>
+            <h3>🪙 {t('companions.coinShopTitle')}</h3>
+            <p className="coin-shop-desc">{t('companions.coinShopDesc')}</p>
             <div className="coin-shop-packs">
               {[
-                { label: 'Standard', credits: 200, coins: 500, price: '$14.99', tag: '' },
-                { label: 'Premium', credits: 600, coins: 1500, price: '$29.99', tag: t('companions.coinShopBest') || 'BEST VALUE' },
+                { coins: 300, price: '¥490', tag: '' },
+                { coins: 700, price: '¥980', tag: t('companions.coinShopPopular') },
+                { coins: 1600, price: '¥1,980', tag: t('companions.coinShopBest') },
               ].map((pack) => (
-                <button key={pack.label} className={`coin-shop-pack ${pack.tag ? 'coin-shop-pack-highlight' : ''}`} onClick={() => {
-                  setShowCoinShop(false);
-                  window.location.href = '/pricing';
+                <button key={pack.coins} className={`coin-shop-pack ${pack.tag ? 'coin-shop-pack-highlight' : ''}`} onClick={() => {
+                  // TODO: Connect to actual payment flow
+                  window.open('/pricing', '_blank');
                 }}>
                   {pack.tag && <span className="coin-shop-pack-tag">{pack.tag}</span>}
-                  <span className="coin-shop-pack-coins" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span>✨ {pack.credits} {t('pricing.credits') || 'credits'}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#f472b6' }}>+ 🪙 {pack.coins} {t('companions.coinBonus') || 'bonus coins'}</span>
-                  </span>
+                  <span className="coin-shop-pack-coins">🪙 {pack.coins}</span>
                   <span className="coin-shop-pack-price">{pack.price}</span>
                 </button>
               ))}
