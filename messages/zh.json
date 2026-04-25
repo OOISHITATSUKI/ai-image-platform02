@@ -200,7 +200,8 @@
     "remaining": "剩余{count}",
     "topUp": "充值",
     "upgrade": "升级套餐",
-    "buyCredits": "购买积分"
+    "buyCredits": "购买积分",
+    "lowWarning": "积分即将用完！"
   },
   "account": {
     "title": "账户",

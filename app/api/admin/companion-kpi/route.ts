@@ -47,6 +47,7 @@ export async function GET(req: Request) {
     { count: todayPaywallClicked },
     { count: todayPhotos },
     { count: todayLevelUps },
+    { count: todayBannerClicks },
   ] = await Promise.all([
     supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_session_start').gte('created_at', todayStart),
     supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_message_sent').gte('created_at', todayStart),
@@ -54,6 +55,7 @@ export async function GET(req: Request) {
     supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'paywall_clicked').gte('created_at', todayStart),
     supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'companion_photo_requested').gte('created_at', todayStart),
     supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'level_up').gte('created_at', todayStart),
+    supabaseAdmin.from('companion_events').select('*', { count: 'exact', head: true }).eq('event_type', 'banner_clicked').gte('created_at', todayStart),
   ]);
 
   // Today's DAU
@@ -70,6 +72,7 @@ export async function GET(req: Request) {
     paywallClicked: todayPaywallClicked ?? 0,
     photos: todayPhotos ?? 0,
     levelUps: todayLevelUps ?? 0,
+    bannerClicks: todayBannerClicks ?? 0,
     dau: todayDau,
     paywallCvr: (todayPaywallShown ?? 0) > 0
       ? Math.round(((todayPaywallClicked ?? 0) / (todayPaywallShown ?? 1)) * 10000) / 100

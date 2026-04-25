@@ -207,7 +207,8 @@
     "remaining": "{count} restantes",
     "topUp": "Recarregar",
     "upgrade": "Melhorar plano",
-    "buyCredits": "Comprar créditos"
+    "buyCredits": "Comprar créditos",
+    "lowWarning": "Créditos quase acabando!"
   },
   "account": {
     "title": "Conta",

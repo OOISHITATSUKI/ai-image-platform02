@@ -247,7 +247,8 @@
     "remaining": "残り {count} クレジット",
     "topUp": "チャージ",
     "upgrade": "プランをアップグレード",
-    "buyCredits": "クレジット購入"
+    "buyCredits": "クレジット購入",
+    "lowWarning": "クレジットが残りわずか！"
   },
   "account": {
     "title": "アカウント",

@@ -210,7 +210,8 @@
     "remaining": "{count} 남음",
     "topUp": "충전",
     "upgrade": "플랜 업그레이드",
-    "buyCredits": "크레딧 구매"
+    "buyCredits": "크레딧 구매",
+    "lowWarning": "크레딧이 거의 소진되었습니다!"
   },
   "account": {
     "title": "계정",

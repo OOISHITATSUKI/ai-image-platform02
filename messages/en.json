@@ -247,7 +247,8 @@
     "remaining": "Remaining {count} Credits",
     "topUp": "Top Up",
     "upgrade": "Upgrade Plan",
-    "buyCredits": "Buy Credits"
+    "buyCredits": "Buy Credits",
+    "lowWarning": "Credits running low!"
   },
   "account": {
     "title": "Account",

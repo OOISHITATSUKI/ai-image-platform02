@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/useTranslation';
 import { useAppStore } from '@/lib/store';
 import StoryAvatarRing from '@/components/companions/StoryAvatarRing';
 import StoriesModal, { type CompanionStories, type StoryItem } from '@/components/companions/StoriesModal';
+import { logCompanionEventClient } from '@/lib/companion-analytics-client';
 
 /** Shows the companion's avatar; falls back to an initial tile on error. */
 function CompanionAvatar({
@@ -111,15 +112,28 @@ export default function CompanionsPage() {
         <p className="comp-hero-sub">{t('companions.heroSub')}</p>
       </section>
 
-      {/* AI Assistant Banner */}
+      {/* AI Assistant Banner — with click tracking + pulse animation */}
       <section className="comp-section" style={{ padding: '0 16px' }}>
-        <Link href="/companions/assistant" style={{ display: 'block', borderRadius: 16, overflow: 'hidden' }}>
+        <Link
+          href="/companions/assistant"
+          className="comp-assistant-banner"
+          onClick={() => {
+            logCompanionEventClient({
+              eventType: 'banner_clicked',
+              metadata: { banner: 'assistant_home', location: 'companions_home' },
+            });
+          }}
+        >
           <img
             src="/companions/assistant-banner.webp"
             alt="AI Assistant"
-            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 16 }}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
             loading="eager"
           />
+          <div className="comp-assistant-banner-cta">
+            <span className="comp-assistant-banner-pulse" />
+            {t('companions.assistantCta') || 'Chat Now'}
+          </div>
         </Link>
       </section>
 

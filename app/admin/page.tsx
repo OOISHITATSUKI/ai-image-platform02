@@ -468,6 +468,10 @@ export default function AdminDashboardPage() {
                             <div style={labelStyle}>レベルアップ</div>
                             <div style={valueStyle('#f59e0b')}>{companionKpi.today.levelUps?.toLocaleString() || 0}</div>
                         </div>
+                        <div style={cardStyle}>
+                            <div style={labelStyle}>バナークリック</div>
+                            <div style={valueStyle('#38bdf8')}>{companionKpi.today.bannerClicks?.toLocaleString() || 0}</div>
+                        </div>
                     </div>
 
                     <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
