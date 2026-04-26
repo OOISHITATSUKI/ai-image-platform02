@@ -11,6 +11,10 @@ export default function PricingPage() {
 
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showFanvueModal, setShowFanvueModal] = useState(false);
+    const [fanvueHandle, setFanvueHandle] = useState('');
+    const [fanvueLoading, setFanvueLoading] = useState(false);
+    const [fanvueError, setFanvueError] = useState('');
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [verifyStep, setVerifyStep] = useState<'send' | 'verify'>('send');
     const [verifyCode, setVerifyCode] = useState('');
@@ -72,6 +76,40 @@ export default function PricingPage() {
             if (res.ok && data.invoice_url) { window.location.href = data.invoice_url; }
             else { setError(data.error || t('pricing.paymentError')); setLoadingPack(null); }
         } catch { setError(t('pricing.networkError')); setLoadingPack(null); }
+    };
+
+    // Fanvue payment flow: link handle then redirect
+    const FANVUE_PROFILE_URL = 'https://www.fanvue.com/tat05';
+
+    const handleFanvuePay = async () => {
+        const token = getToken();
+        if (!token) {
+            setError(t('pricing.loginRequired'));
+            return;
+        }
+        if (!fanvueHandle.trim()) {
+            setFanvueError('Please enter your Fanvue username');
+            return;
+        }
+        setFanvueLoading(true);
+        setFanvueError('');
+        try {
+            const res = await fetch('/api/user/connect-fanvue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ fanvue_handle: fanvueHandle.trim() }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            // Linked successfully — redirect to Fanvue
+            window.open(FANVUE_PROFILE_URL, '_blank');
+            setShowFanvueModal(false);
+            setFanvueHandle('');
+        } catch (err) {
+            setFanvueError(err instanceof Error ? err.message : 'Failed');
+        } finally {
+            setFanvueLoading(false);
+        }
     };
 
     // Styles
@@ -165,32 +203,40 @@ export default function PricingPage() {
                         </div>
                     </div>
 
-                    {/* 3 coin packs matching coin shop */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-                        {[
-                            { coins: 300, price: '¥490', tag: '', packType: 'coin_300' },
-                            { coins: 700, price: '¥980', tag: t('companions.coinShopPopular') || 'POPULAR', packType: 'coin_700' },
-                            { coins: 1600, price: '¥1,980', tag: t('companions.coinShopBest') || 'BEST VALUE', packType: 'coin_1600' },
-                        ].map((pack) => (
-                            <div key={pack.coins} style={pack.tag === (t('companions.coinShopBest') || 'BEST VALUE') ? featuredCard : cardBase}>
-                                {pack.tag && <div style={badge}>{pack.tag}</div>}
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>🪙</div>
-                                    <div style={priceGradient}>{pack.coins}</div>
-                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 8 }}>{t('companions.coinBalance') || 'coins'}</div>
+                    {/* Fanvue subscription button */}
+                    <div style={{ ...featuredCard, textAlign: 'center', padding: '28px 24px' }}>
+                        <div style={badge}>Fanvue</div>
+                        <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>💕</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                            {t('pricing.gf.fanvueTitle') || 'Subscribe on Fanvue'}
+                        </div>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+                            {t('pricing.gf.fanvueDesc') || 'Subscribe to our Fanvue page to unlock all companion features and earn credits automatically.'}
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 16 }}>
+                            {[
+                                { coins: 300, price: '¥490' },
+                                { coins: 700, price: '¥980' },
+                                { coins: 1600, price: '¥1,980' },
+                            ].map((pack) => (
+                                <div key={pack.coins} style={{ padding: '8px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#a78bfa' }}>🪙 {pack.coins}</div>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>{pack.price}</div>
                                 </div>
-                                <button style={pack.tag === (t('companions.coinShopBest') || 'BEST VALUE') ? ctaPrimary : ctaSecondary} onClick={() => {
-                                    window.location.href = '/pricing';
-                                }}>
-                                    {pack.price}
-                                </button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <button style={ctaPrimary} onClick={() => {
+                            const token = getToken();
+                            if (!token) { setError(t('pricing.loginRequired')); return; }
+                            setShowFanvueModal(true);
+                        }}>
+                            {t('pricing.gf.fanvueCta') || 'Pay with Fanvue'}
+                        </button>
                     </div>
 
                     {/* Free tier note */}
                     <div style={{ marginTop: 12, padding: '10px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, fontSize: '0.75rem', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                        💬 {t('pricing.gf.freeNote') || 'Free users can chat with all girlfriends (10 messages/day) with SFW photos and play styles. Purchase coins to unlock the full experience!'}
+                        💬 {t('pricing.gf.freeNote') || 'Free users can chat with all girlfriends (10 messages/day) with SFW photos and play styles. Subscribe on Fanvue to unlock the full experience!'}
                     </div>
                 </div>
 
@@ -211,6 +257,65 @@ export default function PricingPage() {
                     ))}
                 </div>
             </div>
+
+            {/* Fanvue Handle Modal */}
+            {showFanvueModal && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div style={{ background: 'var(--bg-primary, #1a1a2e)', borderRadius: 16, padding: 32, maxWidth: 400, width: '100%', border: '1px solid rgba(167,139,250,0.2)' }}>
+                        <h2 style={{ margin: '0 0 8px', fontSize: '1.2rem' }}>💕 {t('pricing.gf.fanvueModalTitle') || 'Connect & Subscribe'}</h2>
+                        <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            {t('pricing.gf.fanvueModalDesc') || 'Enter your Fanvue username so we can automatically grant you credits when you subscribe.'}
+                        </p>
+                        {fanvueError && (
+                            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid #ef4444', color: '#f87171', padding: 10, borderRadius: 8, marginBottom: 12, fontSize: '0.82rem' }}>
+                                {fanvueError}
+                            </div>
+                        )}
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: 6, display: 'block' }}>
+                                {t('pricing.gf.fanvueHandleLabel') || 'Your Fanvue username'}
+                            </label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                <span style={{ padding: '9px 10px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px 0 0 8px', border: '1px solid var(--border-color, #333)', borderRight: 'none', fontSize: '0.9rem', color: 'var(--text-tertiary)' }}>@</span>
+                                <input
+                                    type="text"
+                                    value={fanvueHandle}
+                                    onChange={(e) => setFanvueHandle(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                                    placeholder="username"
+                                    maxLength={30}
+                                    autoFocus
+                                    style={{
+                                        flex: 1, padding: '9px 12px', borderRadius: '0 8px 8px 0',
+                                        border: '1px solid var(--border-color, #333)',
+                                        background: 'var(--bg-secondary, #1a1a2e)',
+                                        color: 'var(--text-primary)', fontSize: '0.9rem',
+                                    }}
+                                    onKeyDown={(e) => e.key === 'Enter' && fanvueHandle.trim() && handleFanvuePay()}
+                                />
+                            </div>
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: 6 }}>
+                                {t('pricing.gf.fanvueHandleHint') || "Don't have a Fanvue account? One will be created when you subscribe."}
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleFanvuePay}
+                            disabled={fanvueLoading || !fanvueHandle.trim()}
+                            style={{
+                                ...ctaPrimary, width: '100%', marginBottom: 8,
+                                opacity: fanvueLoading || !fanvueHandle.trim() ? 0.5 : 1,
+                            }}
+                        >
+                            {fanvueLoading ? '...' : (t('pricing.gf.fanvueGo') || 'Continue to Fanvue →')}
+                        </button>
+                        <button
+                            onClick={() => { setShowFanvueModal(false); setFanvueHandle(''); setFanvueError(''); }}
+                            style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem', padding: 10, borderRadius: 8 }}
+                        >
+                            {t('pricing.gf.fanvueCancel') || 'Cancel'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Email Verification Modal */}
             {showVerifyModal && (
