@@ -187,10 +187,16 @@ async function handleNewSubscription(event: Record<string, unknown>) {
     return;
   }
 
-  // Only process subscriptions to our creator
+  // Always log recipientUuid for debugging (helps find CREATOR_UUID)
+  console.log(`[Fanvue] subscription.new — recipientUuid: ${recipientUuid}, sender: @${sender.handle}`);
+
+  // Filter by creator UUID (optional — if not set, process all events)
   if (CREATOR_UUID && recipientUuid !== CREATOR_UUID) {
     console.log('[Fanvue] Subscription not for our creator, ignoring');
     return;
+  }
+  if (!CREATOR_UUID) {
+    console.warn('[Fanvue] FANVUE_CREATOR_UUID not set. Set it from the recipientUuid above.');
   }
 
   const amountCents = price ?? 0;
@@ -244,7 +250,10 @@ async function handleTipReceived(event: Record<string, unknown>) {
   const price = event.price as number | undefined;
 
   if (!sender?.handle) return;
+
+  console.log(`[Fanvue] tip.new — recipientUuid: ${recipientUuid}, sender: @${sender.handle}`);
   if (CREATOR_UUID && recipientUuid !== CREATOR_UUID) return;
+  if (!CREATOR_UUID) console.warn('[Fanvue] FANVUE_CREATOR_UUID not set. Set it from the recipientUuid above.');
 
   const amountCents = price ?? 0;
   const credits = calculateCredits(amountCents, 'tip');
@@ -275,7 +284,10 @@ async function handlePurchaseReceived(event: Record<string, unknown>) {
   const price = event.price as number | undefined;
 
   if (!sender?.handle) return;
+
+  console.log(`[Fanvue] purchase.new — recipientUuid: ${recipientUuid}, sender: @${sender.handle}`);
   if (CREATOR_UUID && recipientUuid !== CREATOR_UUID) return;
+  if (!CREATOR_UUID) console.warn('[Fanvue] FANVUE_CREATOR_UUID not set. Set it from the recipientUuid above.');
 
   const amountCents = price ?? 0;
   const credits = calculateCredits(amountCents, 'purchase');
