@@ -7,6 +7,7 @@ import path from 'path';
 import sharp from 'sharp';
 import { logCompanionEvent } from '@/lib/companion-analytics';
 import { COMPANION_EVENTS } from '@/lib/companion-constants';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120; // 2 minutes max for image generation
@@ -199,6 +200,32 @@ export async function POST(req: NextRequest) {
       return 'sfw';
     })();
     console.log(`[companion-photo] affection=${userAffection}, isPaid=${isPaid}, contentLevel=${contentLevel}`);
+
+    // ── Credit deduction for photo generation ──
+    const isNsfwContent = contentLevel === 'lingerie' || contentLevel === 'nsfw';
+    const photoCreditCost = isNsfwContent ? CREDIT_COSTS.girlfriendPhotoNsfw : CREDIT_COSTS.girlfriendPhotoSfw;
+    if (isLoggedIn && authHeader && photoCreditCost > 0) {
+      const payload2 = verifyToken(authHeader.slice(7));
+      if (payload2) {
+        const { data: balData } = await supabaseAdmin
+          .from('users')
+          .select('credits')
+          .eq('id', payload2.userId)
+          .single();
+        const bal = (balData?.credits as number) ?? 0;
+        if (bal < photoCreditCost) {
+          return NextResponse.json({
+            error: 'insufficient_credits',
+            required: photoCreditCost,
+            current: bal,
+          }, { status: 402 });
+        }
+        await supabaseAdmin
+          .from('users')
+          .update({ credits: bal - photoCreditCost })
+          .eq('id', payload2.userId);
+      }
+    }
 
     // Build generation prompt — boost based on content level
     const levelNeg = NEGATIVE_BY_LEVEL[contentLevel] || NEGATIVE_BY_LEVEL.sfw;

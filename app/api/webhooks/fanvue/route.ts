@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { findUserById } from '@/lib/auth';
 import { recordCreditChange } from '@/lib/db/billing';
 import { calculateCredits } from '@/lib/fanvue';
+import { createClaimToken } from '@/lib/db/claimTokens';
+import { sendClaimDM } from '@/lib/fanvue-api';
 
 export const runtime = 'nodejs';
 
@@ -206,7 +208,25 @@ async function handleNewSubscription(event: Record<string, unknown>) {
   const user = await findUserByFanvueHandle(sender.handle);
 
   if (!user) {
+    // Save to pending (legacy) + generate claim token
     await saveToPending(sender as { uuid: string; handle: string }, amountCents, 'subscription');
+    const claim = await createClaimToken({
+      fanvueHandle: sender.handle,
+      fanvueUuid: sender.uuid,
+      purchaseType: 'subscription',
+      amountCents,
+      credits,
+    });
+    console.log(`[Fanvue] Subscription: no linked user for @${sender.handle}. Claim token: ${claim.token}`);
+    // Auto-DM the claim link
+    if (sender.uuid) {
+      await sendClaimDM({
+        recipientUuid: sender.uuid,
+        fanvueHandle: sender.handle,
+        claimToken: claim.token,
+        credits,
+      });
+    }
     return;
   }
 
@@ -261,6 +281,22 @@ async function handleTipReceived(event: Record<string, unknown>) {
   const user = await findUserByFanvueHandle(sender.handle);
   if (!user) {
     await saveToPending(sender as { uuid: string; handle: string }, amountCents, 'tip');
+    const claim = await createClaimToken({
+      fanvueHandle: sender.handle,
+      fanvueUuid: sender.uuid || null,
+      purchaseType: 'tip',
+      amountCents,
+      credits,
+    });
+    console.log(`[Fanvue] Tip: no linked user for @${sender.handle}. Claim token: ${claim.token}`);
+    if (sender.uuid) {
+      await sendClaimDM({
+        recipientUuid: sender.uuid,
+        fanvueHandle: sender.handle,
+        claimToken: claim.token,
+        credits,
+      });
+    }
     return;
   }
 
@@ -295,6 +331,22 @@ async function handlePurchaseReceived(event: Record<string, unknown>) {
   const user = await findUserByFanvueHandle(sender.handle);
   if (!user) {
     await saveToPending(sender as { uuid: string; handle: string }, amountCents, 'purchase');
+    const claim = await createClaimToken({
+      fanvueHandle: sender.handle,
+      fanvueUuid: sender.uuid || null,
+      purchaseType: 'purchase',
+      amountCents,
+      credits,
+    });
+    console.log(`[Fanvue] Purchase: no linked user for @${sender.handle}. Claim token: ${claim.token}`);
+    if (sender.uuid) {
+      await sendClaimDM({
+        recipientUuid: sender.uuid,
+        fanvueHandle: sender.handle,
+        claimToken: claim.token,
+        credits,
+      });
+    }
     return;
   }
 

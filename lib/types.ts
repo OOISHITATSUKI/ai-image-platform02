@@ -4,7 +4,7 @@
 
 export type GenerationType = 'txt2img' | 'img2img' | 'img_edit' | 'face_swap' | 'inpaint' | 'txt2vid' | 'img2vid' | 'ref2vid' | 'vid2vid';
 
-export type PlanTier = 'free' | 'basic' | 'pro' | 'ultimate';
+export type PlanTier = 'free' | 'lite' | 'basic' | 'pro' | 'ultimate';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -131,7 +131,6 @@ export interface User {
   country?: string;
   firstGenerationConfirmed?: boolean;
   termsAgreedAt?: number;
-  coins: number;
 }
 
 // ----- Plan Limits -----
@@ -155,6 +154,15 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     faceSwapPerDay: false,
     chatHistoryDays: 1,
     hasAds: true,
+  },
+  lite: {
+    imagesPerDay: 50,
+    videosPerDay: 2,
+    maxResolution: '1024',
+    maxVideoDuration: 3,
+    faceSwapPerDay: 5,
+    chatHistoryDays: 30,
+    hasAds: false,
   },
   basic: {
     imagesPerDay: 100,

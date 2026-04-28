@@ -2,27 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { verifyToken, findUserById } from '@/lib/auth';
 import { getRelationshipLevel } from '@/lib/companions';
+import { CREDIT_COSTS, SKIP_LEVEL_CREDIT_COSTS } from '@/lib/creditCosts';
 
 /**
- * POST /api/companion-coins — spend coins on companion features
+ * POST /api/companion-coins — spend credits on companion features
+ * (Unified: formerly used coins, now uses credits)
  * Body: { companionId, action, amount? }
  * Actions:
- *   - 'gift'           → 20 coins → relationship +20
- *   - 'boost'          → 100 coins → relationship +100
- *   - 'unlock_content' → 200 coins → relationship instantly to next content tier
+ *   - 'gift'           → 5 credits → relationship +20
+ *   - 'boost'          → 15 credits → relationship +100
+ *   - 'unlock_content' → 30 credits → relationship instantly to next content tier
  *   - 'skip_level'     → variable → Live Action level skip
- *   - 'extra_chat'     → 80 coins → 50 extra messages (stored in localStorage)
+ *   - 'extra_chat'     → 10 credits → 50 extra messages (stored in localStorage)
  */
 
-const COIN_COSTS: Record<string, number> = {
-  gift: 20,
-  boost: 100,
-  unlock_content: 200,
-  extra_chat: 80,
-};
-
-const SKIP_LEVEL_COSTS: Record<number, number> = {
-  2: 10, 3: 20, 4: 35, 5: 25, 6: 50, 7: 80, 8: 120, 9: 200,
+const CREDIT_ACTION_COSTS: Record<string, number> = {
+  gift: CREDIT_COSTS.gift,
+  boost: CREDIT_COSTS.boost,
+  unlock_content: CREDIT_COSTS.unlockContent,
+  extra_chat: CREDIT_COSTS.extraChat,
 };
 
 const RELATIONSHIP_BOOSTS: Record<string, number> = {
@@ -58,42 +56,42 @@ export async function POST(req: NextRequest) {
     const user = await findUserById(payload.userId);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-    // Determine cost
+    // Determine cost (in credits)
     let cost: number;
     if (action === 'skip_level' && targetLevel) {
-      cost = SKIP_LEVEL_COSTS[targetLevel] ?? 150;
+      cost = SKIP_LEVEL_CREDIT_COSTS[targetLevel] ?? 15;
     } else {
-      cost = COIN_COSTS[action];
-      if (!cost) return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+      cost = CREDIT_ACTION_COSTS[action];
+      if (cost === undefined) return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    // Get coin balance from Supabase
+    // Get credit balance from Supabase
     const { data: userData } = await supabaseAdmin
       .from('users')
-      .select('coins')
+      .select('credits')
       .eq('id', user.id)
       .single();
-    const coinBalance = (userData?.coins as number) ?? 0;
+    const creditBalance = (userData?.credits as number) ?? 0;
 
-    if (coinBalance < cost) {
+    if (creditBalance < cost) {
       return NextResponse.json({
-        error: 'insufficient_coins',
+        error: 'insufficient_credits',
         required: cost,
-        current: coinBalance,
+        current: creditBalance,
       }, { status: 402 });
     }
 
-    // Deduct coins
-    const newBalance = coinBalance - cost;
+    // Deduct credits
+    const newBalance = creditBalance - cost;
     const { error: deductErr } = await supabaseAdmin
       .from('users')
-      .update({ coins: newBalance })
+      .update({ credits: newBalance })
       .eq('id', user.id);
 
     if (deductErr) {
-      return NextResponse.json({ error: 'Failed to deduct coins' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to deduct credits' }, { status: 500 });
     }
-    let result: Record<string, unknown> = { ok: true, coinsSpent: cost, balance: newBalance };
+    let result: Record<string, unknown> = { ok: true, creditsSpent: cost, balance: newBalance };
 
     // Apply action effect
     if (action === 'gift' || action === 'boost') {

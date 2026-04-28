@@ -226,7 +226,7 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td style={{ padding: '9px 14px', color: '#a78bfa' }}>{u.plan}</td>
                                     <td style={{ padding: '9px 14px', color: '#f59e0b' }}>{u.credits}</td>
-                                    <td style={{ padding: '9px 14px', color: '#fbbf24' }}>{u.coins}</td>
+                                    <td style={{ padding: '9px 14px', color: '#fbbf24' }}>{u.coins ?? 0}</td>
                                     <td style={{ padding: '9px 14px', color: '#8b5cf6' }}>{u.dailyChatLimit === null ? <span style={{ color: 'var(--text-secondary)' }}>default</span> : u.dailyChatLimit === 0 ? '∞' : u.dailyChatLimit}</td>
                                     <td style={{ padding: '9px 14px', color: 'var(--text-secondary)' }}>{u.country || '-'}</td>
                                     <td style={{ padding: '9px 14px' }}>{u.termsAgreedAt ? <span style={{ color: '#10b981' }}>Yes</span> : <span style={{ color: '#ef4444' }}>No</span>}</td>
@@ -241,9 +241,9 @@ export default function AdminUsersPage() {
                                                 if (c !== null) doAction(u.id, 'set_credits', Number(c));
                                             }} style={btnStyle('#60a5fa')}>Credits</button>
                                             <button onClick={async () => {
-                                                const c = prompt('コイン数を入力:', String(u.coins));
+                                                const c = prompt('コイン数を入力（※廃止予定）:', String(u.coins ?? 0));
                                                 if (c !== null) doAction(u.id, 'set_coins', Number(c));
-                                            }} style={btnStyle('#f59e0b')}>🪙Coins</button>
+                                            }} style={btnStyle('#f59e0b')}>🪙Coins(legacy)</button>
                                             <button onClick={async () => {
                                                 const c = prompt('1日のチャット上限を入力:\n（-1 = プランのデフォルトに戻す, 0 = 無制限, 数字 = カスタム上限）', '-1');
                                                 if (c === null) return;

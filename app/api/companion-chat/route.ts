@@ -5,8 +5,10 @@ import { verifyToken, findUserById } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { logCompanionEvent } from '@/lib/companion-analytics';
 import { COMPANION_EVENTS } from '@/lib/companion-constants';
+import { CREDIT_COSTS, LITE_NSFW_MONTHLY_LIMIT } from '@/lib/creditCosts';
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
+const NOVITA_CHAT_MODEL = process.env.NOVITA_CHAT_MODEL || 'meta-llama/llama-3.3-70b-instruct';
 
 interface ChatMsg {
   role: 'user' | 'assistant';
@@ -582,8 +584,9 @@ This is the #1 most important rule. Violating it breaks the experience.`;
 const DAILY_CHAT_LIMITS: Record<string, number> = {
   guest: 3,        // unregistered: 3 per hour
   free: 10,        // free plan: 10 per day
-  basic: 50,       // basic plan: 50 per day
-  unlimited: 9999, // unlimited plan: essentially no limit
+  lite: 30,        // lite plan: 30 per day
+  basic: 50,       // basic/standard plan: 50 per day
+  unlimited: 9999, // unlimited/premium plan: essentially no limit
 };
 
 // Daily message count tracking per user
@@ -662,7 +665,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Companion not found' }, { status: 404 });
     }
 
-    if (!ANTHROPIC_API_KEY) {
+    if (!NOVITA_API_KEY) {
       return NextResponse.json({ error: 'Chat service unavailable' }, { status: 503 });
     }
 
@@ -748,6 +751,51 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── NSFW credit deduction (skip for greetings and assistant) ──
+    const isNsfwEligible = isPaid && userAffection >= 200 && !companion.isAssistant;
+    let creditCost = 0;
+    if (!isGreeting && isNsfwEligible) {
+      // Lite plan: monthly NSFW chat limit (20/month)
+      if (userPlan === 'lite' && userId) {
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+        const { count: nsfwCount } = await supabaseAdmin
+          .from('companion_analytics')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('event_type', 'message_sent')
+          .gte('created_at', monthStart.toISOString());
+        if ((nsfwCount ?? 0) >= LITE_NSFW_MONTHLY_LIMIT) {
+          return NextResponse.json({
+            error: 'lite_nsfw_limit',
+            used: nsfwCount ?? 0,
+            limit: LITE_NSFW_MONTHLY_LIMIT,
+          }, { status: 429 });
+        }
+      }
+      creditCost = CREDIT_COSTS.chatNsfw;
+      if (userId && creditCost > 0) {
+        const { data: balData } = await supabaseAdmin
+          .from('users')
+          .select('credits')
+          .eq('id', userId)
+          .single();
+        const bal = (balData?.credits as number) ?? 0;
+        if (bal < creditCost) {
+          return NextResponse.json({
+            error: 'insufficient_credits',
+            required: creditCost,
+            current: bal,
+          }, { status: 402 });
+        }
+        await supabaseAdmin
+          .from('users')
+          .update({ credits: bal - creditCost })
+          .eq('id', userId);
+      }
+    }
+
     const nicknameSuffix = resolvedNickname
       ? `\n\n== USER NICKNAME ==\nThe user wants you to call them "${resolvedNickname}". Always address them by this name naturally in conversation. Never ask what to call them — they already told you.`
       : '';
@@ -770,18 +818,19 @@ export async function POST(req: NextRequest) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.novita.ai/v3/openai/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${NOVITA_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: NOVITA_CHAT_MODEL,
         max_tokens: companion.isAssistant ? 500 : 300,
-        system: systemPrompt,
-        messages: apiMessages,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...apiMessages,
+        ],
       }),
       signal: controller.signal,
     });
@@ -790,12 +839,12 @@ export async function POST(req: NextRequest) {
 
     if (!res.ok) {
       const errBody = await res.text();
-      console.error('Anthropic API error:', res.status, errBody);
+      console.error('Novita LLM API error:', res.status, errBody);
       return NextResponse.json({ error: 'Failed to get response' }, { status: 502 });
     }
 
     const data = await res.json();
-    let reply = data.content?.[0]?.text || "Sorry, I couldn't think of what to say...";
+    let reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't think of what to say...";
 
     // Extract and save feedback tags from assistant reply (Nude Assistant only)
     if (companion.isAssistant) {
@@ -924,6 +973,7 @@ export async function POST(req: NextRequest) {
       trustDelta,
       tensionDelta,
       suggestedReplies,
+      creditCost,
       ...(photoMatch ? { photoPrompt: photoMatch[1].trim() } : {}),
     });
   } catch (error: unknown) {

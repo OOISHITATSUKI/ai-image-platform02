@@ -6,7 +6,7 @@ import { supabaseAdmin } from '../supabase-server';
 
 // ----- Transaction Record (one per payment) -----
 
-export type PackType = 'standard' | 'premium';
+export type PackType = 'lite' | 'standard' | 'premium' | 'starter' | 'plus' | 'mega';
 export type TransactionStatus = 'pending' | 'confirming' | 'completed' | 'failed' | 'expired';
 
 export interface TransactionRecord {

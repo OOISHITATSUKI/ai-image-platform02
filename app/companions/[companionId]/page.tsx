@@ -98,15 +98,17 @@ export default function CompanionChatPage() {
   const { t, locale } = useTranslation();
 
   // Support default, user-created, and the Nude Assistant
+  // 'undefined' = still loading from DB, 'null' = truly not found
   const [companion, setCompanion] = useState<Companion | null | undefined>(() => {
-    if (companionId.startsWith('user-')) return null; // will load in useEffect
-    return getCompanionById(companionId) ?? null;
+    if (companionId.startsWith('user-')) return undefined; // will load in useEffect
+    const hardcoded = getCompanionById(companionId);
+    return hardcoded !== undefined ? hardcoded : undefined; // undefined = loading
   });
 
   useEffect(() => {
     if (companionId.startsWith('user-')) {
       const userComp = getUserCompanionById(companionId);
-      setCompanion(userComp);
+      setCompanion(userComp ?? null);
       return;
     }
     // Fetch latest from DB so Admin edits reflect instantly
@@ -114,8 +116,11 @@ export default function CompanionChatPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.companion) setCompanion(data.companion as Companion);
+        else if (!getCompanionById(companionId)) setCompanion(null); // truly not found
       })
-      .catch(() => { /* keep default */ });
+      .catch(() => {
+        if (!getCompanionById(companionId)) setCompanion(null);
+      });
   }, [companionId]);
 
   const { user } = useAppStore();
@@ -151,8 +156,8 @@ export default function CompanionChatPage() {
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  // Coin spend helper
-  const spendCoins = async (action: 'gift' | 'boost') => {
+  // Credit spend helper (unified — replaces coins)
+  const spendCredits = async (action: 'gift' | 'boost') => {
     const token = localStorage.getItem('auth_token');
     if (!token) { setShowGuestLimit(true); return; }
     const res = await fetch('/api/companion-coins', {
@@ -161,17 +166,17 @@ export default function CompanionChatPage() {
       body: JSON.stringify({ companionId, action }),
     });
     const d = await res.json();
-    if (d.error === 'insufficient_coins') { setShowCoinShop(true); return; }
+    if (d.error === 'insufficient_credits') { setShowCreditShop(true); return; }
     if (d.affection !== undefined) setRelPoints(d.affection);
     else if (d.points !== undefined) setRelPoints(d.points);
-    if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, coins: d.balance } });
+    if (d.balance !== undefined && user) useAppStore.setState({ user: { ...user, credits: d.balance } });
     const el = document.createElement('div');
     el.className = action === 'gift' ? 'coin-gift-animation' : 'coin-boost-animation';
     el.textContent = action === 'gift' ? '🎁 +20' : '🚀 +100';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1800);
   };
-  const [showCoinShop, setShowCoinShop] = useState(false);
+  const [showCreditShop, setShowCreditShop] = useState(false);
 
   // PlayStyle
   const playStyleKey = `playstyle_${companionId}`;
@@ -346,7 +351,19 @@ export default function CompanionChatPage() {
   const pendingRef = useRef(pendingStoryComment);
   pendingRef.current = pendingStoryComment;
 
-  if (!companion) {
+  // undefined = still loading from DB
+  if (companion === undefined) {
+    return (
+      <div className="comp-chat-page">
+        <div className="comp-chat-notfound">
+          <div style={{ fontSize: '1.5rem', opacity: 0.5 }}>...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // null = truly not found
+  if (companion === null) {
     return (
       <div className="comp-chat-page">
         <div className="comp-chat-notfound">
@@ -447,6 +464,11 @@ export default function CompanionChatPage() {
           setMessages((prev) => prev.slice(0, -1));
           return;
         }
+        if (data.error === 'insufficient_credits') {
+          setShowCreditShop(true);
+          setMessages((prev) => prev.slice(0, -1));
+          return;
+        }
         throw new Error(data.error || 'API error');
       }
 
@@ -513,6 +535,11 @@ export default function CompanionChatPage() {
       }
       pushRecentMessage(text.trim());
       if (isAssistant) setAssistPresetSeed(s => s + 1);
+
+      // Deduct credits locally if chat cost credits
+      if (data.creditCost && data.creditCost > 0 && user) {
+        useAppStore.getState().deductCredits(data.creditCost);
+      }
 
       // Update relationship with 3-axis sentiment
       if (!isAssistant && data.sentiment) {
@@ -660,9 +687,9 @@ export default function CompanionChatPage() {
             <Link href={`/companions/${companionId}/live`} className="comp-header-live-btn">Live</Link>
           )}
           {!isAssistant && (
-            <div className="comp-header-coin-badge" onClick={() => setShowCoinShop(true)}>
-              <span className="comp-header-coin-icon">🪙</span>
-              <span className="comp-header-coin-num">{user?.coins ?? 0}</span>
+            <div className="comp-header-coin-badge" onClick={() => setShowCreditShop(true)}>
+              <span className="comp-header-coin-icon">⚡</span>
+              <span className="comp-header-coin-num">{user?.credits ?? 0}</span>
               <button className="comp-header-coin-add">+</button>
             </div>
           )}
@@ -875,10 +902,10 @@ export default function CompanionChatPage() {
                 <button type="button" className="comp-input-icon-btn comp-input-call-btn" onClick={() => setShowCallComingSoon(true)} title={t('companions.callMe')}>
                   📞
                 </button>
-                <button type="button" className="comp-input-icon-btn" onClick={() => spendCoins('gift')} title={t('companions.coinGift')}>
+                <button type="button" className="comp-input-icon-btn" onClick={() => spendCredits('gift')} title={t('companions.coinGift')}>
                   🎁<span className="comp-input-icon-badge">20</span>
                 </button>
-                <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCoins('boost')} title={t('companions.coinBoost')}>
+                <button type="button" className="comp-input-icon-btn comp-input-icon-boost" onClick={() => spendCredits('boost')} title={t('companions.coinBoost')}>
                   🚀<span className="comp-input-icon-badge">100</span>
                 </button>
                 <div className="comp-input-divider" />
@@ -906,11 +933,11 @@ export default function CompanionChatPage() {
           <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
           <div className="comp-char-gradient" />
 
-          {/* Coin balance — top left */}
+          {/* Credit balance — top left */}
           {!isAssistant && (
-            <div className="comp-char-coins" onClick={() => setShowCoinShop(true)}>
-              <span style={{ fontSize: '0.85rem' }}>🪙</span>
-              <span className="comp-char-coins-num">{user?.coins ?? 0}</span>
+            <div className="comp-char-coins" onClick={() => setShowCreditShop(true)}>
+              <span style={{ fontSize: '0.85rem' }}>⚡</span>
+              <span className="comp-char-coins-num">{user?.credits ?? 0}</span>
               <button className="comp-char-coins-add">+</button>
             </div>
           )}
@@ -1208,31 +1235,41 @@ export default function CompanionChatPage() {
         </div>
       )}
 
-      {/* Coin Shop Modal */}
-      {showCoinShop && (
-        <div className="paywall-overlay" onClick={() => setShowCoinShop(false)}>
+      {/* Credit Shop Modal */}
+      {showCreditShop && (
+        <div className="paywall-overlay" onClick={() => setShowCreditShop(false)}>
           <div className="coin-shop-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="paywall-close" onClick={() => setShowCoinShop(false)}>×</button>
-            <h3>🪙 {t('companions.coinShopTitle')}</h3>
-            <p className="coin-shop-desc">{t('companions.coinShopDesc')}</p>
+            <button className="paywall-close" onClick={() => setShowCreditShop(false)}>×</button>
+            <h3>{t('companions.creditShopTitle') || 'Get Credits'}</h3>
+            <p className="coin-shop-desc">{t('companions.creditShopDesc') || 'Credits let you send gifts, boost your relationship, unlock NSFW content, and more.'}</p>
             <div className="coin-shop-packs">
               {[
-                { coins: 300, price: '¥490', tag: '' },
-                { coins: 700, price: '¥980', tag: t('companions.coinShopPopular') },
-                { coins: 1600, price: '¥1,980', tag: t('companions.coinShopBest') },
+                { credits: 60, price: '$4.99', tag: '' },
+                { credits: 150, price: '$9.99', tag: t('companions.creditShopPopular') || 'Popular' },
+                { credits: 350, price: '$19.99', tag: t('companions.creditShopBest') || 'Best Value' },
               ].map((pack) => (
-                <button key={pack.coins} className={`coin-shop-pack ${pack.tag ? 'coin-shop-pack-highlight' : ''}`} onClick={() => {
-                  // TODO: Connect to actual payment flow
+                <button key={pack.credits} className={`coin-shop-pack ${pack.tag ? 'coin-shop-pack-highlight' : ''}`} onClick={() => {
                   window.open('/pricing', '_blank');
                 }}>
                   {pack.tag && <span className="coin-shop-pack-tag">{pack.tag}</span>}
-                  <span className="coin-shop-pack-coins">🪙 {pack.coins}</span>
+                  <span className="coin-shop-pack-coins">{pack.credits} credits</span>
                   <span className="coin-shop-pack-price">{pack.price}</span>
                 </button>
               ))}
             </div>
             <div className="coin-shop-balance">
-              {t('companions.coinShopCurrent')}: 🪙 {user?.coins ?? 0} {t('companions.coinBalance')}
+              {t('companions.creditShopCurrent') || 'Current balance'}: {user?.credits ?? 0} {t('pricing.credits') || 'credits'}
+            </div>
+            {/* Subscribe link (subtle) */}
+            <div style={{ marginTop: 10, textAlign: 'center' }}>
+              <a
+                href="/pricing"
+                style={{
+                  fontSize: '0.72rem', color: '#f87171', textDecoration: 'none',
+                }}
+              >
+                {t('companions.creditShopSubCta') || 'View Plans →'}
+              </a>
             </div>
           </div>
         </div>
@@ -1335,8 +1372,8 @@ export default function CompanionChatPage() {
             <div className="barometer-info-cta">
               <span className="barometer-info-cta-label">💡 {t('companions.barometerCtaLabel') || 'すぐに進めたい？'}</span>
               <div className="barometer-info-cta-btns">
-                <button onClick={() => { setShowBarometerInfo(false); spendCoins('gift'); }}>🎁 {t('companions.coinGift') || 'ギフト'}</button>
-                <button onClick={() => { setShowBarometerInfo(false); spendCoins('boost'); }}>🚀 {t('companions.coinBoost') || 'ブースト'}</button>
+                <button onClick={() => { setShowBarometerInfo(false); spendCredits('gift'); }}>🎁 {t('companions.coinGift') || 'ギフト'}</button>
+                <button onClick={() => { setShowBarometerInfo(false); spendCredits('boost'); }}>🚀 {t('companions.coinBoost') || 'ブースト'}</button>
               </div>
             </div>
           </div>

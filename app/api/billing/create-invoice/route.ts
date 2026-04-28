@@ -6,8 +6,12 @@ const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY || '';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 const PACK_PRICES: Record<PackType, { usd: number; credits: number }> = {
-    standard: { usd: 14.99, credits: 200 },
-    premium: { usd: 39.99, credits: 600 },
+    lite: { usd: 7.99, credits: 80 },
+    standard: { usd: 14.99, credits: 220 },
+    premium: { usd: 24.99, credits: 600 },
+    starter: { usd: 4.99, credits: 60 },
+    plus: { usd: 9.99, credits: 150 },
+    mega: { usd: 19.99, credits: 350 },
 };
 
 export async function POST(req: NextRequest) {

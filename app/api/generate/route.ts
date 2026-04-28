@@ -7,10 +7,10 @@ import { processViolation, checkBanStatus } from '@/lib/auditLogger';
 import { rateLimit } from '@/lib/rateLimit';
 import { findUserById, verifyToken } from '@/lib/auth';
 import { getGenerationsByUser } from '@/lib/db/generations';
+import { getLLMProvider } from '@/lib/llm';
 import sharp from 'sharp';
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const NOVITA_BASE = 'https://api.novita.ai/v3/async';
 const NOVITA_BASE_SYNC = 'https://api.novita.ai/v3';
 import fs from 'fs';
@@ -101,30 +101,62 @@ const SDXL_QUALITY_PREFIX =
     '(natural hair strands:1.2), (catchlight in eyes:1.2), ' +
     'film grain, lens distortion, depth of field, chromatic aberration';
 
-// ── Claude Prompt Optimization ──
-// Use Claude to turn natural language or Japanese into high-quality Stable Diffusion tags.
-async function optimizePromptWithClaude(prompt: string, generationType: string, isNsfw: boolean, isXL: boolean): Promise<string> {
-    if (!ANTHROPIC_API_KEY) {
-        console.warn("ANTHROPIC_API_KEY not found, using raw prompt");
-        return prompt;
-    }
-
-    console.log("Optimizing prompt with Claude: " + prompt);
+// ── LLM Prompt Optimization ──
+// Use LLM (Together AI / Claude) to turn natural language or Japanese into high-quality Stable Diffusion tags.
+async function optimizePromptWithLLM(prompt: string, generationType: string, isNsfw: boolean, isXL: boolean): Promise<string> {
+    console.log("Optimizing prompt with LLM: " + prompt);
 
     let systemPrompt: string;
 
     if (generationType === "img_edit" || prompt.includes("[inpaint]")) {
         systemPrompt = isNsfw
-            ? "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. NSFW is allowed: bare skin, nude, nipples, vagina etc. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else."
-            : "You are a Stable Diffusion inpainting prompt expert. Convert the input into 10-20 comma-separated English tags for the masked area only. This is SFW: do NOT include nudity, bare skin, or sexual tags. Keep content clothed and tasteful. Do NOT add quality, lighting, or camera tags. Output ONLY comma-separated tags, nothing else.";
+            ? `You are a Stable Diffusion inpainting prompt expert.
+Convert the input into 10-20 comma-separated English tags for the masked area only.
+Always output in English, regardless of input language.
+NSFW is allowed: bare skin, nude, nipples, vagina etc.
+Do NOT add quality, lighting, or camera tags.
+Output ONLY comma-separated tags, nothing else.
+
+Example:
+Input: "胸を大きく"
+Output: large breasts, bare breasts, cleavage, soft skin, natural breast shape`
+            : `You are a Stable Diffusion inpainting prompt expert.
+Convert the input into 10-20 comma-separated English tags for the masked area only.
+Always output in English, regardless of input language.
+This is SFW: do NOT include nudity, bare skin, or sexual tags. Keep content clothed and tasteful.
+Do NOT add quality, lighting, or camera tags.
+Output ONLY comma-separated tags, nothing else.
+
+Example:
+Input: "赤いドレスに変えて"
+Output: red dress, elegant fabric, satin material, form fitting, fashionable`;
     } else if (generationType === "img2img") {
         systemPrompt = isNsfw
-            ? "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else."
-            : "You are a Stable Diffusion img2img prompt expert. Convert input into 15-25 comma-separated English tags. Translate to English if needed. Focus on style, mood, lighting changes. This is SFW: do NOT include nudity or sexual tags. Do NOT re-describe character appearance. Output ONLY comma-separated tags, nothing else.";
+            ? `You are a Stable Diffusion img2img prompt expert.
+Convert input into 15-25 comma-separated English tags.
+Always output in English, regardless of input language.
+Focus on style, mood, lighting changes. NSFW is allowed, use direct explicit tags.
+Do NOT re-describe character appearance.
+Output ONLY comma-separated tags, nothing else.
+
+Example:
+Input: "夜の雰囲気に変えて"
+Output: night scene, moonlight, dim lighting, shadows, atmospheric, moody, dark background`
+            : `You are a Stable Diffusion img2img prompt expert.
+Convert input into 15-25 comma-separated English tags.
+Always output in English, regardless of input language.
+Focus on style, mood, lighting changes. This is SFW: do NOT include nudity or sexual tags.
+Do NOT re-describe character appearance.
+Output ONLY comma-separated tags, nothing else.
+
+Example:
+Input: "夕焼けの雰囲気に"
+Output: sunset lighting, golden hour, warm tones, orange sky, dramatic light, soft shadows`;
     } else if (isNsfw) {
         systemPrompt = `You are a Stable Diffusion photorealistic prompt expert for an adult NSFW platform.
 Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
 Convert user input into 15-30 comma-separated English tags.
+Always output in English, regardless of input language.
 
 CRITICAL RULES:
 1. Translate any non-English input to English first.
@@ -153,6 +185,7 @@ CRITICAL RULES:
         systemPrompt = `You are a Stable Diffusion photorealistic prompt expert.
 Your goal is to produce images that look like REAL PHOTOGRAPHS, not AI-generated images.
 Convert user input into 15-30 comma-separated English tags.
+Always output in English, regardless of input language.
 
 CRITICAL RULES:
 1. Translate any non-English input to English first.
@@ -168,43 +201,28 @@ CRITICAL RULES:
    - AVOID these AI tells: Do NOT use "perfect skin", "flawless", "symmetrical", "porcelain". Real photos have asymmetry and imperfections.
 7. Do NOT add: age, ethnicity, body shape, hair color, hair style, or breast size tags (these are handled separately by the system).
 8. Keep output under 500 characters to leave room for character tags.
-9. Output ONLY comma-separated tags, nothing else.`;
+9. Output ONLY comma-separated tags, nothing else.
+
+Example:
+Input: "美しい女性、夕日のビーチ"
+Output: beautiful woman, sunset beach, golden hour, cinematic lighting, (shot on Canon EOS R5:1.2), 85mm lens, shallow depth of field, (realistic skin texture:1.3), visible skin pores, natural window light, soft shadows, film grain, bokeh background`;
     }
 
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-                "x-api-key": ANTHROPIC_API_KEY,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({
-                model: "claude-sonnet-4-6",
-                max_tokens: 200,
-                system: systemPrompt,
-                messages: [{ role: "user", content: "Generation Type: " + generationType + ", NSFW: " + isNsfw + ", isXL: " + isXL + "\nUser Input: " + prompt }],
-            }),
-            signal: controller.signal,
+        const llm = getLLMProvider();
+        const response = await llm.generate({
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: "Generation Type: " + generationType + ", NSFW: " + isNsfw + ", isXL: " + isXL + "\nUser Input: " + prompt },
+            ],
+            maxTokens: 200,
+            temperature: 0.7,
         });
 
-        clearTimeout(timeoutId);
-
-        if (!res.ok) {
-            const err = await res.text();
-            console.error("Claude API Error:", res.status, err);
-            return prompt;
-        }
-
-        const data = await res.json();
-        const optimized = data.content[0].text.trim();
-        console.log("Optimized prompt: " + optimized);
-        return optimized;
+        console.log("Optimized prompt: " + response.content);
+        return response.content;
     } catch (err) {
-        console.error("Claude optimization failed:", err);
+        console.error("LLM optimization failed:", err);
         return prompt;
     }
 }
@@ -565,45 +583,41 @@ export async function handleFaceSwapFinal(
     }
 }
 
-// ── Solution A: Auto-inpainting region analysis via Claude ──
+// ── Solution A: Auto-inpainting region analysis via LLM ──
 async function analyzeEditRegion(prompt: string): Promise<{
     region: 'breasts' | 'body' | 'face' | 'clothing' | 'background' | 'full';
     maskBox: { x: number; y: number; w: number; h: number }; // 0-1 normalized
 }> {
-    if (!ANTHROPIC_API_KEY) {
-        return { region: 'full', maskBox: { x: 0, y: 0, w: 1, h: 1 } };
-    }
-
     try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'x-api-key': ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 200,
-                system: `You analyze image editing requests to determine which body region to modify.
-Given a user's edit instruction, output ONLY a JSON object:
+        const llm = getLLMProvider();
+        const response = await llm.generate({
+            messages: [
+                {
+                    role: 'system',
+                    content: `You analyze image editing requests to determine which body region to modify.
+Given a user's edit instruction (in any language), output ONLY a JSON object in English:
 {
   "region": "breasts"|"body"|"face"|"clothing"|"background"|"full",
   "maskBox": {"x": 0.0-1.0, "y": 0.0-1.0, "w": 0.0-1.0, "h": 0.0-1.0}
 }
 maskBox defines the rectangular area to edit (normalized 0-1 coordinates).
+
 Examples:
 - "巨乳にして" → {"region":"breasts","maskBox":{"x":0.2,"y":0.25,"w":0.6,"h":0.4}}
 - "服を脱がせて" → {"region":"body","maskBox":{"x":0.05,"y":0.15,"w":0.9,"h":0.75}}
 - "金髪にして" → {"region":"face","maskBox":{"x":0.2,"y":0.0,"w":0.6,"h":0.4}}
 - "背景を変えて" → {"region":"background","maskBox":{"x":0.0,"y":0.0,"w":1.0,"h":1.0}}
-Output ONLY the JSON, nothing else.`,
-                messages: [{ role: 'user', content: prompt }],
-            }),
+- "make her nude" → {"region":"body","maskBox":{"x":0.05,"y":0.15,"w":0.9,"h":0.75}}
+
+Output ONLY the JSON, nothing else. No markdown, no explanation.`,
+                },
+                { role: 'user', content: prompt },
+            ],
+            maxTokens: 200,
+            temperature: 0.3,
         });
 
-        const data = await res.json();
-        const text = data.content[0].text.trim();
+        const text = response.content;
         const json = JSON.parse(text.replace(/```json|```/g, ''));
         return json;
     } catch (err) {
@@ -1058,7 +1072,7 @@ export async function POST(request: NextRequest) {
                 promptForClaude += `\n[Required Composition: ${compLabels[effectiveComp] || effectiveComp}]`;
             }
         }
-        const optimizedPrompt = await optimizePromptWithClaude(
+        const optimizedPrompt = await optimizePromptWithLLM(
             promptForClaude,
             generationType,
             nudeMode,

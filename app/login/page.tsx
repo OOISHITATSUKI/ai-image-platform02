@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { useTranslation } from '@/lib/useTranslation';
 
@@ -10,6 +10,7 @@ type Step = 'password' | 'mfa' | 'forgot-password' | 'reset-password';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { setUser, locale } = useAppStore();
     const { t } = useTranslation();
 
@@ -60,8 +61,9 @@ export default function LoginPage() {
         // Clear guest gen count
         localStorage.removeItem('guest_gen_count');
 
-        // Redirect to library if images were unlocked, otherwise to home
-        const destination = (unlockedCount && unlockedCount > 0) ? '/library' : '/';
+        // Redirect: claim URL > library (if unlocked) > home
+        const redirectUrl = searchParams.get('redirect');
+        const destination = redirectUrl || ((unlockedCount && unlockedCount > 0) ? '/library' : '/');
         setTimeout(() => router.push(destination), 100);
     };
 

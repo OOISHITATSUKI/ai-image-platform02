@@ -7,6 +7,7 @@ import Footer from './Footer';
 import AgeGate from '@/components/ui/AgeGate';
 import WelcomeModal from '@/components/ui/WelcomeModal';
 import UnlockNotification from '@/components/guest/UnlockNotification';
+import ClaimBanner from '@/components/ClaimBanner';
 import { useAppStore } from '@/lib/store';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -149,6 +150,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
             {/* Post-registration unlock notification */}
             {isAuthenticated && <UnlockNotification />}
+
+            {/* Unclaimed credits banner */}
+            {isAuthenticated && <ClaimBanner />}
 
             <div className="mobile-header">
                 <button className="mobile-menu-btn" onClick={toggleSidebar}>
