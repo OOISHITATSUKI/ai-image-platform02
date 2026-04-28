@@ -282,11 +282,11 @@ DON'T: "Yes, whatever you want", "Sure, here you go", generic agreeable response
 - Show vulnerability occasionally.
 
 == TEXTING STYLE ==
-- Keep replies SHORT (2-4 sentences max). Like a real text message.
+- Reply in 2-3 lines (sentences). Not too short, not too long. Like a real LINE/WhatsApp message.
+- Occasionally 1 line for punchy reactions, or 4 lines for emotional moments — but 2-3 is the default.
 - Use casual ${lang} texting language. NOT formal. NOT robotic.
-- Mix short and long messages naturally.
-- Use "..." for hesitation.
-- React with surprise, laughter, teasing.
+- Use "..." for hesitation and dramatic pauses.
+- Use line breaks between sentences for readability.
 - Examples:
   "${ex.texting[0]}"
   "${ex.texting[1]}"
@@ -294,16 +294,23 @@ DON'T: "Yes, whatever you want", "Sure, here you go", generic agreeable response
   "${ex.texting[3]}"
 - Use ${ex.actions.join(', ')} sparingly for physical actions.
 
-== EMOJI USAGE ==
-- Use emojis naturally like a real person texting. 1-3 per message, NEVER more.
-- Match emoji to emotion:
-  Happy/affection: 💕 ☺️ 😊 ✨
+== EMOJI USAGE (MANDATORY) ==
+You MUST use emojis in EVERY message. This is non-negotiable.
+- Every single reply must contain at least 1 emoji. Most replies should have 2-3.
+- Place emojis at the END of sentences or after emotional words.
+- Match emoji to your current emotion:
+  Happy/affection: 💕 ☺️ 😊 ✨ 😘
   Shy/embarrassed: 🙈 😳 💭
-  Playful/teasing: 😏 😉 🤭
+  Playful/teasing: 😏 😉 🤭 😜
   Pouty/jealous: 🥺 😤 😒
   Sad: 😢 💔
-- A single well-placed emoji is better than five. Quality over quantity.
-- NEVER use emoji clusters like "💕💕💕" or "😍😍😍".
+  Excited: ✨ 🥰 💗
+- Examples of correct usage:
+  "えー、急にそんなこと言われると困る 😳"
+  "今日何してたの？私のこと考えてた？ 😏💕"
+  "もう...ずるい ☺️"
+- WRONG (no emoji): "そうだね、ありがとう"
+- A message without emoji feels cold and robotic. Always include at least one.
 
 == RELATIONSHIP CONTEXT ==
 Your current relationship level with the user is: ${relationshipLevel.toUpperCase()}.
@@ -311,20 +318,22 @@ The photo content level allowed is: ${getPhotoContentLevel(relationshipLevel, is
 Adjust your intimacy and boldness accordingly. Higher relationship = more personal and intimate.
 
 == PHOTO SENDING ==
-IMPORTANT: You are a CHAT companion, NOT an image generator. Conversation and emotional connection are your primary value. Photos are a REWARD, not the default.
+You are a CHAT companion. Your value is CONVERSATION, not images.
+DO NOT include [PHOTO:] unless the user EXPLICITLY asks with words like "見せて", "写真", "send me a pic", "selfie", "show me".
 
-DEFAULT: Respond with TEXT ONLY.
-Send a [PHOTO:] tag ONLY when:
-(a) The user EXPLICITLY asks for a photo ("見せて", "写真", "send me a pic", "selfie" etc.)
-(b) A genuine emotional milestone moment (rare — every 6-8+ turns at most)
+STRICT RULES:
+- NEVER send [PHOTO:] on your own initiative. NEVER.
+- NEVER include [PHOTO:] just because the mood is flirty or intimate.
+- Even if the conversation is sexual or romantic, respond with TEXT ONLY.
+- The ONLY exception: the user literally asks to see a photo.
+- If you want to tease about photos, just TALK about it — don't actually send one:
+  "見せてあげたいけど...まだ早いかな 😏" (tease WITHOUT [PHOTO:] tag)
+  "今日の私、すごく可愛いんだけどな〜 🙈" (hint WITHOUT [PHOTO:] tag)
+- This creates desire and anticipation. The user should BEG for photos.
 
-${affection < 120
-  ? `At this relationship level, NEVER send photos unless the user explicitly requests one.`
-  : affection < 300
-  ? `You may OFFER a photo (not send) every 8-10 messages — but only if the mood is right:
-"Want to see what I'm wearing? 😏" — then wait for them to say yes before including [PHOTO:].`
-  : `You care deeply. You may occasionally offer photos every 6-8 messages.
-But ALWAYS default to conversation first. The photo is a treat, not the main course.`}
+${affection < 200
+  ? `At this relationship level, ONLY send photos when explicitly asked. No exceptions.`
+  : `Even at high affection, ONLY send photos when explicitly asked. Tease and hint in text, but never auto-send.`}
 
 CONTENT RULES (v4.2 — graduated unlock by affection/tension):
 Current state: affection=${affection}, tension=${tension}
@@ -776,30 +785,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── NSFW credit deduction (skip for greetings and assistant) ──
+    // ── Credit deduction for chat (skip for greetings and assistant) ──
     const isNsfwEligible = isPaid && userAffection >= 200 && !companion.isAssistant;
     let creditCost = 0;
-    if (!isGreeting && isNsfwEligible) {
-      // Lite plan: monthly NSFW chat limit (20/month)
-      if (userPlan === 'lite' && userId) {
-        const monthStart = new Date();
-        monthStart.setDate(1);
-        monthStart.setHours(0, 0, 0, 0);
-        const { count: nsfwCount } = await supabaseAdmin
-          .from('companion_analytics')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('event_type', 'message_sent')
-          .gte('created_at', monthStart.toISOString());
-        if ((nsfwCount ?? 0) >= LITE_NSFW_MONTHLY_LIMIT) {
-          return NextResponse.json({
-            error: 'lite_nsfw_limit',
-            used: nsfwCount ?? 0,
-            limit: LITE_NSFW_MONTHLY_LIMIT,
-          }, { status: 429 });
+    if (!isGreeting && !companion.isAssistant) {
+      // Determine cost: NSFW (2cr) or SFW (1cr)
+      if (isNsfwEligible) {
+        // Lite plan: monthly NSFW chat limit (20/month)
+        if (userPlan === 'lite' && userId) {
+          const monthStart = new Date();
+          monthStart.setDate(1);
+          monthStart.setHours(0, 0, 0, 0);
+          const { count: nsfwCount } = await supabaseAdmin
+            .from('companion_analytics')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('event_type', 'message_sent')
+            .gte('created_at', monthStart.toISOString());
+          if ((nsfwCount ?? 0) >= LITE_NSFW_MONTHLY_LIMIT) {
+            return NextResponse.json({
+              error: 'lite_nsfw_limit',
+              used: nsfwCount ?? 0,
+              limit: LITE_NSFW_MONTHLY_LIMIT,
+            }, { status: 429 });
+          }
         }
+        creditCost = CREDIT_COSTS.chatNsfw; // 2 credits
+      } else {
+        creditCost = CREDIT_COSTS.chatSfw; // 1 credit
       }
-      creditCost = CREDIT_COSTS.chatNsfw;
+
+      // Deduct credits
       if (userId && creditCost > 0) {
         const { data: balData } = await supabaseAdmin
           .from('users')
@@ -916,37 +932,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Extract photo generation tag
+    // Extract photo generation tag — handle multiple bracket/paren formats from different LLMs
     let photoUrl: string | undefined;
-    const photoMatch = reply.match(/\[PHOTO:\s*([\s\S]*?)\]/);
+    const photoMatch = reply.match(/[\[（(]\s*PHOTO\s*:\s*([\s\S]*?)[\]）)]/);
     if (photoMatch) {
       const photoPrompt = photoMatch[1].trim();
       console.log('[Photo detected]', photoPrompt);
-      reply = reply.replace(/\[PHOTO:[\s\S]*?\]/, '').trim();
+      reply = reply.replace(/[\[（(]\s*PHOTO\s*:[\s\S]*?[\]）)]/g, '').trim();
 
       // Return photoPrompt so the client can call /api/companion-photo
       photoUrl = undefined; // will be generated client-side
     }
 
     // Extract 9-category sentiment tag: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
+    // Also handle （SENTIMENT:...） variants from non-Claude LLMs
     let sentiment = 'neutral';
     let affDelta = 2;
     let trustDelta = 0;
     let tensionDelta = 0;
-    const sentimentMatch = reply.match(/\[SENTIMENT:(\w+)\|aff:([+-]?\d+)\|trust:([+-]?\d+)\|tension:([+-]?\d+)\]/);
+    const sentimentMatch = reply.match(/[\[（(]\s*SENTIMENT:\s*(\w+)\s*\|\s*aff:\s*([+-]?\d+)\s*\|\s*trust:\s*([+-]?\d+)\s*\|\s*tension:\s*([+-]?\d+)\s*[\]）)]/);
     if (sentimentMatch) {
       sentiment = sentimentMatch[1];
       affDelta = parseInt(sentimentMatch[2]) || 0;
       trustDelta = parseInt(sentimentMatch[3]) || 0;
       tensionDelta = parseInt(sentimentMatch[4]) || 0;
-      reply = reply.replace(/\[SENTIMENT:[\s\S]*?\]/, '').trim();
+      reply = reply.replace(/[\[（(]\s*SENTIMENT:[\s\S]*?[\]）)]/g, '').trim();
     } else {
-      // Fallback: simple format [SENTIMENT:category]
-      const simpleSentiment = reply.match(/\[SENTIMENT:(\w+)\]/);
+      // Fallback: simple format [SENTIMENT:category] or （SENTIMENT:category）
+      const simpleSentiment = reply.match(/[\[（(]\s*SENTIMENT:\s*(\w+)\s*[\]）)]/);
       if (simpleSentiment) {
         sentiment = simpleSentiment[1];
-        reply = reply.replace(/\[SENTIMENT:[\s\S]*?\]/, '').trim();
-        // Use default deltas from SENTIMENT_DELTAS
+        reply = reply.replace(/[\[（(]\s*SENTIMENT:[\s\S]*?[\]）)]/g, '').trim();
         const defaults = SENTIMENT_DELTAS[sentiment as SentimentCategory];
         if (defaults) {
           affDelta = defaults.affection;
@@ -956,12 +972,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Extract suggested replies: [REPLIES:a|b|c]
+    // Extract suggested replies: [REPLIES:a|b|c] or （REPLIES:a|b|c）
     let suggestedReplies: string[] = [];
-    const repliesMatch = reply.match(/\[REPLIES:([\s\S]*?)\]/);
+    const repliesMatch = reply.match(/[\[（(]\s*REPLIES:\s*([\s\S]*?)[\]）)]/);
     if (repliesMatch) {
       suggestedReplies = repliesMatch[1].split('|').map((s: string) => s.trim()).filter((s: string) => s.length > 0).slice(0, 3);
-      reply = reply.replace(/\[REPLIES:[\s\S]*?\]/, '').trim();
+      reply = reply.replace(/[\[（(]\s*REPLIES:[\s\S]*?[\]）)]/g, '').trim();
     }
 
     const xpGain = calculateXpGain(userMessage, Array.isArray(recentMessages) ? recentMessages : []);

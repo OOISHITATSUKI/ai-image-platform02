@@ -11,8 +11,8 @@ export const CREDIT_COSTS = {
   videoGen: 10,
 
   // Companion chat
-  chatSfw: 0,              // Free (daily limit still applies)
-  chatNsfw: 1,             // 1 credit per NSFW message
+  chatSfw: 1,              // 1 credit per SFW message
+  chatNsfw: 2,             // 2 credits per NSFW message
 
   // Companion photos
   girlfriendPhotoSfw: 2,

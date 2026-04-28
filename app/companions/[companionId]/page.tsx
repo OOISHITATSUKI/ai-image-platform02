@@ -350,29 +350,6 @@ export default function CompanionChatPage() {
   const pendingRef = useRef(pendingStoryComment);
   pendingRef.current = pendingStoryComment;
 
-  // undefined = still loading from DB
-  if (companion === undefined) {
-    return (
-      <div className="comp-chat-page">
-        <div className="comp-chat-notfound">
-          <div style={{ fontSize: '1.5rem', opacity: 0.5 }}>...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // null = truly not found
-  if (companion === null) {
-    return (
-      <div className="comp-chat-page">
-        <div className="comp-chat-notfound">
-          <h2>{t('companions.notFound')}</h2>
-          <Link href="/companions" className="comp-btn-primary">{t('companions.browse')}</Link>
-        </div>
-      </div>
-    );
-  }
-
   // Preset messages — assistant gets FAQ + flirty presets (random 3), companions get flirty ones
   const allAssistantPresets = [
     // FAQ / serious
@@ -640,6 +617,27 @@ export default function CompanionChatPage() {
     e.preventDefault();
     sendMessage(input);
   };
+
+  // ── Early returns AFTER all Hooks (React Rules of Hooks) ──
+  if (companion === undefined) {
+    return (
+      <div className="comp-chat-page">
+        <div className="comp-chat-notfound">
+          <div style={{ fontSize: '1.5rem', opacity: 0.5 }}>...</div>
+        </div>
+      </div>
+    );
+  }
+  if (companion === null) {
+    return (
+      <div className="comp-chat-page">
+        <div className="comp-chat-notfound">
+          <h2>{t('companions.notFound')}</h2>
+          <Link href="/companions" className="comp-btn-primary">{t('companions.browse')}</Link>
+        </div>
+      </div>
+    );
+  }
 
   // Always show avatar as the first gallery image. Deduplicate against galleryUrls
   // so the picture the admin just uploaded is guaranteed to appear even when the
