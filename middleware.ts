@@ -106,6 +106,6 @@ export const config = {
     // Exclude the admin upload endpoints so the middleware body-size limit
     // (default 10MB in Next.js 16) doesn't truncate multipart uploads.
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|videos/|images/|outputs/|api/admin/upload-companion-video|api/admin/upload-companion-image).*)',
+        '/((?!_next/static|_next/image|favicon.ico|videos/|images/|outputs/|api/admin/upload-companion-video|api/admin/upload-companion-image|google.*\\.html|.*\\.xml|.*\\.txt).*)',
     ],
 };
