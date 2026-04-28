@@ -158,3 +158,48 @@ export function validatePrompt(prompt: string): ValidationResult {
 
     return { valid: true, normalized: pStripped };
 }
+
+/**
+ * Lighter validator for companion chat messages.
+ * Only blocks truly illegal content (minors, real persons, illegal acts).
+ * Adult NSFW vocabulary ("脱いで", "nude", "naked" etc.) is ALLOWED —
+ * this is expected vocabulary on an adult platform.
+ */
+export function validateChatMessage(text: string): ValidationResult {
+    const pWithSpaces = normalizeWithSpaces(text);
+    const pStripped = normalizePrompt(text);
+    const checkTarget = text + ' ' + pWithSpaces + ' ' + pStripped;
+
+    // CAT1: Direct minor expressions — BLOCK
+    if (CAT1_EN.test(checkTarget) || CAT1_JA.test(checkTarget)) {
+        return { valid: false, rule: 'Category 1: Minor Expression' };
+    }
+    // CAT2: Age expressions (under 18) — BLOCK
+    if (CAT2_AGE.test(checkTarget) || CAT2_JA.test(checkTarget)) {
+        return { valid: false, rule: 'Category 2: Age Expression' };
+    }
+    // CAT6 strict: loli/shota — BLOCK
+    if (CAT6_STRICT.test(checkTarget)) {
+        return { valid: false, rule: 'Category 6: Minor Body Type' };
+    }
+    // CAT7 strict: pedo slang — BLOCK
+    if (CAT7_STRICT.test(checkTarget) || CAT7_ACRONYMS.test(text)) {
+        return { valid: false, rule: 'Category 7: Prohibited Slang' };
+    }
+    // Real person check — BLOCK
+    try {
+        const rpPath = path.join(process.cwd(), 'data', 'real_persons.json');
+        if (fs.existsSync(rpPath)) {
+            const blockedPersons = JSON.parse(fs.readFileSync(rpPath, 'utf8')).blocked_persons;
+            const pLower = text.toLowerCase();
+            for (const person of blockedPersons) {
+                if (pLower.includes(person.name_en.toLowerCase()) || text.includes(person.name_ja)) {
+                    return { valid: false, rule: 'Real Person Block' };
+                }
+            }
+        }
+    } catch {}
+
+    // Everything else (nude, naked, 脱いで, etc.) is ALLOWED for chat
+    return { valid: true };
+}

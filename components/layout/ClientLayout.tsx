@@ -9,6 +9,7 @@ import WelcomeModal from '@/components/ui/WelcomeModal';
 import UnlockNotification from '@/components/guest/UnlockNotification';
 import ClaimBanner from '@/components/ClaimBanner';
 import { useAppStore } from '@/lib/store';
+import { emergencyCleanup } from '@/lib/safe-storage';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const { theme, toggleSidebar, toggleSettingsPanel, isAuthenticated, settingsPanelVisible, user } = useAppStore();
@@ -26,6 +27,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     // Prevent hydration mismatch and handle mobile initial state
     useEffect(() => {
         setMounted(true);
+        emergencyCleanup();
 
         // ── Auto-detect browser language (runs synchronously before async session restore) ──
         // Priority: 1) manually chosen (localStorage) 2) browser lang 3) 'en'

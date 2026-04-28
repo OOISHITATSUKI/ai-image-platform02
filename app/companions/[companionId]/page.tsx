@@ -22,6 +22,7 @@ import PlayStyleModal from '@/components/companions/PlayStyleModal';
 import { useTranslation } from '@/lib/useTranslation';
 import { logCompanionEventClient } from '@/lib/companion-analytics-client';
 import { COMPANION_EVENTS, PAYWALL_TRIGGERS } from '@/lib/companion-constants';
+import { safeStorage, MAX_CHAT_MESSAGES } from '@/lib/safe-storage';
 
 /** Convert markdown-style links [text](url) to clickable <a> tags */
 function renderMessageContent(content: string): React.ReactNode {
@@ -131,11 +132,11 @@ export default function CompanionChatPage() {
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
-      const saved = localStorage.getItem(chatStorageKey);
+      const saved = safeStorage.getItem(chatStorageKey);
       if (saved) {
         const parsed = JSON.parse(saved) as Message[];
         // Strip expired image URLs (photos auto-delete after 1h)
-        return parsed.map(m => ({ ...m, imageUrl: undefined, imageLoading: false }));
+        return parsed.slice(-MAX_CHAT_MESSAGES).map(m => ({ ...m, imageUrl: undefined, imageLoading: false }));
       }
     } catch {}
     return [];
@@ -255,7 +256,7 @@ export default function CompanionChatPage() {
       setRelTension(30);
       setUserNickname(null);
       setMessages([]);
-      localStorage.removeItem(chatStorageKey);
+      safeStorage.removeItem(chatStorageKey);
       setShowPlayStyleModal(false);
     }
   };
@@ -269,7 +270,7 @@ export default function CompanionChatPage() {
   const readRecentMessages = (): string[] => {
     if (typeof window === 'undefined') return [];
     try {
-      const raw = localStorage.getItem(recentMessagesKey);
+      const raw = safeStorage.getItem(recentMessagesKey);
       return raw ? (JSON.parse(raw) as string[]) : [];
     } catch {
       return [];
@@ -280,20 +281,18 @@ export default function CompanionChatPage() {
     try {
       const existing = readRecentMessages();
       const updated = [msg, ...existing].slice(0, 5);
-      localStorage.setItem(recentMessagesKey, JSON.stringify(updated));
+      safeStorage.setItem(recentMessagesKey, JSON.stringify(updated));
     } catch {}
   };
 
   const userMsgCount = messages.filter((m) => m.role === 'user').length;
   const isLimited = !isPaid && userMsgCount >= FREE_MESSAGE_LIMIT;
 
-  // Persist messages to localStorage (keep last 50)
+  // Persist messages to localStorage (keep last 20, text only — no images/blobs)
   useEffect(() => {
     if (messages.length > 0) {
-      try {
-        const toSave = messages.slice(-50).map(({ role, content }) => ({ role, content }));
-        localStorage.setItem(chatStorageKey, JSON.stringify(toSave));
-      } catch {}
+      const toSave = messages.slice(-MAX_CHAT_MESSAGES).map(({ role, content }) => ({ role, content }));
+      safeStorage.setItem(chatStorageKey, JSON.stringify(toSave));
     }
   }, [messages, chatStorageKey]);
 
@@ -308,7 +307,7 @@ export default function CompanionChatPage() {
   const greetingSent = useRef(false);
   useEffect(() => {
     if (!companion || greetingSent.current) return;
-    const saved = typeof window !== 'undefined' ? localStorage.getItem(chatStorageKey) : null;
+    const saved = typeof window !== 'undefined' ? safeStorage.getItem(chatStorageKey) : null;
     if (saved) return;
     if (!companion.firstMessage) return;
     greetingSent.current = true;
@@ -472,9 +471,20 @@ export default function CompanionChatPage() {
         throw new Error(data.error || 'API error');
       }
 
-      // Update dynamic quick replies
+      // Update dynamic quick replies (deduplicate)
       if (Array.isArray(data.suggestedReplies) && data.suggestedReplies.length > 0) {
-        setDynamicReplies(data.suggestedReplies);
+        const seen = new Set<string>();
+        const deduped = data.suggestedReplies.filter((r: string) => {
+          // Exact match dedup
+          if (seen.has(r)) return false;
+          // Fuzzy dedup: first 3 chars match
+          const prefix = r.replace(/[\s\p{Emoji}]/gu, '').slice(0, 3);
+          if (prefix && seen.has(prefix)) return false;
+          seen.add(r);
+          if (prefix) seen.add(prefix);
+          return true;
+        });
+        setDynamicReplies(deduped.slice(0, 3));
       }
 
       // If AI wants to send a photo, check free user limit (1st free, 2nd+ paywall)
@@ -1090,7 +1100,7 @@ export default function CompanionChatPage() {
                 onClick={() => {
                   if (confirm(t('companions.assistResetConfirm') || 'Reset chat history and closeness? This cannot be undone.')) {
                     setMessages([]);
-                    localStorage.removeItem(`chat_history_${companion.id}`);
+                    safeStorage.removeItem(`chat_history_${companion.id}`);
                     setAssistPresetSeed(s => s + 1);
                     setShowAssistCloseness(false);
                   }
