@@ -52,6 +52,21 @@ function serveJsChallenge(): NextResponse {
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
+    // --- SEO/検索エンジン認証ファイルはmiddlewareをスキップ ---
+    // Google Search Console, Bing Webmaster Tools等の認証ファイルや
+    // sitemap.xml, robots.txt等の静的ファイルはNext.jsの公開ファイルとして直接配信させる
+    if (
+        /^\/google[a-z0-9]+\.html$/i.test(pathname) ||
+        /^\/BingSiteAuth\.xml$/i.test(pathname) ||
+        pathname === '/robots.txt' ||
+        pathname === '/sitemap.xml' ||
+        pathname === '/ads.txt' ||
+        pathname.endsWith('.xml') ||
+        pathname.endsWith('.txt')
+    ) {
+        return NextResponse.next();
+    }
+
     // --- 中国ボットフィルタリング（JSチャレンジ） ---
     const country = getCountry(req);
     if (CHALLENGE_COUNTRIES.includes(country)) {
