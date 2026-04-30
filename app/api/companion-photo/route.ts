@@ -341,19 +341,23 @@ export async function POST(req: NextRequest) {
 
     for (const faceUrl of faceCandidates) {
       try {
-        let faceBase64: string;
+        let faceBuf: Buffer;
         if (faceUrl.startsWith('http')) {
-          faceBase64 = await fetchImageAsBase64(faceUrl);
+          const b64 = await fetchImageAsBase64(faceUrl);
+          faceBuf = Buffer.from(b64, 'base64');
         } else {
           const facePath = path.join(process.cwd(), 'public', faceUrl);
-          const faceBuf = await fs.readFile(facePath);
+          faceBuf = await fs.readFile(facePath);
           // Skip placeholder files (< 1KB = likely not a real image)
           if (faceBuf.length < 1024) {
             console.log(`[companion-photo] Skipping placeholder face: ${faceUrl} (${faceBuf.length} bytes)`);
             continue;
           }
-          faceBase64 = faceBuf.toString('base64');
         }
+
+        // Convert to JPEG for merge-face API (webp not supported by Novita)
+        const jpegBuf = await sharp(faceBuf).jpeg({ quality: 90 }).toBuffer();
+        const faceBase64 = jpegBuf.toString('base64');
 
         const targetBase64 = await fetchImageAsBase64(imageUrl);
         finalBase64 = await mergeFace(faceBase64, targetBase64);
