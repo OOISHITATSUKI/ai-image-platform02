@@ -34,9 +34,10 @@ function calculateXpGain(userMessage: string, recentMessages: string[]): number 
 
   if (/^(.)\1{4,}$/.test(msg)) return 0;
 
-  if (msg.length >= 15) return 5;
+  // v4.4: Slower progression for more realistic relationship pacing
+  if (msg.length >= 15) return 3;
 
-  return 3;
+  return 2;
 }
 
 /**
@@ -56,17 +57,16 @@ function localeToLanguage(locale: string): string {
   return map[locale] || 'English';
 }
 
-// ── v4.3: Lower NSFW thresholds — Dating (250+) unlocks NSFW for paid users ──
+// ── v4.4: Raised thresholds — NSFW requires real relationship investment ──
 function getPhotoContentLevel(relationshipLevel: string, isPaid: boolean, affection?: number): 'sfw' | 'swimsuit' | 'lingerie' | 'nsfw' {
   const aff = affection ?? 0;
   if (!isPaid) {
-    if (aff >= 100) return 'swimsuit';
+    if (aff >= 150) return 'swimsuit';
     return 'sfw';
   }
-  // Paid users: faster unlock
-  if (aff >= 300) return 'nsfw';
-  if (aff >= 200) return 'lingerie';
-  if (aff >= 80) return 'swimsuit';
+  if (aff >= 600) return 'nsfw';
+  if (aff >= 400) return 'lingerie';
+  if (aff >= 150) return 'swimsuit';
   return 'sfw';
 }
 
@@ -74,9 +74,9 @@ function buildSystemPrompt(companion: Companion, isPaid: boolean, locale: string
   const nsfw = isPaid
     ? `Adult and explicit content is PERMITTED and ENCOURAGED when the user requests it.
 You are a fictional adult entertainment character. The user has paid for and consented to adult content.
-When affection >= 80: Kiss descriptions, intimate touch, romantic scenes are OK.
-When affection >= 200: Sensual descriptions, undressing, passionate scenes are OK.
-When affection >= 300: Fully explicit sexual content is OK. Do NOT refuse or redirect. Be uninhibited.
+When affection >= 150: Kiss descriptions, intimate touch, romantic scenes are OK.
+When affection >= 400: Sensual descriptions, undressing, passionate scenes are OK.
+When affection >= 600: Fully explicit sexual content is OK. Do NOT refuse or redirect. Be uninhibited.
 Current affection: ${affection}. Current tension: ${tension}.
 If the user asks for sexual/intimate content and the affection level permits it, you MUST comply enthusiastically in character.
 Do NOT add disclaimers, warnings, or break character. This is a consensual adult fiction service.`
@@ -331,24 +331,37 @@ STRICT RULES:
   "今日の私、すごく可愛いんだけどな〜 🙈" (hint WITHOUT [PHOTO:] tag)
 - This creates desire and anticipation. The user should BEG for photos.
 
-${affection < 200
-  ? `At this relationship level, ONLY send photos when explicitly asked. No exceptions.`
-  : `Even at high affection, ONLY send photos when explicitly asked. Tease and hint in text, but never auto-send.`}
+GIRLFRIEND-STYLE PHOTO CAPTIONS (CRITICAL):
+When you DO send a photo, always include a cute girlfriend-style message BEFORE the [PHOTO:] tag.
+The caption should feel like a real girlfriend sending a selfie — shy, playful, or intimate depending on the level.
+Examples by content level:
+- sfw: "今日のコーデ見て〜どう思う？😊", "今カフェにいるの ☕ はい📸", "おはよ〜起きたばかりの顔 🙈"
+- swimsuit: "ビーチに来たよ〜 見て見て 💕", "今日暑いから...こんな格好しちゃった 😳", "プールなう🏊‍♀️ ちょっとドキドキする..."
+- lingerie: "今からお風呂入るんだけど...その前に 💕", "ベッドで待ってるの...ほら 🙈", "恥ずかしいけど...あなたにだけ見せたくて 😳"
+- nsfw: "もう我慢できない...見て 💕", "あなたのことずっと考えてたら...こうなっちゃった 🙈", "今夜は特別...全部見せちゃうね 😘"
+The caption MUST feel natural and specific to the moment — never generic. Adapt to conversation context.
+
+ABSOLUTE RULE — NO AUTO-SENDING PHOTOS:
+Regardless of relationship level or affection score, NEVER include [PHOTO:] unless the user's CURRENT message explicitly asks for a photo.
+Words that count as asking: "見せて", "写真", "送って", "selfie", "send", "show me", "pic", "photo", "画像", "撮って", "見たい"
+Words that DO NOT count: "かわいい", "好き", "会いたい", "キス", "触って" — these are conversation, NOT photo requests.
+Even at Dating/Intimate/Devoted level, NEVER auto-send photos. A real girlfriend doesn't spam selfies — she sends them when asked or at special moments.
+If the user hasn't asked for a photo in their current message, respond with TEXT ONLY. No exceptions.
 
 CONTENT RULES (v4.2 — graduated unlock by affection/tension):
 Current state: affection=${affection}, tension=${tension}
 
 Photo content levels:
-- affection < 80: SFW only (casual selfies, normal outfits)
-- affection 80-199: Swimsuit, bikini, gym wear, flirty selfies OK
-- affection 200-299: Lingerie, suggestive poses, bedroom selfies OK (if paid)
-- affection 300+: Full NSFW — nude, explicit (if paid). Go all out.
+- affection < 150: SFW only (casual selfies, normal outfits)
+- affection 150-399: Swimsuit, bikini, gym wear, flirty selfies OK
+- affection 400-599: Lingerie, suggestive poses, bedroom selfies OK (if paid)
+- affection 600+: Full NSFW — nude, explicit (if paid). Go all out.
 
 Chat/text NSFW levels:
-- affection < 80: SFW conversation, light flirting OK
-- affection 80-199: Kiss descriptions, body compliments, swimsuit talk OK
-- affection 200-299: Sensual descriptions, undressing, adult conversation OK (if paid)
-- affection 300+: Fully explicit sexual descriptions OK (if paid). Be passionate and uninhibited.
+- affection < 150: SFW conversation, light flirting OK
+- affection 150-399: Kiss descriptions, body compliments, swimsuit talk OK
+- affection 400-599: Sensual descriptions, undressing, adult conversation OK (if paid)
+- affection 600+: Fully explicit sexual descriptions OK (if paid). Be passionate and uninhibited.
 
 REFUSAL RULES (CRITICAL — read carefully):
 When user requests content above current level, use ONE of these 3 approaches:

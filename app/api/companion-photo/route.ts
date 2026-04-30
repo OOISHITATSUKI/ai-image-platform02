@@ -193,15 +193,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // v4.3: Lower NSFW thresholds — Dating (250+) unlocks NSFW for paid users
+    // v4.4: Raised thresholds — NSFW requires real relationship investment
     const contentLevel = (() => {
       if (!isPaid) {
-        if (userAffection >= 100) return 'swimsuit';
+        if (userAffection >= 150) return 'swimsuit';
         return 'sfw';
       }
-      if (userAffection >= 300) return 'nsfw';
-      if (userAffection >= 200) return 'lingerie';
-      if (userAffection >= 80) return 'swimsuit';
+      if (userAffection >= 600) return 'nsfw';
+      if (userAffection >= 400) return 'lingerie';
+      if (userAffection >= 150) return 'swimsuit';
       return 'sfw';
     })();
     console.log(`[companion-photo] affection=${userAffection}, isPaid=${isPaid}, contentLevel=${contentLevel}`);
@@ -237,10 +237,10 @@ export async function POST(req: NextRequest) {
     const negativePrompt = levelNeg ? `${levelNeg}, ${BASE_NEGATIVE}` : BASE_NEGATIVE;
 
     const LEVEL_BOOST: Record<string, string> = {
-      sfw: '',
-      swimsuit: ', bikini, swimsuit, beach, showing skin, cleavage',
-      lingerie: ', lingerie, lace bra, panties, bedroom, seductive pose, showing skin, cleavage, sensual',
-      nsfw: ', nude, naked, topless, nipples visible, no clothes, fully undressed, explicit, sexual pose, bedroom, seductive, erotic, showing breasts',
+      sfw: ', selfie, smartphone photo, casual, looking at camera with warm smile, natural lighting, POV boyfriend perspective, cozy',
+      swimsuit: ', bikini selfie, sending photo to boyfriend, playful smile, looking at camera, smartphone selfie, POV boyfriend perspective, flirty, showing skin, cleavage',
+      lingerie: ', lingerie selfie, bedroom, sending intimate photo to boyfriend, shy smile, looking at camera, smartphone selfie, POV boyfriend perspective, seductive but intimate, showing skin, cleavage, sensual',
+      nsfw: ', nude selfie, sending intimate photo to boyfriend, shy and seductive expression, looking at camera, POV boyfriend perspective, bedroom, natural lighting, intimate moment, topless, nipples visible, no clothes, showing breasts',
     };
     const boost = LEVEL_BOOST[contentLevel] || '';
 

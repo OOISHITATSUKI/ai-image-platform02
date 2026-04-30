@@ -849,14 +849,14 @@ export function getCompatibilityPrompt(level: CompatibilityLevel): string {
 
 // ── Relationship System v2: 3-axis + 6 phases ──
 
-// v4.2: Lowered thresholds by ~30-40% for faster progression
+// v4.4: Raised thresholds for more realistic pacing — dating takes ~120 messages
 export const RELATIONSHIP_LEVELS = [
   { id: 'stranger', label: 'Stranger', minAffection: 0, emoji: '👋' },
-  { id: 'acquaintance', label: 'Acquaintance', minAffection: 30, emoji: '🤝' },
-  { id: 'crush', label: 'Crush', minAffection: 100, emoji: '💕' },
-  { id: 'dating', label: 'Dating', minAffection: 250, emoji: '💓' },
-  { id: 'intimate', label: 'Intimate', minAffection: 450, emoji: '❤️‍🔥' },
-  { id: 'devoted', label: 'Devoted', minAffection: 700, emoji: '💎' },
+  { id: 'acquaintance', label: 'Acquaintance', minAffection: 50, emoji: '🤝' },
+  { id: 'crush', label: 'Crush', minAffection: 150, emoji: '💕' },
+  { id: 'dating', label: 'Dating', minAffection: 350, emoji: '💓' },
+  { id: 'intimate', label: 'Intimate', minAffection: 600, emoji: '❤️‍🔥' },
+  { id: 'devoted', label: 'Devoted', minAffection: 900, emoji: '💎' },
 ] as const;
 
 export type RelationshipLevel = typeof RELATIONSHIP_LEVELS[number]['id'];
