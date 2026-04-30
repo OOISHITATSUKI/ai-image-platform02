@@ -6,12 +6,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Generate NSFW AI Images Free — No Sign Up | ImageNude',
-  description: 'Step-by-step guide to generating NSFW AI images for free. No account required. Works on mobile and desktop.',
+  title: 'How to Generate NSFW AI Images: 10,000+ Generation Lessons (2026)',
+  description: 'Hard-won lessons from 10,000+ NSFW AI image generations. Prompts, models, settings, and workflow tips for realistic results. Updated 2026.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images' },
   openGraph: {
-    title: 'How to Generate NSFW AI Images Free — No Sign Up | ImageNude',
-    description: 'Step-by-step guide to generating NSFW AI images for free. No account required. Works on mobile and desktop.',
+    title: 'How to Generate NSFW AI Images: 10,000+ Generation Lessons (2026)',
+    description: 'Hard-won lessons from 10,000+ NSFW AI image generations. Prompts, models, settings, and workflow tips for realistic results. Updated 2026.',
     url: 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -29,8 +29,9 @@ const ldJson = [
     datePublished: '2026-03-21',
     dateModified: '2026-03-21',
     author: { '@type': 'Organization', name: 'Image Nude' },
-    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
-    description: 'Real tips from someone who built an AI image platform. What actually works, what doesn\'t, and the mistakes I made along the way.',
+    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/how-to-generate-nsfw-ai-images' },
+    description: 'Hard-won lessons from 10,000+ NSFW AI image generations. Prompts, models, settings, and workflow tips for realistic results. Updated 2026.',
   },
   {
     '@context': 'https://schema.org',

@@ -53,6 +53,8 @@ export default function CompanionsPage() {
   interface RawStory { id: string; companion_id: string; media_url: string; media_type: 'image' | 'video'; duration_seconds: number; caption?: string; sort_order: number; base_likes?: number; base_comments?: number; real_likes?: number; real_comments?: number; }
   const [storiesMap, setStoriesMap] = useState<Map<string, StoryItem[]>>(new Map());
   const [storiesModal, setStoriesModal] = useState<{ companions: CompanionStories[]; startIdx: number } | null>(null);
+  const [iconRowExpanded, setIconRowExpanded] = useState(false);
+  const ICON_ROW_LIMIT = 6;
 
   const getViewedStories = useCallback((): Set<string> => {
     try { return new Set(JSON.parse(localStorage.getItem('viewed_stories') || '[]')); } catch { return new Set(); }
@@ -137,28 +139,62 @@ export default function CompanionsPage() {
         </Link>
       </section>
 
-      {/* Icon Row — horizontal scroll with Stories support */}
+      {/* Icon Row — smart sorted, collapsible */}
       <section className="comp-icon-row">
-        {companions.map((c) => {
-          const hasStories = !!c.storyThumbnailUrl && storiesMap.has(c.id);
-          const viewed = hasStories && (() => {
-            const viewedSet = getViewedStories();
-            const cStories = storiesMap.get(c.id) ?? [];
-            return cStories.every((s) => viewedSet.has(s.id));
-          })();
+        {(() => {
+          // Smart sort: unviewed stories → viewed stories → no stories
+          const viewedSet = getViewedStories();
+          const sorted = [...companions].sort((a, b) => {
+            const aHas = !!a.storyThumbnailUrl && storiesMap.has(a.id);
+            const bHas = !!b.storyThumbnailUrl && storiesMap.has(b.id);
+            if (aHas && !bHas) return -1;
+            if (!aHas && bHas) return 1;
+            if (aHas && bHas) {
+              const aViewed = (storiesMap.get(a.id) ?? []).every((s) => viewedSet.has(s.id));
+              const bViewed = (storiesMap.get(b.id) ?? []).every((s) => viewedSet.has(s.id));
+              if (!aViewed && bViewed) return -1;
+              if (aViewed && !bViewed) return 1;
+            }
+            return 0;
+          });
 
-          return hasStories ? (
-            <div key={c.id} className="comp-icon-item" onClick={() => openStories(c.id)} style={{ cursor: 'pointer' }}>
-              <StoryAvatarRing src={c.avatarUrl} name={c.name} hasStories isViewed={!!viewed} />
-              <span className="comp-icon-name">{c.name}</span>
-            </div>
-          ) : (
-            <Link key={c.id} href={`/companions/${c.id}`} className="comp-icon-item">
-              <StoryAvatarRing src={c.avatarUrl} name={c.name} hasStories={false} isViewed={false} />
-              <span className="comp-icon-name">{c.name}</span>
-            </Link>
+          const visible = iconRowExpanded ? sorted : sorted.slice(0, ICON_ROW_LIMIT);
+          const hiddenCount = sorted.length - ICON_ROW_LIMIT;
+
+          return (
+            <>
+              {visible.map((c) => {
+                const hasStories = !!c.storyThumbnailUrl && storiesMap.has(c.id);
+                const viewed = hasStories && (storiesMap.get(c.id) ?? []).every((s) => viewedSet.has(s.id));
+
+                return hasStories ? (
+                  <div key={c.id} className="comp-icon-item" onClick={() => openStories(c.id)} style={{ cursor: 'pointer' }}>
+                    <StoryAvatarRing src={c.avatarUrl} name={c.name} hasStories isViewed={!!viewed} />
+                    <span className="comp-icon-name">{c.name}</span>
+                  </div>
+                ) : (
+                  <Link key={c.id} href={`/companions/${c.id}`} className="comp-icon-item">
+                    <StoryAvatarRing src={c.avatarUrl} name={c.name} hasStories={false} isViewed={false} />
+                    <span className="comp-icon-name">{c.name}</span>
+                  </Link>
+                );
+              })}
+              {hiddenCount > 0 && (
+                <button
+                  className="comp-icon-item comp-icon-more-btn"
+                  onClick={() => setIconRowExpanded(!iconRowExpanded)}
+                >
+                  <span className="comp-icon-more-circle">
+                    {iconRowExpanded ? '−' : `+${hiddenCount}`}
+                  </span>
+                  <span className="comp-icon-name">
+                    {iconRowExpanded ? (t('companions.showLess') || 'Less') : (t('companions.showMore') || 'More')}
+                  </span>
+                </button>
+              )}
+            </>
           );
-        })}
+        })()}
       </section>
 
       {/* My Characters */}

@@ -11,9 +11,10 @@ const ldJsonArticle = {
   '@type': 'Article',
   headline: 'How to Write NSFW AI Prompts: Complete Guide for Realistic Results',
   datePublished: '2025-03-13',
-  dateModified: '2025-03-13',
+  dateModified: '2026-04-30',
   author: { '@type': 'Organization', name: 'Image Nude' },
-  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
+  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/how-to-write-nsfw-ai-prompts' },
 };
 
 const ldJsonFaq = {
@@ -78,7 +79,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
 
             <div className={styles.meta}>
               <span className={styles.tag}>Guide</span>
-              <span className={styles.metaInfo}>March 2025 &middot; 10 min read</span>
+              <span className={styles.metaInfo}>April 2026 &middot; 10 min read</span>
             </div>
 
             <h1 className={styles.h1}>How to Write NSFW AI Prompts: Complete Guide for Realistic Results</h1>
@@ -89,7 +90,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
 
             {/* Basics */}
             <h2 id="basics">The Basics: How AI Prompts Work</h2>
-            <p>An AI image prompt is a text description that tells the model what to generate. The AI doesn&apos;t &ldquo;understand&rdquo; language the way a human does &mdash; it matches your words to patterns learned from millions of images during training.</p>
+            <p>An AI image prompt is a text description that tells the model what to generate. The AI doesn&apos;t &ldquo;understand&rdquo; language the way a human does &mdash; it matches your words to patterns learned from millions of images during training. If you&apos;re new to the whole process, our <Link href="/blog/how-to-generate-nsfw-ai-images">beginner&apos;s guide to generating NSFW AI images</Link> covers the end-to-end workflow before you dive into prompt specifics.</p>
             <p>This means <strong>specificity is everything</strong>. Vague prompts produce vague results. The more precisely you describe what you want &mdash; appearance, pose, lighting, style &mdash; the closer the output will match your vision.</p>
             <p>Most NSFW AI platforms also support <strong>negative prompts</strong> &mdash; a separate field where you list things you don&apos;t want in the image. Used correctly, negative prompts dramatically reduce unwanted artifacts and improve consistency.</p>
 
@@ -283,7 +284,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
             </div>
 
             <h3>Style Keywords</h3>
-            <p>Add a photography or style reference to anchor the visual aesthetic:</p>
+            <p>Add a photography or style reference to anchor the visual aesthetic. The exact keywords that work best depend on the model you&apos;re using &mdash; our <Link href="/blog/stable-diffusion-nsfw-guide">Stable Diffusion NSFW guide</Link> covers model-specific settings in more detail:</p>
 
             <div className={styles.promptBox}>
               shot on Sony A7R, 85mm lens, shallow depth of field, magazine photography style<br /><br />
@@ -358,7 +359,7 @@ export default function HowToWriteNsfwAiPromptsPage() {
               <ul>
                 <li><Link href="/blog/how-to-generate-nsfw-ai-images">How to Generate NSFW AI Images</Link></li>
                 <li><Link href="/blog/how-to-create-consistent-ai-character">Create a Consistent AI Character</Link></li>
-                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2025</Link></li>
+                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2026</Link></li>
                 <li><Link href="/blog/ai-face-swap-adults">Best NSFW Face Swap Tools</Link></li>
               </ul>
             </div>

@@ -125,10 +125,15 @@ async function mergeFace(faceBase64: string, targetBase64: string): Promise<stri
         response_image_type: 'jpeg',
       }),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.error(`[companion-photo] merge-face API ${res.status}: ${errText.slice(0, 200)}`);
+      return null;
+    }
     const data = await res.json();
     return data.image_file ?? null;
-  } catch {
+  } catch (e) {
+    console.error('[companion-photo] merge-face exception:', e);
     return null;
   }
 }
@@ -317,6 +322,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Auto-discover real face images from avatars directory (in case DB/config points to placeholders)
+    try {
+      const avatarDir = path.join(process.cwd(), 'public', 'companions', 'avatars');
+      const files = await fs.readdir(avatarDir);
+      const realImages = files
+        .filter(f => f.startsWith(companionId + '-') && /\.(png|webp|jpg|jpeg)$/i.test(f) && f !== `${companionId}-1.jpg` && f !== `${companionId}-2.jpg` && f !== `${companionId}-3.jpg`)
+        .sort()
+        .slice(0, 3)
+        .map(f => `/companions/avatars/${f}`);
+      for (const imgPath of realImages) {
+        if (!faceCandidates.includes(imgPath)) {
+          faceCandidates.push(imgPath);
+        }
+      }
+    } catch {}
+    console.log(`[companion-photo] Face candidates for ${companionId}: ${faceCandidates.length} images`);
+
     for (const faceUrl of faceCandidates) {
       try {
         let faceBase64: string;
@@ -339,6 +361,7 @@ export async function POST(req: NextRequest) {
           console.log(`[companion-photo] Face swap success with: ${faceUrl}`);
           break; // Use first successful face swap
         }
+        console.warn(`[companion-photo] merge-face returned null for: ${faceUrl}`);
       } catch (e) {
         console.error(`[companion-photo] Face swap failed with ${faceUrl}:`, e);
         continue; // Try next candidate

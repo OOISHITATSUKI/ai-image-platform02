@@ -9214,6 +9214,19 @@ button, a, [role="button"] {
 .comp-icon-name {
   font-size: 0.72rem; color: var(--text-secondary);
 }
+.comp-icon-more-btn {
+  background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0;
+}
+.comp-icon-more-circle {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(229,52,42,0.1); border: 2px solid rgba(229,52,42,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #e5342a;
+  transition: background 0.2s, border-color 0.2s;
+}
+.comp-icon-more-btn:hover .comp-icon-more-circle {
+  background: rgba(229,52,42,0.2); border-color: #e5342a;
+}
 
 /* Section */
 .comp-section {
@@ -9743,6 +9756,60 @@ button, a, [role="button"] {
 .comp-char-bottom-unlock-pts { font-size: 0.68rem; color: #a1a1aa; font-weight: 500; }
 .comp-char-bottom-unlock-pts em { color: #fbbf24; font-weight: 700; font-style: normal; font-size: 0.72rem; }
 .comp-char-bottom-unlock-reward { font-size: 0.78rem; color: #ffffff; font-weight: 700; }
+
+/* Detail toggle button */
+.comp-char-detail-toggle {
+  width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+  font-size: 0.72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.comp-char-detail-toggle:hover {
+  background: rgba(255,255,255,0.2); color: #fff;
+}
+
+/* Expandable profile details */
+.comp-char-bottom-profile-expand {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-size: 0.7rem; color: rgba(255,255,255,0.6); line-height: 1.5;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  animation: profileSlideIn 0.2s ease-out;
+}
+@keyframes profileSlideIn {
+  from { opacity: 0; max-height: 0; padding: 0; }
+  to { opacity: 1; max-height: 120px; }
+}
+
+/* Live-style unlock badge */
+.comp-char-bottom-unlock-live {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 2px; padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.comp-char-unlock-live-badge {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(236,72,153,0.2); border: 1px solid rgba(236,72,153,0.45);
+  border-radius: 999px; padding: 3px 10px;
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em;
+  color: #ec4899;
+}
+.comp-char-unlock-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ec4899;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+.comp-char-unlock-live-text {
+  font-size: 0.72rem; color: rgba(255,255,255,0.7); font-weight: 500;
+}
+.comp-char-unlock-live-text em {
+  color: #fbbf24; font-weight: 800; font-style: normal;
+}
 
 /* Glass card overlay — for assistant only */
 .comp-char-glass {

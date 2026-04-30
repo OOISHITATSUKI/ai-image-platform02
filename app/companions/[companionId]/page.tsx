@@ -967,26 +967,38 @@ export default function CompanionChatPage() {
             const nl = getNextLevel(relPoints);
             const ptn = nl ? nl.minAffection - relPoints : 0;
             return (
-            <div className="comp-char-bottom-overlay" onClick={() => setShowBarometerInfo(true)} style={{ cursor: 'pointer' }}>
-              {/* Name + mini profile */}
+            <div className="comp-char-bottom-overlay">
+              {/* Name + relationship badge */}
               <div className="comp-char-bottom-header">
                 <div className="comp-char-bottom-name">
                   <h3>{companion.name} <span className="comp-char-bottom-age">{companion.age}</span></h3>
-                  <button className="comp-char-bottom-stage" onClick={() => setShowRoadmap(true)}>
-                    {cl.emoji} {t(`companions.rel_${cl.id}`)} <span className="comp-char-bottom-stage-arrow">▾</span>
-                  </button>
-                </div>
-                {companion.profile && (
-                  <div className="comp-char-bottom-profile">
-                    <span>📍 {t('companions.profileHometown') || 'From'}: {companion.profile.hometown}</span>
-                    <span>💼 {t('companions.profileOccupation') || 'Job'}: {companion.profile.occupation}</span>
-                    {companion.profile.hobbies && <span>✨ {t('companions.profileHobbies') || 'Hobbies'}: {companion.profile.hobbies}</span>}
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <button className="comp-char-bottom-stage" onClick={(e) => { e.stopPropagation(); setShowRoadmap(true); }}>
+                      {cl.emoji} {t(`companions.rel_${cl.id}`)} <span className="comp-char-bottom-stage-arrow">▾</span>
+                    </button>
+                    {companion.profile && (
+                      <button className="comp-char-detail-toggle" onClick={(e) => { e.stopPropagation(); setShowProfile(!showProfile); }}>
+                        {showProfile ? '✕' : 'ℹ'}
+                      </button>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* 3-axis barometer */}
-              <div className="comp-char-bottom-axes">
+              {/* Collapsible profile details */}
+              {showProfile && companion.profile && (
+                <div className="comp-char-bottom-profile-expand">
+                  <span>📍 {t('companions.profileHometown') || 'From'}: {companion.profile.hometown}</span>
+                  <span>💼 {t('companions.profileOccupation') || 'Job'}: {companion.profile.occupation}</span>
+                  {companion.profile.hobbies && <span>✨ {t('companions.profileHobbies') || 'Hobbies'}: {companion.profile.hobbies}</span>}
+                  {companion.profile.favoriteFood && <span>🍽️ {t('companions.profileFood') || 'Likes'}: {companion.profile.favoriteFood}</span>}
+                  {companion.profile.music && <span>🎵 {t('companions.profileMusic') || 'Music'}: {companion.profile.music}</span>}
+                  {companion.profile.catchphrase && <span>💬 &ldquo;{companion.profile.catchphrase}&rdquo;</span>}
+                </div>
+              )}
+
+              {/* 3-axis barometer — always visible */}
+              <div className="comp-char-bottom-axes" onClick={() => setShowBarometerInfo(true)} style={{ cursor: 'pointer' }}>
                 {[
                   { label: t('companions.rel_axis_affection'), value: relPoints, max: 1000, color: '#ec4899' },
                   { label: t('companions.rel_axis_trust'), value: relTrust, max: 100, color: '#60a5fa' },
@@ -1002,21 +1014,27 @@ export default function CompanionChatPage() {
                 ))}
               </div>
 
-              {/* Next unlock hint */}
+              {/* Next unlock hint — live badge style */}
               {nl && (
-                <div className="comp-char-bottom-unlock">
-                  <span className="comp-char-bottom-unlock-pts">
-                    {(() => {
-                      const tmpl = t('companions.rel_next');
-                      const idx = tmpl.indexOf('{points}');
-                      if (idx === -1) return tmpl;
-                      return <>{tmpl.slice(0, idx)}<em>{ptn}</em>{tmpl.slice(idx + '{points}'.length)}</>;
-                    })()}
+                <div className="comp-char-bottom-unlock-live">
+                  <span className="comp-char-unlock-live-badge">
+                    <span className="comp-char-unlock-live-dot" />
+                    NEXT
                   </span>
-                  <span className="comp-char-bottom-unlock-reward">{t(`companions.rel_unlock_${nl.id}`)}</span>
+                  <span className="comp-char-unlock-live-text">
+                    <em>{ptn}pt</em> {t(`companions.rel_unlock_${nl.id}`)}
+                  </span>
                 </div>
               )}
-              {!nl && <div className="comp-char-bottom-unlock-reward">💎 {t('companions.rel_max')}</div>}
+              {!nl && (
+                <div className="comp-char-bottom-unlock-live">
+                  <span className="comp-char-unlock-live-badge" style={{ background: 'rgba(168,85,247,0.3)', borderColor: 'rgba(168,85,247,0.6)' }}>
+                    <span className="comp-char-unlock-live-dot" style={{ background: '#a855f7' }} />
+                    MAX
+                  </span>
+                  <span className="comp-char-unlock-live-text">💎 {t('companions.rel_max')}</span>
+                </div>
+              )}
             </div>
             ); })()}
 

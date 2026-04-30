@@ -9,11 +9,12 @@ import BlogNav from '@/components/blog/BlogNav';
 const ldJsonArticle = {
   '@context': 'https://schema.org',
   '@type': 'Article',
-  headline: 'Stable Diffusion NSFW Guide 2025 — Models, Settings & Browser Alternatives',
+  headline: 'Stable Diffusion NSFW Guide 2026 — Models, Settings & Browser Alternatives',
   datePublished: '2025-03-13',
-  dateModified: '2025-03-13',
+  dateModified: '2026-04-30',
   author: { '@type': 'Organization', name: 'Image Nude' },
-  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
+  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/stable-diffusion-nsfw-guide' },
 };
 
 const ldJsonFaq = {
@@ -73,10 +74,10 @@ export default function StableDiffusionNsfwGuidePage() {
 
             <div className={styles.meta}>
               <span className={styles.tag}>Guide</span>
-              <span className={styles.metaInfo}>March 2025 &middot; 11 min read</span>
+              <span className={styles.metaInfo}>April 2026 &middot; 11 min read</span>
             </div>
 
-            <h1 className={styles.h1}>Stable Diffusion NSFW Guide 2025 &mdash; Models, Settings &amp; Browser Alternatives</h1>
+            <h1 className={styles.h1}>Stable Diffusion NSFW Guide 2026 &mdash; Models, Settings &amp; Browser Alternatives</h1>
 
             <p className={styles.lede}>
               Stable Diffusion is the most powerful open-source image platform available &mdash; and the most complex. This guide cuts through the setup noise to cover the NSFW models worth using, the settings that actually matter, and a zero-setup browser alternative for anyone without a dedicated GPU.
@@ -106,12 +107,13 @@ export default function StableDiffusionNsfwGuidePage() {
 
             <h3>Realistic Generation (SDXL)</h3>
             <ul>
-              <li><strong>Juggernaut XL V11</strong> &mdash; The best all-around photorealistic NSFW model in 2025. Handles diverse subjects, excellent skin rendering, consistent anatomy. Download free from Civitai.</li>
+              <li><strong>Juggernaut XL V11</strong> &mdash; The best all-around photorealistic NSFW model in 2026. Handles diverse subjects, excellent skin rendering, consistent anatomy. Download free from Civitai.</li>
               <li><strong>RealVisXL V5.0</strong> &mdash; Clean, sharp results with a professional photography look. Strong for portraits where fine detail matters more than organic texture.</li>
               <li><strong>HelloWorld XL 7.0</strong> &mdash; Optimized specifically for East Asian facial features. Best-in-class for Korean and Japanese character generation.</li>
             </ul>
 
             <h3>Anime Generation</h3>
+            <p>For a full comparison of anime-specific tools beyond Stable Diffusion, see our <Link href="/blog/nsfw-ai-anime-generator">NSFW anime generator guide</Link>.</p>
             <ul>
               <li><strong>AbyssOrangeMix3 (AOM3)</strong> &mdash; Classic SD1.5 anime model, still widely used. Detailed hentai-style illustration with strong anatomy.</li>
               <li><strong>CounterfeitXL</strong> &mdash; SDXL-based anime. More detailed than AOM3 with better proportions and sharpness.</li>
@@ -119,7 +121,7 @@ export default function StableDiffusionNsfwGuidePage() {
             </ul>
 
             <div className={styles.tip}>
-              <p><strong>💡 SD1.5 vs SDXL:</strong> SDXL produces significantly better quality but needs 8GB+ VRAM and only works at native 1024px. SD1.5 runs at 512&ndash;768px on less VRAM. For NSFW generation in 2025, use SDXL whenever your hardware allows it.</p>
+              <p><strong>💡 SD1.5 vs SDXL:</strong> SDXL produces significantly better quality but needs 8GB+ VRAM and only works at native 1024px. SD1.5 runs at 512&ndash;768px on less VRAM. For NSFW generation in 2026, use SDXL whenever your hardware allows it.</p>
             </div>
 
             {/* Settings */}
@@ -160,7 +162,7 @@ export default function StableDiffusionNsfwGuidePage() {
 
             {/* Prompts */}
             <h2 id="prompts">NSFW Prompt Structure for Stable Diffusion</h2>
-            <p>SD-specific prompts use weighted syntax that non-SD tools often ignore. The parentheses notation directly boosts those tags in the generation:</p>
+            <p>SD-specific prompts use weighted syntax that non-SD tools often ignore. The parentheses notation directly boosts those tags in the generation. For a platform-agnostic deep dive, see our <Link href="/blog/how-to-write-nsfw-ai-prompts">NSFW prompt writing guide</Link>.</p>
 
             <div className={styles.promptBox}>
               <span className={styles.promptLabel}>Realistic NSFW &mdash; SDXL</span>
@@ -245,7 +247,7 @@ export default function StableDiffusionNsfwGuidePage() {
               </table>
             </div>
 
-            <p>If you have a capable GPU and enjoy the control, run Stable Diffusion locally. If you want results in under a minute without any setup overhead, Image Nude delivers the same SDXL model quality through a browser.</p>
+            <p>If you have a capable GPU and enjoy the control, run Stable Diffusion locally. If you want results in under a minute without any setup overhead, Image Nude delivers the same SDXL model quality through a browser. Our <Link href="/blog/how-to-generate-nsfw-ai-images">NSFW image generation guide</Link> walks through the browser-based workflow.</p>
 
             {/* FAQ */}
             <h2 id="faq">FAQ</h2>
@@ -303,7 +305,8 @@ export default function StableDiffusionNsfwGuidePage() {
               <ul>
                 <li><Link href="/blog/how-to-write-nsfw-ai-prompts">How to Write NSFW AI Prompts</Link></li>
                 <li><Link href="/blog/ai-portrait-generator-realistic-faces">AI Portrait Generator Guide</Link></li>
-                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2025</Link></li>
+                <li><Link href="/blog/nsfw-ai-anime-generator">NSFW AI Anime Generator</Link></li>
+                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2026</Link></li>
               </ul>
             </div>
           </aside>

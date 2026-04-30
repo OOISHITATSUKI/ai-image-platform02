@@ -6,12 +6,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'Best AI Undress Tools in 2025 (Free & Paid) | ImageNude',
-  description: 'Honest comparison of the top AI undress tools. Find the best free options with no watermark and no login required.',
+  title: 'I Tested 3 AI Undress Tools — What Actually Works in 2026',
+  description: 'Honest comparison of SoulGen, Promptchan AI, and Undress.app. Real screenshots, real prices, real opinions — updated for 2026.',
   alternates: { canonical: 'https://imagenude.com/blog/best-ai-undress-tools' },
   openGraph: {
-    title: 'Best AI Undress Tools in 2025 (Free & Paid) | ImageNude',
-    description: 'Honest comparison of the top AI undress tools. Find the best free options with no watermark and no login required.',
+    title: 'I Tested 3 AI Undress Tools — What Actually Works in 2026',
+    description: 'Honest comparison of SoulGen, Promptchan AI, and Undress.app. Real screenshots, real prices, real opinions — updated for 2026.',
     url: 'https://imagenude.com/blog/best-ai-undress-tools',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -27,7 +27,8 @@ const ldJson = [
     datePublished: '2026-03-21',
     dateModified: '2026-03-21',
     author: { '@type': 'Organization', name: 'Image Nude' },
-    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
+    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/best-ai-undress-tools' },
     description: 'Honest comparison of SoulGen, Promptchan AI, and Undress.app. Real screenshots, real prices, real opinions.',
   },
 ];
@@ -134,7 +135,7 @@ export default function BestUndressToolsPage() {
               <figcaption className={styles['but-caption']}>Google, Apple, or email registration. Over 5 million creators on the platform.</figcaption>
             </figure>
 
-            <p>Promptchan is where you go when you want <em>customization</em>. The editor gives you control over style, poses, filters, and emotion settings &mdash; plus a negative prompt field, which most competitors skip entirely. If you know what you&apos;re doing with prompts, you&apos;ll appreciate this level of control.</p>
+            <p>Promptchan is where you go when you want <em>customization</em>. The editor gives you control over style, poses, filters, and emotion settings &mdash; plus a negative prompt field, which most competitors skip entirely. If you know what you&apos;re doing with prompts, you&apos;ll appreciate this level of control. (Not sure where to start? Our <Link href="/blog/how-to-write-nsfw-ai-prompts">NSFW prompt-writing guide</Link> walks through the basics.)</p>
 
             <figure className={styles['but-figure']}>
               <Image src={`${IMG}/promptchan-editor.png`} alt="Promptchan AI editor with Style, Poses, Filters, and Emotion controls" width={760} height={428} className={styles['but-img']} />
@@ -268,13 +269,13 @@ export default function BestUndressToolsPage() {
             <p><strong>If you want to create consistent AI characters</strong> &mdash; go with SoulGen. The face creator and character system are unique, and the video features add a lot of value.</p>
             <p><strong>If you want customization and control</strong> &mdash; go with Promptchan AI. The style, pose, filter, and emotion settings give you more creative control than any other tool I tested. The tiered pricing also means you can start cheap at $11.99/month.</p>
             <p><strong>If you just want something simple</strong> &mdash; Undress.app&apos;s preset system is the easiest to use, but be prepared to pay significantly more per image.</p>
-            <p>None of these tools are perfect. SoulGen locks everything behind a blur until you pay. Promptchan&apos;s interface takes a bit of learning. Undress.app charges premium prices for basic output. But those are the trade-offs in this market right now.</p>
+            <p>None of these tools are perfect. SoulGen locks everything behind a blur until you pay. Promptchan&apos;s interface takes a bit of learning. Undress.app charges premium prices for basic output. But those are the trade-offs in this market right now. If you&apos;d like a broader walkthrough covering generation settings and workflows, take a look at our <Link href="/blog/how-to-generate-nsfw-ai-images">guide to generating NSFW AI images</Link>.</p>
 
             <hr className={styles['but-divider']} />
 
             {/* Disclosure */}
             <h2 id="disclosure">One More Thing</h2>
-            <p>Full disclosure: I run an AI image platform called <Link href="/">Image Nude</Link>. It does text-to-image, face swap, and undress (inpaint) &mdash; and you can try it free with 20 credits, no credit card required.</p>
+            <p>Full disclosure: I run an AI image platform called <Link href="/">Image Nude</Link>. It does text-to-image, face swap, and undress (inpaint) &mdash; and you can try it free with 20 credits, no credit card required. We also maintain a <Link href="/blog/ai-nude-generator-free">list of free AI nude generators</Link> if you want to explore more options beyond these three.</p>
             <p>I&apos;m not going to rank my own tool in this list because that would be dishonest. But if you want to compare it yourself, <Link href="/">give it a try</Link> and see how it stacks up. You can go directly to the <Link href="/undress-ai">free AI undress tool — no login required</Link>, or check out the <Link href="/face-swap">face swap tool</Link>.</p>
 
             <Link href="/editor" className={styles['but-cta-large']}>

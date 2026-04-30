@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: "What's the best AI face swap tool for adult content?",
-    a: 'Image Nude leads in 2025 for NSFW AI face swap — realistic results, automatic 1-hour image deletion for privacy, and cryptocurrency payment support for anonymous purchases.',
+    a: 'Image Nude leads in 2026 for NSFW AI face swap — realistic results, automatic 1-hour image deletion for privacy, and cryptocurrency payment support for anonymous purchases.',
   },
   {
     q: 'Can AI face swap work on fully AI-generated images?',

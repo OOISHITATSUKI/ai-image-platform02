@@ -5,12 +5,12 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'AI Face Swap for Adults — Free, Fast & Private | ImageNude',
-  description: 'The best AI face swap tool for adult content. Free to try, no login needed, results in under 10 seconds.',
+  title: 'AI Face Swap for Adults: Why 90% Fail & How to Fix It (2026)',
+  description: 'After 1,000+ NSFW face swaps, I found why 90% fail. The angle problem, the lighting trick, and the tools that actually deliver realistic results.',
   alternates: { canonical: 'https://imagenude.com/blog/ai-face-swap-adults' },
   openGraph: {
-    title: 'AI Face Swap for Adults — Free, Fast & Private | ImageNude',
-    description: 'The best AI face swap tool for adult content. Free to try, no login needed, results in under 10 seconds.',
+    title: 'AI Face Swap for Adults: Why 90% Fail & How to Fix It (2026)',
+    description: 'After 1,000+ NSFW face swaps, I found why 90% fail. The angle problem, the lighting trick, and the tools that actually deliver realistic results.',
     url: 'https://imagenude.com/blog/ai-face-swap-adults',
     siteName: 'Image Nude',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
@@ -25,7 +25,8 @@ const ldJson = {
   datePublished: '2025-02-01',
   dateModified: '2026-03-21',
   author: { '@type': 'Organization', name: 'Image Nude' },
-  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com' },
+  publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/ai-face-swap-adults' },
 };
 
 export default function AiFaceSwapAdultsPage() {
@@ -166,50 +167,10 @@ export default function AiFaceSwapAdultsPage() {
 
             <p>My workaround when photos don&apos;t match: <strong>swap onto AI-generated bodies instead of real photos.</strong> AI images have uniform, predictable lighting, so the face blends in way more naturally.</p>
 
-            {/* 4-Step Workflow */}
-            <h2 id="workflow">My 4-Step NSFW Face Swap Workflow</h2>
-            <p>Here&apos;s the exact process I use now after months of trial and error.</p>
-
-            <div className={styles['afs-guide-step']}>
-              <div className={styles['afs-guide-num']}>1</div>
-              <div className={styles['afs-guide-content']}>
-                <h3>Pick the right face source</h3>
-                <p>This matters more than the tool you use. My checklist:</p>
-                <ul>
-                  <li>Front-facing or near-front (under 15° angle)</li>
-                  <li>Sharp and well-lit — no harsh shadows across the face</li>
-                  <li>At least 512px wide — the AI needs pixel data to work with</li>
-                  <li>Calm or neutral expression — big smiles and extreme poses blend poorly</li>
-                  <li>Clean background — clutter slows down face detection</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className={styles['afs-guide-step']}>
-              <div className={styles['afs-guide-num']}>2</div>
-              <div className={styles['afs-guide-content']}>
-                <h3>Generate the body first</h3>
-                <p>Rather than searching for the perfect body photo, I create one. Text-to-image generation gives me full control over pose, lighting, and style. Then I swap the face onto that generated body in a second pass.</p>
-                <p>Uploading a real photo as the body works too — just match the lighting to your face source.</p>
-              </div>
-            </div>
-
-            <div className={styles['afs-guide-step']}>
-              <div className={styles['afs-guide-num']}>3</div>
-              <div className={styles['afs-guide-content']}>
-                <h3>Run 3–4 variations</h3>
-                <p>Every face swap has a random element. Identical inputs produce slightly different outputs each time. Running 3–4 generations and picking the best one takes 30 extra seconds and massively improves consistency.</p>
-              </div>
-            </div>
-
-            <div className={styles['afs-guide-step']}>
-              <div className={styles['afs-guide-num']}>4</div>
-              <div className={styles['afs-guide-content']}>
-                <h3>Stack undress + face swap</h3>
-                <p>The most powerful workflow I&apos;ve found: generate an undressed body with inpainting first, then apply the face on top. Two steps, one platform, fully custom result.</p>
-                <p>This combo is actually why I built <Link href="/">Image Nude</Link> — no other tool I tested supported undress and face swap in a single workflow without exporting between apps.</p>
-              </div>
-            </div>
+            {/* Workflow Summary */}
+            <h2 id="workflow">My Workflow (Summary)</h2>
+            <p>After months of trial and error, I settled on a 4-step process: pick the right face source (front-facing, well-lit, 512px+), generate or select a matching body, run 3&ndash;4 variations, and stack undress + face swap for maximum control.</p>
+            <p>The full breakdown with screenshots is in our <Link href="/blog/how-to-use-ai-face-swap-adults">step-by-step face swap tutorial</Link> &mdash; it covers everything from signup to download in 5 minutes.</p>
 
             {/* Face Swap vs Deepfake */}
             <h2 id="vs-deepfake">Face Swap vs. Deepfake: Where&apos;s the Line?</h2>
@@ -229,7 +190,7 @@ export default function AiFaceSwapAdultsPage() {
               <li>Passing off swapped content as genuine footage</li>
             </ul>
 
-            <p>Reputable platforms enforce these boundaries. But the responsibility ultimately sits with the user.</p>
+            <p>Reputable platforms enforce these boundaries. But the responsibility ultimately sits with the user. For a deeper breakdown of the legal distinctions, read <Link href="/blog/ai-face-swap-vs-deepfake">AI face swap vs deepfake</Link>.</p>
 
             {/* Which Tools */}
             <h2 id="tools">Which Tools Support NSFW Face Swap?</h2>
@@ -259,6 +220,7 @@ export default function AiFaceSwapAdultsPage() {
                 <li><strong>Generate 3–4 variations</strong> — always pick from multiple results</li>
                 <li><strong>High-res face source</strong> — 512px minimum, sharper is better</li>
                 <li><strong>Undress first, face swap second</strong> — most control over the final image</li>
+                <li><strong><Link href="/blog/how-to-create-consistent-ai-character">Save faces for reuse</Link></strong> — lock a face once and apply it to any future generation</li>
               </ol>
             </div>
 
@@ -280,7 +242,7 @@ export default function AiFaceSwapAdultsPage() {
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#angle-problem">The Angle Problem</a></li>
                 <li><a href="#lighting-trick">The Lighting Trick</a></li>
-                <li><a href="#workflow">4-Step Workflow</a></li>
+                <li><a href="#workflow">Workflow Summary</a></li>
                 <li><a href="#vs-deepfake">Face Swap vs. Deepfake</a></li>
                 <li><a href="#tools">Which Tools</a></li>
                 <li><a href="#quick-reference">Quick Reference</a></li>

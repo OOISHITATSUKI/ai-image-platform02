@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free NSFW AI Prompts That Actually Work (2025) | ImageNude',
+  title: 'How to Write NSFW AI Prompts: Tips for Better Results (2026)',
   description: 'Discover the best NSFW AI prompts for generating realistic images. Free to use, no sign up needed. Step-by-step guide with examples.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-write-nsfw-ai-prompts' },
   openGraph: {
-    title: 'Free NSFW AI Prompts That Actually Work (2025) | ImageNude',
+    title: 'How to Write NSFW AI Prompts: Tips for Better Results (2026)',
     description: 'Discover the best NSFW AI prompts for generating realistic images. Free to use, no sign up needed. Step-by-step guide with examples.',
     url: 'https://imagenude.com/blog/how-to-write-nsfw-ai-prompts',
     siteName: 'Image Nude',

@@ -6,11 +6,11 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide | Image Nude',
+  title: 'How to Use AI Face Swap for Adults: Complete 2026 Guide',
   description: 'Step-by-step guide to using AI face swap for adult content. Tips for realistic results, best image choices, advanced workflows, and how to get started free.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-use-ai-face-swap-adults' },
   openGraph: {
-    title: 'How to Use AI Face Swap for Adults: Complete 2025 Guide | Image Nude',
+    title: 'How to Use AI Face Swap for Adults: Complete 2026 Guide',
     description: 'Step-by-step guide to using AI face swap for adult content. Tips for realistic results, best image choices, advanced workflows, and how to get started free.',
     url: 'https://imagenude.com/blog/how-to-use-ai-face-swap-adults',
     siteName: 'Image Nude',
@@ -19,19 +19,31 @@ export const metadata: Metadata = {
   },
 };
 
-const ldJson = {
-  '@context': 'https://schema.org',
-  '@type': 'HowTo',
-  name: 'How to Use AI Face Swap for Adults',
-  description: 'Step-by-step guide to using AI face swap tools for adult content generation.',
-  step: [
-    { '@type': 'HowToStep', name: 'Sign up and get free credits', text: 'Create a free account at Image Nude. You receive 20 credits on signup with no credit card required.' },
-    { '@type': 'HowToStep', name: 'Select Face Swap mode', text: 'Click the Face Swap button in the toolbar. Two upload slots appear — one for the body (target) and one for the face (source).' },
-    { '@type': 'HowToStep', name: 'Upload the body image', text: 'Drop your body image into Slot 1. This is the image whose body shows up in the final result.' },
-    { '@type': 'HowToStep', name: 'Upload the face image', text: 'Drop your face image into Slot 2. Front-facing shots with even lighting give the most accurate results.' },
-    { '@type': 'HowToStep', name: 'Generate and download', text: 'Click Generate. The AI blends the face onto the body in approximately 8 seconds. Download immediately — images delete within 1 hour.' },
-  ],
-};
+const ldJson = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Use AI Face Swap for Adults',
+    description: 'Step-by-step guide to using AI face swap tools for adult content generation.',
+    step: [
+      { '@type': 'HowToStep', name: 'Sign up and get free credits', text: 'Create a free account at Image Nude. You receive 20 credits on signup with no credit card required.' },
+      { '@type': 'HowToStep', name: 'Select Face Swap mode', text: 'Click the Face Swap button in the toolbar. Two upload slots appear — one for the body (target) and one for the face (source).' },
+      { '@type': 'HowToStep', name: 'Upload the body image', text: 'Drop your body image into Slot 1. This is the image whose body shows up in the final result.' },
+      { '@type': 'HowToStep', name: 'Upload the face image', text: 'Drop your face image into Slot 2. Front-facing shots with even lighting give the most accurate results.' },
+      { '@type': 'HowToStep', name: 'Generate and download', text: 'Click Generate. The AI blends the face onto the body in approximately 8 seconds. Download immediately — images delete within 1 hour.' },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How to Use AI Face Swap for Adults: Complete 2026 Guide',
+    datePublished: '2025-03-15',
+    dateModified: '2026-04-30',
+    author: { '@type': 'Organization', name: 'Image Nude' },
+    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/how-to-use-ai-face-swap-adults' },
+  },
+];
 
 const IMG = '/images/blog/AIFaceSwap';
 
@@ -53,10 +65,10 @@ export default function HowToUseAiFaceSwapAdultsPage() {
 
             <div className={styles.meta}>
               <span className={styles.tag}>How-To</span>
-              <span className={styles.metaInfo}>March 2025 &middot; 9 min read</span>
+              <span className={styles.metaInfo}>April 2026 &middot; 9 min read</span>
             </div>
 
-            <h1 className={styles.h1}>How to Use AI Face Swap for Adults: Complete 2025 Guide</h1>
+            <h1 className={styles.h1}>How to Use AI Face Swap for Adults: Complete 2026 Guide</h1>
 
             <p className={styles.lede}>
               AI face swap tools got good fast. The outputs now look realistic enough to fool a casual observer &mdash; and you don&apos;t need any editing skills to pull it off. This guide walks you through everything from your first swap to advanced techniques that pros use.
@@ -254,7 +266,7 @@ export default function HowToUseAiFaceSwapAdultsPage() {
               <p>20 credits on signup. No credit card required. Results in 8 seconds.</p>
               <Link href="/register" className={styles.ctaBtn}>Try Face Swap Free &rarr;</Link>
               <p className={styles.ctaNote}>18+ only &middot; All content AI-generated &middot; Images deleted within 1 hour</p>
-              <p style={{ marginTop: 12, fontSize: 13 }}>Also see: <Link href="/blog/ai-face-swap-vs-deepfake">Face Swap vs Deepfake explained</Link> &middot; <Link href="/blog/ai-face-swap-adults">Best NSFW face swap tools 2025</Link></p>
+              <p style={{ marginTop: 12, fontSize: 13 }}>Also see: <Link href="/blog/ai-face-swap-vs-deepfake">Face Swap vs Deepfake explained</Link> &middot; <Link href="/blog/ai-face-swap-adults">Best NSFW face swap tools 2026</Link></p>
             </div>
 
           </article>
@@ -281,10 +293,10 @@ export default function HowToUseAiFaceSwapAdultsPage() {
             <div className={styles.related}>
               <h4 className={styles.relatedTitle}>Related Articles</h4>
               <ul>
-                <li><Link href="/blog/ai-face-swap-adults">Best NSFW Face Swap Tools 2025</Link></li>
+                <li><Link href="/blog/ai-face-swap-adults">Best NSFW Face Swap Tools 2026</Link></li>
                 <li><Link href="/blog/ai-face-swap-vs-deepfake">Face Swap vs Deepfake: The Difference</Link></li>
                 <li><Link href="/blog/how-to-create-consistent-ai-character">Create a Consistent AI Character</Link></li>
-                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2025</Link></li>
+                <li><Link href="/blog/best-ai-undress-tools">Best AI Undress Tools 2026</Link></li>
               </ul>
             </div>
           </aside>

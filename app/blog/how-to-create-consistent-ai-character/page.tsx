@@ -6,11 +6,11 @@ import styles from './page.module.css';
 import BlogNav from '@/components/blog/BlogNav';
 
 export const metadata: Metadata = {
-  title: 'How to Create a Consistent AI Character: Same Face, Unlimited Scenes (2025) | Image Nude',
+  title: 'How to Create a Consistent AI Character (Same Face, Any Scene) 2026',
   description: 'Learn how to create a consistent AI character and generate the same face across unlimited scenes. Step-by-step guide using face-saving technology — free to start.',
   alternates: { canonical: 'https://imagenude.com/blog/how-to-create-consistent-ai-character' },
   openGraph: {
-    title: 'How to Create a Consistent AI Character: Same Face, Unlimited Scenes (2025) | Image Nude',
+    title: 'How to Create a Consistent AI Character (Same Face, Any Scene) 2026',
     description: 'Learn how to create a consistent AI character and generate the same face across unlimited scenes. Step-by-step guide using face-saving technology — free to start.',
     url: 'https://imagenude.com/blog/how-to-create-consistent-ai-character',
     siteName: 'Image Nude',
@@ -19,18 +19,30 @@ export const metadata: Metadata = {
   },
 };
 
-const ldJson = {
-  '@context': 'https://schema.org',
-  '@type': 'HowTo',
-  name: 'How to Create a Consistent AI Character',
-  description: 'Step-by-step guide to creating a consistent AI character and generating the same face across unlimited scenes using face-saving technology.',
-  step: [
-    { '@type': 'HowToStep', name: 'Generate your base character', text: 'Use text-to-image to generate the character you want. Create several variations and pick the clearest face.' },
-    { '@type': 'HowToStep', name: 'Save the face', text: 'Click the save icon on your chosen image. Select Save Face and give the character a name.' },
-    { '@type': 'HowToStep', name: 'Select your saved face', text: 'Before generating, select your saved face from the My Faces panel above the prompt input.' },
-    { '@type': 'HowToStep', name: 'Generate new scenes', text: 'Write any new prompt. The AI applies your saved face regardless of scene, pose, or setting.' },
-  ],
-};
+const ldJson = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Create a Consistent AI Character',
+    description: 'Step-by-step guide to creating a consistent AI character and generating the same face across unlimited scenes using face-saving technology.',
+    step: [
+      { '@type': 'HowToStep', name: 'Generate your base character', text: 'Use text-to-image to generate the character you want. Create several variations and pick the clearest face.' },
+      { '@type': 'HowToStep', name: 'Save the face', text: 'Click the save icon on your chosen image. Select Save Face and give the character a name.' },
+      { '@type': 'HowToStep', name: 'Select your saved face', text: 'Before generating, select your saved face from the My Faces panel above the prompt input.' },
+      { '@type': 'HowToStep', name: 'Generate new scenes', text: 'Write any new prompt. The AI applies your saved face regardless of scene, pose, or setting.' },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How to Create a Consistent AI Character (Same Face, Any Scene) 2026',
+    datePublished: '2025-03-15',
+    dateModified: '2026-04-30',
+    author: { '@type': 'Organization', name: 'Image Nude' },
+    publisher: { '@type': 'Organization', name: 'Image Nude', url: 'https://imagenude.com', logo: { '@type': 'ImageObject', url: 'https://imagenude.com/logo.png' } },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://imagenude.com/blog/how-to-create-consistent-ai-character' },
+  },
+];
 
 const IMG = '/images/blog/consistent-character';
 
@@ -52,7 +64,7 @@ export default function HowToCreateConsistentAiCharacterPage() {
 
             <div className={styles.meta}>
               <span className={styles.tag}>Guide</span>
-              <span className={styles.metaInfo}>March 2025 &middot; 7 min read</span>
+              <span className={styles.metaInfo}>April 2026 &middot; 7 min read</span>
             </div>
 
             <h1 className={styles.h1}>How to Create a Consistent AI Character: Same Face, Unlimited Scenes</h1>
@@ -78,7 +90,7 @@ export default function HowToCreateConsistentAiCharacterPage() {
 
             <p>This isn&apos;t a bug &mdash; it&apos;s how text-to-image AI works. Every generation draws from random noise, so even identical prompts produce different faces each time. The randomness is baked into the model architecture.</p>
 
-            <p>Until recently, fixing this meant ControlNet, LoRA training, or embedding workflows that required hours of technical setup. In 2025, <strong>face-saving technology</strong> makes consistent AI character creation accessible to anyone &mdash; no technical knowledge required.</p>
+            <p>Until recently, fixing this meant ControlNet, LoRA training, or embedding workflows that required hours of technical setup. In 2026, <strong>face-saving technology</strong> makes consistent AI character creation accessible to anyone &mdash; no technical knowledge required.</p>
 
             {/* What Face-Saving Actually Does */}
             <h2 id="what-is">What Face-Saving Actually Does</h2>
@@ -123,7 +135,7 @@ export default function HowToCreateConsistentAiCharacterPage() {
             <div className={styles.stepBlock}>
               <div className={styles.stepNum}>1</div>
               <h3>Generate Your Base Character</h3>
-              <p>Start with a detailed text-to-image prompt &mdash; describe the face, hair, and style you want. Generate 5&ndash;10 variations and pick the clearest, most front-facing result. That image becomes your character&apos;s face reference.</p>
+              <p>Start with a detailed text-to-image prompt &mdash; describe the face, hair, and style you want. For tips on getting <Link href="/blog/ai-portrait-generator-realistic-faces">realistic face results</Link>, use specific lighting and skin-detail keywords. Generate 5&ndash;10 variations and pick the clearest, most front-facing result. That image becomes your character&apos;s face reference.</p>
             </div>
 
             <div className={styles.stepBlock}>
@@ -202,7 +214,7 @@ export default function HowToCreateConsistentAiCharacterPage() {
               <li><strong>Save multiple characters.</strong> Paid plans store up to 10 saved faces &mdash; build a library of different characters for different scenarios.</li>
               <li><strong>Start with high-quality base images.</strong> Higher resolution and sharper base images produce more accurate face-locking across generations.</li>
               <li><strong>Keep hair description consistent in prompts.</strong> The face locks; hair doesn&apos;t. Describing the same hair color and length helps maintain overall character coherence.</li>
-              <li><strong>Combine with <Link href="/face-swap">Face Swap</Link> for precision.</strong> Use face saving for txt2img scenes; switch to Face Swap mode when you need exact face placement on a specific body image. You can also pair it with the <Link href="/undress-ai">undress tool</Link> for the full workflow.</li>
+              <li><strong>Combine with <Link href="/face-swap">Face Swap</Link> for precision.</strong> Use face saving for txt2img scenes; switch to Face Swap mode when you need exact face placement on a specific body image. Our <Link href="/blog/ai-face-swap-adults">AI face swap guide</Link> covers the full technique, and our <Link href="/blog/how-to-use-ai-face-swap-adults">face swap how-to</Link> walks through it step by step. You can also pair it with the <Link href="/undress-ai">undress tool</Link> for the full workflow.</li>
               <li><strong>Upload external references on paid plans.</strong> Paid users can upload external images as face references &mdash; not just generated images.</li>
             </ul>
 
