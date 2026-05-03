@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Companion } from '@/lib/companions';
 import AvatarCropModal from '@/components/admin/AvatarCropModal';
+import VideoManager from '@/components/admin/VideoManager';
 
 interface Props {
   mode: 'new' | 'edit';
@@ -594,34 +595,15 @@ export default function CompanionEditor({ mode, companionId }: Props) {
         ))}
       </fieldset>
 
-      {!c.isAssistant && (
+      {!c.isAssistant && mode === 'edit' && companionId && (
+        <VideoManager companionId={companionId} />
+      )}
+      {!c.isAssistant && mode === 'new' && (
         <fieldset style={fieldset}>
-          <legend style={legend}>Live Action動画 ({LIVE_VIDEO_SLOTS.length}本)</legend>
-          {mode === 'new' ? (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-              基本情報を保存してから、動画をアップロードできます。
-            </p>
-          ) : (
-            <>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: 12 }}>
-                mp4/webm 推奨、最大500MB/本。アップロード先：<code>/public/companions/videos/</code>。
-                ホバーで再生プレビュー。
-              </p>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
-                gap: 12,
-              }}>
-                {LIVE_VIDEO_SLOTS.map((slot) => (
-                  <LiveVideoSlot
-                    key={`${slot.actionId}-${slot.variant}`}
-                    companionId={companionId ?? c.id}
-                    slot={slot}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+          <legend style={legend}>動画管理</legend>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
+            基本情報を保存してから、動画をアップロードできます。
+          </p>
         </fieldset>
       )}
 
