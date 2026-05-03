@@ -350,9 +350,9 @@ export default function CompanionChatPage() {
   const pendingRef = useRef(pendingStoryComment);
   pendingRef.current = pendingStoryComment;
 
-  // Preset messages — assistant gets FAQ + flirty presets (random 3), companions get flirty ones
-  const allAssistantPresets = [
-    // FAQ / serious
+  // Preset messages — level-aware romance psychology presets
+  // Assistant: FAQ + flirty presets based on closeness (message count)
+  const assistFaqPresets = [
     { label: t('companions.assistPresetRequest'), message: t('companions.assistPresetRequestMsg') },
     { label: t('companions.assistPresetHow'), message: t('companions.assistPresetHowMsg') },
     { label: t('companions.assistPresetPlayStyle'), message: t('companions.assistPresetPlayStyleMsg') },
@@ -366,26 +366,82 @@ export default function CompanionChatPage() {
     { label: t('companions.assistFaqLevel'), message: t('companions.assistFaqLevelMsg') },
     { label: t('companions.assistFaqVideo'), message: t('companions.assistFaqVideoMsg') },
     { label: t('companions.assistFaqInpaint'), message: t('companions.assistFaqInpaintMsg') },
-    // Flirty / playful
+  ];
+  // Lv1: Ice-breakers — empathy & similarity (ミラーリング, 共感)
+  const assistFlirtLv1 = [
+    { label: t('companions.assistFlirtType'), message: t('companions.assistFlirtTypeMsg') },
+    { label: t('companions.assistFlirtAge'), message: t('companions.assistFlirtAgeMsg') },
+    { label: t('companions.assistFlirtMirror'), message: t('companions.assistFlirtMirrorMsg') },
+    { label: t('companions.assistFlirtCompliment'), message: t('companions.assistFlirtComplimentMsg') },
+  ];
+  // Lv2: Building tension — push-pull, scarcity (押して引く, 希少性)
+  const assistFlirtLv2 = [
     { label: t('companions.assistFlirtBf'), message: t('companions.assistFlirtBfMsg') },
     { label: t('companions.assistFlirtPhoto'), message: t('companions.assistFlirtPhotoMsg') },
-    { label: t('companions.assistFlirtType'), message: t('companions.assistFlirtTypeMsg') },
-    { label: t('companions.assistFlirtDate'), message: t('companions.assistFlirtDateMsg') },
-    { label: t('companions.assistFlirtAge'), message: t('companions.assistFlirtAgeMsg') },
+    { label: t('companions.assistFlirtPushPull'), message: t('companions.assistFlirtPushPullMsg') },
+    { label: t('companions.assistFlirtScarcity'), message: t('companions.assistFlirtScarcityMsg') },
+    { label: t('companions.assistFlirtGap'), message: t('companions.assistFlirtGapMsg') },
   ];
+  // Lv3: Deep connection — reciprocity, jealousy, protection (好意の返報性, 嫉妬, 庇護欲)
+  const assistFlirtLv3 = [
+    { label: t('companions.assistFlirtDate'), message: t('companions.assistFlirtDateMsg') },
+    { label: t('companions.assistFlirtJealous'), message: t('companions.assistFlirtJealousMsg') },
+    { label: t('companions.assistFlirtReciprocity'), message: t('companions.assistFlirtReciprocityMsg') },
+    { label: t('companions.assistFlirtProtect'), message: t('companions.assistFlirtProtectMsg') },
+    { label: t('companions.assistFlirtNight'), message: t('companions.assistFlirtNightMsg') },
+  ];
+
   const [assistPresetSeed, setAssistPresetSeed] = useState(0);
   const [assistantPresets, setAssistantPresets] = useState<{label: string; message: string}[]>([]);
   useEffect(() => {
-    const shuffled = [...allAssistantPresets].sort(() => Math.random() - 0.5);
-    setAssistantPresets(shuffled.slice(0, 3));
-  }, [assistPresetSeed]); // eslint-disable-line react-hooks/exhaustive-deps
-  const presetMessages = isAssistant ? assistantPresets : [
+    const closeness = Math.min(Math.floor(messages.filter(m => m.role === 'user').length), 100);
+    // Level-aware: unlock deeper flirty presets as closeness grows
+    let flirtPool = [...assistFlirtLv1];
+    if (closeness >= 15) flirtPool = [...flirtPool, ...assistFlirtLv2];
+    if (closeness >= 35) flirtPool = [...flirtPool, ...assistFlirtLv3];
+    // Mix: 1 FAQ + 2 flirty (weighted toward romance as closeness grows)
+    const shuffledFaq = [...assistFaqPresets].sort(() => Math.random() - 0.5);
+    const shuffledFlirt = [...flirtPool].sort(() => Math.random() - 0.5);
+    const faqCount = closeness >= 30 ? 0 : 1;
+    const picked = [
+      ...shuffledFaq.slice(0, faqCount),
+      ...shuffledFlirt.slice(0, 3 - faqCount),
+    ].sort(() => Math.random() - 0.5);
+    setAssistantPresets(picked.slice(0, 3));
+  }, [assistPresetSeed, messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Companion presets — level-aware based on relPoints (affection)
+  // Lv1 (0-149): Gentle approach — empathy, compliments, mirroring
+  const companionPresetsLv1 = [
     { label: t('companions.presetSecret'), message: t('companions.presetSecretMsg') },
-    { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
     { label: t('companions.presetMiss'), message: t('companions.presetMissMsg') },
-    { label: t('companions.presetBold'), message: t('companions.presetBoldMsg') },
+    { label: t('companions.presetConfession'), message: t('companions.presetConfessionMsg') },
+    { label: t('companions.presetVulnerable'), message: t('companions.presetVulnerableMsg') },
     { label: t('companions.presetPhoto'), message: t('companions.presetPhotoMsg') },
   ];
+  // Lv2 (150-399): Push-pull, teasing, jealousy
+  const companionPresetsLv2 = [
+    { label: t('companions.presetPushPull'), message: t('companions.presetPushPullMsg') },
+    { label: t('companions.presetTease'), message: t('companions.presetTeaseMsg') },
+    { label: t('companions.presetJealousy'), message: t('companions.presetJealousyMsg') },
+    { label: t('companions.presetNightWhisper'), message: t('companions.presetNightWhisperMsg') },
+    { label: t('companions.presetWearing'), message: t('companions.presetWearingMsg') },
+  ];
+  // Lv3 (400+): Deep intimacy — dominance, exclusivity, bold
+  const companionPresetsLv3 = [
+    { label: t('companions.presetDominant'), message: t('companions.presetDominantMsg') },
+    { label: t('companions.presetExclusive'), message: t('companions.presetExclusiveMsg') },
+    { label: t('companions.presetBold'), message: t('companions.presetBoldMsg') },
+  ];
+
+  const getCompanionPresets = () => {
+    let pool = [...companionPresetsLv1];
+    if (relPoints >= 150) pool = [...pool, ...companionPresetsLv2];
+    if (relPoints >= 400) pool = [...pool, ...companionPresetsLv3];
+    return pool.sort(() => Math.random() - 0.5).slice(0, 5);
+  };
+
+  const presetMessages = isAssistant ? assistantPresets : getCompanionPresets();
 
   // Detect breakup/reset keywords in user message
   const [showResetFromChat, setShowResetFromChat] = useState(false);
