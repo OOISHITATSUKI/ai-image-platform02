@@ -155,6 +155,17 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       return NextResponse.json({ ok: true });
     }
 
+    if (action === 'reset_all_relationships') {
+      // Delete ALL users' relationships with this companion
+      const { error: delErr, count } = await supabaseAdmin
+        .from('companion_relationships')
+        .delete()
+        .eq('companion_id', id);
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+      console.log(`[admin] Reset all relationships for companion ${id}: ${count ?? '?'} rows deleted`);
+      return NextResponse.json({ ok: true, deleted: count ?? 0 });
+    }
+
     if (action === 'duplicate') {
       const { data: existing, error: readErr } = await supabaseAdmin
         .from('companions')

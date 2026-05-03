@@ -514,6 +514,20 @@ export default function CompanionEditor({ mode, companionId }: Props) {
       </fieldset>
 
       <fieldset style={fieldset}>
+        <legend style={legend}>外見 (画像生成用)</legend>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 12, marginTop: 0 }}>
+          これらの属性はAI画像生成のプロンプトに使用されます。変更すると次の画像から反映されます。
+        </p>
+        <FormRow label="体型 (例: slim, athletic, curvy, petite)"><input style={input} value={c.profile?.bodyType ?? ''} onChange={(e) => setProfile('bodyType', e.target.value)} /></FormRow>
+        <FormRow label="バスト (例: small, medium, large, extra large)"><input style={input} value={c.profile?.breastSize ?? ''} onChange={(e) => setProfile('breastSize', e.target.value)} /></FormRow>
+        <FormRow label="髪色 (例: blonde, brunette, black, pink)"><input style={input} value={c.profile?.hairColor ?? ''} onChange={(e) => setProfile('hairColor', e.target.value)} /></FormRow>
+        <FormRow label="髪型 (例: long straight, short bob, twin tails)"><input style={input} value={c.profile?.hairStyle ?? ''} onChange={(e) => setProfile('hairStyle', e.target.value)} /></FormRow>
+        <FormRow label="肌色 (例: fair, olive, tan, dark)"><input style={input} value={c.profile?.skinTone ?? ''} onChange={(e) => setProfile('skinTone', e.target.value)} /></FormRow>
+        <FormRow label="身長 (例: 162cm)"><input style={input} value={c.profile?.height ?? ''} onChange={(e) => setProfile('height', e.target.value)} /></FormRow>
+        <FormRow label="特徴 (例: mole under eye, freckles)"><input style={input} value={c.profile?.specialFeatures ?? ''} onChange={(e) => setProfile('specialFeatures', e.target.value)} /></FormRow>
+      </fieldset>
+
+      <fieldset style={fieldset}>
         <legend style={legend}>画像</legend>
         <FormRow label="アバターURL">
           <div style={{ display: 'flex', gap: 8 }}>
@@ -738,6 +752,37 @@ export default function CompanionEditor({ mode, companionId }: Props) {
               </>
             )}
           </div>
+        </fieldset>
+      )}
+
+      {mode === 'edit' && !c.isAssistant && (
+        <fieldset style={{ ...fieldset, borderColor: 'rgba(255,80,80,0.2)' }}>
+          <legend style={{ ...legend, color: '#ff6b6b' }}>危険ゾーン</legend>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: 12, marginTop: 0 }}>
+            キャラ設定を大幅に変更した場合、全ユーザーの関係をリセットすると旧設定の影響を完全に排除できます。
+          </p>
+          <button
+            className="admin-btn-secondary"
+            style={{ background: 'rgba(255,50,50,0.15)', borderColor: 'rgba(255,50,50,0.4)', color: '#ff8080' }}
+            onClick={async () => {
+              if (!confirm(`${c.name}の全ユーザーとの関係をリセットしますか？\nチャット履歴・好感度が全て初期化されます。この操作は取り消せません。`)) return;
+              if (!confirm('本当にリセットしますか？（最終確認）')) return;
+              try {
+                const res = await fetch(`/api/admin/companions/${companionId}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'reset_all_relationships' }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed');
+                alert(`リセット完了: ${data.deleted}件の関係データを削除しました`);
+              } catch (e: unknown) {
+                alert(e instanceof Error ? e.message : 'リセットに失敗しました');
+              }
+            }}
+          >
+            全ユーザーの関係をリセット
+          </button>
         </fieldset>
       )}
 

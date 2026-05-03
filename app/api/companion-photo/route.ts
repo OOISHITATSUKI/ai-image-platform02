@@ -322,22 +322,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Auto-discover real face images from avatars directory (in case DB/config points to placeholders)
-    try {
-      const avatarDir = path.join(process.cwd(), 'public', 'companions', 'avatars');
-      const files = await fs.readdir(avatarDir);
-      const realImages = files
-        .filter(f => f.startsWith(companionId + '-') && /\.(png|webp|jpg|jpeg)$/i.test(f) && f !== `${companionId}-1.jpg` && f !== `${companionId}-2.jpg` && f !== `${companionId}-3.jpg`)
-        .sort()
-        .slice(0, 3)
-        .map(f => `/companions/avatars/${f}`);
-      for (const imgPath of realImages) {
-        if (!faceCandidates.includes(imgPath)) {
-          faceCandidates.push(imgPath);
-        }
-      }
-    } catch {}
-    console.log(`[companion-photo] Face candidates for ${companionId}: ${faceCandidates.length} images`);
+    // Only use DB-registered avatar + gallery images (no filesystem auto-discovery)
+    // This ensures face swap always uses the current companion's face, not leftover files
+    console.log(`[companion-photo] Face candidates for ${companionId}: ${faceCandidates.length} images (DB-only)`);
 
     for (const faceUrl of faceCandidates) {
       try {

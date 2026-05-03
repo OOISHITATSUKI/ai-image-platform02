@@ -40,6 +40,13 @@ export interface CompanionRow {
   profile_catchphrase: string | null;
   first_message: string | null;
   story_thumbnail_url: string | null;
+  profile_body_type: string | null;
+  profile_breast_size: string | null;
+  profile_hair_color: string | null;
+  profile_hair_style: string | null;
+  profile_skin_tone: string | null;
+  profile_height: string | null;
+  profile_special_features: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -52,7 +59,7 @@ export function rowToCompanion(row: CompanionRow): Companion {
     row.profile_music ||
     row.profile_hobbies;
 
-  // Merge body attributes from hardcoded companion data (not in DB yet)
+  // Body attributes — prefer DB columns, fallback to hardcoded legacy data
   const legacy = COMPANIONS.find((c) => c.id === row.id) ?? (row.is_assistant ? nudeAssistant : undefined);
   const legacyProfile = legacy?.profile;
 
@@ -66,14 +73,13 @@ export function rowToCompanion(row: CompanionRow): Companion {
         movies: row.profile_movies ?? '',
         hobbies: row.profile_hobbies ?? '',
         catchphrase: row.profile_catchphrase ?? '',
-        // Body attributes — sourced from hardcoded data until DB columns are added
-        bodyType: legacyProfile?.bodyType,
-        breastSize: legacyProfile?.breastSize,
-        hairColor: legacyProfile?.hairColor,
-        hairStyle: legacyProfile?.hairStyle,
-        skinTone: legacyProfile?.skinTone,
-        height: legacyProfile?.height,
-        specialFeatures: legacyProfile?.specialFeatures,
+        bodyType: row.profile_body_type ?? legacyProfile?.bodyType,
+        breastSize: row.profile_breast_size ?? legacyProfile?.breastSize,
+        hairColor: row.profile_hair_color ?? legacyProfile?.hairColor,
+        hairStyle: row.profile_hair_style ?? legacyProfile?.hairStyle,
+        skinTone: row.profile_skin_tone ?? legacyProfile?.skinTone,
+        height: row.profile_height ?? legacyProfile?.height,
+        specialFeatures: row.profile_special_features ?? legacyProfile?.specialFeatures,
       }
     : undefined;
 
@@ -137,6 +143,13 @@ export function companionToRow(
     profile_catchphrase: c.profile?.catchphrase ?? null,
     first_message: c.firstMessage ?? null,
     story_thumbnail_url: c.storyThumbnailUrl ?? null,
+    profile_body_type: c.profile?.bodyType ?? null,
+    profile_breast_size: c.profile?.breastSize ?? null,
+    profile_hair_color: c.profile?.hairColor ?? null,
+    profile_hair_style: c.profile?.hairStyle ?? null,
+    profile_skin_tone: c.profile?.skinTone ?? null,
+    profile_height: c.profile?.height ?? null,
+    profile_special_features: c.profile?.specialFeatures ?? null,
   };
 }
 
