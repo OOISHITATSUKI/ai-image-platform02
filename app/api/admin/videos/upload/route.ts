@@ -56,10 +56,16 @@ export async function POST(req: NextRequest) {
 
     // Save to DB based on video type
     if (videoType === 'hover') {
-      await supabaseAdmin
+      const { error: dbErr, count } = await supabaseAdmin
         .from('companions')
         .update({ hover_video_url: videoUrl })
         .eq('id', characterId);
+
+      if (dbErr) {
+        console.error(`[video-upload] hover DB update failed for ${characterId}:`, dbErr);
+        return NextResponse.json({ error: `DB update failed: ${dbErr.message}` }, { status: 500 });
+      }
+      console.log(`[video-upload] hover saved for ${characterId}: ${videoUrl} (rows: ${count})`);
 
       return NextResponse.json({ ok: true, videoUrl, sizeMB, warnings: validation.warnings });
     }
