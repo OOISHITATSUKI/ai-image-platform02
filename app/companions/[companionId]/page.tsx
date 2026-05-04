@@ -107,11 +107,13 @@ export default function CompanionChatPage() {
     const hardcoded = getCompanionById(companionId);
     return hardcoded !== undefined ? hardcoded : undefined; // undefined = loading
   });
+  const [companionReady, setCompanionReady] = useState(false);
 
   useEffect(() => {
     if (companionId.startsWith('user-')) {
       const userComp = getUserCompanionById(companionId);
       setCompanion(userComp ?? null);
+      setCompanionReady(true);
       return;
     }
     // Fetch latest from DB so Admin edits reflect instantly
@@ -119,10 +121,12 @@ export default function CompanionChatPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.companion) setCompanion(data.companion as Companion);
-        else if (!getCompanionById(companionId)) setCompanion(null); // truly not found
+        else if (!getCompanionById(companionId)) setCompanion(null);
+        setCompanionReady(true);
       })
       .catch(() => {
         if (!getCompanionById(companionId)) setCompanion(null);
+        setCompanionReady(true);
       });
   }, [companionId]);
 
@@ -321,7 +325,7 @@ export default function CompanionChatPage() {
   // Generate greeting via chat API so it respects the user's language
   const greetingSent = useRef(false);
   useEffect(() => {
-    if (!companion || greetingSent.current) return;
+    if (!companion || !companionReady || greetingSent.current) return;
     const saved = typeof window !== 'undefined' ? safeStorage.getItem(chatStorageKey) : null;
     if (saved) return;
     if (!companion.firstMessage && !companion.greetingSequence?.length) return;
@@ -377,7 +381,7 @@ export default function CompanionChatPage() {
         setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companion?.id]);
+  }, [companionReady]);
 
   // Auto-send story comment if arriving from Stories
   const storyCommentSent = useRef(false);
