@@ -730,15 +730,49 @@ export default function CompanionEditor({ mode, companionId }: Props) {
                     </button>
                   </div>
                 ))}
+                {/* File upload */}
                 <label style={{
                   ...slotBox, alignItems: 'center', justifyContent: 'center', minWidth: 100, minHeight: 120,
                   cursor: 'pointer', border: '2px dashed rgba(255,255,255,0.15)',
                 }}>
                   <span style={{ fontSize: '1.5rem', color: 'var(--text-tertiary)' }}>＋</span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>追加</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>ファイル追加</span>
                   <input type="file" accept="image/*,video/mp4,video/webm" style={{ display: 'none' }}
                     onChange={(e) => { if (e.target.files?.[0]) handleStoryUpload(e.target.files[0]); e.target.value = ''; }} />
                 </label>
+                {/* URL direct input */}
+                <div style={{
+                  ...slotBox, alignItems: 'center', justifyContent: 'center', minWidth: 100, minHeight: 120,
+                  border: '2px dashed rgba(124,92,252,0.3)',
+                }}>
+                  <span style={{ fontSize: '1.2rem', color: 'var(--text-tertiary)' }}>🔗</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: 4 }}>URL追加</span>
+                  <button
+                    style={{ ...slotUploadBtn, fontSize: '0.68rem', padding: '4px 8px' }}
+                    onClick={async () => {
+                      const url = prompt('動画 or 画像のURLを入力\n（R2 URLなど）');
+                      if (!url?.trim()) return;
+                      const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(url);
+                      const duration = isVideo ? (parseInt(prompt('動画の秒数 (デフォルト: 5)') || '') || 5) : 5;
+                      try {
+                        await fetch(`/api/admin/companions/${companionId}/stories`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            media_url: url.trim(),
+                            media_type: isVideo ? 'video' : 'image',
+                            duration_seconds: duration,
+                          }),
+                        });
+                        if (companionId) loadStories(companionId);
+                      } catch (e: unknown) {
+                        alert(e instanceof Error ? e.message : 'Failed');
+                      }
+                    }}
+                  >
+                    追加
+                  </button>
+                </div>
               </>
             )}
           </div>
