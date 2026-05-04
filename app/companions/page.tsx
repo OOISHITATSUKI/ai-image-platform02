@@ -2,12 +2,14 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { COMPANIONS, getActionVideoUrl, isLiveActionAvailable, type Companion } from '@/lib/companions';
 import { getUserCompanions } from '@/lib/userCompanions';
 import { useTranslation } from '@/lib/useTranslation';
 import { useAppStore } from '@/lib/store';
 import StoryAvatarRing from '@/components/companions/StoryAvatarRing';
 import StoriesModal, { type CompanionStories, type StoryItem } from '@/components/companions/StoriesModal';
+import CompanionConfirmModal from '@/components/companions/CompanionConfirmModal';
 import { logCompanionEventClient } from '@/lib/companion-analytics-client';
 
 /** Shows the companion's avatar; falls back to an initial tile on error. */
@@ -43,6 +45,7 @@ function CompanionAvatar({
 }
 
 export default function CompanionsPage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const { user } = useAppStore();
   const isPaid = !!user && user.plan !== 'free';
@@ -54,6 +57,7 @@ export default function CompanionsPage() {
   const [storiesMap, setStoriesMap] = useState<Map<string, StoryItem[]>>(new Map());
   const [storiesModal, setStoriesModal] = useState<{ companions: CompanionStories[]; startIdx: number } | null>(null);
   const [iconRowExpanded, setIconRowExpanded] = useState(false);
+  const [confirmCompanion, setConfirmCompanion] = useState<Companion | null>(null);
   const ICON_ROW_LIMIT = 6;
 
   const getViewedStories = useCallback((): Set<string> => {
@@ -238,7 +242,7 @@ export default function CompanionsPage() {
                   </div>
                 </Link>
               )}
-              <Link href={`/companions/${c.id}`} className="comp-card">
+              <div className="comp-card" onClick={() => setConfirmCompanion(c)} style={{ cursor: 'pointer' }}>
                 <div className="comp-card-img">
                   <CompanionAvatar src={c.avatarUrl} name={c.name} />
                   {c.hoverVideoUrl && <HoverVideoOverlay videoUrl={c.hoverVideoUrl} />}
@@ -256,7 +260,7 @@ export default function CompanionsPage() {
                   <p className="comp-card-tagline">{c.tagline}</p>
                   <button className="comp-card-play">{t('companions.chatBtn')}</button>
                 </div>
-              </Link>
+              </div>
             </React.Fragment>
           ))}
         </div>
@@ -273,6 +277,15 @@ export default function CompanionsPage() {
           ))}
         </div>
       </section>
+
+      {/* Companion Confirm Modal */}
+      {confirmCompanion && (
+        <CompanionConfirmModal
+          companion={confirmCompanion}
+          onConfirm={() => router.push(`/companions/${confirmCompanion.id}`)}
+          onClose={() => setConfirmCompanion(null)}
+        />
+      )}
 
       {/* Stories Modal */}
       {storiesModal && (

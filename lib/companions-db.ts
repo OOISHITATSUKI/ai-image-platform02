@@ -41,6 +41,8 @@ export interface CompanionRow {
   first_message: string | null;
   story_thumbnail_url: string | null;
   hover_video_url: string | null;
+  greeting_video_url: string | null;
+  greeting_image_url: string | null;
   profile_body_type: string | null;
   profile_breast_size: string | null;
   profile_hair_color: string | null;
@@ -109,6 +111,8 @@ export function rowToCompanion(row: CompanionRow): Companion {
     firstMessage: row.first_message ?? undefined,
     storyThumbnailUrl: row.story_thumbnail_url ?? undefined,
     hoverVideoUrl: row.hover_video_url ?? undefined,
+    greetingVideoUrl: row.greeting_video_url ?? undefined,
+    greetingImageUrl: row.greeting_image_url ?? undefined,
   };
 }
 
@@ -146,6 +150,8 @@ export function companionToRow(
     first_message: c.firstMessage ?? null,
     story_thumbnail_url: c.storyThumbnailUrl ?? null,
     hover_video_url: c.hoverVideoUrl ?? null,
+    greeting_video_url: c.greetingVideoUrl ?? null,
+    greeting_image_url: c.greetingImageUrl ?? null,
     profile_body_type: c.profile?.bodyType ?? null,
     profile_breast_size: c.profile?.breastSize ?? null,
     profile_hair_color: c.profile?.hairColor ?? null,

@@ -346,15 +346,23 @@ export default function CompanionChatPage() {
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.reply) {
-          setMessages([{ role: 'assistant', content: data.reply }]);
-        } else {
-          // Fallback to hardcoded message
-          setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
-        }
+        const greetingMsg: Message = {
+          role: 'assistant',
+          content: data?.reply || companion.firstMessage!,
+          ...(companion.greetingVideoUrl ? { emotionVideoUrl: companion.greetingVideoUrl } : {}),
+          ...(companion.greetingImageUrl && !companion.greetingVideoUrl ? { imageUrl: companion.greetingImageUrl } : {}),
+        };
+        setMessages([greetingMsg]);
+        if (data?.emotion) setCurrentEmotion(data.emotion);
       })
       .catch(() => {
-        setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
+        const greetingMsg: Message = {
+          role: 'assistant',
+          content: companion.firstMessage!,
+          ...(companion.greetingVideoUrl ? { emotionVideoUrl: companion.greetingVideoUrl } : {}),
+          ...(companion.greetingImageUrl && !companion.greetingVideoUrl ? { imageUrl: companion.greetingImageUrl } : {}),
+        };
+        setMessages([greetingMsg]);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companion?.id]);

@@ -63,6 +63,9 @@ export interface Companion {
   storyThumbnailUrl?: string;
   /** Hover video URL (R2) — plays on card hover in home page. */
   hoverVideoUrl?: string;
+  /** Greeting media — sent with first message */
+  greetingVideoUrl?: string;
+  greetingImageUrl?: string;
 }
 
 /** Should Live Action be shown/accessible for this companion? */

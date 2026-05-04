@@ -498,6 +498,14 @@ export default function CompanionEditor({ mode, companionId }: Props) {
       <FormRow label="First Message (チャット開始時)">
         <textarea style={{ ...input, minHeight: 60 }} value={c.firstMessage ?? ''} onChange={(e) => set('firstMessage', e.target.value)} />
       </FormRow>
+      <FormRow label="初回挨拶 動画URL (R2)">
+        <input style={input} value={c.greetingVideoUrl ?? ''} onChange={(e) => set('greetingVideoUrl', e.target.value || undefined)} placeholder="https://pub-xxx.r2.dev/videos/..." />
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>初回メッセージと一緒にチャットに表示される動画</span>
+      </FormRow>
+      <FormRow label="初回挨拶 画像URL">
+        <input style={input} value={c.greetingImageUrl ?? ''} onChange={(e) => set('greetingImageUrl', e.target.value || undefined)} placeholder="動画が未設定の場合に画像を表示" />
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>動画優先。動画がない場合のみ画像が表示されます</span>
+      </FormRow>
       <FormRow label="System Prompt (AI人格の核)">
         <textarea style={{ ...input, minHeight: 140, fontFamily: 'monospace', fontSize: '0.82rem' }} value={c.systemPrompt} onChange={(e) => set('systemPrompt', e.target.value)} />
       </FormRow>

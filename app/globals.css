@@ -9140,6 +9140,74 @@ button, a, [role="button"] {
 .comp-hero {
   text-align: center; padding: 32px 20px 24px;
 }
+
+/* Companion Confirm Modal */
+.comp-confirm-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.comp-confirm-modal {
+  background: var(--bg-card, #1a1a2e); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; overflow: hidden;
+  width: 100%; max-width: 340px;
+  display: flex; flex-direction: column;
+  animation: modalSlideUp 0.3s ease;
+}
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.comp-confirm-media {
+  position: relative; width: 100%; aspect-ratio: 3/4; overflow: hidden;
+}
+.comp-confirm-video, .comp-confirm-img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.comp-confirm-media-gradient {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(to top, var(--bg-card, #1a1a2e), transparent);
+  pointer-events: none;
+}
+.comp-confirm-info {
+  padding: 0 20px; margin-top: -40px; position: relative; z-index: 1;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.comp-confirm-name {
+  font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0;
+}
+.comp-confirm-personality {
+  font-size: 0.8rem; color: var(--companion-pink, #ff4d8d);
+  text-transform: capitalize;
+}
+.comp-confirm-tagline {
+  font-size: 0.82rem; color: var(--text-secondary); margin: 4px 0 0;
+  line-height: 1.4;
+}
+.comp-confirm-question {
+  font-size: 0.9rem; color: var(--text-primary); text-align: center;
+  padding: 16px 20px 0; margin: 0;
+}
+.comp-confirm-start {
+  margin: 16px 20px 0; padding: 14px;
+  border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, var(--companion-pink, #ff4d8d), var(--companion-purple, #7c5cfc));
+  color: #fff; font-size: 1rem; font-weight: 700;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.comp-confirm-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255,77,141,0.3);
+}
+.comp-confirm-cancel {
+  margin: 8px 20px 20px; padding: 10px;
+  border: none; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--text-tertiary);
+  font-size: 0.85rem;
+}
+.comp-confirm-cancel:hover { color: var(--text-secondary); }
+
 .comp-hero-title {
   font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
   background: linear-gradient(135deg, var(--companion-pink), var(--companion-purple));
