@@ -629,11 +629,14 @@ export default function CompanionChatPage() {
             }));
           });
       } else {
-        setMessages((prev) => [...prev, {
-          role: 'assistant',
-          content: data.reply,
-          ...(emotionVideoUrlForChat ? { emotionVideoUrl: emotionVideoUrlForChat } : {}),
-        }]);
+        // Text first
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+        // Emotion video arrives with delay (natural feel)
+        if (emotionVideoUrlForChat) {
+          setTimeout(() => {
+            setMessages((prev) => [...prev, { role: 'assistant', content: '', emotionVideoUrl: emotionVideoUrlForChat }]);
+          }, 1500);
+        }
       }
       pushRecentMessage(text.trim());
       if (isAssistant) setAssistPresetSeed(s => s + 1);
@@ -1066,18 +1069,8 @@ export default function CompanionChatPage() {
 
         {/* Right Column — 9:16 Character Panel (desktop only) */}
         <div className="comp-char-panel">
-          {/* Full 9:16 character — emotion video or static image */}
-          {!isAssistant && Object.keys(emotionVideos).length > 0 ? (
-            <EmotionVideoPanel
-              companionId={companionId}
-              currentEmotion={currentEmotion}
-              emotionVideos={emotionVideos}
-              affection={relPoints}
-              fallbackImageUrl={galleryImages[galleryIdx] || companion.avatarUrl}
-            />
-          ) : (
-            <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
-          )}
+          {/* Full 9:16 character image */}
+          <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
           <div className="comp-char-gradient" />
 
           {/* Credit balance — top left */}
