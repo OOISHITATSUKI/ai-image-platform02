@@ -838,6 +838,8 @@ export default function CompanionEditor({ mode, companionId }: Props) {
 type GreetingBlock = { type: 'text' | 'image' | 'video'; content: string };
 
 function GreetingSequenceBuilder({ sequence, onChange }: { sequence: GreetingBlock[]; onChange: (s: GreetingBlock[]) => void }) {
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+
   const add = (type: GreetingBlock['type']) => {
     onChange([...sequence, { type, content: '' }]);
   };
@@ -857,12 +859,37 @@ function GreetingSequenceBuilder({ sequence, onChange }: { sequence: GreetingBlo
     onChange(next);
   };
 
-  const typeEmoji = { text: '💬', image: '🖼️', video: '🎬' };
-  const typePlaceholder = {
-    text: 'メッセージを入力...',
-    image: '画像URL (https://...)',
-    video: '動画URL (https://...mp4)',
+  // Upload file to R2 and set URL
+  const handleFileUpload = async (idx: number, file: File, blockType: 'image' | 'video') => {
+    setUploadingIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('videoType', blockType === 'video' ? 'emotion' : 'hover');
+      fd.append('characterId', 'greeting');
+      if (blockType === 'image') {
+        // Use image upload endpoint
+        fd.delete('videoType');
+        fd.delete('characterId');
+        fd.append('companionId', 'greeting');
+        const res = await fetch('/api/admin/upload-companion-image', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        update(idx, data.url);
+      } else {
+        const res = await fetch('/api/admin/videos/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.details?.join(', ') || 'Upload failed');
+        update(idx, data.videoUrl);
+      }
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      setUploadingIdx(null);
+    }
   };
+
+  const typeEmoji = { text: '💬', image: '🖼️', video: '🎬' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -888,21 +915,38 @@ function GreetingSequenceBuilder({ sequence, onChange }: { sequence: GreetingBlo
                 style={{ ...seqInput, minHeight: 50 }}
                 value={block.content}
                 onChange={(e) => update(idx, e.target.value)}
-                placeholder={typePlaceholder[block.type]}
+                placeholder="メッセージを入力..."
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <input
-                  style={seqInput}
-                  value={block.content}
-                  onChange={(e) => update(idx, e.target.value)}
-                  placeholder={typePlaceholder[block.type]}
-                />
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <input
+                    style={{ ...seqInput, flex: 1 }}
+                    value={block.content}
+                    onChange={(e) => update(idx, e.target.value)}
+                    placeholder={block.type === 'image' ? '画像URL or アップロード →' : '動画URL or アップロード →'}
+                  />
+                  <label style={{ ...addBtn, display: 'flex', alignItems: 'center', gap: 3, margin: 0, whiteSpace: 'nowrap', fontSize: '0.7rem', padding: '4px 8px' }}>
+                    {uploadingIdx === idx ? '...' : '📁'}
+                    <input
+                      type="file"
+                      accept={block.type === 'image' ? 'image/*' : 'video/mp4'}
+                      style={{ display: 'none' }}
+                      disabled={uploadingIdx !== null}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleFileUpload(idx, f, block.type as 'image' | 'video');
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
+                {/* Preview */}
                 {block.content && block.type === 'image' && (
-                  <img src={block.content} alt="" style={{ maxWidth: 80, borderRadius: 6 }} />
+                  <img src={block.content} alt="" style={{ maxWidth: 100, borderRadius: 6 }} />
                 )}
                 {block.content && block.type === 'video' && (
-                  <video src={block.content} muted playsInline style={{ maxWidth: 80, borderRadius: 6 }}
+                  <video src={block.content} muted playsInline style={{ maxWidth: 100, borderRadius: 6 }}
                     onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).pause(); e.currentTarget.currentTime = 0; }}
                   />
