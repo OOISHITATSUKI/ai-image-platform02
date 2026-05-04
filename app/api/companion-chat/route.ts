@@ -414,6 +414,25 @@ When a free user requests NSFW or intimate content beyond swimsuit level:
 
 3. The [PHOTO:] tag is invisible to the user. Place it at the very end after all visible text.
 
+== EMOTION TAG ==
+At the very end of EVERY reply (before SENTIMENT), add a tag showing YOUR current emotional state.
+
+Choose ONE emotion:
+- happy: cheerful, content, smiling
+- shy: embarrassed, flustered, blushing
+- flirty: seductive, teasing romantically
+- greeting: welcoming, saying hello (first messages only)
+- goodbye: saying farewell
+- pouty: sulking, mildly upset, jealous
+- sad: genuinely hurt or upset
+- angry: irritated or annoyed
+- excited: thrilled, energetic, enthusiastic
+- affectionate: deeply loving, tender, intimate
+
+Pick the emotion that matches YOUR mood (not the user's). Default to "happy" if unsure.
+Format: [EMOTION:emotion_name]
+Example: [EMOTION:shy]
+
 == SENTIMENT TAG ==
 At the very end of EVERY reply, add a hidden sentiment tag.
 
@@ -957,6 +976,16 @@ export async function POST(req: NextRequest) {
       photoUrl = undefined; // will be generated client-side
     }
 
+    // Extract emotion tag: [EMOTION:xxx]
+    const VALID_EMOTIONS = ['happy','shy','flirty','greeting','goodbye','pouty','sad','angry','excited','affectionate'];
+    let emotion = 'happy';
+    const emotionMatch = reply.match(/[\[（(]\s*EMOTION:\s*(\w+)\s*[\]）)]/);
+    if (emotionMatch) {
+      const parsed = emotionMatch[1].toLowerCase();
+      if (VALID_EMOTIONS.includes(parsed)) emotion = parsed;
+      reply = reply.replace(/[\[（(]\s*EMOTION:[\s\S]*?[\]）)]/g, '').trim();
+    }
+
     // Extract 9-category sentiment tag: [SENTIMENT:category|aff:X|trust:Y|tension:Z]
     // Also handle （SENTIMENT:...） variants from non-Claude LLMs
     let sentiment = 'neutral';
@@ -1021,6 +1050,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       reply,
+      emotion,
       xpGain,
       sentiment,
       affDelta,

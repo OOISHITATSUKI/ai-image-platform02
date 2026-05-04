@@ -23,6 +23,7 @@ import { useTranslation } from '@/lib/useTranslation';
 import { logCompanionEventClient } from '@/lib/companion-analytics-client';
 import { COMPANION_EVENTS, PAYWALL_TRIGGERS } from '@/lib/companion-constants';
 import { safeStorage, MAX_CHAT_MESSAGES } from '@/lib/safe-storage';
+import EmotionVideoPanel from '@/components/companions/EmotionVideoPanel';
 
 /** Convert markdown-style links [text](url) to clickable <a> tags */
 function renderMessageContent(content: string): React.ReactNode {
@@ -192,6 +193,10 @@ export default function CompanionChatPage() {
   const [stageChangeEffect, setStageChangeEffect] = useState<{ type: 'up' | 'down'; stage: string } | null>(null);
   const [userNickname, setUserNickname] = useState<string | null>(null);
 
+  // Emotion video state
+  const [currentEmotion, setCurrentEmotion] = useState('greeting');
+  const [emotionVideos, setEmotionVideos] = useState<Record<string, { video_url: string; variation_index: number; unlock_level: number; weight: number }[]>>({});
+
   // Log session start event
   useEffect(() => {
     if (!companion) return;
@@ -226,6 +231,15 @@ export default function CompanionChatPage() {
         if (typeof d.tension === 'number') setRelTension(d.tension);
         if (d.nickname !== undefined) setUserNickname(d.nickname);
       })
+      .catch(() => {});
+  }, [companion?.id, companionId]);
+
+  // Fetch emotion videos on mount
+  useEffect(() => {
+    if (!companion || companion.isAssistant) return;
+    fetch(`/api/companion-emotions?companionId=${companionId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.emotions) setEmotionVideos(d.emotions); })
       .catch(() => {});
   }, [companion?.id, companionId]);
 
@@ -502,6 +516,11 @@ export default function CompanionChatPage() {
           return;
         }
         throw new Error(data.error || 'API error');
+      }
+
+      // Update emotion for video panel
+      if (data.emotion && !isAssistant) {
+        setCurrentEmotion(data.emotion);
       }
 
       // Update dynamic quick replies (deduplicate)
@@ -993,8 +1012,18 @@ export default function CompanionChatPage() {
 
         {/* Right Column — 9:16 Character Panel (desktop only) */}
         <div className="comp-char-panel">
-          {/* Full 9:16 character image */}
-          <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
+          {/* Full 9:16 character — emotion video or static image */}
+          {!isAssistant && Object.keys(emotionVideos).length > 0 ? (
+            <EmotionVideoPanel
+              companionId={companionId}
+              currentEmotion={currentEmotion}
+              emotionVideos={emotionVideos}
+              affection={relPoints}
+              fallbackImageUrl={galleryImages[galleryIdx] || companion.avatarUrl}
+            />
+          ) : (
+            <div className="comp-char-image" style={{ backgroundImage: `url(${galleryImages[galleryIdx] || companion.avatarUrl})` }} />
+          )}
           <div className="comp-char-gradient" />
 
           {/* Credit balance — top left */}
