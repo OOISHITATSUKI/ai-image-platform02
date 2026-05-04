@@ -1152,6 +1152,7 @@
     "presetMissMsg": "I miss you so much",
     "presetBoldMsg": "Don't hold back, be more bold with me",
     "presetPhotoMsg": "Send me a photo of yourself",
+    "photoFailed": "写真の送信に失敗しました...もう一度お願いしてね",
     "paywallChatTitle": "今日のチャット上限に達しました",
     "paywallChatDesc": "{name}との今日のメッセージを使い切りました。プランをアップグレードすると毎日もっと話せます。または明日また来てね！",
     "paywallPhotoTitle": "フォトモードをアンロック",

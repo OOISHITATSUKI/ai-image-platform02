@@ -1139,6 +1139,7 @@
     "presetMissMsg": "I miss you so much",
     "presetBoldMsg": "Don't hold back, be more bold with me",
     "presetPhotoMsg": "Send me a photo of yourself",
+    "photoFailed": "Failed to send photo... please try again",
     "paywallChatTitle": "Daily Chat Limit Reached",
     "paywallChatDesc": "You've used all your messages for today with {name}. Upgrade your plan for more daily messages, or come back tomorrow!",
     "paywallPhotoTitle": "Unlock Photo Mode",
