@@ -9530,6 +9530,18 @@ button, a, [role="button"] {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+/* Emotion video in chat bubble */
+.comp-emotion-video-bubble {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.comp-emotion-video-msg {
+  display: block;
+  max-width: 200px; width: 100%;
+  aspect-ratio: 9/16;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 .comp-photo-bubble {
   display: flex; flex-direction: column; gap: 4px;
 }

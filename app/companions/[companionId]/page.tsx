@@ -43,6 +43,7 @@ interface Message {
   content: string;
   imageUrl?: string;
   imageLoading?: boolean;
+  emotionVideoUrl?: string;
 }
 
 /** Displays the companion avatar image or a styled initial fallback. */
@@ -518,9 +519,20 @@ export default function CompanionChatPage() {
         throw new Error(data.error || 'API error');
       }
 
-      // Update emotion for video panel
+      // Update emotion for video panel + resolve video URL for chat bubble
+      let emotionVideoUrlForChat: string | undefined;
       if (data.emotion && !isAssistant) {
+        const prevEmotion = currentEmotion;
         setCurrentEmotion(data.emotion);
+
+        // Only attach emotion video to chat if emotion changed AND no photo is being sent
+        if (data.emotion !== prevEmotion && !data.photoPrompt) {
+          const videos = (emotionVideos[data.emotion] ?? []);
+          if (videos.length > 0) {
+            const picked = videos[Math.floor(Math.random() * videos.length)];
+            emotionVideoUrlForChat = picked.video_url;
+          }
+        }
       }
 
       // Update dynamic quick replies (deduplicate)
@@ -593,7 +605,11 @@ export default function CompanionChatPage() {
             }));
           });
       } else {
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+        setMessages((prev) => [...prev, {
+          role: 'assistant',
+          content: data.reply,
+          ...(emotionVideoUrlForChat ? { emotionVideoUrl: emotionVideoUrlForChat } : {}),
+        }]);
       }
       pushRecentMessage(text.trim());
       if (isAssistant) setAssistPresetSeed(s => s + 1);
@@ -836,6 +852,20 @@ export default function CompanionChatPage() {
                         </a>
                       </div>
                       <span className="comp-photo-caption">📷 Photo from {companion.name}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Emotion video — separate bubble (only when no photo) */}
+                {msg.emotionVideoUrl && !msg.imageUrl && (
+                  <div className="comp-msg comp-msg-ai">
+                    <AvatarFace companion={companion} className="comp-msg-avatar" />
+                    <div className="comp-emotion-video-bubble">
+                      <video
+                        src={msg.emotionVideoUrl}
+                        autoPlay muted loop playsInline
+                        className="comp-emotion-video-msg"
+                      />
                     </div>
                   </div>
                 )}
