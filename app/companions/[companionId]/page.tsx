@@ -324,14 +324,38 @@ export default function CompanionChatPage() {
     if (!companion || greetingSent.current) return;
     const saved = typeof window !== 'undefined' ? safeStorage.getItem(chatStorageKey) : null;
     if (saved) return;
-    if (!companion.firstMessage) return;
+    if (!companion.firstMessage && !companion.greetingSequence?.length) return;
     greetingSent.current = true;
 
+    // LINE-style greeting sequence: render blocks as multiple messages with delay
+    if (companion.greetingSequence && companion.greetingSequence.length > 0) {
+      const seq = companion.greetingSequence;
+      const msgs: Message[] = [];
+      for (const block of seq) {
+        if (block.type === 'text' && block.content) {
+          msgs.push({ role: 'assistant', content: block.content });
+        } else if (block.type === 'image' && block.content) {
+          msgs.push({ role: 'assistant', content: '', imageUrl: block.content });
+        } else if (block.type === 'video' && block.content) {
+          msgs.push({ role: 'assistant', content: '', emotionVideoUrl: block.content });
+        }
+      }
+      // Show messages one by one with delay for natural feel
+      let shown = 0;
+      const showNext = () => {
+        shown++;
+        setMessages(msgs.slice(0, shown));
+        if (shown < msgs.length) setTimeout(showNext, 600);
+      };
+      if (msgs.length > 0) showNext();
+      return;
+    }
+
+    // Fallback: AI-generated greeting
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    // Ask the AI to generate the first greeting in the user's language
     fetch('/api/companion-chat', {
       method: 'POST',
       headers,
@@ -346,23 +370,11 @@ export default function CompanionChatPage() {
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        const greetingMsg: Message = {
-          role: 'assistant',
-          content: data?.reply || companion.firstMessage!,
-          ...(companion.greetingVideoUrl ? { emotionVideoUrl: companion.greetingVideoUrl } : {}),
-          ...(companion.greetingImageUrl && !companion.greetingVideoUrl ? { imageUrl: companion.greetingImageUrl } : {}),
-        };
-        setMessages([greetingMsg]);
+        setMessages([{ role: 'assistant', content: data?.reply || companion.firstMessage! }]);
         if (data?.emotion) setCurrentEmotion(data.emotion);
       })
       .catch(() => {
-        const greetingMsg: Message = {
-          role: 'assistant',
-          content: companion.firstMessage!,
-          ...(companion.greetingVideoUrl ? { emotionVideoUrl: companion.greetingVideoUrl } : {}),
-          ...(companion.greetingImageUrl && !companion.greetingVideoUrl ? { imageUrl: companion.greetingImageUrl } : {}),
-        };
-        setMessages([greetingMsg]);
+        setMessages([{ role: 'assistant', content: companion.firstMessage! }]);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companion?.id]);

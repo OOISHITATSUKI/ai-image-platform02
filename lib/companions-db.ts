@@ -43,6 +43,7 @@ export interface CompanionRow {
   hover_video_url: string | null;
   greeting_video_url: string | null;
   greeting_image_url: string | null;
+  greeting_sequence: unknown[] | null;
   profile_body_type: string | null;
   profile_breast_size: string | null;
   profile_hair_color: string | null;
@@ -113,6 +114,7 @@ export function rowToCompanion(row: CompanionRow): Companion {
     hoverVideoUrl: row.hover_video_url ?? undefined,
     greetingVideoUrl: row.greeting_video_url ?? undefined,
     greetingImageUrl: row.greeting_image_url ?? undefined,
+    greetingSequence: Array.isArray(row.greeting_sequence) ? row.greeting_sequence as { type: 'text' | 'image' | 'video'; content: string }[] : undefined,
   };
 }
 
@@ -152,6 +154,7 @@ export function companionToRow(
     hover_video_url: c.hoverVideoUrl ?? null,
     greeting_video_url: c.greetingVideoUrl ?? null,
     greeting_image_url: c.greetingImageUrl ?? null,
+    greeting_sequence: c.greetingSequence ?? null,
     profile_body_type: c.profile?.bodyType ?? null,
     profile_breast_size: c.profile?.breastSize ?? null,
     profile_hair_color: c.profile?.hairColor ?? null,

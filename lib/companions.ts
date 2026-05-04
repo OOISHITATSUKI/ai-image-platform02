@@ -66,6 +66,8 @@ export interface Companion {
   /** Greeting media — sent with first message */
   greetingVideoUrl?: string;
   greetingImageUrl?: string;
+  /** LINE-style greeting sequence */
+  greetingSequence?: { type: 'text' | 'image' | 'video'; content: string }[];
 }
 
 /** Should Live Action be shown/accessible for this companion? */

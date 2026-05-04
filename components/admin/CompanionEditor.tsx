@@ -495,17 +495,21 @@ export default function CompanionEditor({ mode, companionId }: Props) {
       <FormRow label="Personality Description">
         <textarea style={{ ...input, minHeight: 60 }} value={c.personalityDescription ?? ''} onChange={(e) => set('personalityDescription', e.target.value)} />
       </FormRow>
-      <FormRow label="First Message (チャット開始時)">
-        <textarea style={{ ...input, minHeight: 60 }} value={c.firstMessage ?? ''} onChange={(e) => set('firstMessage', e.target.value)} />
+      <FormRow label="First Message (フォールバック用)">
+        <textarea style={{ ...input, minHeight: 40, fontSize: '0.8rem' }} value={c.firstMessage ?? ''} onChange={(e) => set('firstMessage', e.target.value)} placeholder="グリーティングシーケンス未設定時に使用" />
       </FormRow>
-      <FormRow label="初回挨拶 動画URL (R2)">
-        <input style={input} value={c.greetingVideoUrl ?? ''} onChange={(e) => set('greetingVideoUrl', e.target.value || undefined)} placeholder="https://pub-xxx.r2.dev/videos/..." />
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>初回メッセージと一緒にチャットに表示される動画</span>
-      </FormRow>
-      <FormRow label="初回挨拶 画像URL">
-        <input style={input} value={c.greetingImageUrl ?? ''} onChange={(e) => set('greetingImageUrl', e.target.value || undefined)} placeholder="動画が未設定の場合に画像を表示" />
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>動画優先。動画がない場合のみ画像が表示されます</span>
-      </FormRow>
+
+      {/* LINE-style Greeting Sequence Builder */}
+      <fieldset style={{ ...fieldset, borderColor: 'rgba(255,77,141,0.2)' }}>
+        <legend style={{ ...legend, color: '#ff4d8d' }}>💬 グリーティングシーケンス（LINE風）</legend>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 0, marginBottom: 12 }}>
+          初めてチャットを開いた時に順番に表示されるメッセージ。テキスト・画像・動画を自由に組み合わせ可能。
+        </p>
+        <GreetingSequenceBuilder
+          sequence={c.greetingSequence ?? []}
+          onChange={(seq) => set('greetingSequence', seq.length > 0 ? seq : undefined)}
+        />
+      </fieldset>
       <FormRow label="System Prompt (AI人格の核)">
         <textarea style={{ ...input, minHeight: 140, fontFamily: 'monospace', fontSize: '0.82rem' }} value={c.systemPrompt} onChange={(e) => set('systemPrompt', e.target.value)} />
       </FormRow>
@@ -829,6 +833,116 @@ export default function CompanionEditor({ mode, companionId }: Props) {
     </div>
   );
 }
+
+// ── LINE-style Greeting Sequence Builder ──
+type GreetingBlock = { type: 'text' | 'image' | 'video'; content: string };
+
+function GreetingSequenceBuilder({ sequence, onChange }: { sequence: GreetingBlock[]; onChange: (s: GreetingBlock[]) => void }) {
+  const add = (type: GreetingBlock['type']) => {
+    onChange([...sequence, { type, content: '' }]);
+  };
+  const update = (idx: number, content: string) => {
+    const next = [...sequence];
+    next[idx] = { ...next[idx], content };
+    onChange(next);
+  };
+  const remove = (idx: number) => {
+    onChange(sequence.filter((_, i) => i !== idx));
+  };
+  const move = (idx: number, dir: -1 | 1) => {
+    const next = [...sequence];
+    const target = idx + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+
+  const typeEmoji = { text: '💬', image: '🖼️', video: '🎬' };
+  const typePlaceholder = {
+    text: 'メッセージを入力...',
+    image: '画像URL (https://...)',
+    video: '動画URL (https://...mp4)',
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {sequence.map((block, idx) => (
+        <div key={idx} style={{
+          display: 'flex', gap: 6, alignItems: 'flex-start',
+          background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: 8,
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          {/* Order & Type badge */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', minWidth: 32 }}>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>#{idx + 1}</span>
+            <span style={{ fontSize: '1.1rem' }}>{typeEmoji[block.type]}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 2 }}>
+              <button onClick={() => move(idx, -1)} style={miniBtn} disabled={idx === 0}>▲</button>
+              <button onClick={() => move(idx, 1)} style={miniBtn} disabled={idx === sequence.length - 1}>▼</button>
+            </div>
+          </div>
+          {/* Content */}
+          <div style={{ flex: 1 }}>
+            {block.type === 'text' ? (
+              <textarea
+                style={{ ...seqInput, minHeight: 50 }}
+                value={block.content}
+                onChange={(e) => update(idx, e.target.value)}
+                placeholder={typePlaceholder[block.type]}
+              />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <input
+                  style={seqInput}
+                  value={block.content}
+                  onChange={(e) => update(idx, e.target.value)}
+                  placeholder={typePlaceholder[block.type]}
+                />
+                {block.content && block.type === 'image' && (
+                  <img src={block.content} alt="" style={{ maxWidth: 80, borderRadius: 6 }} />
+                )}
+                {block.content && block.type === 'video' && (
+                  <video src={block.content} muted playsInline style={{ maxWidth: 80, borderRadius: 6 }}
+                    onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).pause(); e.currentTarget.currentTime = 0; }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+          {/* Delete */}
+          <button onClick={() => remove(idx)} style={{ ...miniBtn, color: '#ff6b6b', fontSize: '0.9rem' }}>×</button>
+        </div>
+      ))}
+      {/* Add buttons */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+        <button onClick={() => add('text')} style={addBtn}>💬 テキスト</button>
+        <button onClick={() => add('image')} style={addBtn}>🖼️ 画像</button>
+        <button onClick={() => add('video')} style={addBtn}>🎬 動画</button>
+      </div>
+      {sequence.length === 0 && (
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: '4px 0 0', fontStyle: 'italic' }}>
+          未設定 → First Messageのテキストが使用されます
+        </p>
+      )}
+    </div>
+  );
+}
+
+const miniBtn: React.CSSProperties = {
+  padding: '1px 4px', border: 'none', borderRadius: 3, cursor: 'pointer',
+  background: 'rgba(255,255,255,0.06)', color: 'var(--text-tertiary)', fontSize: '0.6rem',
+};
+const addBtn: React.CSSProperties = {
+  padding: '6px 12px', borderRadius: 6, border: '1px dashed rgba(255,77,141,0.4)',
+  background: 'rgba(255,77,141,0.08)', color: '#ff4d8d', fontSize: '0.78rem',
+  cursor: 'pointer', fontWeight: 500,
+};
+const seqInput: React.CSSProperties = {
+  width: '100%', padding: '6px 8px', borderRadius: 5,
+  border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)',
+  color: 'var(--text-primary)', fontSize: '0.82rem', outline: 'none', boxSizing: 'border-box',
+};
 
 function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
