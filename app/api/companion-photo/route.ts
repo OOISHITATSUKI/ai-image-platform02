@@ -10,7 +10,7 @@ import { COMPANION_EVENTS } from '@/lib/companion-constants';
 import { CREDIT_COSTS } from '@/lib/creditCosts';
 
 export const runtime = 'nodejs';
-export const maxDuration = 120; // 2 minutes max for image generation
+export const maxDuration = 180; // 3 minutes max for image generation
 
 const NOVITA_API_KEY = process.env.NOVITA_API_KEY;
 const NOVITA_BASE = 'https://api.novita.ai/v3/async';
@@ -60,8 +60,8 @@ const NEGATIVE_BY_LEVEL: Record<string, string> = {
 const BASE_NEGATIVE = '(worst quality:1.4), (low quality:1.4), (ugly:1.3), (deformed:1.3), bad anatomy, bad proportions, blurry, watermark, text, signature, plastic skin, doll-like, CGI, 3d render, anime, cartoon, illustration, painting, drawing, art, sketch, unrealistic, airbrushed, oversmoothed skin, extra fingers, mutated hands, poorly drawn face, poorly drawn hands, missing fingers, extra limbs, fused fingers, long neck, cross-eyed';
 
 async function pollResult(taskId: string): Promise<string | null> {
-  for (let i = 0; i < 45; i++) {
-    await new Promise(r => setTimeout(r, 2500));
+  for (let i = 0; i < 35; i++) {
+    await new Promise(r => setTimeout(r, 3000));
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
