@@ -13,6 +13,7 @@ const LANG_LABELS: Record<Locale, string> = {
   zh: '中文',
   ko: '한국어',
   pt: 'PT',
+  hi: 'हिन्दी',
 };
 
 export default function BlogNav() {

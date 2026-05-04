@@ -34,7 +34,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         try {
             const { localeManuallySet } = useAppStore.getState();
             if (!localeManuallySet) {
-                const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+                const supported = ['en', 'ja', 'es', 'zh', 'ko', 'pt', 'hi'];
                 const browserLang = (navigator.language || '').split('-')[0].toLowerCase();
                 const detected = supported.includes(browserLang) ? browserLang : 'en';
                 useAppStore.setState({ locale: detected as ReturnType<typeof useAppStore.getState>['locale'] });

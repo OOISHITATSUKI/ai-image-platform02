@@ -115,6 +115,7 @@ export default function ProfilePage() {
                         <button className={`pill ${locale === 'ko' ? 'active' : ''}`} onClick={() => setLocale('ko')}>한국어</button>
                         <button className={`pill ${locale === 'es' ? 'active' : ''}`} onClick={() => setLocale('es')}>Español</button>
                         <button className={`pill ${locale === 'pt' ? 'active' : ''}`} onClick={() => setLocale('pt')}>Português</button>
+                        <button className={`pill ${locale === 'hi' ? 'active' : ''}`} onClick={() => setLocale('hi')}>हिन्दी</button>
                     </div>
                 </div>
             </div>

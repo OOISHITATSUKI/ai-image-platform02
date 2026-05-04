@@ -8,7 +8,7 @@ export type PlanTier = 'free' | 'lite' | 'basic' | 'pro' | 'ultimate';
 
 export type ThemeMode = 'dark' | 'light';
 
-export type Locale = 'en' | 'ja' | 'es' | 'zh' | 'ko' | 'pt';
+export type Locale = 'en' | 'ja' | 'es' | 'zh' | 'ko' | 'pt' | 'hi';
 
 export type AspectRatio = '1:1' | '4:3' | '3:4' | '16:9' | '9:16' | '21:9';
 

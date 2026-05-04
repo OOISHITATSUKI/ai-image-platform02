@@ -8,12 +8,13 @@ import es from '@/messages/es.json';
 import zh from '@/messages/zh.json';
 import ko from '@/messages/ko.json';
 import pt from '@/messages/pt.json';
+import hi from '@/messages/hi.json';
 import type { Locale } from './types';
 
-export const locales: Locale[] = ['en', 'ja', 'es', 'zh', 'ko', 'pt'];
+export const locales: Locale[] = ['en', 'ja', 'es', 'zh', 'ko', 'pt', 'hi'];
 export const defaultLocale: Locale = 'en';
 
-const messages: Record<Locale, Record<string, unknown>> = { en, ja, es, zh, ko, pt };
+const messages: Record<Locale, Record<string, unknown>> = { en, ja, es, zh, ko, pt, hi };
 
 /**
  * Get a nested translation value by dot-separated key.
