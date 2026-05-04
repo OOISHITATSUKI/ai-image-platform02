@@ -206,6 +206,7 @@ export default function CompanionsPage() {
               <Link key={c.id} href={`/companions/${c.id}`} className="comp-card">
                 <div className="comp-card-img">
                   <CompanionAvatar src={c.avatarUrl} name={c.name} />
+                  {c.hoverVideoUrl && <HoverVideoOverlay videoUrl={c.hoverVideoUrl} />}
                   <div className="comp-card-overlay" />
                 </div>
                 <div className="comp-card-bottom">
@@ -240,6 +241,7 @@ export default function CompanionsPage() {
               <Link href={`/companions/${c.id}`} className="comp-card">
                 <div className="comp-card-img">
                   <CompanionAvatar src={c.avatarUrl} name={c.name} />
+                  {c.hoverVideoUrl && <HoverVideoOverlay videoUrl={c.hoverVideoUrl} />}
                   <div className="comp-card-overlay" />
                   {c.isNew && <span className="comp-badge-new">{t('companions.badgeNew')}</span>}
                   {isLiveActionAvailable(c) && (
@@ -278,6 +280,70 @@ export default function CompanionsPage() {
           companions={storiesModal.companions}
           initialCompanionIndex={storiesModal.startIdx}
           onClose={() => setStoriesModal(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Card with hover video support — IntersectionObserver for perf */
+function HoverVideoOverlay({ videoUrl }: { videoUrl: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hovering, setHovering] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+
+  // IntersectionObserver: only load video when in viewport
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (hovering) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [hovering]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ position: 'absolute', inset: 0 }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onTouchStart={() => setHovering(true)}
+      onTouchEnd={() => setHovering(false)}
+    >
+      {inView && (
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          muted
+          loop
+          playsInline
+          preload="none"
+          onLoadedData={() => setLoaded(true)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: hovering && loaded ? 1 : 0,
+            transition: 'opacity 0.4s ease',
+            pointerEvents: 'none',
+          }}
         />
       )}
     </div>

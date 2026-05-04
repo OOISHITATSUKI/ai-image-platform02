@@ -61,6 +61,8 @@ export interface Companion {
   liveActionEnabled?: boolean;
   /** Stories thumbnail — when set, the icon ring shows pink on the home page. */
   storyThumbnailUrl?: string;
+  /** Hover video URL (R2) — plays on card hover in home page. */
+  hoverVideoUrl?: string;
 }
 
 /** Should Live Action be shown/accessible for this companion? */
