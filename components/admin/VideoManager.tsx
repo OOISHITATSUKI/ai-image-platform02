@@ -6,16 +6,16 @@ import type { VideoType } from '@/lib/video/validator';
 
 // ── Emotion definitions ──
 const EMOTIONS = [
-  { code: 'happy',        label: '😊 Happy',        unlockLevel: 0 },
-  { code: 'shy',          label: '😳 Shy',          unlockLevel: 0 },
-  { code: 'flirty',       label: '😉 Flirty',       unlockLevel: 20 },
-  { code: 'greeting',     label: '👋 Greeting',     unlockLevel: 0 },
-  { code: 'goodbye',      label: '👋 Goodbye',      unlockLevel: 0 },
-  { code: 'pouty',        label: '😤 Pouty',        unlockLevel: 0 },
-  { code: 'sad',          label: '😢 Sad',          unlockLevel: 0 },
-  { code: 'angry',        label: '😠 Angry',        unlockLevel: 0 },
-  { code: 'excited',      label: '🤩 Excited',      unlockLevel: 10 },
-  { code: 'affectionate', label: '🥰 Affectionate', unlockLevel: 30 },
+  { code: 'happy',        label: '😊 嬉しい',      unlockLevel: 0 },
+  { code: 'shy',          label: '😳 恥ずかしい',  unlockLevel: 0 },
+  { code: 'flirty',       label: '😉 いちゃいちゃ', unlockLevel: 20 },
+  { code: 'greeting',     label: '👋 挨拶',        unlockLevel: 0 },
+  { code: 'goodbye',      label: '👋 バイバイ',    unlockLevel: 0 },
+  { code: 'pouty',        label: '😤 すねる',      unlockLevel: 0 },
+  { code: 'sad',          label: '😢 悲しい',      unlockLevel: 0 },
+  { code: 'angry',        label: '😠 怒る',        unlockLevel: 0 },
+  { code: 'excited',      label: '🤩 興奮',        unlockLevel: 10 },
+  { code: 'affectionate', label: '🥰 甘える',      unlockLevel: 30 },
 ] as const;
 
 // ── Live Action slot definitions ──
