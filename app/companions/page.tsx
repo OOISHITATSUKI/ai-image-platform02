@@ -306,6 +306,20 @@ function HoverVideoOverlay({ videoUrl }: { videoUrl: string }) {
     return () => observer.disconnect();
   }, []);
 
+  // Listen for hover on the parent .comp-card-img instead of this div
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (!parent) return;
+    const enter = () => setHovering(true);
+    const leave = () => setHovering(false);
+    parent.addEventListener('mouseenter', enter);
+    parent.addEventListener('mouseleave', leave);
+    return () => {
+      parent.removeEventListener('mouseenter', enter);
+      parent.removeEventListener('mouseleave', leave);
+    };
+  }, []);
+
   useEffect(() => {
     if (!videoRef.current) return;
     if (hovering) {
@@ -319,11 +333,7 @@ function HoverVideoOverlay({ videoUrl }: { videoUrl: string }) {
   return (
     <div
       ref={containerRef}
-      style={{ position: 'absolute', inset: 0 }}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      onTouchStart={() => setHovering(true)}
-      onTouchEnd={() => setHovering(false)}
+      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
     >
       {inView && (
         <video
@@ -342,7 +352,6 @@ function HoverVideoOverlay({ videoUrl }: { videoUrl: string }) {
             objectFit: 'cover',
             opacity: hovering && loaded ? 1 : 0,
             transition: 'opacity 0.4s ease',
-            pointerEvents: 'none',
           }}
         />
       )}
