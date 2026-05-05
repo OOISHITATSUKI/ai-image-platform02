@@ -524,30 +524,6 @@ export default function Sidebar() {
                     </div>
                 )}
 
-                {/* Language Selector */}
-                {!sidebarCollapsed && (
-                    <div style={{ padding: '0 12px', marginBottom: 8 }}>
-                        <select
-                            value={locale}
-                            onChange={(e) => setLocale(e.target.value as Locale)}
-                            style={{
-                                width: '100%',
-                                padding: '6px 10px',
-                                borderRadius: 8,
-                                border: '1px solid var(--border-color, #333)',
-                                background: 'var(--bg-secondary, #1a1a2e)',
-                                color: 'var(--text-primary, #fff)',
-                                fontSize: '0.8rem',
-                                cursor: 'pointer',
-                                outline: 'none',
-                            }}
-                        >
-                            {languages.map((lang) => (
-                                <option key={lang.value} value={lang.value}>{lang.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
 
                 {/* User Profile Bar */}
                 {isAuthenticated ? (

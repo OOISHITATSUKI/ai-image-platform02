@@ -156,6 +156,13 @@ export default function VideoManager({ companionId }: Props) {
         </div>
       </fieldset>
 
+      {/* ── Reward Media (Gift/Boost) ── */}
+      <fieldset style={fieldset}>
+        <legend style={legend}>ギフト/ブースト特別メディア</legend>
+        <p style={hint}>ギフトやブースト時にチャットに表示される画像/動画（各最大3件、ランダム表示）</p>
+        <RewardMediaManager companionId={companionId} />
+      </fieldset>
+
       {/* ── Storage Stats ── */}
       <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', padding: '8px 0' }}>
         合計: ホバー {hoverUrl ? 1 : 0} / 感情 {emotionVideos.length}/30 / Live Action {liveactionVideos.length}/{LIVE_ACTION_SLOTS.length}
@@ -279,6 +286,90 @@ function VideoSlot({
         )}
       </div>
       {error && <div style={{ color: '#ff8080', fontSize: '0.68rem' }}>{error}</div>}
+    </div>
+  );
+}
+
+// ── Reward Media Manager ──
+function RewardMediaManager({ companionId }: { companionId: string }) {
+  const [media, setMedia] = useState<{ id: string; action_type: string; media_type: string; media_url: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMedia = async () => {
+    const res = await fetch(`/api/admin/reward-media?companionId=${companionId}`);
+    const data = await res.json();
+    setMedia(data.media ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchMedia(); }, [companionId]);
+
+  const addMedia = async (actionType: string) => {
+    const url = prompt(`${actionType === 'gift' ? 'ギフト' : 'ブースト'}用メディアのURLを入力:`);
+    if (!url) return;
+    const mediaType = url.match(/\.(mp4|webm|mov)$/i) ? 'video' : 'image';
+    const res = await fetch('/api/admin/reward-media', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companionId, actionType, mediaType, mediaUrl: url }),
+    });
+    if (res.ok) fetchMedia();
+    else alert((await res.json()).error);
+  };
+
+  const deleteMedia = async (id: string) => {
+    if (!confirm('削除しますか？')) return;
+    await fetch(`/api/admin/reward-media?id=${id}`, { method: 'DELETE' });
+    fetchMedia();
+  };
+
+  if (loading) return <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>読み込み中...</div>;
+
+  const giftMedia = media.filter(m => m.action_type === 'gift');
+  const boostMedia = media.filter(m => m.action_type === 'boost');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {(['gift', 'boost'] as const).map(action => {
+        const items = action === 'gift' ? giftMedia : boostMedia;
+        return (
+          <div key={action}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                {action === 'gift' ? '🎁 ギフト' : '🚀 ブースト'} ({items.length}/3)
+              </span>
+              {items.length < 3 && (
+                <button
+                  onClick={() => addMedia(action)}
+                  style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 4, border: '1px solid rgba(124,92,252,0.4)', background: 'rgba(124,92,252,0.15)', color: '#a68fff', cursor: 'pointer' }}
+                >
+                  + 追加
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {items.map(item => (
+                <div key={item.id} style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 6, position: 'relative' }}>
+                  {item.media_type === 'video' ? (
+                    <video src={item.media_url} style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', borderRadius: 4 }} muted />
+                  ) : (
+                    <img src={item.media_url} style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', borderRadius: 4 }} />
+                  )}
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-tertiary)', marginTop: 4, wordBreak: 'break-all' }}>
+                    {item.media_url.split('/').pop()}
+                  </div>
+                  <button
+                    onClick={() => deleteMedia(item.id)}
+                    style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(255,50,50,0.8)', border: 'none', borderRadius: '50%', width: 18, height: 18, color: '#fff', fontSize: '0.65rem', cursor: 'pointer' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

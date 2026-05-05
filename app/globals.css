@@ -9207,6 +9207,31 @@ button, a, [role="button"] {
   font-size: 0.85rem;
 }
 .comp-confirm-cancel:hover { color: var(--text-secondary); }
+.comp-confirm-light {
+  padding: 24px 20px; text-align: center;
+}
+.comp-confirm-card {
+  position: relative; overflow: hidden; border-radius: 14px;
+  margin-bottom: 16px;
+}
+.comp-confirm-avatar {
+  width: 100%; height: 192px; object-fit: cover; display: block;
+}
+.comp-confirm-card-info {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.comp-confirm-card-name {
+  font-size: 1.05rem; font-weight: 700; color: #fff;
+}
+.comp-confirm-card-personality {
+  font-size: 0.75rem; color: rgba(255,255,255,0.7); text-transform: capitalize;
+}
+.comp-confirm-light .comp-confirm-question { padding: 0 0 12px; }
+.comp-confirm-light .comp-confirm-start { margin: 0 0 8px; }
+.comp-confirm-light .comp-confirm-cancel { margin: 0; }
 
 .comp-hero-title {
   font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;

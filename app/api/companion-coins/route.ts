@@ -130,7 +130,19 @@ export async function POST(req: NextRequest) {
         reason: action,
       });
 
-      result = { ...result, points: newPoints, affection: newAff, level };
+      // Get random reward media for this action
+      const { data: rewardMedia } = await supabaseAdmin
+        .from('companion_reward_media')
+        .select('media_type, media_url')
+        .eq('companion_id', companionId)
+        .eq('action_type', action);
+
+      let rewardMediaItem: { media_type: string; media_url: string } | null = null;
+      if (rewardMedia && rewardMedia.length > 0) {
+        rewardMediaItem = rewardMedia[Math.floor(Math.random() * rewardMedia.length)];
+      }
+
+      result = { ...result, points: newPoints, affection: newAff, level, rewardMedia: rewardMediaItem };
     }
 
     if (action === 'unlock_content') {

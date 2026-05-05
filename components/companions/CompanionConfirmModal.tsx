@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { Companion } from '@/lib/companions';
 
 interface Props {
@@ -10,36 +10,27 @@ interface Props {
 }
 
 export default function CompanionConfirmModal({ companion, onConfirm, onClose }: Props) {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = () => {
+    setLoading(true);
+    onConfirm();
+  };
+
   return (
     <div className="comp-confirm-overlay" onClick={onClose}>
-      <div className="comp-confirm-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Image preview (video removed for performance) */}
-        <div className="comp-confirm-media">
-          <img
-            src={companion.avatarUrl}
-            alt={companion.name}
-            className="comp-confirm-img"
-          />
-          <div className="comp-confirm-media-gradient" />
+      <div className="comp-confirm-modal comp-confirm-light" onClick={(e) => e.stopPropagation()}>
+        <div className="comp-confirm-card">
+          <img src={companion.avatarUrl} alt={companion.name} className="comp-confirm-avatar" width={144} height={192} loading="eager" />
+          <div className="comp-confirm-card-info">
+            <span className="comp-confirm-card-name">{companion.name}, {companion.age}</span>
+            <span className="comp-confirm-card-personality">{companion.personality}</span>
+          </div>
         </div>
-
-        {/* Info */}
-        <div className="comp-confirm-info">
-          <h2 className="comp-confirm-name">{companion.name}, {companion.age}</h2>
-          <span className="comp-confirm-personality">{companion.personality}</span>
-          <p className="comp-confirm-tagline">{companion.tagline}</p>
-        </div>
-
-        {/* Question */}
-        <p className="comp-confirm-question">
-          この<strong>{companion.name}</strong>と会話を始めますか？
-        </p>
-
-        {/* Buttons */}
-        <button className="comp-confirm-start" onClick={onConfirm}>
-          💬 会話を始める
+        <button className="comp-confirm-start" onClick={handleConfirm} disabled={loading}>
+          {loading ? '読み込み中...' : '💬 会話を始める'}
         </button>
-        <button className="comp-confirm-cancel" onClick={onClose}>
+        <button className="comp-confirm-cancel" onClick={onClose} disabled={loading}>
           戻る
         </button>
       </div>

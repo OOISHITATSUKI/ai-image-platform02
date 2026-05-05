@@ -242,7 +242,7 @@ export default function CompanionsPage() {
                   </div>
                 </Link>
               )}
-              <div className="comp-card" onClick={() => setConfirmCompanion(c)} style={{ cursor: 'pointer' }}>
+              <div className="comp-card" onClick={() => router.push(`/companions/${c.id}`)} style={{ cursor: 'pointer' }}>
                 <div className="comp-card-img">
                   <CompanionAvatar src={c.avatarUrl} name={c.name} />
                   {c.hoverVideoUrl && <HoverVideoOverlay videoUrl={c.hoverVideoUrl} />}

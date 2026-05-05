@@ -182,6 +182,16 @@ export default function CompanionChatPage() {
     el.textContent = action === 'gift' ? '🎁 +20' : '🚀 +100';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1800);
+
+    // Show special reward media in chat if available
+    if (d.rewardMedia) {
+      const media = d.rewardMedia;
+      if (media.media_type === 'image') {
+        setMessages(prev => [...prev, { role: 'assistant', content: action === 'gift' ? '🎁 ありがとう！' : '🚀 うれしい！', imageUrl: media.media_url }]);
+      } else if (media.media_type === 'video') {
+        setMessages(prev => [...prev, { role: 'assistant', content: action === 'gift' ? '🎁 ありがとう！' : '🚀 うれしい！', emotionVideoUrl: media.media_url }]);
+      }
+    }
   };
   const [showCreditShop, setShowCreditShop] = useState(false);
 
