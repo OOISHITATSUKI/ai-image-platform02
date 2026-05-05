@@ -154,7 +154,7 @@ export default function AdminFeedbackPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: 24 }}>
         <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>
           📩 ユーザーフィードバック
         </h1>

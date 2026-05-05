@@ -146,7 +146,7 @@ export default function AdminCompanionsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: 24 }}>
         <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>キャラクター管理</h1>
         <Link href="/admin/companions/new" className="admin-btn-primary">＋ 新規追加</Link>
       </div>
@@ -191,6 +191,7 @@ export default function AdminCompanionsPage() {
                 <th style={th}>名前</th>
                 <th style={th}>年齢</th>
                 <th style={th}>性格</th>
+                <th style={th}>動画URL</th>
                 <th style={th}>状態</th>
                 <th style={th}>順番</th>
                 <th style={{ ...th, textAlign: 'right', paddingRight: 12 }}>操作</th>
@@ -227,6 +228,33 @@ export default function AdminCompanionsPage() {
                   </td>
                   <td style={td}>{c.age || '-'}</td>
                   <td style={{ ...td, textTransform: 'capitalize' }}>{c.personality}</td>
+                  <td style={{ ...td, fontSize: '0.72rem', maxWidth: 200 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {c.hoverVideoUrl && (
+                        <span style={{ color: 'var(--text-tertiary)' }}>
+                          <strong>Hover:</strong> <a href={c.hoverVideoUrl} target="_blank" rel="noopener" style={{ color: '#7c9cfc', wordBreak: 'break-all' }}>{c.hoverVideoUrl.split('/').pop()}</a>
+                        </span>
+                      )}
+                      {c.greetingVideoUrl && (
+                        <span style={{ color: 'var(--text-tertiary)' }}>
+                          <strong>Greeting:</strong> <a href={c.greetingVideoUrl} target="_blank" rel="noopener" style={{ color: '#7c9cfc', wordBreak: 'break-all' }}>{c.greetingVideoUrl.split('/').pop()}</a>
+                        </span>
+                      )}
+                      {c.liveActions && c.liveActions.filter(a => a.videoUrl).length > 0 && (
+                        <details style={{ marginTop: 2 }}>
+                          <summary style={{ color: 'var(--text-tertiary)', cursor: 'pointer' }}>LiveAction ({c.liveActions.filter(a => a.videoUrl).length})</summary>
+                          <div style={{ marginTop: 2, paddingLeft: 4 }}>
+                            {c.liveActions.filter(a => a.videoUrl).map(a => (
+                              <div key={a.id} style={{ color: 'var(--text-tertiary)' }}>
+                                {a.label}: <a href={a.videoUrl} target="_blank" rel="noopener" style={{ color: '#7c9cfc', wordBreak: 'break-all' }}>{a.videoUrl!.split('/').pop()}</a>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      {!c.hoverVideoUrl && !c.greetingVideoUrl && (!c.liveActions || c.liveActions.filter(a => a.videoUrl).length === 0) && <span style={{ color: 'var(--text-tertiary)' }}>-</span>}
+                    </div>
+                  </td>
                   <td style={td}>
                     <select
                       value={c._status}
@@ -248,6 +276,7 @@ export default function AdminCompanionsPage() {
                   <td style={{ ...td, textAlign: 'right' }}>
                     <div style={{ display: 'inline-flex', gap: 6 }}>
                       <Link href={`/admin/companions/${c.id}`} className="admin-btn-small">編集</Link>
+                      <Link href={`/admin/companions/${c.id}#videos`} className="admin-btn-small">動画</Link>
                       <button onClick={() => handleDuplicate(c.id)} className="admin-btn-small">複製</button>
                       <button onClick={() => handleDelete(c.id)} className="admin-btn-small admin-btn-danger">削除</button>
                     </div>

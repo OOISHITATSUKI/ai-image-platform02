@@ -81,6 +81,23 @@ export default function PricingPage() {
         } catch { setError(t('pricing.networkError')); setLoadingPack(null); }
     };
 
+    const handleRapydCheckout = async (packType: string) => {
+        setError(null); setLoadingPack(`rapyd_${packType}`);
+        try {
+            const token = getToken();
+            if (!token) { setError(t('pricing.loginRequired')); setLoadingPack(null); return; }
+            const res = await fetch('/api/rapyd/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ packType }),
+            });
+            const data = await res.json();
+            if (data.requiresVerification) { setPendingPackType(packType); setShowVerifyModal(true); setLoadingPack(null); return; }
+            if (res.ok && data.checkout_url) { window.location.href = data.checkout_url; }
+            else { setError(data.error || t('pricing.paymentError')); setLoadingPack(null); }
+        } catch { setError(t('pricing.networkError')); setLoadingPack(null); }
+    };
+
     const FANVUE_PROFILE_URL = 'https://www.fanvue.com/tat05';
 
     const ok = <span style={{ color: '#34d399', flexShrink: 0 }}>✓</span>;
@@ -284,15 +301,15 @@ export default function PricingPage() {
                                     <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#a78bfa' }}>{pack.credits}</span>
                                     <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>{t('pricing.credits', 'credits')}</span>
                                     <span style={{ fontSize: '1.1rem', fontWeight: 800, background: 'linear-gradient(135deg, #a78bfa, #f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{pack.price}</span>
-                                    <div style={{ display: 'flex', gap: 6, marginTop: 6, width: '100%' }}>
+                                    <div style={{ display: 'flex', gap: 6, marginTop: 6, width: '100%', flexWrap: 'wrap' }}>
+                                        <button onClick={() => handleRapydCheckout(pack.id)} disabled={loadingPack !== null}
+                                            style={{ flex: 1, padding: '6px 4px', borderRadius: 8, fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer', background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)', minWidth: '45%' }}>
+                                            {loadingPack === `rapyd_${pack.id}` ? '...' : t('pricing.payCard', 'Credit Card')}
+                                        </button>
                                         <button onClick={() => handleCheckout(pack.id)} disabled={loadingPack !== null}
-                                            style={{ flex: 1, padding: '6px 4px', borderRadius: 8, fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer', background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                            style={{ flex: 1, padding: '6px 4px', borderRadius: 8, fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer', background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.12)', minWidth: '45%' }}>
                                             {loadingPack === pack.id ? '...' : t('pricing.payCrypto', 'Cryptocurrency')}
                                         </button>
-                                        <a href={pack.fanvueUrl} target="_blank" rel="noopener noreferrer"
-                                            style={{ flex: 1, padding: '6px 4px', borderRadius: 8, fontSize: '0.65rem', fontWeight: 600, textDecoration: 'none', textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                                            {t('pricing.payCard', 'Credit Card')}
-                                        </a>
                                     </div>
                                 </div>
                             ))}

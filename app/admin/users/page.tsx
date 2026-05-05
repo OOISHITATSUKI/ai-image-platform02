@@ -190,13 +190,13 @@ export default function AdminUsersPage() {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Users</h1>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Total: {users.length}</span>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', alignItems: 'center' }}>
-                <input style={{ ...inputStyle, minWidth: '300px' }} placeholder="Search by email / username / ID" value={search} onChange={e => setSearch(e.target.value)} />
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input style={{ ...inputStyle, flex: 1, minWidth: '160px', maxWidth: '400px' }} placeholder="Search by email / username / ID" value={search} onChange={e => setSearch(e.target.value)} />
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{filteredUsers.length} results</span>
                 <button
                     onClick={() => { setBulkModal(true); setBulkFilter('all'); setBulkSubject(''); setBulkBody(''); setBulkTemplate('custom'); }}

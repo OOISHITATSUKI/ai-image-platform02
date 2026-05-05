@@ -13,21 +13,13 @@ export default function CompanionConfirmModal({ companion, onConfirm, onClose }:
   return (
     <div className="comp-confirm-overlay" onClick={onClose}>
       <div className="comp-confirm-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Video/Image preview */}
+        {/* Image preview (video removed for performance) */}
         <div className="comp-confirm-media">
-          {companion.hoverVideoUrl ? (
-            <video
-              src={companion.hoverVideoUrl}
-              autoPlay muted loop playsInline
-              className="comp-confirm-video"
-            />
-          ) : (
-            <img
-              src={companion.avatarUrl}
-              alt={companion.name}
-              className="comp-confirm-img"
-            />
-          )}
+          <img
+            src={companion.avatarUrl}
+            alt={companion.name}
+            className="comp-confirm-img"
+          />
           <div className="comp-confirm-media-gradient" />
         </div>
 
@@ -48,7 +40,7 @@ export default function CompanionConfirmModal({ companion, onConfirm, onClose }:
           💬 会話を始める
         </button>
         <button className="comp-confirm-cancel" onClick={onClose}>
-          戻��
+          戻る
         </button>
       </div>
     </div>

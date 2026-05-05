@@ -65,7 +65,7 @@ export default function AdminBlocksPage() {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>🚫 ブロックログ</h1>
                 <button onClick={exportCSV} style={{ padding: '8px 16px', background: 'var(--primary)', border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer', fontSize: '0.85rem' }}>
                     📥 CSVエクスポート

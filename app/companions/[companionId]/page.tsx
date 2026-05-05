@@ -842,13 +842,15 @@ export default function CompanionChatPage() {
 
             {messages.map((msg, idx) => (
               <React.Fragment key={idx}>
-                {/* Text bubble */}
-                <div className={`comp-msg ${msg.role === 'user' ? 'comp-msg-user' : 'comp-msg-ai'}`}>
-                  {msg.role === 'assistant' && (
-                    <AvatarFace companion={companion} className="comp-msg-avatar" />
-                  )}
-                  <div className="comp-msg-bubble">{msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}</div>
-                </div>
+                {/* Text bubble — skip if content is empty (image/video-only message) */}
+                {msg.content && (
+                  <div className={`comp-msg ${msg.role === 'user' ? 'comp-msg-user' : 'comp-msg-ai'}`}>
+                    {msg.role === 'assistant' && (
+                      <AvatarFace companion={companion} className="comp-msg-avatar" />
+                    )}
+                    <div className="comp-msg-bubble">{msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}</div>
+                  </div>
+                )}
 
                 {/* Photo loading — separate bubble */}
                 {msg.imageLoading && (

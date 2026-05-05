@@ -64,9 +64,9 @@ export default function AdminPaymentsPage() {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>💰 決済管理</h1>
-                <div style={{ display: 'flex', gap: '16px', fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>💰 決済管理</h1>
+                <div style={{ display: 'flex', gap: '12px', fontSize: '0.9rem', flexWrap: 'wrap' }}>
                     <div style={{ padding: '10px 16px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', color: '#10b981' }}>
                         今月: <strong>${summary.currentMonthTotal.toFixed(2)}</strong> / {summary.currentMonthCount}件
                     </div>

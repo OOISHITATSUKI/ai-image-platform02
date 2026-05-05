@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const videoUrl = await uploadToR2(buffer, remoteKey, 'video/mp4');
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    console.log(`[video-upload] ${videoType} ${characterId}: ${sizeMB}MB → ${remoteKey}`);
+    console.log(`[video-upload] ${videoType} ${characterId}: ${sizeMB}MB → ${remoteKey} | emotion=${emotion} actionId=${actionId}`);
 
     // Save to DB based on video type
     if (videoType === 'hover') {

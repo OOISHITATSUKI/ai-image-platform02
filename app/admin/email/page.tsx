@@ -232,7 +232,7 @@ export default function AdminEmailPage() {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>メール管理</h1>
             </div>
 
