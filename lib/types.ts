@@ -221,6 +221,9 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-juggernaut-xl', name: '✨ Juggernaut XL (V11)', type: 'image', provider: 'novita', description: 'Powerful SDXL versatile (V11)', novitaModelName: 'juggernautXL_juggXIByRundiffusion_695423.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
   { id: 'novita-helloworld-xl', name: '✨ HelloWorld XL V7.0', type: 'image', provider: 'novita', description: 'Natural SDXL realism (V7.0)', novitaModelName: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
 
+  // ── Anime Model (NSFW) ──
+  { id: 'novita-anime-xl', name: '🎨 Anime XL', type: 'image', provider: 'novita', description: 'NSFW anime / illustration', novitaModelName: 'animagineXLV31_v31_291394.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+
   // ── Video Models ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },
   { id: 'wan-2.6', name: 'WAN 2.6 Pro', type: 'video', provider: 'wan', description: 'High quality video' },

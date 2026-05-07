@@ -998,7 +998,14 @@ export async function POST(request: NextRequest) {
         // ── Model Selection Logic ──
         let novitaModelName = model?.novitaModelName || 'sd_xl_base_1.0.safetensors';
 
-        // Keep user-selected model (no auto-switch)
+        // Auto-switch to anime model when anime style is selected
+        const isAnimeStyle = tagSettings && (tagSettings as TagSettings).stylePreset === 'anime';
+        if (isAnimeStyle) {
+            novitaModelName = 'animagineXLV31_v31_291394.safetensors';
+            console.log('Anime style detected. Switching to anime model.');
+        }
+
+        // Keep user-selected model (no auto-switch for non-anime)
 
 
         console.log(`[DEBUG] reposeMode=${reposeMode} generationType=${generationType} hasImage=${!!imageBase64}`);
@@ -1165,8 +1172,17 @@ export async function POST(request: NextRequest) {
 
         // ── Negative Prompt: combine default + tag-specific negatives ──
         let finalNegative = isXL ? SDXL_NEGATIVE_PROMPT : quality.negativePrompt;
-        if (tagNegativeFragment && !isXL) {
+        if (tagNegativeFragment) {
             finalNegative = `${finalNegative}, ${tagNegativeFragment}`;
+        }
+
+        // Anime style: replace negative prompt (remove anti-anime terms, add anti-realistic terms)
+        if (isAnimeStyle) {
+            finalNegative = 'photorealistic, realistic, 3d render, real photo, ' +
+                'bad anatomy, bad hands, extra fingers, fewer fingers, ' +
+                'child, underage, lowres, blurry, watermark, text, ' +
+                'ugly, deformed, disfigured, extra limbs';
+            if (tagNegativeFragment) finalNegative += `, ${tagNegativeFragment}`;
         }
 
         // Remove "multiple faces/bodies" from negative if user wants 2+ people
@@ -1228,11 +1244,11 @@ export async function POST(request: NextRequest) {
             width,
             height,
             image_num: Math.min(count, 4),
-            steps: isXL ? 35 : quality.steps,
+            steps: isAnimeStyle ? 28 : (isXL ? 35 : quality.steps),
             seed: -1,
-            clip_skip: isXL ? 1 : 2,
-            sampler_name: isXL ? 'DPM++ 2M SDE Karras' : quality.sampler,
-            guidance_scale: isXL ? 5.5 : (isPureImg2Img ? 5 : quality.guidance),
+            clip_skip: isAnimeStyle ? 2 : (isXL ? 1 : 2),
+            sampler_name: isAnimeStyle ? 'Euler a' : (isXL ? 'DPM++ 2M SDE Karras' : quality.sampler),
+            guidance_scale: isAnimeStyle ? 7 : (isXL ? 5.5 : (isPureImg2Img ? 5 : quality.guidance)),
             // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
             ...(!isXL ? {
                 loras: [

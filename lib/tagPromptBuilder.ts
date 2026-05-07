@@ -238,8 +238,18 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
         characterParts.push(SITUATION_MAP[tags.situation]);
     }
 
-    // ── STYLE: Photorealism ──
-    if (tags.photorealism === 'photorealistic') {
+    // ── STYLE: Anime or Photorealism ──
+    if (tags.stylePreset === 'anime') {
+        styleParts.push(
+            '(anime:1.4), (illustration:1.3), (2d:1.2), anime style, detailed anime face, ' +
+            'anime eyes, colorful, vivid colors, high quality anime, masterpiece, best quality'
+        );
+        // Override negative for anime — remove photorealism negatives
+        negativeParts.push(
+            '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (real photo:1.3), ' +
+            'bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres'
+        );
+    } else if (tags.photorealism === 'photorealistic') {
         styleParts.push(
             '(photorealistic:1.4), (RAW photo:1.3), (DSLR:1.2), 85mm lens, f/2.8, ' +
             'shallow depth of field, bokeh, film grain, ' +
