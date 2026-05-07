@@ -250,8 +250,17 @@ export async function POST(req: NextRequest) {
       ? `${p.hairColor ?? ''} ${p.hairStyle ?? ''} hair, ${p.skinTone ?? ''} skin, ${p.bodyType} body, ${p.breastSize ?? 'medium'} breasts${p.specialFeatures ? `, ${p.specialFeatures}` : ''}`
       : '';
 
-    const finalPrompt = `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
-    console.log(`[companion-photo] contentLevel=${contentLevel}, prompt=${finalPrompt.slice(0, 200)}...`);
+    const isAnime = companion.artStyle === 'anime';
+
+    const finalPrompt = isAnime
+      ? `(anime:1.4), (illustration:1.3), (2d:1.2), anime style, (detailed anime face:1.3), (beautiful detailed eyes:1.4), masterpiece, best quality, ultra-detailed, absurdres, highres, beautiful anime girl, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, vivid colors, clean lines, sharp lines`
+      : `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
+
+    const finalNegative = isAnime
+      ? `photorealistic, realistic, 3d render, real photo, bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres, (worst quality:1.4), (low quality:1.4), watermark, text`
+      : negativePrompt;
+
+    console.log(`[companion-photo] contentLevel=${contentLevel}, artStyle=${companion.artStyle}, prompt=${finalPrompt.slice(0, 200)}...`);
 
     // Step 1: Generate base image via txt2img (with 1 retry)
     let imageUrl: string | null = null;
@@ -268,16 +277,22 @@ export async function POST(req: NextRequest) {
             enable_nsfw_detection: false,
           },
           request: {
-            model_name: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors',
+            model_name: isAnime
+              ? 'AnythingV5_v5PrtRE.safetensors'
+              : 'leosamsHelloworldXL_helloworldXL70_485879.safetensors',
             prompt: finalPrompt,
-            negative_prompt: negativePrompt,
-            width: 832,
-            height: 1216,
-            steps: 32,
-            guidance_scale: 5.5,
+            negative_prompt: finalNegative,
+            width: isAnime ? 512 : 832,
+            height: isAnime ? 768 : 1216,
+            steps: isAnime ? 30 : 32,
+            guidance_scale: isAnime ? 8 : 5.5,
             sampler_name: 'DPM++ 2M Karras',
+            clip_skip: isAnime ? 2 : 1,
             image_num: 1,
             seed: -1,
+            ...(isAnime ? {
+              loras: [{ model_name: 'add_detail_44319', strength: 0.4 }],
+            } : {}),
           },
         }),
       });
@@ -310,15 +325,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Image generation failed after retries' }, { status: 504 });
     }
 
-    // Step 3: Face swap with companion's avatar (or gallery fallback)
+    // Step 3: Face swap with companion's avatar (skip for anime — model handles style)
     let finalBase64: string | null = null;
+
+    if (isAnime) {
+      // Anime: no face swap needed, use generated image directly
+      console.log('[companion-photo] Anime style: skipping face swap');
+      finalBase64 = await fetchImageAsBase64(imageUrl);
+    }
 
     // Collect all candidate face images: avatar + gallery
     const faceCandidates: string[] = [];
-    if (companion.avatarUrl) faceCandidates.push(companion.avatarUrl);
-    if (Array.isArray(companion.galleryUrls)) {
-      for (const url of companion.galleryUrls) {
-        if (url && !faceCandidates.includes(url)) faceCandidates.push(url);
+    if (!isAnime) {
+      if (companion.avatarUrl) faceCandidates.push(companion.avatarUrl);
+      if (Array.isArray(companion.galleryUrls)) {
+        for (const url of companion.galleryUrls) {
+          if (url && !faceCandidates.includes(url)) faceCandidates.push(url);
+        }
       }
     }
 

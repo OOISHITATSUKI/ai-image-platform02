@@ -67,6 +67,7 @@ export interface GenerationSettings {
 
 export type AgeTag = '20s_early' | '20s_late' | '30s' | '40s';
 export type StylePresetTag = 'film' | 'dreamy' | 'natural' | 'glamour' | 'night' | 'raw' | 'anime';
+export type AnimeSubStyleTag = 'anime_standard' | 'anime_moe' | 'anime_dark' | 'anime_semi_real' | 'anime_retro';
 export type HairColorTag = 'black_hair' | 'brown_hair' | 'blonde_hair' | 'red_hair' | 'pink_hair' | 'silver_hair' | 'blue_hair';
 export type HairStyleTag = 'long_straight' | 'long_wavy' | 'short_bob' | 'ponytail' | 'twin_tails' | 'messy_bun' | 'pixie_cut';
 export type PeopleCountTag = '1' | '2' | 'multiple';
@@ -81,6 +82,7 @@ export type OutfitTag = 'lingerie' | 'swimsuit' | 'casual' | 'dress' | 'nude';
 
 export interface TagSettings {
   stylePreset?: StylePresetTag;
+  animeSubStyle?: AnimeSubStyleTag;
   hairColor?: HairColorTag;
   hairStyle?: HairStyleTag;
   age?: AgeTag;
@@ -222,7 +224,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: 'novita-helloworld-xl', name: '✨ HelloWorld XL V7.0', type: 'image', provider: 'novita', description: 'Natural SDXL realism (V7.0)', novitaModelName: 'leosamsHelloworldXL_helloworldXL70_485879.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-realistic' },
 
   // ── Anime Model (NSFW) ──
-  { id: 'novita-anime-xl', name: '🎨 Anime XL', type: 'image', provider: 'novita', description: 'NSFW anime / illustration', novitaModelName: 'animagineXLV31_v31_291394.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
+  { id: 'novita-anime', name: '🎨 Anime (AnythingV5)', type: 'image', provider: 'novita', description: 'Anime / illustration style', novitaModelName: 'AnythingV5_v5PrtRE.safetensors', apiType: 'sd', nsfw: true, category: 'nsfw-anime' },
 
   // ── Video Models ──
   { id: 'wan-2.1', name: 'WAN 2.1', type: 'video', provider: 'wan', description: 'Fast video generation' },

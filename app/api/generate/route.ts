@@ -19,6 +19,7 @@ import path from 'path';
 // ── Task Metadata Store (for async polling) ──
 export const taskMetadataStore = new Map<string, {
     selectedFaceImageUrl?: string;
+    isAnimeStyle?: boolean;
     createdAt: number;
 }>();
 
@@ -1001,7 +1002,7 @@ export async function POST(request: NextRequest) {
         // Auto-switch to anime model when anime style is selected
         const isAnimeStyle = tagSettings && (tagSettings as TagSettings).stylePreset === 'anime';
         if (isAnimeStyle) {
-            novitaModelName = 'animagineXLV31_v31_291394.safetensors';
+            novitaModelName = 'AnythingV5_v5PrtRE.safetensors';
             console.log('Anime style detected. Switching to anime model.');
         }
 
@@ -1238,23 +1239,57 @@ export async function POST(request: NextRequest) {
         // ── Repose Mode: img2img with prompt-driven pose change ──
 
         
+        // Anime + My Faces: fetch face image for IP-Adapter
+        let animeIpAdapterBase64: string | undefined;
+        if (isAnimeStyle && selectedFaceImageUrl) {
+            try {
+                if (selectedFaceImageUrl.startsWith('data:')) {
+                    animeIpAdapterBase64 = selectedFaceImageUrl.replace(/^data:image\/\w+;base64,/, '');
+                } else {
+                    const faceRes = await fetch(selectedFaceImageUrl);
+                    const faceBuf = await faceRes.arrayBuffer();
+                    animeIpAdapterBase64 = Buffer.from(faceBuf).toString('base64');
+                }
+                console.log('Anime IP-Adapter: face image loaded for reference');
+            } catch (e) {
+                console.error('Failed to load face for IP-Adapter:', e);
+            }
+        }
+
         // Build request body
         const novitaRequest: Record<string, unknown> = {
             model_name: novitaModelName,
             width,
             height,
             image_num: Math.min(count, 4),
-            steps: isAnimeStyle ? 28 : (isXL ? 35 : quality.steps),
+            steps: isAnimeStyle ? 30 : (isXL ? 35 : quality.steps),
             seed: -1,
             clip_skip: isAnimeStyle ? 2 : (isXL ? 1 : 2),
-            sampler_name: isAnimeStyle ? 'Euler a' : (isXL ? 'DPM++ 2M SDE Karras' : quality.sampler),
-            guidance_scale: isAnimeStyle ? 7 : (isXL ? 5.5 : (isPureImg2Img ? 5 : quality.guidance)),
-            // ONLY add LoRAs if the model is compatible (mostly SD1.5 for this specific LoRA)
-            ...(!isXL ? {
+            sampler_name: isAnimeStyle ? 'DPM++ 2M Karras' : (isXL ? 'DPM++ 2M SDE Karras' : quality.sampler),
+            guidance_scale: isAnimeStyle ? 8 : (isXL ? 5.5 : (isPureImg2Img ? 5 : quality.guidance)),
+            // LoRAs
+            ...(isAnimeStyle ? {
+                loras: [
+                    {
+                        model_name: 'add_detail_44319',
+                        strength: 0.4,
+                    },
+                ]
+            } : !isXL ? {
                 loras: [
                     {
                         model_name: 'add_detail_44319',
                         strength: 0.7,
+                    },
+                ]
+            } : {}),
+            // IP-Adapter for anime face consistency (low strength to preserve quality)
+            ...(isAnimeStyle && animeIpAdapterBase64 ? {
+                ip_adapters: [
+                    {
+                        model_name: 'ip-adapter-plus-face_sd15',
+                        image_base64: animeIpAdapterBase64,
+                        strength: 0.2,
                     },
                 ]
             } : {}),
@@ -1491,6 +1526,7 @@ export async function POST(request: NextRequest) {
         // ── Store task metadata for status endpoint ──
         taskMetadataStore.set(taskId, {
             selectedFaceImageUrl: selectedFaceImageUrl || undefined,
+            isAnimeStyle: !!isAnimeStyle,
             createdAt: Date.now(),
         });
         cleanupTaskMetadata();

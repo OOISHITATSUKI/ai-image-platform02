@@ -704,11 +704,32 @@ export default function LeftPanel({
                                             const emojiMap: Record<string, string> = { film: '🎞', dreamy: '✨', natural: '☀️', glamour: '🏖', night: '🌙', raw: '📷', anime: '🎨' };
                                             return (
                                                 <button key={style} className={`pill ${tagSettings.stylePreset === style ? 'active' : ''}`}
-                                                    onClick={() => updateTagSettings({ stylePreset: tagSettings.stylePreset === style ? undefined : style })}>
+                                                    onClick={() => updateTagSettings({ stylePreset: tagSettings.stylePreset === style ? undefined : style, ...(style !== 'anime' ? { animeSubStyle: undefined } : {}) })}>
                                                     {emojiMap[style]} {t(`tags.style${style.charAt(0).toUpperCase() + style.slice(1)}`)}
                                                 </button>
                                             );
                                         })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Anime sub-styles — only when anime is selected */}
+                            {isImageMode && tagSettings.stylePreset === 'anime' && (
+                                <div className="control-group">
+                                    <label>Anime Style</label>
+                                    <div className="pill-grid">
+                                        {([
+                                            { id: 'anime_standard', emoji: '✏️', label: 'Standard' },
+                                            { id: 'anime_moe', emoji: '🌸', label: 'Moe / Cute' },
+                                            { id: 'anime_dark', emoji: '🖤', label: 'Dark / Gothic' },
+                                            { id: 'anime_semi_real', emoji: '💎', label: 'Semi-Real' },
+                                            { id: 'anime_retro', emoji: '📺', label: 'Retro 90s' },
+                                        ] as const).map((sub) => (
+                                            <button key={sub.id} className={`pill ${tagSettings.animeSubStyle === sub.id ? 'active' : ''}`}
+                                                onClick={() => updateTagSettings({ animeSubStyle: tagSettings.animeSubStyle === sub.id ? undefined : sub.id })}>
+                                                {sub.emoji} {sub.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             )}

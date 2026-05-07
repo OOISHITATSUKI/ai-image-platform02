@@ -240,15 +240,41 @@ export function buildTagPromptResult(tags: TagSettings): TagPromptResult {
 
     // ── STYLE: Anime or Photorealism ──
     if (tags.stylePreset === 'anime') {
-        styleParts.push(
-            '(anime:1.4), (illustration:1.3), (2d:1.2), anime style, detailed anime face, ' +
-            'anime eyes, colorful, vivid colors, high quality anime, masterpiece, best quality'
-        );
-        // Override negative for anime — remove photorealism negatives
-        negativeParts.push(
-            '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (real photo:1.3), ' +
-            'bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres'
-        );
+        // Base anime prompt — high quality boosters
+        const animeBase = '(anime:1.4), (illustration:1.3), (2d:1.2), anime style, ' +
+            '(detailed anime face:1.3), (beautiful detailed eyes:1.4), (expressive eyes:1.2), ' +
+            '(sharp lines:1.2), (clean lineart:1.2), ' +
+            'masterpiece, best quality, ultra-detailed, absurdres, highres';
+
+        // Sub-style specific prompts
+        const subStyle = tags.animeSubStyle || 'anime_standard';
+        const ANIME_SUB_MAP: Record<string, { prompt: string; negative: string }> = {
+            anime_standard: {
+                prompt: `${animeBase}, colorful, vivid colors, high quality anime, clean lines, professional anime, detailed shading, (beautiful lighting:1.2)`,
+                negative: '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (real photo:1.3), (low quality:1.4), (worst quality:1.4), (normal quality:1.2)',
+            },
+            anime_moe: {
+                prompt: `${animeBase}, (moe:1.3), (kawaii:1.3), cute face, (big sparkling eyes:1.4), soft pastel colors, blush, adorable, (soft lighting:1.3), (sparkle:1.1), (gradient background:1.1), round face`,
+                negative: '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (real photo:1.3), (dark:1.2), (gritty:1.2), (low quality:1.4), (worst quality:1.4)',
+            },
+            anime_dark: {
+                prompt: `${animeBase}, (dark anime:1.3), (gothic:1.3), (dramatic lighting:1.3), dark atmosphere, moody, (deep shadows:1.2), (detailed background:1.2), (dark color palette:1.2), (intense eyes:1.3), high contrast, cinematic composition`,
+                negative: '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (pastel:1.2), (cute:1.1), (bright:1.1), (low quality:1.4), (worst quality:1.4)',
+            },
+            anime_semi_real: {
+                prompt: `(semi-realistic anime:1.4), (highly detailed:1.4), (anime:1.2), (realistic lighting:1.3), (detailed eyes:1.3), (realistic hair:1.2), smooth skin, cinematic, (sharp focus:1.2), illustration, (intricate details:1.2), ray tracing, studio lighting`,
+                negative: '(3d:1.2), (real photo:1.2), (overly cartoon:1.2), (low quality:1.4), (worst quality:1.4), (blurry:1.3)',
+            },
+            anime_retro: {
+                prompt: `${animeBase}, (90s anime:1.4), (retro anime:1.3), (cel shading:1.3), (vintage anime style:1.2), (slightly faded colors:1.1), classic anime aesthetic, (hand-drawn feel:1.2), 1990s anime, (film grain:0.3), thick outlines`,
+                negative: '(photorealistic:1.4), (realistic:1.3), (3d:1.2), (modern:1.1), (digital art:1.1), (low quality:1.4), (worst quality:1.4)',
+            },
+        };
+
+        const sub = ANIME_SUB_MAP[subStyle] || ANIME_SUB_MAP.anime_standard;
+        styleParts.push(sub.prompt);
+        negativeParts.push(sub.negative);
+        negativeParts.push('bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres');
     } else if (tags.photorealism === 'photorealistic') {
         styleParts.push(
             '(photorealistic:1.4), (RAW photo:1.3), (DSLR:1.2), 85mm lens, f/2.8, ' +

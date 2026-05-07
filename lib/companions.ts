@@ -68,6 +68,8 @@ export interface Companion {
   greetingImageUrl?: string;
   /** LINE-style greeting sequence */
   greetingSequence?: { type: 'text' | 'image' | 'video'; content: string }[];
+  /** Art style for image generation in chat: 'realistic' (default) or 'anime' */
+  artStyle?: 'realistic' | 'anime';
 }
 
 /** Should Live Action be shown/accessible for this companion? */

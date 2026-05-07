@@ -51,6 +51,7 @@ export interface CompanionRow {
   profile_skin_tone: string | null;
   profile_height: string | null;
   profile_special_features: string | null;
+  art_style: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -115,6 +116,7 @@ export function rowToCompanion(row: CompanionRow): Companion {
     greetingVideoUrl: row.greeting_video_url ?? undefined,
     greetingImageUrl: row.greeting_image_url ?? undefined,
     greetingSequence: Array.isArray(row.greeting_sequence) ? row.greeting_sequence as { type: 'text' | 'image' | 'video'; content: string }[] : undefined,
+    artStyle: (row.art_style as 'realistic' | 'anime') ?? 'realistic',
   };
 }
 
@@ -162,6 +164,7 @@ export function companionToRow(
     profile_skin_tone: c.profile?.skinTone ?? null,
     profile_height: c.profile?.height ?? null,
     profile_special_features: c.profile?.specialFeatures ?? null,
+    art_style: c.artStyle ?? 'realistic',
   };
 }
 

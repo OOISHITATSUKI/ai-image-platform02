@@ -211,6 +211,7 @@ const emptyCompanion: Companion = {
   name: '',
   age: 22,
   personality: 'playful',
+  artStyle: 'realistic',
   tagline: '',
   description: '',
   avatarUrl: '',
@@ -481,6 +482,12 @@ export default function CompanionEditor({ mode, companionId }: Props) {
           <option value="dominant">Dominant</option>
           <option value="caring">Caring</option>
           <option value="mysterious">Mysterious</option>
+        </select>
+      </FormRow>
+      <FormRow label="アートスタイル">
+        <select style={input} value={c.artStyle || 'realistic'} onChange={(e) => set('artStyle', e.target.value)}>
+          <option value="realistic">📷 Realistic（実写風）</option>
+          <option value="anime">🎨 Anime（アニメ風）</option>
         </select>
       </FormRow>
       <FormRow label="Tagline (ホームカード)">

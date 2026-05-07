@@ -63,9 +63,10 @@ export async function GET(request: NextRequest) {
             // Apply face merge for txt2img + MyFace (selectedFaceImageUrl)
             // Face swap mode is already handled in the main generate route, but txt2img
             // with MyFace needs post-processing here after the image is generated.
+            // Skip for anime style — IP-Adapter handles face consistency during generation.
             let finalImages = images;
             const metadata = taskMetadataStore.get(taskId);
-            if (metadata?.selectedFaceImageUrl) {
+            if (metadata?.selectedFaceImageUrl && !metadata?.isAnimeStyle) {
                 try {
                     console.log('Status endpoint: Applying MyFace merge to generated images...');
                     let faceBase64 = '';
