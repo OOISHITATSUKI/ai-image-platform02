@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
@@ -132,12 +132,13 @@ export default function Sidebar() {
         },
     ];
 
-    const createNavItems: { icon: string; label: string; type: GenerationType }[] = [
-        { icon: '🖼️', label: 'Image',     type: 'txt2img' },
-        { icon: '👤', label: 'Face Swap', type: 'face_swap' },
-        { icon: '✂️', label: 'Undress',   type: 'inpaint' },
-        { icon: '🎬', label: 'Video',     type: 'img2vid' },
+    const allCreateNavItems: { icon: string; label: string; type: GenerationType; flag: string }[] = [
+        { icon: '🖼️', label: 'Image',     type: 'txt2img',   flag: 'feature_image' },
+        { icon: '👤', label: 'Face Swap', type: 'face_swap', flag: 'feature_faceswap' },
+        { icon: '✂️', label: 'Undress',   type: 'inpaint',   flag: 'feature_undress' },
+        { icon: '🎬', label: 'Video',     type: 'img2vid',   flag: 'feature_video' },
     ];
+    const createNavItems = allCreateNavItems.filter(item => featureFlags[item.flag]);
 
     const languages: { value: Locale; label: string }[] = [
         { value: 'en', label: 'English' },
@@ -152,6 +153,12 @@ export default function Sidebar() {
     const accountMenuRef = useRef<HTMLDivElement>(null);
     const [unlockedNewCount, setUnlockedNewCount] = useState(0);
     const [showHowToUse, setShowHowToUse] = useState(false);
+
+    // Feature flags
+    const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
+    useEffect(() => {
+        fetch('/api/feature-flags').then(r => r.json()).then(setFeatureFlags).catch(() => {});
+    }, []);
 
     const isCompanionsPage = !!pathname && pathname.startsWith('/companions');
 
@@ -257,8 +264,8 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* 🎨 CREATE — collapsible */}
-                <div className="nav-section nav-section-create">
+                {/* 🎨 CREATE — collapsible (hidden if no features enabled) */}
+                {createNavItems.length > 0 && <div className="nav-section nav-section-create">
                     {!sidebarCollapsed ? (
                         <div
                             className="nav-section-label"
@@ -287,7 +294,7 @@ export default function Sidebar() {
                             </Link>
                         );
                     })}
-                </div>
+                </div>}
 
                 {/* Chat History */}
                 <div className="chat-history-section">
@@ -405,8 +412,8 @@ export default function Sidebar() {
                     )}
                 </div>
 
-                {/* Library — below chat history */}
-                {!sidebarCollapsed && (
+                {/* Library — below chat history (hidden if feature disabled) */}
+                {!sidebarCollapsed && featureFlags.feature_library && (
                     <Link
                         href="/library"
                         className="nav-item"

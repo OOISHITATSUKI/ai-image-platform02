@@ -35,6 +35,7 @@ export default function AdminSidebar() {
         { path: '/admin/content', label: '🖼️ コンテンツ管理' },
         { path: '/admin/terms', label: '📄 規約管理' },
         { path: '/admin/feedback', label: '📩 フィードバック' },
+        { path: '/admin/features', label: '⚙️ 機能管理' },
     ];
 
     return (
