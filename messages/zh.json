@@ -840,7 +840,7 @@
     "heroSub": "聊天、调情、探索 — 你的完美AI伴侣在等你",
     "heroCreate": "✨ 立即创建",
     "assistantBadge": "AI指南",
-    "assistantTitle": "遇见你的Nude Assistant",
+    "assistantTitle": "遇见你的AI Stylist",
     "assistantDesc": "免费开始。询问提示词技巧、功能、Live Action策略 — 她会引导你了解一切。",
     "assistantCta": "开始聊天 →",
     "myCharacters": "我的角色",
@@ -964,7 +964,7 @@
     "paywallCallDesc": "升级以拨打{name}的电话。",
     "paywallLiveTitle": "解锁更多动作",
     "paywallLiveDesc": "升级以访问等级{level}及以上的动作。",
-    "paywallAssistantTitle": "解锁Nude Assistant",
+    "paywallAssistantTitle": "解锁AI Stylist",
     "paywallAssistantDesc": "你的专属AI指南 — 提示词技巧、Live Action跳级策略、伴侣推荐和24/7帮助。Basic和Unlimited计划包含。",
     "paywallUpgrade": "立即升级",
     "paywallLater": "以后再说",
@@ -1085,7 +1085,7 @@
     "ps_spicy_desc": "大胆挑逗",
     "sidebarHome": "首页",
     "sidebarLiveAction": "Live Action",
-    "sidebarNudeAssistant": "Nude Assistant"
+    "sidebarNudeAssistant": "AI Stylist"
   },
   "claim": {
     "loginRequired": "登录以领取积分",

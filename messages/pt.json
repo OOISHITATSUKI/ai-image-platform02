@@ -847,7 +847,7 @@
     "heroSub": "Converse, flerte e explore — sua parceira IA perfeita te espera",
     "heroCreate": "✨ Criar Agora",
     "assistantBadge": "SEU GUIA IA",
-    "assistantTitle": "Conheça sua Nude Assistant",
+    "assistantTitle": "Conheça sua AI Stylist",
     "assistantDesc": "Grátis para começar. Pergunte sobre prompts, recursos, estratégias de Live Action — ela vai te guiar em tudo.",
     "assistantCta": "Conversar →",
     "myCharacters": "Meus Personagens",
@@ -971,7 +971,7 @@
     "paywallCallDesc": "Faça upgrade para ligar para {name}.",
     "paywallLiveTitle": "Desbloquear Mais Ações",
     "paywallLiveDesc": "Faça upgrade para acessar ações do Nível {level} e acima.",
-    "paywallAssistantTitle": "Desbloquear Nude Assistant",
+    "paywallAssistantTitle": "Desbloquear AI Stylist",
     "paywallAssistantDesc": "Seu guia IA pessoal — dicas de prompts, estratégias de Live Action, recomendações de companheiras e ajuda 24/7. Incluído nos planos Basic e Unlimited.",
     "paywallUpgrade": "Fazer Upgrade",
     "paywallLater": "Talvez Depois",
@@ -1092,7 +1092,7 @@
     "ps_spicy_desc": "Ousada e provocante",
     "sidebarHome": "Início",
     "sidebarLiveAction": "Live Action",
-    "sidebarNudeAssistant": "Nude Assistant"
+    "sidebarNudeAssistant": "AI Stylist"
   },
   "claim": {
     "loginRequired": "Faça login para resgatar créditos",

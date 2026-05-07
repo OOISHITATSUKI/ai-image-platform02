@@ -132,33 +132,44 @@ export default function Sidebar() {
         },
     ];
 
+    // Feature flags
+    const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({
+        feature_image: false,
+        feature_faceswap: false,
+        feature_undress: false,
+        feature_video: false,
+        feature_library: false,
+        feature_chathistory: false,
+    });
+    useEffect(() => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        fetch('/api/feature-flags', { headers })
+            .then(r => {
+                if (!r.ok) throw new Error('fetch failed');
+                return r.json();
+            })
+            .then(data => {
+                if (data && typeof data === 'object') {
+                    setFeatureFlags(prev => ({ ...prev, ...data }));
+                }
+            })
+            .catch(() => {});
+    }, []);
+
     const allCreateNavItems: { icon: string; label: string; type: GenerationType; flag: string }[] = [
         { icon: '🖼️', label: 'Image',     type: 'txt2img',   flag: 'feature_image' },
         { icon: '👤', label: 'Face Swap', type: 'face_swap', flag: 'feature_faceswap' },
         { icon: '✂️', label: 'Undress',   type: 'inpaint',   flag: 'feature_undress' },
         { icon: '🎬', label: 'Video',     type: 'img2vid',   flag: 'feature_video' },
     ];
-    const createNavItems = allCreateNavItems.filter(item => featureFlags[item.flag]);
-
-    const languages: { value: Locale; label: string }[] = [
-        { value: 'en', label: 'English' },
-        { value: 'ja', label: '日本語' },
-        { value: 'es', label: 'Español' },
-        { value: 'zh', label: '中文' },
-        { value: 'ko', label: '한국어' },
-        { value: 'pt', label: 'Português' },
-    ];
+    const createNavItems = allCreateNavItems.filter(item => featureFlags[item.flag] === true);
 
     const [showAccountMenu, setShowAccountMenu] = useState(false);
     const accountMenuRef = useRef<HTMLDivElement>(null);
     const [unlockedNewCount, setUnlockedNewCount] = useState(0);
     const [showHowToUse, setShowHowToUse] = useState(false);
-
-    // Feature flags
-    const [featureFlags, setFeatureFlags] = useState<Record<string, boolean>>({});
-    useEffect(() => {
-        fetch('/api/feature-flags').then(r => r.json()).then(setFeatureFlags).catch(() => {});
-    }, []);
 
     const isCompanionsPage = !!pathname && pathname.startsWith('/companions');
 
@@ -296,8 +307,8 @@ export default function Sidebar() {
                     })}
                 </div>}
 
-                {/* Chat History */}
-                <div className="chat-history-section">
+                {/* Chat History (hidden if feature disabled) */}
+                {featureFlags.feature_chathistory && <div className="chat-history-section">
                     <div
                         className="chat-history-header"
                         onClick={() => setChatHistoryOpen((v) => !v)}
@@ -410,10 +421,10 @@ export default function Sidebar() {
                             ))}
                         </div>
                     )}
-                </div>
+                </div>}
 
                 {/* Library — below chat history (hidden if feature disabled) */}
-                {!sidebarCollapsed && featureFlags.feature_library && (
+                {!sidebarCollapsed && featureFlags && featureFlags.feature_library && (
                     <Link
                         href="/library"
                         className="nav-item"

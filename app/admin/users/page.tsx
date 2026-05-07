@@ -40,6 +40,30 @@ export default function AdminUsersPage() {
     const [emailSending, setEmailSending] = useState(false);
     const [emailTemplate, setEmailTemplate] = useState('custom');
 
+    // Feature flags modal
+    const [featureModal, setFeatureModal] = useState<{ userId: string; email: string } | null>(null);
+    const [userFeatures, setUserFeatures] = useState<Record<string, boolean>>({});
+    const [featureLoading, setFeatureLoading] = useState(false);
+
+    const openFeatureModal = async (userId: string, email: string) => {
+        setFeatureModal({ userId, email });
+        setFeatureLoading(true);
+        const res = await fetch(`/api/admin/user-features?userId=${userId}`);
+        const data = await res.json();
+        setUserFeatures(data);
+        setFeatureLoading(false);
+    };
+
+    const toggleUserFeature = async (key: string, value: boolean) => {
+        if (!featureModal) return;
+        await fetch('/api/admin/user-features', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: featureModal.userId, key, value }),
+        });
+        setUserFeatures(prev => ({ ...prev, [key]: value }));
+    };
+
     // Bulk email modal state
     const [bulkModal, setBulkModal] = useState(false);
     const [bulkFilter, setBulkFilter] = useState('all');
@@ -252,6 +276,7 @@ export default function AdminUsersPage() {
                                                 doAction(u.id, 'set_daily_chat_limit', n);
                                             }} style={btnStyle('#8b5cf6')}>💬Limit</button>
                                             <button onClick={() => { const p = prompt('Enter plan (free / paid):', u.plan); if (p !== null) doAction(u.id, 'set_plan', undefined, p); }} style={btnStyle('#a78bfa')}>Plan</button>
+                                            <button onClick={() => openFeatureModal(u.id, u.email)} style={btnStyle('#10b981')}>機能</button>
                                             <button onClick={() => { setEmailModal({ userId: u.id, email: u.email }); setEmailSubject(''); setEmailBody(''); setEmailTemplate('custom'); }} style={btnStyle('#06b6d4')}>Email</button>
                                             <button onClick={() => { if (confirm('Delete this user? This cannot be undone.')) doAction(u.id, 'delete'); }} style={btnStyle('#991b1b')}>Delete</button>
                                         </div>
@@ -387,6 +412,44 @@ export default function AdminUsersPage() {
                                 {bulkSending ? 'Sending...' : 'Send Bulk Email'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Feature flags modal */}
+            {featureModal && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setFeatureModal(null)}>
+                    <div style={{ background: 'var(--bg-card, #1a1a2e)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: 24, width: '90%', maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>機能管理</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '0 0 16px' }}>{featureModal.email}</p>
+                        {featureLoading ? (
+                            <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-tertiary)' }}>Loading...</div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                {[
+                                    { key: 'feature_image', label: '🖼️ Image生成' },
+                                    { key: 'feature_faceswap', label: '👤 Face Swap' },
+                                    { key: 'feature_undress', label: '✂️ Undress' },
+                                    { key: 'feature_video', label: '🎬 Video' },
+                                    { key: 'feature_library', label: '📁 ライブラリ' },
+                                    { key: 'feature_chathistory', label: '💬 チャット履歴' },
+                                ].map(f => (
+                                    <div key={f.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)' }}>
+                                        <span style={{ fontSize: '0.88rem' }}>{f.label}</span>
+                                        <button
+                                            onClick={() => toggleUserFeature(f.key, !userFeatures[f.key])}
+                                            style={{
+                                                padding: '5px 16px', borderRadius: 6, border: 'none', fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer',
+                                                background: userFeatures[f.key] ? '#10b981' : 'rgba(255,255,255,0.1)',
+                                                color: userFeatures[f.key] ? '#fff' : 'var(--text-tertiary)',
+                                            }}
+                                        >
+                                            {userFeatures[f.key] ? 'ON' : 'OFF'}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button onClick={() => setFeatureModal(null)} style={{ marginTop: 16, width: '100%', padding: 10, borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer' }}>閉じる</button>
                     </div>
                 </div>
             )}

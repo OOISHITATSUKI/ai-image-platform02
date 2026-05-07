@@ -14,7 +14,8 @@ const FEATURE_DEFS: { key: string; label: string; description: string }[] = [
   { key: 'feature_faceswap', label: '👤 Face Swap', description: 'サイドバーのCREATE → Face Swap を表示' },
   { key: 'feature_undress', label: '✂️ Undress', description: 'サイドバーのCREATE → Undress を表示' },
   { key: 'feature_video', label: '🎬 Video', description: 'サイドバーのCREATE → Video を表示' },
-  { key: 'feature_library', label: '📁 ライブラリ', description: 'サイドバーのライブラリ（チャット履歴）を表示' },
+  { key: 'feature_library', label: '📁 ライブラリ', description: 'サイドバーのライブラリ（画像一覧）を表示' },
+  { key: 'feature_chathistory', label: '💬 チャット履歴', description: 'サイドバーのチャット履歴を表示' },
 ];
 
 export default function AdminFeaturesPage() {

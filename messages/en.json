@@ -1021,7 +1021,7 @@
     "heroSub": "Chat, flirt, and explore — your perfect AI partner awaits",
     "heroCreate": "✨ Create Now",
     "assistantBadge": "YOUR AI GUIDE",
-    "assistantTitle": "Meet Your Nude Assistant",
+    "assistantTitle": "Meet Your AI Stylist",
     "assistantDesc": "Free to start. Ask about prompts, features, Live Action strategies — she'll walk you through everything.",
     "assistantCta": "Chat Now →",
     "myCharacters": "My Characters",
@@ -1148,7 +1148,7 @@
     "paywallCallDesc": "Upgrade to call {name} and hear her voice.",
     "paywallLiveTitle": "Unlock More Actions",
     "paywallLiveDesc": "Upgrade to access Level {level} actions and beyond.",
-    "paywallAssistantTitle": "Unlock Nude Assistant",
+    "paywallAssistantTitle": "Unlock AI Stylist",
     "paywallAssistantDesc": "Your personal AI guide — prompt tips, Live Action skip strategies, companion recommendations, and 24/7 help. Included with Basic & Unlimited.",
     "paywallUpgrade": "Upgrade Now",
     "paywallLater": "Maybe Later",
@@ -1276,7 +1276,7 @@
     "ps_spicy_desc": "Bold and provocative",
     "sidebarHome": "Home",
     "sidebarLiveAction": "Live Action",
-    "sidebarNudeAssistant": "Nude Assistant"
+    "sidebarNudeAssistant": "AI Stylist"
   },
   "claim": {
     "loginRequired": "Login to Claim Credits",

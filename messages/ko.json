@@ -850,7 +850,7 @@
     "heroSub": "채팅, 플러팅, 탐험 — 완벽한 AI 파트너가 기다리고 있어요",
     "heroCreate": "✨ 지금 만들기",
     "assistantBadge": "AI 가이드",
-    "assistantTitle": "Nude Assistant를 만나보세요",
+    "assistantTitle": "AI Stylist를 만나보세요",
     "assistantDesc": "무료로 시작하세요. 프롬프트 팁, 기능, Live Action 전략에 대해 무엇이든 물어보세요.",
     "assistantCta": "채팅하기 →",
     "myCharacters": "내 캐릭터",
@@ -974,7 +974,7 @@
     "paywallCallDesc": "{name}에게 전화하려면 업그레이드하세요.",
     "paywallLiveTitle": "더 많은 액션 잠금 해제",
     "paywallLiveDesc": "레벨 {level} 이상의 액션에 접근하려면 업그레이드하세요.",
-    "paywallAssistantTitle": "Nude Assistant 잠금 해제",
+    "paywallAssistantTitle": "AI Stylist 잠금 해제",
     "paywallAssistantDesc": "개인 AI 가이드 — 프롬프트 팁, Live Action 스킵 전략, 컴패니언 추천, 24시간 지원. Basic과 Unlimited 플랜에 포함.",
     "paywallUpgrade": "지금 업그레이드",
     "paywallLater": "나중에",
@@ -1095,7 +1095,7 @@
     "ps_spicy_desc": "대담하고 도발적",
     "sidebarHome": "홈",
     "sidebarLiveAction": "Live Action",
-    "sidebarNudeAssistant": "Nude Assistant"
+    "sidebarNudeAssistant": "AI Stylist"
   },
   "claim": {
     "loginRequired": "로그인하여 크레딧 받기",

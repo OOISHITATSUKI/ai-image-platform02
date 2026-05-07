@@ -847,7 +847,7 @@
     "heroSub": "Chatea, coquetea y explora — tu pareja IA perfecta te espera",
     "heroCreate": "✨ Crear Ahora",
     "assistantBadge": "TU GUÍA IA",
-    "assistantTitle": "Conoce a tu Nude Assistant",
+    "assistantTitle": "Conoce a tu AI Stylist",
     "assistantDesc": "Gratis para empezar. Pregunta sobre prompts, funciones, estrategias de Live Action — ella te guiará en todo.",
     "assistantCta": "Chatear →",
     "myCharacters": "Mis Personajes",
@@ -971,7 +971,7 @@
     "paywallCallDesc": "Mejora para llamar a {name} y escuchar su voz.",
     "paywallLiveTitle": "Desbloquear Más Acciones",
     "paywallLiveDesc": "Mejora para acceder a acciones de Nivel {level} y más.",
-    "paywallAssistantTitle": "Desbloquear Nude Assistant",
+    "paywallAssistantTitle": "Desbloquear AI Stylist",
     "paywallAssistantDesc": "Tu guía IA personal — consejos de prompts, estrategias de Live Action, recomendaciones de compañeras y ayuda 24/7. Incluido en Basic y Unlimited.",
     "paywallUpgrade": "Mejorar Ahora",
     "paywallLater": "Quizás Después",
@@ -1092,7 +1092,7 @@
     "ps_spicy_desc": "Atrevida y provocativa",
     "sidebarHome": "Inicio",
     "sidebarLiveAction": "Live Action",
-    "sidebarNudeAssistant": "Nude Assistant"
+    "sidebarNudeAssistant": "AI Stylist"
   },
   "claim": {
     "loginRequired": "Inicia sesión para reclamar créditos",
