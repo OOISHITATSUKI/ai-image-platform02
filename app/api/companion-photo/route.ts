@@ -236,13 +236,30 @@ export async function POST(req: NextRequest) {
     const levelNeg = NEGATIVE_BY_LEVEL[contentLevel] || NEGATIVE_BY_LEVEL.sfw;
     const negativePrompt = levelNeg ? `${levelNeg}, ${BASE_NEGATIVE}` : BASE_NEGATIVE;
 
-    const LEVEL_BOOST: Record<string, string> = {
+    const isAnime = companion.artStyle === 'anime';
+
+    // Level boost — different for realistic vs anime
+    const LEVEL_BOOST_REAL: Record<string, string> = {
       sfw: ', selfie, smartphone photo, casual, looking at camera with warm smile, natural lighting, POV boyfriend perspective, cozy',
       swimsuit: ', bikini selfie, sending photo to boyfriend, playful smile, looking at camera, smartphone selfie, POV boyfriend perspective, flirty, showing skin, cleavage',
       lingerie: ', lingerie selfie, bedroom, sending intimate photo to boyfriend, shy smile, looking at camera, smartphone selfie, POV boyfriend perspective, seductive but intimate, showing skin, cleavage, sensual',
       nsfw: ', nude selfie, sending intimate photo to boyfriend, shy and seductive expression, looking at camera, POV boyfriend perspective, bedroom, natural lighting, intimate moment, topless, nipples visible, no clothes, showing breasts',
     };
-    const boost = LEVEL_BOOST[contentLevel] || '';
+    const LEVEL_BOOST_ANIME: Record<string, string> = {
+      sfw: ', cute pose, smiling, casual outfit, looking at viewer, warm colors',
+      swimsuit: ', (swimsuit:1.3), bikini, beach, playful, looking at viewer, flirty smile, showing skin',
+      lingerie: ', (lingerie:1.3), bedroom, (seductive pose:1.2), shy expression, looking at viewer, blushing, showing skin, cleavage',
+      nsfw: ', (nude:1.3), (topless:1.3), (nipples:1.2), no clothes, bedroom, seductive expression, looking at viewer, blushing, (exposed breasts:1.3), intimate',
+    };
+    const boost = (isAnime ? LEVEL_BOOST_ANIME : LEVEL_BOOST_REAL)[contentLevel] || '';
+
+    // Negative prompt — anime NSFW needs to NOT block nudity at higher levels
+    const ANIME_NEGATIVE_BY_LEVEL: Record<string, string> = {
+      sfw: 'nsfw, nude, naked, topless, nipples, genitalia, sex, explicit, pornographic, lingerie, underwear, bikini',
+      swimsuit: 'nude, naked, topless, nipples, genitalia, sex, explicit, pornographic',
+      lingerie: 'genitalia, explicit pornographic acts',
+      nsfw: '',
+    };
 
     // Inject companion's physical attributes into the prompt
     const p = companion.profile;
@@ -250,14 +267,13 @@ export async function POST(req: NextRequest) {
       ? `${p.hairColor ?? ''} ${p.hairStyle ?? ''} hair, ${p.skinTone ?? ''} skin, ${p.bodyType} body, ${p.breastSize ?? 'medium'} breasts${p.specialFeatures ? `, ${p.specialFeatures}` : ''}`
       : '';
 
-    const isAnime = companion.artStyle === 'anime';
-
     const finalPrompt = isAnime
       ? `(anime:1.4), (illustration:1.3), (2d:1.2), anime style, (detailed anime face:1.3), (beautiful detailed eyes:1.4), masterpiece, best quality, ultra-detailed, absurdres, highres, beautiful anime girl, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, vivid colors, clean lines, sharp lines`
       : `(RAW photo:1.2), (photorealistic:1.4), (masterpiece:1.2), (best quality:1.2), beautiful woman, ${bodyDesc ? bodyDesc + ', ' : ''}${prompt}${boost}, ultra realistic, professional photograph, DSLR, 85mm lens, natural skin texture, skin pores, detailed skin, subsurface scattering, natural lighting, film grain, sharp focus on face, depth of field, bokeh background`;
 
+    const animeNegLevel = ANIME_NEGATIVE_BY_LEVEL[contentLevel] || ANIME_NEGATIVE_BY_LEVEL.sfw;
     const finalNegative = isAnime
-      ? `photorealistic, realistic, 3d render, real photo, bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres, (worst quality:1.4), (low quality:1.4), watermark, text`
+      ? `photorealistic, realistic, 3d render, real photo, bad anatomy, bad hands, extra fingers, fewer fingers, blurry, lowres, (worst quality:1.4), (low quality:1.4), watermark, text${animeNegLevel ? ', ' + animeNegLevel : ''}`
       : negativePrompt;
 
     console.log(`[companion-photo] contentLevel=${contentLevel}, artStyle=${companion.artStyle}, prompt=${finalPrompt.slice(0, 200)}...`);
